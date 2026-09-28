@@ -23,6 +23,9 @@
   var MET = 12, SURF = 192;                   // px por metro; y del suelo (0 m)
   var ROPE_X = 320, DMIN = -30, DMAX = 10;
   var yOf = function (d) { return SURF - d * MET; };
+  /* Cabeza de la mascota de PixelLab (assets/img/mascota-*.png): centro en x
+     y fila de la frente, donde se apoya el ala de un sombrero. */
+  var CABEZA = { frente: { cx: 21.5, frente: 11 }, espalda: { cx: 15, frente: 11 } };
 
   /* ---------- Mapa: el pozo y tres huecos laterales ---------- */
   function mapa() {
@@ -308,15 +311,16 @@
         }
         var base = IMG['mascota-base'], esp = IMG['mascota-espalda'] || base;
         if (tono) { base = M.sprites.conPiel(base, tono); esp = M.sprites.conPiel(esp, tono); }
+        /* Cabeza medida en los PNG procesados: centro en x y fila de la frente. */
         var casco = IMG['sombrero-minero'];
-        var A = casco ? M.sprites.conSombrero(base, M.sprites.espejo(casco), -1, -0.35) : base;
-        var B = casco ? M.sprites.conSombrero(esp, casco, -1, -0.35) : esp;
+        var A = casco ? M.sprites.conSombrero(base, casco, CABEZA.frente) : base;
+        var B = casco ? M.sprites.conSombrero(esp, casco, CABEZA.espalda) : esp;
         var arriba = A.arriba || 0;
         return {
           A: A, B: B, B2: M.sprites.espejo(B), C: A,
           fantasma: M.sprites.silueta(A, [127, 227, 240]),
-          ax: Math.round(A.width / 2), cy: 38 + arriba,              // la cuerda pasa por el centro; cinturon a 38 px
-          lampara: { x: -9, y: -38 - arriba + (casco ? 10 : 6) }     // lampara del casco, respecto al cinturon
+          ax: Math.round(base.width / 2) + (A.izq || 0), cy: 38 + arriba,   // la cuerda pasa por el centro; cinturon a 38 px
+          lampara: { x: casco ? 9 : 0, y: -38 - arriba + (casco ? 6 : 4) } // lampara del casco, respecto al cinturon
         };
       }
       var SPR = juego(op.piel);

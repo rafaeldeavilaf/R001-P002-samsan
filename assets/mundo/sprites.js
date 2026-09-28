@@ -53,18 +53,32 @@
     return c;
   };
 
-  /* Pone un sombrero sobre un personaje. `dx` corre el sombrero en x respecto
-     al centro; `dyFrac` es cuanto sobresale hacia arriba, en fraccion de su
-     alto (negativo = arriba). El canvas crece hacia arriba lo necesario y
-     guarda en `.arriba` cuanto crecio, para corregir los anclajes. */
-  S.conSombrero = function (cuerpo, sombrero, dx, dyFrac) {
-    var arriba = Math.max(0, -Math.round(sombrero.height * dyFrac));
-    var sx = Math.round(cuerpo.width / 2 - sombrero.width / 2 + (dx || 0));
-    var izq = Math.max(0, -sx), der = Math.max(0, sx + sombrero.width - cuerpo.width);
+  /* Fila del ala de un sombrero: la mas ancha en su 80 % de arriba (si hay
+     empate, la mas baja). Devuelve { y, cx } en px del sombrero. */
+  S.ala = function (sombrero) {
+    var x = sombrero.getContext && sombrero.getContext('2d');
+    if (!x) return { y: Math.round(sombrero.height * 0.7), cx: sombrero.width / 2 };
+    var d = x.getImageData(0, 0, sombrero.width, sombrero.height).data, mejor = { y: 0, n: -1, cx: sombrero.width / 2 };
+    for (var y = 0; y < Math.floor(sombrero.height * 0.8); y++) {
+      var n = 0, lo = sombrero.width, hi = -1;
+      for (var xx = 0; xx < sombrero.width; xx++) if (d[(y * sombrero.width + xx) * 4 + 3]) { n++; lo = Math.min(lo, xx); hi = Math.max(hi, xx); }
+      if (n >= mejor.n) mejor = { y: y, n: n, cx: (lo + hi) / 2 };
+    }
+    return mejor;
+  };
+
+  /* Pone un sombrero sobre un personaje: el centro del ala sobre el centro de
+     la cabeza y el ala a la altura de la frente. `cabeza` = { cx, frente } en
+     px del cuerpo. El canvas crece lo necesario y guarda `.arriba` e `.izq`
+     (cuanto crecio hacia arriba y a la izquierda) para corregir anclajes. */
+  S.conSombrero = function (cuerpo, sombrero, cabeza) {
+    var a = S.ala(sombrero);
+    var sx = Math.round(cabeza.cx - a.cx), sy = cabeza.frente - a.y;
+    var izq = Math.max(0, -sx), arriba = Math.max(0, -sy), der = Math.max(0, sx + sombrero.width - cuerpo.width);
     var c = document.createElement('canvas'); c.width = cuerpo.width + izq + der; c.height = cuerpo.height + arriba;
     var x = c.getContext('2d');
-    if (x) { x.imageSmoothingEnabled = false; x.drawImage(cuerpo, izq, arriba); x.drawImage(sombrero, izq + sx, 0); }
-    c.arriba = arriba;
+    if (x) { x.imageSmoothingEnabled = false; x.drawImage(cuerpo, izq, arriba); x.drawImage(sombrero, izq + sx, arriba + sy); }
+    c.arriba = arriba; c.izq = izq;
     return c;
   };
 
