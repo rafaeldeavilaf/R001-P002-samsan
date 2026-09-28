@@ -45,6 +45,13 @@ Progresión:
 
 La igualdad y la comparación de restas quedan para un segundo minijuego.
 
+**La operación siempre a la vista** (pedido de Rafael: en Year 2 se aprende el signo + y −):
+- bajo la canasta se lee `7 + ? = 10`;
+- al atrapar la fruta justa queda `7 + 3 = 10 ✓`;
+- con la que sobra se ve `7 + 5 = 12 ✗`, rayado;
+- en la ronda 2 la cadena crece: `5 + 2 + ? = 10`;
+- cada fruta lleva su signo (`+3`); en la ronda de resta los bichos llevarán `−3` y la operación será `12 − 3 = 9`.
+
 Year 2:
 - no se depende de leer;
 - puntos y número grande;

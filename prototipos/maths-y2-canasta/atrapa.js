@@ -43,6 +43,13 @@
     '.cn-botones{display:flex;gap:12px;margin-top:10px}' +
     '.cn-botones .k-boton{flex:1;min-height:64px;font-size:1.6rem}' +
     '.cn-msg{text-align:center;min-height:1.6em;font-weight:800;margin:6px 0 0}' +
+    '.cn-ec{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-weight:900;font-size:clamp(1.6rem,6vw,2.4rem)}' +
+    '.cn-ec span{min-width:1.6em;padding:0 8px;text-align:center;border:3px solid #1E1426;border-radius:10px;background:#FFFDF6}' +
+    '.cn-ec span.is-base{background:#D8F6FA}' +
+    '.cn-ec span.is-hueco{border-style:dashed;color:#5C4A3B}' +
+    '.cn-ec span.is-mal{background:repeating-linear-gradient(45deg,#FF9E8A 0 6px,#FFFDF6 6px 12px)}' +
+    '.cn-ec span.is-bien{background:#D8F0C8}' +
+    '.cn-ec em{font-style:normal;font-size:1.2em}' +
     '@media (prefers-reduced-motion:reduce){.cn-fruta.is-rebota{transition:none}}';
   document.head.appendChild(css);
 
@@ -63,10 +70,22 @@
     c.style.left = S.x + '%';
   }
 
+  /* La operacion siempre a la vista: 7 + ? = 10, y al atrapar 7 + 3 = 10.
+     Con una fruta de prueba (que sobra o no alcanza): 8 + 5 = 13, rayada y con ✗. */
+  function operacion(prueba) {
+    var p = S.ronda.pasos[S.paso], t = ['<span class="is-base">' + p.tiene + '</span>'];
+    S.sumandos.forEach(function (v) { t.push('<em>+</em>', '<span>' + v + '</span>'); });
+    var suma = S.tiene + (prueba || 0);
+    if (prueba) t.push('<em>+</em>', '<span class="is-mal">' + prueba + '</span>', '<em>=</em>', '<span class="is-mal">' + suma + ' ✗</span>');
+    else if (S.listo) t.push('<em>=</em>', '<span class="is-bien">10 ✓</span>');
+    else t.push('<em>+</em>', '<span class="is-hueco">?</span>', '<em>=</em>', '<span>10</span>');
+    P.$('#cn-ec').innerHTML = t.join('');
+  }
+
   function soltar(v, k, total) {
     var el = document.createElement('div');
     el.className = 'cn-fruta';
-    el.innerHTML = puntos(v) + '<b>' + v + '</b>';
+    el.innerHTML = puntos(v) + '<b>+' + v + '</b>';
     el.setAttribute('aria-label', v + ' fruit');
     S.campo.appendChild(el);
     var carril = total === 1 ? 50 : 14 + (72 / (total - 1)) * k;
@@ -75,38 +94,43 @@
 
   function empezarPaso() {
     var p = S.ronda.pasos[S.paso];
-    S.tiene = p.tiene;
+    S.tiene = p.tiene; S.sumandos = [];
     S.frutas.forEach(function (f) { if (f.el.parentNode) f.el.parentNode.removeChild(f.el); });
     S.frutas = p.caen.map(function (v, k) { return soltar(v, k, p.caen.length); });
     S.vel = 16 + S.paso * 3 + S.r * 4;                       // unidades por segundo; sube con cada paso
     S.listo = false;
     pintarCanasta(0);
     P.$('#cn-msg').textContent = 'Fill the ten!';
+    operacion();
   }
 
   function atrapar(f) {
     f.fuera = true;
     var suma = S.tiene + f.v;
     if (suma === 10) {
-      S.tiene = 10; S.listo = true;
+      S.tiene = 10; S.listo = true; S.sumandos.push(f.v);
       f.el.parentNode.removeChild(f.el);
       pintarCanasta(0);
       P.sonido('gema');
-      P.$('#cn-msg').textContent = S.tiene - f.v + ' + ' + f.v + ' = 10';
+      P.$('#cn-msg').textContent = 'Ten!';
+      operacion();
       setTimeout(siguientePaso, 900);
     } else if (suma > 10 || !S.ronda.guarda) {
       pintarCanasta(f.v);                                      // se ve lo que sobra o lo que falta
       P.sonido('mal');
-      P.$('#cn-msg').textContent = suma > 10 ? 'Too many — it does not fit.' : 'Not full yet — try another.';
+      P.$('#cn-msg').textContent = suma > 10 ? 'Too many — ' + suma + ' is more than 10.' : 'Not 10 yet — try another.';
+      operacion(f.v);
+      setTimeout(function () { if (!S.listo) operacion(); }, 900);
       f.el.style.transform = 'translate(-50%,-50%) translateY(-120px) rotate(40deg)';
       f.el.classList.add('is-rebota');
       setTimeout(function () { if (f.el.parentNode) f.el.parentNode.removeChild(f.el); relanzar(f); if (!S.listo) pintarCanasta(0); }, 800);
     } else {
-      S.tiene = suma;                                          // ronda 2: se queda y falta otra
+      S.tiene = suma; S.sumandos.push(f.v);                   // ronda 2: se queda y falta otra
       f.el.parentNode.removeChild(f.el);
       pintarCanasta(0);
       P.sonido('paso');
-      P.$('#cn-msg').textContent = suma + ' — ' + (10 - suma) + ' more to 10.';
+      P.$('#cn-msg').textContent = (10 - suma) + ' more to 10.';
+      operacion();
       var p = S.ronda.pasos[S.paso];
       if (!S.frutas.some(function (g) { return !g.fuera && S.tiene + g.v <= 10; })) {
         // Si ya no cae ninguna que sirva, vuelve a caer la tanda completa.
@@ -163,6 +187,7 @@
       '<section class="k-panel">' +
         '<div class="cn-cabeza"><h2>' + RONDAS[r].nombre + '</h2><div class="k-gemas">' + P.gemaSVG(22) + '<span id="gems">' + gemas + '</span></div></div>' +
         '<div class="cn-campo" id="cn-campo"><div class="cn-canasta" id="cn-canasta"></div></div>' +
+        '<div class="cn-ec" id="cn-ec" aria-live="polite"></div>' +
         '<p class="cn-msg" id="cn-msg" aria-live="polite"></p>' +
         '<div class="cn-botones"><button type="button" class="k-boton" data-d="izq" aria-label="Move left">&#9664;</button>' +
         '<button type="button" class="k-boton" data-d="der" aria-label="Move right">&#9654;</button></div>' +
