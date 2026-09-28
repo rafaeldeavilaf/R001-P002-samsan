@@ -330,7 +330,15 @@
       exp.cinturaY = function () { return yOf(exp.posAnim); };
       var A = M.sprites.EXPLORADOR;
 
-      var topo = { x: 140, pies: 384, anim: M.sprites.animador(), img: M.sprites.topo(false).canvas(), imgB: M.sprites.topo(true).canvas() };
+      /* Topo minero, compañero de la Caverna: arte de PixelLab si existe
+         (temas/maths/img/companero-topo.png); si no, el provisional por codigo.
+         `lampara`: la luz del casco, respecto a (x, pies). */
+      var topoArte = IMG['companero-topo'];
+      var topo = topoArte
+        ? { x: 136, pies: 384, anim: M.sprites.animador(), img: topoArte, imgB: topoArte,
+            lampara: { x: 32 - topoArte.width / 2, y: 6 - topoArte.height } }
+        : { x: 140, pies: 384, anim: M.sprites.animador(), img: M.sprites.topo(false).canvas(), imgB: M.sprites.topo(true).canvas(),
+            lampara: { x: M.sprites.TOPO.lamparaX - 13, y: -19 } };
 
       var luz = M.crearLuz(L, { ambiente: '#342D52', superficie: SURF, pozo: { x: 252, w: 136, alto: 240 },
         rayos: { x: 262, n: 4, paso: 30 }, sol: { x: 520, y: 58, factor: 0.12 } });
@@ -338,7 +346,7 @@
       luz.dinamicas = function () {
         return [
           { x: ROPE_X + SPR.lampara.x, y: yOf(exp.posAnim) + SPR.lampara.y, r: 85, c: '255,240,200', kind: 'lamp', ph: 0 },
-          { x: topo.x + M.sprites.TOPO.lamparaX - 13, y: topo.pies - 19, r: 48, c: '255,240,200', kind: 'lamp', ph: 0 }
+          { x: topo.x + topo.lampara.x, y: topo.pies + topo.lampara.y, r: 48, c: '255,240,200', kind: 'lamp', ph: 0 }
         ];
       };
       var part = M.crearParticulas(L, { semilla: 11 });

@@ -161,7 +161,7 @@ check('el explorador llega a su nueva profundidad', cav && Math.abs(cav.explorad
 check('la camara sigue al explorador', cav && Math.abs(LB.cam.y - LB.cam.objetivo) < 2 && LB.cam.objetivo === LB.limiteCam(cav.yOf(-3) - 360 * 0.52));
 check('hay fuentes de luz del escenario y dinamicas (casco y topo)', cav && cav.luz.fuentes.length >= 10 && cav.luz.dinamicas().length === 2);
 check('el mundo dibuja todas sus capas en orden', LB.bx.calls && LB.bx.calls.drawImage > 0 && LB.ctx.calls.drawImage > 0);
-check('el topo (compañero de la Caverna) esta en su hueco', cav && cav.topo && cav.topo.pies === 384);
+check('el topo (compañero de la Caverna) esta en su hueco, con la luz de su lampara', cav && cav.topo && cav.topo.pies === 384 && cav.topo.lampara && cav.luz.dinamicas()[1].y < 384);
 const motor = read('assets', 'mundo', 'base.js') + read('assets', 'mundo', 'lienzo.js') + read('assets', 'mundo', 'capas.js') + read('assets', 'mundo', 'luz.js');
 check('el motor del mundo no conoce el bioma (sin cuerda, topo ni caverna)', !/\b(cuerda|topo|caverna|mina)\b/i.test(motor.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')));
 
