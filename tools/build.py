@@ -409,6 +409,21 @@ def build_vitrina(kit, ui, brand, credits):
     return page
 
 
+def build_proto(kit, ui, brand, credits, cual, titulo):
+    """Solo local: prototipos de nucleo de La Mina (28 sep 2026) para que Rafael
+    elija jugando. No usan el motor: kit, capa del mundo, bioma y sus datos."""
+    page = head(titulo + " — " + brand, "Prototipo local de La Mina.", kit + SITE_CSS + read("assets", "sitio", "proto.css"), "maths", "en")
+    page += ('<div class="k-pagina">\n<header>\n  <h1 class="k-titulo">' + html.escape(brand) + '</h1>\n'
+             '  <p class="k-lema">' + html.escape(titulo) + '</p>\n</header>\n<main id="proto"></main>\n')
+    page += foot(credits) + '</div>\n'
+    page += '<script>\n' + ui + '\n</script>\n'
+    page += mundo_scripts("maths")
+    for partes in (("temas", "maths", "y6-la-mina", "prototipos.js"), ("assets", "sitio", "proto-comun.js"), ("assets", "sitio", "proto-" + cual + ".js")):
+        page += '<script>\n' + read(*partes) + '\n</script>\n'
+    page += '</body>\n</html>\n'
+    return page
+
+
 # Guardarrailes sobre cada pagina escrita.
 ASSETS_RE = re.compile(r"""(src|href)\s*=\s*["'][^"']*assets/""")
 EXTERNAL_RE = re.compile(
@@ -465,6 +480,10 @@ def main():
     # Copia local para que el enlace del pie funcione al jugar desde _local/.
     write(LOCAL + "/legal.html", legal)
     built.append((LOCAL + "/vitrina-caverna.html", write(LOCAL + "/vitrina-caverna.html", build_vitrina(kit, ui, brand, credits))))
+    if os.path.exists(os.path.join(ROOT, "temas", "maths", "y6-la-mina", "prototipos.js")):
+        for cual, titulo in (("excavar", "Prototype E: Dig to the gem"), ("cartas", "Prototype A: Jump cards")):
+            rel = LOCAL + "/proto-" + cual + ".html"
+            built.append((rel, write(rel, build_proto(kit, ui, brand, credits, cual, titulo))))
 
     for rel, _ in built:
         guard(rel)

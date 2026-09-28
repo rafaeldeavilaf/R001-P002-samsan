@@ -200,9 +200,11 @@ def main():
                     pg2.locator("#levelList .level-card").nth(0).click()
                     pg2.locator("#briefGo").click()
                     pg2.wait_for_timeout(1800)
-                    pg2.evaluate("() => { const M = window.__samsanMina; M.E.L.opts.particles = false; M.E.profundidad(9); }")
+                    # Luz mas oscura del tema: tramo 3 y jefe, con el montacargas a -24 m
+                    # (determinista: el primer item tiene profundidad al azar).
+                    pg2.evaluate("() => { const M = window.__samsanMina; M.E.L.opts.particles = false; M.E.profundidad(9); M.E.estado.fisica = -24; }")
                     pg2.locator("#qScene canvas").scroll_into_view_if_needed()
-                    pg2.wait_for_timeout(1200)
+                    pg2.wait_for_timeout(2500)
                     reg = pg2.evaluate("() => window.__samsanMina.regiones()")
                     gris = Image.open(io.BytesIO(pg2.screenshot())).convert("L")
                     gris.save(os.path.join(SALIDA, "grises-mina-%dx%d.png" % (w, h)))

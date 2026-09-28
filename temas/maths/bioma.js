@@ -428,7 +428,7 @@
          (regla 9; tools/arte/prueba_grises.py). */
       L.capa('mundo', 59, function (bx, camI) {
         // Solo bajo tierra: contra el cielo claro, la sombra restaria contraste.
-        var fondo = M.clamp((exp.piso() - SURF - 20) / 50, 0, 1);
+        var fondo = M.clamp((exp.piso() - SURF - 6) / 24, 0, 1);
         if (!fondo) return;
         var cx = POZO_X + exp.dx, cy = Math.round(exp.piso()) - camI - exp.dy - 38;
         var g = bx.createRadialGradient(cx, cy, 12, cx, cy, 58);
@@ -817,6 +817,8 @@
           cavar: function (bandera) { tunel = { hasta: M.clamp(bandera, K.DMIN, -2), t: 0 }; },
           profundidad: function (n) { cav.luz.cfg.ambiente = AMB[Math.max(0, Math.min(AMB.length - 1, n - 1))]; },   // n = tramos ya cerrados
           nuevoNivel: function () { puertas = []; saco = 0; tunel = null; cav.luz.cfg.ambiente = AMB[0]; },
+          /* Quita la compuerta de una profundidad (deshacer en el prototipo de cartas). */
+          quitarPuerta: function (d) { puertas = puertas.filter(function (P) { return P.d !== d; }); if (saco > 0) saco--; },
           /* Remate del tema: el gran cristal del fondo ilumina toda la mina;
              todas las compuertas del pozo se abren con su cristal. */
           granCristal: function () {

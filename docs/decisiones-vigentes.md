@@ -113,7 +113,14 @@ Total 154 h, USD 0 al mes. Etapa en curso: **2** (tope 60 h), iniciada el 28 sep
 
 Tiempo de la etapa 2 hasta aquí: unas 3,3 h de reloj (tope 60 h).
 
-Pendiente en la etapa 2: la compuerta de Rafael sobre La Mina (juego y capturas) y, si la aprueba, publicarla (`publicar: true`) para la prueba con el jugador mayor. La fase H del plan (selector de dos jugadores con asentimiento y exportar/importar) queda para la etapa 3, cuya compuerta necesita al jugador menor; la etapa 2 solo necesita al mayor.
+**Prueba de Rafael y prototipos (28 sep 2026).** Rafael jugó La Mina y se aburrió en un minuto: cada pantalla era una sola decisión obvia (calcular y llevar el marcador), se contaban marcas porque la regla solo rotula múltiplos de 5, la recompensa no se entendía y la pantalla inicial mostraba los personajes del motor viejo. El panel simulado había proyectado 8/10 de diversión y se equivocó: midió coherencia y toques, no ganas de seguir jugando. **Regla desde ahora: la diversión la juzga Rafael jugando, nunca una proyección.** Un panel de gamers comparó seis núcleos y Rafael aprobó prototipar dos, solo locales y sin tocar el motor:
+
+- **E. Excavar** (`_local/proto-excavar.html`): pared de bloques con números con signo; se cava un camino y cada bloque suma al contador del pico; la puerta de la gema abre solo con el número exacto del candado. Fichas azules (+) y rojas (−) que se anulan.
+- **A. Cartas de salto** (`_local/proto-cartas.html`): el pozo con vetas a distintas profundidades, franjas de roca y una mano de cartas con signo; hay que recoger todas las vetas.
+- Los dos: pantalla inicial con el explorador de PixelLab y sus 12 tonos, gema grande en el centro al completar, deshacer siempre. Datos de `tools/gen/maths_y6_prototipos.py` (tres juegos de cuatro puzzles, validados con un buscador); `tools/verify_prototipos.js` los juega todos (179 comprobaciones).
+- Pendiente conocido: entre −3 y −8 m la cabeza del explorador queda en la línea del suelo y en grises se confunde con el entorno; en la luz más oscura (−12 a −27 m) la diferencia es 23 a 30. Arreglo propuesto: un borde claro alrededor del explorador, después de elegir el núcleo.
+
+Pendiente en la etapa 2: Rafael juega los dos prototipos 5 minutos cada uno y elige (criterio: ¿quiere jugar otra ronda sin que nadie se lo pida?). Con su veredicto, plan aparte para integrar el núcleo ganador en La Mina y su pantalla inicial en el shell de los temas. Nada se sube ni se publica hasta entonces. La fase H (dos jugadores) queda para la etapa 3.
 
 ## 8. Preguntas abiertas
 
