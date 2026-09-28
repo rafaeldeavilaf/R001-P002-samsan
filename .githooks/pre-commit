@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Bloquea el commit si algún cambio preparado o nombre de archivo contiene
+# un nombre real de la lista local .anonimato.local (uno por línea, # para comentarios).
+# Las frases exactas de .anonimato.permitidos (el crédito del autor) quedan exentas.
+# Activar una vez con:  git config core.hooksPath .githooks
+set -euo pipefail
+
+LISTA=".anonimato.local"
+if [ ! -f "$LISTA" ]; then
+  echo "ANONIMATO: falta $LISTA (lista local de nombres a vigilar). Commit bloqueado." >&2
+  exit 1
+fi
+
+PATRONES="$(mktemp)"
+trap 'rm -f "$PATRONES"' EXIT
+grep -v '^[[:space:]]*#' "$LISTA" | sed -e 's/[[:space:]]*$//' -e '/^$/d' > "$PATRONES"
+if [ ! -s "$PATRONES" ]; then
+  echo "ANONIMATO: $LISTA está vacío. Commit bloqueado." >&2
+  exit 1
+fi
+
+FALLA=0
+
+ARCHIVOS="$(git diff --cached --name-only --diff-filter=ACMR)"
+if [ -n "$ARCHIVOS" ] && printf '%s\n' "$ARCHIVOS" | grep -iF -f "$PATRONES" >/dev/null; then
+  echo "ANONIMATO: un nombre de archivo contiene un nombre real:" >&2
+  printf '%s\n' "$ARCHIVOS" | grep -iF -f "$PATRONES" >&2
+  FALLA=1
+fi
+
+LINEAS="$(git diff --cached -U0 --diff-filter=ACMR --no-color | grep '^+' | grep -v '^+++' || true)"
+# Frases permitidas (versionadas en .anonimato.permitidos): se quitan antes de revisar.
+if [ -f .anonimato.permitidos ]; then
+  while IFS= read -r FRASE || [ -n "$FRASE" ]; do
+    FRASE="${FRASE%$'\r'}"
+    case "$FRASE" in ''|'#'*) continue;; esac
+    LINEAS="${LINEAS//"$FRASE"/}"
+  done < .anonimato.permitidos
+fi
+if [ -n "$LINEAS" ] && printf '%s\n' "$LINEAS" | grep -iF -f "$PATRONES" >/dev/null; then
+  echo "ANONIMATO: una línea agregada contiene un nombre real:" >&2
+  printf '%s\n' "$LINEAS" | grep -inF -f "$PATRONES" | cut -c1-160 >&2
+  FALLA=1
+fi
+
+exit "$FALLA"

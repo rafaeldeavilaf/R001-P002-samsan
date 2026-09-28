@@ -1,0 +1,12 @@
+{
+  "name": "samsan",
+  "version": "0.0.0-etapa0",
+  "private": true,
+  "description": "SAMSAN: herramientas de verificacion. El sitio publicado no usa npm ni node: es HTML+CSS+JS autocontenido servido por GitHub Pages. jsdom solo existe para el harness de pruebas.",
+  "scripts": {
+    "test": "node tools/harness.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}

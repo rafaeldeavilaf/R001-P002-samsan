@@ -1,0 +1,942 @@
+/* ============================================================
+   SAMSAN — ENGINE.CSS
+   Shared pixel-gaming design system.
+   DO NOT fork this file per subject. Subjects only override
+   --accent / --accent-2 via the [data-accent] attribute.
+   ============================================================ */
+
+/* Fuentes locales (RC-04: cero peticiones a terceros). tools/build.py las
+   inlina como data: URI en cada .html. Licencias OFL en assets/fonts/. */
+@font-face {
+  font-family: 'Press Start 2P';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/press-start-2p-latin-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/nunito-latin-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/nunito-latin-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('fonts/nunito-latin-800.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('fonts/nunito-latin-900.woff2') format('woff2');
+}
+
+/* ---------- 1. TOKENS ---------- */
+:root {
+  /* Base world palette — identical in every subject */
+  --bg-0:      #0b0f2a;   /* deepest background          */
+  --bg-1:      #131a3f;   /* panel background            */
+  --bg-2:      #1c2555;   /* raised surface              */
+  --bg-3:      #2a3573;   /* hover surface               */
+  --ink:       #eaf0ff;   /* primary text                */
+  --ink-dim:   #97a3d4;   /* secondary text              */
+  --line:      #4658b8;   /* pixel border                */
+
+  /* Semantic — identical in every subject */
+  --good:      #3ce88a;
+  --good-dark: #12683f;
+  --bad:       #ff4d6d;
+  --bad-dark:  #7a1930;
+  --warn:      #ffd93d;
+  --xp:        #7ee8fa;
+
+  /* Subject accent — the ONLY thing a subject may change */
+  --accent:    #7ee8fa;
+  --accent-2:  #c77dff;
+
+  /* Pixel geometry */
+  --px:        4px;       /* one "pixel" unit            */
+  --radius:    0px;       /* never round corners         */
+  --font-ui:   'Press Start 2P', 'Courier New', monospace;
+  --font-read: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Per-subject accents. Add a new line when a new subject is added. */
+[data-accent="maths"]     { --accent:#7ee8fa; --accent-2:#c77dff; }
+[data-accent="science"]   { --accent:#3ce88a; --accent-2:#ffd93d; }
+[data-accent="english"]   { --accent:#ff9e64; --accent-2:#ff4d6d; }
+[data-accent="humanities"]{ --accent:#ffd93d; --accent-2:#ff9e64; }
+[data-accent="spanish"]   { --accent:#ff6ec7; --accent-2:#7ee8fa; }
+[data-accent="computing"] { --accent:#a0ff5c; --accent-2:#7ee8fa; }
+
+/* ---------- 2. RESET / SHELL ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--bg-0);
+  background-image:
+    radial-gradient(circle at 20% 0%,  rgba(126,232,250,.10), transparent 45%),
+    radial-gradient(circle at 85% 15%, rgba(199,125,255,.10), transparent 45%),
+    linear-gradient(180deg, #0b0f2a 0%, #070a1c 100%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-read);
+  font-size: 17px;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: 0 0 64px;
+  overflow-x: hidden;
+}
+
+/* CRT scanlines — decorative, never blocks clicks */
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,.13) 0px,
+    rgba(0,0,0,.13) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+  opacity: .55;
+}
+
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 18px; }
+
+/* ---------- 3. PIXEL PRIMITIVES ---------- */
+
+/* Chunky stepped border. Used on every box in the game. */
+.pixel-box {
+  background: var(--bg-1);
+  border: var(--px) solid var(--line);
+  box-shadow:
+     0 0 0 var(--px) var(--bg-0),
+     0 var(--px) 0 var(--px) rgba(0,0,0,.55);
+  position: relative;
+}
+
+.pixel-box--raised { background: var(--bg-2); }
+
+h1, h2, h3, .ui, .btn, .tag, .hud, .tile {
+  font-family: var(--font-ui);
+  letter-spacing: .5px;
+  line-height: 1.5;
+}
+
+h1 { font-size: 20px; }
+h2 { font-size: 15px; }
+h3 { font-size: 12px; }
+
+.text-accent { color: var(--accent); }
+.text-dim    { color: var(--ink-dim); }
+
+/* ---------- 4. BUTTONS ---------- */
+.btn {
+  display: inline-block;
+  font-size: 11px;
+  padding: 14px 18px;
+  background: var(--bg-2);
+  color: var(--ink);
+  border: var(--px) solid var(--line);
+  box-shadow: 0 var(--px) 0 0 #0a0e24, inset 0 var(--px) 0 0 rgba(255,255,255,.08);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: transform .06s steps(2), background .12s;
+  user-select: none;
+}
+.btn:hover   { background: var(--bg-3); }
+.btn:active  { transform: translateY(var(--px)); box-shadow: 0 0 0 0 #0a0e24; }
+.btn:focus-visible { outline: var(--px) solid var(--warn); outline-offset: var(--px); }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+
+.btn--primary {
+  background: var(--accent);
+  color: #071024;
+  border-color: #fff;
+  font-weight: 700;
+}
+.btn--primary:hover { background: #fff; }
+
+.btn--ghost { background: transparent; }
+
+/* ---------- 5. HUD ---------- */
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  margin: 18px 0;
+  font-size: 10px;
+}
+.hud__group { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.hud__stat  { display: flex; gap: 7px; align-items: center; color: var(--ink-dim); }
+.hud__stat b { color: var(--ink); font-weight: 400; }
+
+.bar {
+  height: 16px;
+  background: #0a0e24;
+  border: var(--px) solid var(--line);
+  overflow: hidden;
+  flex: 1;
+  min-width: 140px;
+}
+.bar__fill {
+  height: 100%;
+  width: 0%;
+  background: repeating-linear-gradient(90deg,
+     var(--accent) 0 8px, color-mix(in srgb, var(--accent) 70%, #000) 8px 12px);
+  transition: width .35s steps(10);
+}
+
+/* ---------- 6. AVATAR ---------- */
+/* Contorno oscuro alrededor de TODO el sprite. Es lo que hacen los juegos de
+   8 bits para que el personaje se lea sobre cualquier fondo: sin el, el pelo
+   castano contra un cielo oscuro daba 1.03:1 y la cabeza desaparecia.
+   Cuatro drop-shadow de 2px = una linea de contorno; el quinto es la sombra
+   en el suelo que ya existia. */
+.avatar {
+  width: 64px; height: 64px;
+  image-rendering: pixelated;
+  flex: none;
+  filter:
+    drop-shadow( 2px 0 0 #120c18) drop-shadow(-2px 0 0 #120c18)
+    drop-shadow(0  2px 0 #120c18) drop-shadow(0 -2px 0 #120c18)
+    drop-shadow(0  4px 0 rgba(0,0,0,.45));
+}
+.avatar--sm { width: 40px; height: 40px; }
+.avatar--lg { width: 96px; height: 96px; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+.avatar--bob { animation: bob 1.4s steps(4) infinite; }
+
+/* Reacciones a la respuesta */
+/* Playtest H3: el brinco con escalado se leia "de kinder" a los 10-11.
+   Ahora es un gesto contenido: brazos arriba (ya en el sprite) y un pequeno
+   rebote, sin escalar. */
+@keyframes cheer {
+  0%   { transform: translateY(0); }
+  30%  { transform: translateY(-6px); }
+  60%  { transform: translateY(0); }
+  100% { transform: translateY(-2px); }
+}
+.avatar--cheer { animation: cheer .5s steps(5) forwards; }
+
+/* Sin `filter` en el ultimo fotograma: sobreescribia el contorno del sprite y
+   la cabeza volvia a perderse justo al fallar, que es cuando mas se mira. */
+@keyframes slump {
+  0%   { transform: translateY(0)   rotate(0deg); }
+  25%  { transform: translateY(3px) rotate(-7deg); }
+  55%  { transform: translateY(6px) rotate(5deg); }
+  100% { transform: translateY(7px) rotate(0deg); }
+}
+.avatar--down { animation: slump .55s steps(5) forwards; }
+
+/* ----- Invocar la calculadora magica (PLAN-V2 §6.2) -----
+   1.1 s en cuatro fases, todo con steps() y sin `ease`:
+   alzar (0-0.3) · destello (0.3-0.5) · aparicion (0.5-0.9) · sostener. */
+/* Solo brillo: el `filter` del sprite (su contorno) no se toca aqui. */
+@keyframes summonGlow {
+  0%, 25%, 100% { opacity: 1; }
+  40%           { opacity: .75; }
+}
+.avatar--summon { animation: summonGlow 1.1s steps(6) forwards; }
+
+@keyframes flashPop { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+.avatar .flash {
+  opacity: 0;
+  transform-origin: 13px 4px;
+  animation: flashPop .2s steps(3) .3s forwards;
+}
+
+@keyframes calcIn { 0% { transform: translateY(6px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+.avatar .calc {
+  opacity: 0;
+  animation: calcIn .4s steps(4) .5s forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar--bob, .avatar--cheer, .avatar--down { animation: none; }
+  .shake, .pop { animation: none; }
+  /* Se salta a la fase 4: la calculadora ya esta ahi, sin destello. */
+  .avatar--summon { animation: none; }
+  .avatar .flash  { display: none; }
+  .avatar .calc   { opacity: 1; animation: none; }
+}
+
+/* Mensaje del companero. El sprite vive en la escena, no aqui: un solo
+   personaje en movimiento se sigue mejor que tres repartidos. */
+.mate {
+  display: flex; align-items: center; gap: 12px;
+  flex: none;
+  min-width: 150px;
+}
+.mate__msg {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--ink-dim);
+}
+.mate__msg.is-good { color: var(--good); }
+.mate__msg.is-bad  { color: var(--bad); }
+
+/* ---------- 6b. HEROE Y ARMERIA (v2) ---------- */
+.hero-pick { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 18px; }
+
+.hero-card {
+  flex: 1 1 160px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 18px 14px;
+  background: var(--bg-0);
+  border: var(--px) solid var(--line);
+  cursor: pointer;
+  color: var(--ink-dim);
+  font-family: var(--font-ui);
+  font-size: 10px;
+}
+.hero-card:hover { background: var(--bg-2); }
+.hero-card:focus-visible { outline: var(--px) solid var(--warn); outline-offset: var(--px); }
+.hero-card.is-on { border-color: var(--accent); background: var(--bg-2); color: var(--accent); }
+.hero-card__art .avatar { width: 84px; height: 84px; }
+
+.field {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 13px 12px;
+  background: var(--bg-0);
+  border: var(--px) solid var(--line);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.field:focus-visible { outline: var(--px) solid var(--warn); outline-offset: var(--px); }
+
+.armoury {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: start;
+  margin-top: 20px;
+}
+.arm-row { display: grid; gap: 8px; margin-bottom: 16px; }
+.arm-row__label { font-family: var(--font-ui); font-size: 9px; color: var(--ink-dim); }
+.arm-row__strip { display: flex; gap: 8px; flex-wrap: wrap; }
+/* La piel trae 12 tonos: muestras algo mas pequenas para que la rampa se lea
+   entera de un vistazo, de mas claro a mas oscuro. */
+.arm-row__strip--skin .swatch { width: 32px; height: 32px; }
+@media (max-width: 620px) { .arm-row__strip--skin .swatch { width: 28px; height: 28px; } }
+
+.swatch {
+  width: 38px; height: 38px;
+  flex: none;
+  border: var(--px) solid var(--line);
+  cursor: pointer;
+  padding: 0;
+}
+.swatch:hover { border-color: var(--ink-dim); }
+.swatch:focus-visible { outline: var(--px) solid var(--warn); outline-offset: 2px; }
+.swatch.is-on { border-color: #fff; box-shadow: 0 0 0 var(--px) var(--bg-0) inset; }
+/* Bloqueado: se ve que existe, no se ve el color. Se gana dominando un nivel. */
+.swatch.is-locked { background: var(--bg-0) !important; cursor: not-allowed; opacity: .8; display: grid; place-items: center; }
+.swatch__lock { font-size: 14px; line-height: 1; }
+.swatch--inline { display: inline-block; width: 16px; height: 16px; vertical-align: middle; border-width: 2px; }
+
+.armoury__preview {
+  display: grid; justify-items: center; gap: 10px;
+  padding: 18px;
+  background: var(--bg-0);
+  border: var(--px) solid var(--line);
+}
+.armoury__tag { font-family: var(--font-ui); font-size: 9px; color: var(--ink-dim); }
+
+@media (max-width: 620px) {
+  .armoury { grid-template-columns: 1fr; }
+  .armoury__preview { justify-self: stretch; }
+  .swatch { width: 34px; height: 34px; }
+}
+
+/* ---------- 7. LEVEL MAP ---------- */
+.levels { display: grid; gap: 16px; margin-top: 22px; }
+
+.level-card {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform .08s steps(2);
+}
+.level-card:hover:not(.is-locked) { transform: translate(0, -3px); }
+.level-card.is-locked { opacity: .45; cursor: not-allowed; }
+.level-card.is-done   { border-color: var(--good); }
+
+.level-card__num {
+  font-family: var(--font-ui);
+  font-size: 22px;
+  width: 64px; height: 64px;
+  display: grid; place-items: center;
+  background: var(--bg-0);
+  border: var(--px) solid var(--accent);
+  color: var(--accent);
+}
+.level-card.is-done .level-card__num { border-color: var(--good); color: var(--good); }
+.level-card__name { font-family: var(--font-ui); font-size: 12px; margin-bottom: 8px; }
+.level-card__sub  { color: var(--ink-dim); font-size: 14px; }
+/* Gemas: una por tramo completado. La apagada cambia de forma (rombo
+   hueco), no solo de color, y el conteo va tambien en texto (sr-only). */
+.gems { font-family: var(--font-ui); font-size: 16px; color: var(--warn); white-space: nowrap; }
+.gems .off { color: #6f7ab8; }
+
+/* ---------- 7b. PROGRESO, MEDALLAS Y PERFIL (v2) ----------
+   Todo lo de aqui mide al nino contra si mismo. No hay nada comparativo con
+   otros ninos: eso exigiria un servidor con datos de menores. */
+.progress { margin: 18px 0 4px; }
+.progress__head {
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  font-family: var(--font-ui); font-size: 9px;
+  color: var(--ink-dim);
+  margin-bottom: 8px;
+}
+
+.medal-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+.medal {
+  display: inline-block;
+  padding: 8px 10px;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  line-height: 1.6;
+  background: var(--bg-0);
+  border: 2px solid var(--line);
+  color: var(--ink-dim);
+}
+.medal--1 { border-color: #b87333; color: #e0a06a; }   /* bronce */
+.medal--2 { border-color: #b9c4d6; color: #dce6f5; }   /* plata  */
+.medal--3 { border-color: var(--warn); color: var(--warn); }
+.medal--0 { opacity: .55; }
+
+.medals-new {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  align-items: center;
+  margin: 18px 0;
+}
+.medals-new__tag {
+  font-family: var(--font-ui); font-size: 9px; color: var(--warn);
+  width: 100%;
+}
+
+.score-lines { margin: 16px 0; font-size: 15px; display: grid; gap: 6px; }
+.score-best { color: var(--warn); font-weight: 700; }
+.score-up   { color: var(--good); font-weight: 700; }
+.score-down { color: var(--ink-dim); }
+
+.prof-lv { margin: 20px 0 10px; color: var(--accent); }
+.prof-scroll { overflow-x: auto; }
+.prof-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  line-height: 1.8;
+}
+.prof-table th, .prof-table td {
+  border: 2px solid var(--line);
+  padding: 8px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+.prof-table th { color: var(--ink-dim); background: var(--bg-0); }
+.prof-table td { color: var(--ink); }
+
+/* ---------- 8. QUESTION SCREEN ---------- */
+.stage { margin-top: 20px; padding: 22px; }
+
+.q-tag {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  padding: 6px 9px;
+  background: var(--bg-0);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.q-stem { font-size: 19px; font-weight: 700; line-height: 1.55; margin-bottom: 8px; }
+.q-sub  { color: var(--ink-dim); font-size: 15px; margin-bottom: 18px; }
+
+/* Sequence tiles */
+.seq {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin: 18px 0 22px;
+  overflow-x: auto;          /* fracciones largas nunca empujan la página */
+  padding-bottom: 4px;
+}
+.tile {
+  min-width: 62px;
+  padding: 12px 10px;
+  text-align: center;
+  font-size: 13px;
+  background: var(--bg-0);
+  border: var(--px) solid var(--line);
+  color: var(--ink);
+}
+.tile--blank { border-color: var(--warn); color: var(--warn); background: #1a1533; }
+.tile--ghost { opacity: .45; }
+
+/* ---------- 8b. SCENES — moverse ES responder (v2) ----------
+   Cada casilla es un <button> real: foco, Tab y aria salen gratis.
+   El heroe es un sprite absoluto que se desplaza con `left`; con
+   prefers-reduced-motion la transicion se anula y APARECE en la casilla
+   en vez de caminar. Un nino con solo teclado juega el mismo juego.
+   Sin canvas: un heroe y <= 12 casillas no lo justifican.
+------------------------------------------------------------- */
+.scene-host { margin: 4px 0 2px; }
+
+.scene__corridor {
+  position: relative;
+  padding: 16px 14px 0;
+  border: var(--px) solid var(--line);
+  background: linear-gradient(180deg, #070a1c 0%, #10163a 100%);
+  overflow: hidden;
+}
+
+/* `stretch`, no `flex-end`: una opcion puede ser un numero corto ("24") o una
+   secuencia entera ("70, 62, 54, 46"). Las puertas crecen con su contenido y
+   todas igualan a la mas alta, para que el corredor siga leyendose como tal.
+   Altura fija = texto cortado. */
+.scene__row { display: flex; gap: 8px; align-items: stretch; }
+
+/* Casilla de inicio del tramo: a donde vuelve el heroe al fallar. */
+.scene__start {
+  flex: 0 0 52px;
+  min-height: 96px;
+  display: grid; place-items: center;
+  border: var(--px) dashed var(--line);
+  border-bottom: none;
+  color: var(--ink-dim);
+}
+.scene__start-tag { font-family: var(--font-ui); font-size: 8px; letter-spacing: 1px; }
+.scene__start.is-here { border-color: var(--accent); color: var(--accent); }
+
+/* Puertas */
+.door {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--font-read);
+}
+.door__key {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  background: var(--bg-0);
+  border: 2px solid var(--line);
+  color: var(--accent);
+}
+.door__frame {
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;               /* crece con el texto; nunca lo corta */
+  min-height: 92px;
+  display: grid; place-items: center;
+  padding: 12px 10px 20px;      /* hueco abajo para el pomo */
+  background: var(--bg-2);
+  border: var(--px) solid var(--line);
+  border-bottom: none;
+  transition: background .12s;
+}
+.door__frame::after {                 /* pomo, abajo a la derecha:
+                                         centrado chocaba con el texto largo */
+  content: '';
+  position: absolute; right: 8px; bottom: 8px;
+  width: 6px; height: 6px;
+  background: var(--warn);
+}
+.door__value {
+  font-size: 17px; font-weight: 700; line-height: 1.35;
+  text-align: center; overflow-wrap: anywhere;
+}
+.door:hover:not(:disabled) .door__frame { background: var(--bg-3); }
+.door:focus-visible { outline: none; }
+.door:focus-visible .door__frame { outline: var(--px) solid var(--warn); outline-offset: 2px; }
+.door:disabled { cursor: default; }
+
+.door.is-here .door__frame { background: var(--bg-3); border-color: var(--accent); }
+.door.is-here .door__key   { border-color: var(--accent); }
+.door.is-right .door__frame { background: var(--good-dark); border-color: var(--good); }
+.door.is-right .door__key   { border-color: var(--good); color: var(--good); }
+.door.is-wrong .door__frame { background: var(--bad-dark); border-color: var(--bad); }
+.door.is-wrong .door__key   { border-color: var(--bad); color: var(--bad); }
+
+/* Suelo del corredor y heroe */
+.scene__floor {
+  height: 78px;
+  border-top: var(--px) solid var(--line);
+  background: repeating-linear-gradient(90deg, #141a3f 0 14px, #0f1433 14px 28px);
+}
+.scene__hero {
+  position: absolute;
+  left: 0; bottom: 10px;
+  transform: translateX(-50%);
+  transition: left .22s steps(6);
+  pointer-events: none;
+}
+.scene__hero .avatar { width: 52px; height: 52px; }
+
+/* ----- Corredor VERTICAL: opciones largas (secuencias, frases) -----
+   Cuatro frases en columnas de 80px son ilegibles. Aqui cada puerta es una
+   banda a lo ancho y el heroe baja por el carril izquierdo. El modelo de
+   movimiento no cambia: las flechas mueven una casilla y Enter cruza. */
+.scene--stacked .scene__corridor { padding-bottom: 16px; }
+.scene--stacked .scene__row { flex-direction: column; align-items: stretch; gap: 8px; }
+
+.scene--stacked .scene__start {
+  align-self: flex-start;
+  flex: none;
+  width: 52px;
+  min-height: 42px;
+  border: var(--px) dashed var(--line);
+}
+.scene--stacked .scene__start-tag { writing-mode: horizontal-tb; }
+
+.scene--stacked .door {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 10px;
+  margin-left: 64px;             /* deja el carril del heroe a la izquierda */
+}
+.scene--stacked .door__key { align-self: center; }
+.scene--stacked .door__frame {
+  min-height: 52px;
+  border-bottom: var(--px) solid var(--line);
+  padding: 12px 22px 12px 12px;
+  place-items: center start;
+}
+.scene--stacked .door__value { text-align: left; font-size: 16px; }
+.scene--stacked .door__frame::after { top: 50%; bottom: auto; margin-top: -3px; }
+
+.scene--stacked .scene__floor { display: none; }
+.scene--stacked .scene__corridor::before {   /* el carril por donde baja */
+  content: '';
+  position: absolute;
+  left: 40px; top: 14px; bottom: 14px;
+  width: var(--px);
+  background: repeating-linear-gradient(180deg, var(--line) 0 8px, transparent 8px 16px);
+}
+.scene--stacked .scene__hero {
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  transition: top .22s steps(6);
+}
+
+@media (max-width: 700px) {
+  .scene--stacked .door { margin-left: 44px; }
+  .scene--stacked .scene__corridor::before { left: 26px; }
+  .scene--stacked .scene__start { width: 38px; }
+  .scene--stacked .scene__start-tag { font-size: 7px; }
+  .scene--stacked .door__value { font-size: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene--stacked .scene__hero { transition: none; }
+}
+
+/* ---------- FORGE (mech: "forge") ----------
+   Construction scene: a preview strip of chosen pieces + a palette to pick
+   from. Generic, subject-agnostic — same rules as `.scene--doors` above. */
+.scene--forge { padding: 4px 0; }
+.forge__preview {
+  min-height: 52px;
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 10px 12px;
+  border: var(--px) solid var(--line);
+  background: var(--bg-2);
+  margin-bottom: 14px;
+}
+.forge__preview.is-good { border-color: var(--good); }
+.forge__preview.is-bad  { border-color: var(--bad); }
+.forge__placeholder { color: var(--ink-dim); font-size: 14px; }
+.forge__palette { display: flex; flex-wrap: wrap; gap: 8px; }
+.forge__piece {
+  font-family: var(--font-read);
+  font-size: 15px;
+  padding: 8px 12px;
+  border: var(--px) solid var(--accent);
+  background: var(--bg-1);
+  color: var(--ink);
+  cursor: pointer;
+}
+.forge__piece:hover:not(:disabled) { background: var(--bg-2); }
+.forge__piece:disabled { opacity: .35; cursor: default; }
+.forge__preview .forge__piece.is-chosen {
+  border-color: var(--accent-2);
+  background: var(--bg-3);
+}
+
+.scene__help {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+/* `nowrap`: "A B C D" partido en dos lineas se lee como dos cosas distintas. */
+.scene__help b {
+  color: var(--accent);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  white-space: nowrap;
+}
+/* Las flechas necesitan una fuente que tenga el glifo. */
+.scene__help kbd {
+  color: var(--accent);
+  font-family: var(--font-read);
+  font-weight: 900;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .scene__corridor { padding: 12px 10px 0; }
+  .scene__row { gap: 6px; }
+  .scene__start { flex-basis: 30px; min-height: 78px; }
+  .scene__start-tag { writing-mode: vertical-rl; font-size: 7px; }
+  .door__key { width: 22px; height: 22px; font-size: 8px; }
+  .door__frame { min-height: 78px; padding: 8px 6px 18px; }
+  .door__value { font-size: 14px; line-height: 1.3; }
+  .scene__floor { height: 64px; }
+  .scene__hero .avatar { width: 44px; height: 44px; }
+  .scene__help { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* El heroe aparece en la casilla en vez de caminar hasta ella. */
+  .scene__hero { transition: none; }
+  .door__frame { transition: none; }
+}
+
+/* ---------- 8c. LUGARES (ENV) y CAMINO DE TRAMOS ----------
+   Cinco capas detras de la escena: cielo, lejano, pared, suelo, primer plano.
+   Props en SVG inline (assets/props.js) y materiales como patron SVG tintado.
+   Todo decorativo va aria-hidden y sin pointer-events: la escena esta encima.
+   Regla R1 del panel: nada decorativo junto a las casillas. ------------------ */
+/* Alturas del lugar: cielo (donde asoman torres y la puerta del jefe),
+   franja alta de pared (almenas, antorchas, ventanas: SIN puertas debajo),
+   luego las casillas, y el suelo. Visto en vivo: sin la franja de cielo la
+   pared lo tapaba todo y los props caian detras de las puertas. */
+.world { position: relative; --env-floor-h: 78px; --env-sky-h: 64px; --env-strip-h: 34px; }
+.world .scene-host { position: relative; z-index: 1; }
+.world.is-stacked { --env-floor-h: 18px; }
+
+/* Con lugar, el corredor de la escena se vuelve transparente, deja sitio
+   arriba para cielo y pared, y las casillas se visten del material. */
+.has-env .scene__corridor { background: transparent; border-color: transparent;
+                            padding-top: calc(var(--env-sky-h) + var(--env-strip-h) + 12px); }
+.has-env .scene__floor    { background: transparent; border-top-color: transparent; }
+.has-env .door__frame  { background: var(--env-slot); border-color: var(--env-slotline); }
+.has-env .door__key    { border-color: var(--env-slotline); color: var(--env-glow); }
+.has-env .scene__start { border-color: var(--env-slotline); color: var(--env-slotline); }
+.has-env .door.is-here .door__frame { border-color: var(--env-glow); }
+.has-env .scene--stacked .scene__corridor::before { background: repeating-linear-gradient(180deg, var(--env-slotline) 0 8px, transparent 8px 16px); }
+
+.env { position: absolute; inset: 0; overflow: hidden; z-index: 0; border: var(--px) solid var(--env-line); }
+.env__layer { position: absolute; left: 0; right: 0; }
+.env__props { position: absolute; inset: 0; }
+.env__sky   { top: 0; bottom: 0; background: linear-gradient(180deg, var(--env-sky), var(--env-sky2)); }
+/* Lo lejano se apoya en la linea alta del muro (bottom:0 de esta capa). */
+.env__far   { top: 0; height: var(--env-sky-h); }
+.env__far .env__props { overflow: visible; }
+.env__wall  { top: var(--env-sky-h); bottom: var(--env-floor-h); background-blend-mode: multiply; background-repeat: repeat;
+              background-position: calc(var(--hx, 0) * -48px) 0; transition: background-position .22s steps(6); }
+.env__floor { bottom: 0; height: var(--env-floor-h); background-blend-mode: multiply; background-repeat: repeat;
+              border-top: var(--px) solid var(--env-line);
+              background-position: calc(var(--hx, 0) * -72px) 0; transition: background-position .22s steps(6); }
+.env__fg    { bottom: 0; height: var(--env-floor-h); }
+
+/* Parallax: una variable. Lo lejano se mueve menos que lo cercano. */
+.env__far  .env__props { transform: translateX(calc(var(--hx, 0) * -3%)); transition: transform .22s steps(6); }
+.env__wall .env__props { transform: translateX(calc(var(--hx, 0) * -6%)); transition: transform .22s steps(6); }
+
+.prop { position: absolute; transform: translateX(-50%); image-rendering: pixelated; }
+.env__gate { transform: translateX(-50%) scale(var(--gs, .45)); transform-origin: bottom center; transition: transform .35s steps(5); }
+
+/* Llamas / luces: dos cuadros alternos con steps. En aula quedan quietas. */
+.prop .f1 { animation: flick 1s steps(1, end) infinite; }
+.prop .f2 { opacity: 0; animation: flick 1s steps(1, end) infinite reverse; }
+@keyframes flick { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+/* Deslizamiento de tramo al pulsar NEXT: el lugar LLEGA desde la derecha y
+   se asienta. Un solo disparo por clase; sin temporizadores. */
+.env.is-shift .env__far  .env__props { animation: envArriveFar .24s steps(6); }
+.env.is-shift .env__wall .env__props { animation: envArrive .24s steps(6); }
+.env.is-shift .env__wall, .env.is-shift .env__floor { animation: envArriveBg .24s steps(6); }
+@keyframes envArriveFar { from { transform: translateX(3%); } to { transform: translateX(calc(var(--hx, 0) * -3%)); } }
+@keyframes envArrive    { from { transform: translateX(8%); } to { transform: translateX(calc(var(--hx, 0) * -6%)); } }
+@keyframes envArriveBg  { from { background-position: 64px 0; } to { background-position: 0 0; } }
+
+/* La escena anterior sale por la izquierda; la nueva entra por la derecha.
+   Nada bloquea: el heroe nuevo responde desde el primer frame. */
+.scene-slot { position: relative; }
+.scene-slot.is-in  { animation: sceneIn .24s steps(6); }
+.scene-slot.is-out { position: absolute; inset: 0; z-index: 0; pointer-events: none; animation: sceneOut .24s steps(6) forwards; }
+@keyframes sceneIn  { from { transform: translateX(28%); opacity: .3; } to { transform: none; opacity: 1; } }
+@keyframes sceneOut { from { transform: none; opacity: 1; } to { transform: translateX(-28%); opacity: 0; } }
+
+/* El camino del HUD: un tramo por familia. */
+.bar.path { display: flex; gap: 3px; padding: 2px; height: 16px; }
+.bar.path i { flex: 1; background: var(--bg-2); }
+.bar.path i.on  { background: var(--good); }
+.bar.path i.now { background: var(--warn); }
+
+@media (max-width: 700px) { .world { --env-floor-h: 64px; --env-sky-h: 44px; --env-strip-h: 22px; } }
+
+/* Modo aula y reduced-motion: el lugar se queda quieto, la transicion es un
+   corte seco, las llamas no titilan. El lugar sigue ahi; solo no se mueve. */
+@media (prefers-reduced-motion: reduce) {
+  .env, .env *, .scene-slot { animation: none !important; transition: none !important; }
+}
+.is-aula .env, .is-aula .env *, .is-aula .scene-slot { animation: none !important; transition: none !important; }
+
+/* Solo para lectores de pantalla: anuncia la posicion del heroe. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)}
+  40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+}
+.shake { animation: shake .3s steps(3); }
+
+@keyframes pop { 0%{transform:scale(.9)} 60%{transform:scale(1.04)} 100%{transform:scale(1)} }
+.pop { animation: pop .22s steps(3); }
+
+/* Feedback panel */
+.feedback { margin-top: 18px; padding: 16px; display: none; }
+.feedback.is-on { display: block; }
+.feedback__title { font-family: var(--font-ui); font-size: 12px; margin-bottom: 10px; }
+.feedback--good { border-color: var(--good); }
+.feedback--good .feedback__title { color: var(--good); }
+.feedback--bad  { border-color: var(--bad); }
+.feedback--bad  .feedback__title { color: var(--bad); }
+.feedback__body { font-size: 16px; }
+.feedback__body code {
+  font-family: var(--font-ui); font-size: 12px;
+  background: var(--bg-0); padding: 2px 5px; border: 2px solid var(--line);
+}
+
+/* Hint */
+.hint {
+  margin-top: 14px; padding: 12px 14px;
+  border-left: var(--px) solid var(--warn);
+  background: rgba(255,217,61,.08);
+  font-size: 15px;
+  display: none;
+}
+.hint.is-on { display: block; }
+
+/* Briefing (mini-lesson) */
+.brief { padding: 22px; margin-top: 20px; }
+.brief h2 { color: var(--accent); margin-bottom: 16px; }
+.brief p  { margin-bottom: 14px; font-size: 17px; }
+.brief ul { margin: 0 0 14px 20px; }
+.brief li { margin-bottom: 8px; }
+.brief .example {
+  background: var(--bg-0);
+  border: var(--px) solid var(--line);
+  padding: 14px; margin: 14px 0;
+  font-family: var(--font-ui); font-size: 12px; line-height: 1.9;
+  overflow-x: auto;
+}
+
+/* Combo popup */
+.combo {
+  position: fixed; right: 20px; top: 20px; z-index: 50;
+  font-family: var(--font-ui); font-size: 14px;
+  color: var(--warn); text-shadow: 0 3px 0 #000;
+  opacity: 0; pointer-events: none;
+}
+@keyframes floatUp { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-40px)} }
+.combo.is-on { animation: floatUp .8s steps(8) forwards; }
+
+/* Victory screen */
+.victory { text-align: center; padding: 34px 22px; }
+.victory h2 { color: var(--warn); font-size: 18px; margin-bottom: 18px; }
+.victory .gems { font-size: 34px; margin: 18px 0 8px; }
+.victory__stats { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin: 22px 0; font-family: var(--font-ui); font-size: 11px; }
+.victory__stats div span { display: block; color: var(--ink-dim); font-size: 9px; margin-bottom: 8px; }
+
+/* Row helpers */
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.row--end { justify-content: flex-end; }
+.mt   { margin-top: 18px; }
+.mt-lg{ margin-top: 30px; }
+
+.screen { display: none; }
+.screen.is-on { display: block; }
+
+/* Site header */
+.site-head { padding: 26px 0 6px; display: flex; gap: 18px; align-items: center; }
+.site-head h1 { line-height: 1.4; }
+.site-head p { color: var(--ink-dim); font-size: 14px; margin-top: 8px; }
+
+footer { text-align: center; color: var(--ink-dim); font-size: 12px; margin-top: 40px; }
+.site-foot { padding: 18px 0 28px; line-height: 1.7; font-size: 13px; }
+.site-foot a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.site-foot a:focus-visible { outline: var(--px) solid var(--warn); outline-offset: 2px; }
+
+@media (max-width: 620px) {
+  body { font-size: 16px; }
+  h1 { font-size: 15px; }
+  .stage { padding: 16px; }
+  .level-card { grid-template-columns: 52px 1fr; }
+  .level-card__num { width: 52px; height: 52px; font-size: 18px; }
+  .gems { grid-column: 1 / -1; }
+  .mate { min-width: 0; width: 100%; }
+  .hud { justify-content: flex-start; }
+  .hud__group { width: 100%; }
+  .btn { padding: 14px 14px; }          /* objetivo táctil >= 44px de alto */
+}
+
+@media (max-width: 380px) {
+  .mate__sprite, .mate__sprite .avatar { width: 44px; height: 44px; }
+  .mate__msg { font-size: 10px; }
+  .tile { min-width: 52px; padding: 10px 8px; font-size: 12px; }
+  .q-stem { font-size: 17px; }
+}

@@ -1,0 +1,27 @@
+# Windows / macOS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Editores
+.vscode/
+.idea/
+
+# Node — SOLO para el harness de test. El juego publicado no usa npm.
+node_modules/
+package-lock.json
+
+# Temporales
+*.tmp
+*.bak
+.write_test
+
+# Local: lista de nombres a vigilar (nunca se versiona)
+.anonimato.local
+
+# Juegos construidos solo para jugar y probar en este equipo (tools/build.py)
+_local/

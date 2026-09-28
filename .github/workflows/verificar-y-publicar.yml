@@ -1,0 +1,121 @@
+name: verificar-y-publicar
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependencias de prueba
+        run: |
+          npm install
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; else echo "OMITIDO: requirements.txt aún no existe (llega con tools/arte/ en la etapa 1)"; fi
+          if grep -q '"playwright' package.json; then npx playwright install --with-deps chromium; else echo "OMITIDO: playwright no está en package.json"; fi
+
+      - name: Anonimato
+        env:
+          NOMBRES: ${{ secrets.ANONIMATO_NOMBRES }}
+        run: |
+          test -n "$NOMBRES" || { echo "Falta el secreto ANONIMATO_NOMBRES"; exit 1; }
+          python3 - <<'PY'
+          import os, subprocess, sys
+          nombres = [n.strip().lower() for n in os.environ["NOMBRES"].splitlines() if n.strip()]
+          permitidas = []
+          if os.path.exists(".anonimato.permitidos"):
+              permitidas = [l.rstrip("\r\n") for l in open(".anonimato.permitidos", encoding="utf-8")
+                            if l.strip() and not l.startswith("#")]
+          fallas = []
+          for ruta in subprocess.check_output(["git", "ls-files"], text=True).splitlines():
+              if any(n in ruta.lower() for n in nombres):
+                  fallas.append(f"nombre de archivo: {ruta}")
+                  continue
+              try:
+                  texto = open(ruta, encoding="utf-8").read()
+              except (UnicodeDecodeError, IsADirectoryError, FileNotFoundError):
+                  continue
+              for f in permitidas:
+                  texto = texto.replace(f, "")
+              texto = texto.lower()
+              if any(n in texto for n in nombres):
+                  fallas.append(f"contenido: {ruta}")
+          if fallas:
+              print("Nombres reales encontrados en:\n" + "\n".join(fallas))
+              sys.exit(1)
+          print("Anonimato OK")
+          PY
+
+      - name: Documentos con estado
+        run: |
+          shopt -s nullglob
+          for f in docs/*.md docs/temas/*.md; do
+            head -5 "$f" | grep -q '^estado:' || { echo "$f no declara estado: en su encabezado"; exit 1; }
+          done
+
+      - name: Generar datos
+        run: |
+          shopt -s nullglob
+          [ -d tools/gen ] || echo "OMITIDO: tools/gen/ aún no existe (llega en la etapa 2); se corren los generadores tools/gen_*.py"
+          for g in tools/gen_*.py tools/gen/*.py; do
+            case "$(basename "$g")" in samsan_gen.py|__init__.py) continue;; esac
+            echo "== $g"; python3 "$g"
+          done
+
+      - name: Construir
+        run: python3 tools/build.py
+
+      - name: Regresión
+        run: node tools/harness.js
+
+      - name: Prueba de grises y contraste
+        run: |
+          if [ -f tools/arte/prueba_grises.py ]; then
+            python3 tools/arte/prueba_grises.py
+          else
+            echo "OMITIDO: tools/arte/prueba_grises.py aún no existe (se crea en la etapa 1)"
+          fi
+
+      - name: Verificaciones por tema
+        run: |
+          shopt -s nullglob
+          for v in tools/verify_*.js; do echo "== $v"; node "$v"; done
+
+      - name: Preparar sitio
+        run: |
+          mkdir -p _site
+          cp ./*.html _site/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  publicar:
+    needs: verificar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
