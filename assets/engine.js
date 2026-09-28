@@ -853,8 +853,9 @@
   /* ---------- SCENES.line — Mover en la recta (etapa 2) ----------
      Verbo: mover un instrumento sobre una escala y detenerse. Se dibuja en
      el mundo del bioma de la materia (window.SAMSAN_BIOMAS[meta.bioma]),
-     que da un `escenario` con la piel del instrumento (montacargas,
-     termometro). El motor no sabe de minas ni de temperaturas.
+     que da un `escenario` (en la Caverna, el montacargas del pozo). El
+     motor no sabe de minas: solo pide al escenario que ejecute la
+     respuesta (`viajar`, `resultado`) y que marque el instrumento.
 
      Variante en data.js (ademas de stem/options/answer del contrato):
        solucion: numero que el nino debe fijar (el dato que falta)
@@ -864,15 +865,17 @@
                bandera (estimacion a la decena), valor (arranque; el primer
                item llega medio resuelto), pistaGrafica }
 
-     Sello de tres pasos: concreto (se mueve el instrumento), pictorico (se
-     ve la figura y se toca la respuesta entre cuatro), abstracto (se
+     Sello de tres pasos: concreto (palancas de 10 y de 1: se descompone
+     en decenas y unidades), pictorico (la figura con la punta de la
+     flecha tapada; se toca la respuesta entre cuatro), abstracto (se
      escribe el numero con el teclado en pantalla).
 
      check(estado) -> true si estado.valor es la solucion. Es la misma regla
-     que valida el generador (tools/gen/). Error visible: el mundo muestra a
-     donde llevo la respuesta, el contorno punteado de donde debia llegar y
-     un corchete con la diferencia. */
-  var LINEA = { canvas: null, promesa: null, E: null };
+     que valida el generador (tools/gen/). La respuesta se entrega al motor
+     (ctx.pick) cuando el mundo termina de ejecutarla: primero el viaje,
+     luego el panel. Error visible: a donde llevo la respuesta, el contorno
+     punteado de donde debia llegar y un corchete con la diferencia. */
+  var LINEA = { canvas: null, promesa: null, E: null, run: null };
   function lineaEscenario() {
     if (LINEA.promesa) return LINEA.promesa;
     var B = window.SAMSAN_BIOMAS && DATA.meta && window.SAMSAN_BIOMAS[DATA.meta.bioma];
@@ -882,6 +885,8 @@
     LINEA.promesa = B.escenario(LINEA.canvas).then(function (E) {
       LINEA.E = E;
       if (motionOff()) { E.L.opts.smooth = false; E.L.opts.particles = false; }
+      /* Un solo protagonista: el explorador del mundo con el tono del heroe. */
+      if (HERO && HERO.skin && E.cav && E.cav.explorador.fijarPiel) E.cav.explorador.fijarPiel(HERO.skin);
       E.L.iniciar();
       return E;
     }, function () { return null; });
@@ -893,26 +898,40 @@
 
   SCENES.line = function () {
     var ctx = null, dead = false, host = null, V = null, Lv = null;
-    var fase = 'mover', valor = 0, bandera = null, tecleo = '', cursor = -1, elegido = null;
-    var btnUp = null, btnDown = null, btnMain = null, nowEl = null, notaEl = null, cajaEl = null, opts = [];
+    var fase = 'mover', valor = 0, bandera = null, tecleo = '', cursor = -1, elegido = null, bien = false;
+    var palancas = [], btnMain = null, nowEl = null, notaEl = null, cajaEl = null, opts = [];
     var timers = [], onKey = null;
     var NB = ' ';
 
     function unidad(n) { return numTxt(n) + NB + Lv.unidad; }
-    function paso() { return fase === 'bandera' ? 10 : 1; }
     /* Lo que el mundo muestra para un valor del nino. */
     function llegada(x) {
       return Lv.faltante === 'final' ? x : Lv.faltante === 'cambio' ? Lv.inicio + x : x + Lv.cambio;
     }
     function inicioDe(x) { return Lv.faltante === 'inicio' ? x : Lv.inicio; }
+    function limites() {
+      if (fase === 'bandera') return [Lv.min, Lv.max];
+      return Lv.faltante === 'cambio' ? [Lv.min - Lv.inicio, Lv.max - Lv.inicio] : [Lv.min, Lv.max];
+    }
+    function redondeo10(n) { return Math.floor((n + 5) / 10) * 10; }
 
+    /* Franja tapada del pictorico: contiene el dato que falta, pero no esta
+       centrada en el (desplazamiento fijo por variante), y no tapa el dato
+       conocido del otro extremo. */
+    function tapa(c, otro) {
+      var o = (((Lv.inicio * 7 + Lv.cambio * 3) % 5) + 5) % 5 - 2;
+      var lo = c + o - 3.5, hi = c + o + 3.5;
+      if (otro >= lo - 1 && otro <= c) lo = otro + 1;
+      if (otro <= hi + 1 && otro >= c) hi = otro - 1;
+      return { desde: Math.max(Lv.min, lo), hasta: Math.min(Lv.max, hi) };
+    }
     /* Marcas fijas del instrumento segun modo y dato que falta. */
     function pinta() {
       var P = {}, c = Lv.cambio, u = NB + Lv.unidad;
       if (Lv.modo === 'pictorico') {
-        if (Lv.faltante === 'final')  { P.inicio = Lv.inicio; P.salto = { desde: Lv.inicio, hasta: Lv.final, texto: signoTxt(c) + u }; P.pregunta = Lv.final; }
+        if (Lv.faltante === 'final')  { P.inicio = Lv.inicio; P.salto = { desde: Lv.inicio, hasta: Lv.final, texto: signoTxt(c) + u }; P.tapa = tapa(Lv.final, Lv.inicio); }
         if (Lv.faltante === 'cambio') { P.inicio = Lv.inicio; P.anillo = Lv.final; P.salto = { desde: Lv.inicio, hasta: Lv.final, texto: '?' }; }
-        if (Lv.faltante === 'inicio') { P.anillo = Lv.final; P.salto = { desde: Lv.inicio, hasta: Lv.final, texto: signoTxt(c) + u }; P.pregunta = Lv.inicio; }
+        if (Lv.faltante === 'inicio') { P.anillo = Lv.final; P.salto = { desde: Lv.inicio, hasta: Lv.final, texto: signoTxt(c) + u }; P.tapa = tapa(Lv.inicio, Lv.final); }
         return P;
       }
       if (Lv.faltante === 'final')  { P.inicio = Lv.inicio; }
@@ -924,24 +943,24 @@
       if (LINEA.E && !dead) {
         var st = LINEA.E.estado;
         st.valor = valor;
-        if (Lv.modo === 'concreto' && fase !== 'hecho') st.fisica = Lv.faltante === 'cambio' ? Lv.inicio : valor;
+        if (Lv.modo === 'concreto') st.fisica = Lv.faltante === 'cambio' ? Lv.inicio : valor;
         st.bandera = bandera;
         LINEA.E.pintar(pinta());
       }
       if (nowEl) nowEl.textContent = fase === 'bandera' ? fmt(UI.scene.lineFlagNow, { value: unidad(bandera) })
         : Lv.faltante === 'cambio' ? fmt(UI.scene.lineJumpNow, { value: signoTxt(valor) + NB + Lv.unidad })
         : fmt(UI.scene.lineNow, { value: unidad(valor) });
-      if (btnUp) {
-        var lo = fase === 'bandera' ? Lv.min : (Lv.faltante === 'cambio' ? Lv.min - Lv.inicio : Lv.min);
-        var hi = fase === 'bandera' ? Lv.max : (Lv.faltante === 'cambio' ? Lv.max - Lv.inicio : Lv.max);
-        var x = fase === 'bandera' ? bandera : valor;
-        btnUp.disabled = dead || x + paso() > hi;
-        btnDown.disabled = dead || x - paso() < lo;
-      }
+      var lim = limites(), x = fase === 'bandera' ? bandera : valor;
+      palancas.forEach(function (b) {
+        var d = parseInt(b.getAttribute('data-d'), 10);
+        b.disabled = dead || (fase === 'bandera' && Math.abs(d) === 1) || x + d > lim[1] || x + d < lim[0];
+      });
       if (cajaEl) cajaEl.textContent = tecleo === '' ? ' ' : tecleo.replace(/-/g, '−');
     }
     function configurarMundo() {
       if (!LINEA.E || dead) return;
+      if (LINEA.run !== run) { LINEA.run = run; if (LINEA.E.nuevoNivel) LINEA.E.nuevoNivel(); }
+      if (LINEA.E.profundidad && run) LINEA.E.profundidad(run.gems);
       var fis = Lv.modo === 'concreto' ? (Lv.faltante === 'cambio' ? Lv.inicio : valor)
         : Lv.modo === 'pictorico' ? (Lv.faltante === 'inicio' ? Lv.final : Lv.inicio) : Lv.inicio;
       LINEA.E.configurar({ piel: Lv.piel, unidad: Lv.unidad, min: Lv.min, max: Lv.max, valor: valor, fisica: fis,
@@ -949,18 +968,19 @@
       sync();
     }
 
+    /* Palancas: `delta` es +-1 o +-10. Una palanca que sacaria el valor del
+       instrumento se apaga (no se recorta: la aritmetica queda honesta). */
     function mover(delta) {
       if (dead || Lv.modo !== 'concreto') return;
+      var lim = limites();
       if (fase === 'bandera') {
-        var nb = Math.max(Lv.min, Math.min(Lv.max, bandera + delta * 10));
-        if (nb === bandera) return;
+        var nb = bandera + (delta > 0 ? 10 : -10);
+        if (nb > lim[1] || nb < lim[0]) return;
         bandera = nb; sync(); ctx.say(fmt(UI.scene.sayLineFlag, { value: unidad(bandera) }));
         return;
       }
-      var lo = Lv.faltante === 'cambio' ? Lv.min - Lv.inicio : Lv.min;
-      var hi = Lv.faltante === 'cambio' ? Lv.max - Lv.inicio : Lv.max;
-      var nv = Math.max(lo, Math.min(hi, valor + delta));
-      if (nv === valor) return;
+      var nv = valor + delta;
+      if (nv > lim[1] || nv < lim[0]) return;
       valor = nv; sync();
       ctx.say(Lv.faltante === 'cambio' ? signoTxt(valor) + NB + Lv.unidad : unidad(valor));
     }
@@ -971,7 +991,7 @@
       btn.addEventListener('pointerdown', function (e) {
         if (e.button !== 0 && e.pointerType === 'mouse') return;
         usado = true; mover(delta); parar();
-        t1 = setTimeout(function () { t2 = setInterval(function () { mover(delta); }, 220); }, 450);
+        t1 = setTimeout(function () { t2 = setInterval(function () { mover(delta); }, 260); }, 500);
         timers.push(t1);
       });
       ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) { btn.addEventListener(ev, parar); });
@@ -990,15 +1010,20 @@
         ctx = context; dead = false; V = ctx.variant; Lv = V.line; host = container;
         fase = Lv.modo === 'concreto' && Lv.bandera ? 'bandera' : 'mover';
         valor = Lv.modo === 'concreto' ? (Lv.valor != null ? Lv.valor : (Lv.faltante === 'cambio' ? 0 : Lv.faltante === 'final' ? Lv.inicio : 0)) : 0;
-        bandera = fase === 'bandera' ? Math.round(Lv.inicio / 10) * 10 : null;
-        tecleo = ''; cursor = -1; elegido = null; opts = [];
+        bandera = fase === 'bandera' ? redondeo10(Lv.inicio) : null;
+        tecleo = ''; cursor = -1; elegido = null; opts = []; palancas = []; bien = false;
 
         var h = '<div class="scene scene--line scene--line-' + Lv.modo + '">' +
           '<div class="linea__escena" aria-hidden="true"></div>';
         if (Lv.modo === 'concreto') {
+          var palanca = function (d) {
+            var aria = d === 10 ? UI.scene.lineUp10 : d === 1 ? UI.scene.lineUp : d === -1 ? UI.scene.lineDown : UI.scene.lineDown10;
+            var txt = (d > 0 ? '&#9650;' : '&#9660;') + '<b>' + (Math.abs(d) === 10 ? '10' : '1') + '</b>';
+            return '<button type="button" class="btn linea__flecha' + (Math.abs(d) === 10 ? ' linea__flecha--10' : '') +
+              '" data-d="' + d + '" aria-label="' + esc(aria) + '">' + txt + '</button>';
+          };
           h += '<div class="linea__mando">' +
-            '<button type="button" class="btn linea__flecha" data-d="1" aria-label="' + esc(UI.scene.lineUp) + '">&#9650;</button>' +
-            '<button type="button" class="btn linea__flecha" data-d="-1" aria-label="' + esc(UI.scene.lineDown) + '">&#9660;</button>' +
+            '<div class="linea__palancas">' + palanca(10) + palanca(1) + palanca(-1) + palanca(-10) + '</div>' +
             '<span class="linea__ahora" aria-live="off"></span>' +
             '<button type="button" class="btn btn--primary linea__ok"></button>' +
           '</div>';
@@ -1030,11 +1055,22 @@
         btnMain = container.querySelector('.linea__ok');
         var self = this;
         if (Lv.modo === 'concreto') {
-          btnUp = container.querySelector('[data-d="1"]'); btnDown = container.querySelector('[data-d="-1"]');
+          palancas = Array.prototype.slice.call(container.querySelectorAll('.linea__flecha'));
+          palancas.forEach(function (b) { mantener(b, parseInt(b.getAttribute('data-d'), 10)); });
           nowEl = container.querySelector('.linea__ahora');
-          mantener(btnUp, 1); mantener(btnDown, -1);
           btnMain.textContent = fase === 'bandera' ? UI.scene.lineFlag : UI.scene.lineCheck;
           if (ctx.help) ctx.help(fase === 'bandera' ? UI.scene.lineHelpFlag : UI.scene.lineHelp, false);
+          /* Teclas de 10: AvPag/RePag y Mayus + flechas, antes que el motor
+             (que mueve de a 1 con las flechas solas). */
+          onKey = function (e) {
+            if (dead || e.ctrlKey || e.metaKey || e.altKey) return;
+            var d = e.key === 'PageUp' ? 10 : e.key === 'PageDown' ? -10
+              : (e.shiftKey && e.key === 'ArrowUp') ? 10 : (e.shiftKey && e.key === 'ArrowDown') ? -10 : 0;
+            if (!d) return;
+            e.preventDefault(); e.stopPropagation();
+            if (!e.repeat) mover(d);
+          };
+          window.addEventListener('keydown', onKey, true);
         } else if (Lv.modo === 'pictorico') {
           opts = Array.prototype.map.call(container.querySelectorAll('.linea__opcion'), function (n) {
             return { node: n, orig: parseInt(n.getAttribute('data-orig'), 10) };
@@ -1086,7 +1122,7 @@
 
       move: function (delta) {
         if (dead) return;
-        if (Lv.modo === 'concreto') { mover(-delta); return; }     // flecha arriba = sube
+        if (Lv.modo === 'concreto') { mover(-delta); return; }     // flecha arriba = sube 1
         if (Lv.modo === 'pictorico') {
           cursor = Math.max(0, Math.min(opts.length - 1, (cursor < 0 ? (delta > 0 ? -1 : opts.length) : cursor) + delta));
           pintarOpciones(); opts[cursor].node.focus();
@@ -1105,6 +1141,7 @@
           fase = 'mover';
           btnMain.textContent = UI.scene.lineCheck;
           if (ctx.help) ctx.help(UI.scene.lineHelp, false);
+          if (LINEA.E && LINEA.E.cavar) LINEA.E.cavar(bandera);          // el topo cava hacia la bandera
           sync();
           ctx.say(fmt(UI.scene.sayLineFlagDone, { value: unidad(bandera) }));
           return null;
@@ -1121,37 +1158,44 @@
         valor = x;
         var ok = this.check({ valor: x });
         dead = true; fase = 'hecho';
-        [btnUp, btnDown, btnMain].forEach(function (b) { if (b) b.disabled = true; });
+        palancas.concat([btnMain]).forEach(function (b) { if (b) b.disabled = true; });
         opts.forEach(function (o) { o.node.disabled = true; });
         if (host) Array.prototype.forEach.call(host.querySelectorAll('.linea__tecla'), function (b) { b.disabled = true; });
-        /* El mundo lleva la respuesta a su sitio: la plataforma viaja. */
         var sc = host && host.querySelector('.scene--line');
         if (sc) sc.classList.add('is-revelada');
-        if (LINEA.E) {
-          LINEA.E.L.redimensionar();
-          var st = LINEA.E.estado;
-          st.fisica = llegada(x); st.ver = true;
-          LINEA.E.pintar({ inicio: inicioDe(x), anillo: Lv.faltante !== 'final' ? Lv.final : null,
-            salto: { desde: inicioDe(x), hasta: llegada(x), texto: signoTxt(llegada(x) - inicioDe(x)) + NB + Lv.unidad } });
-        }
         if (bandera != null && notaEl) {
           notaEl.textContent = fmt(UI.scene.lineFlagGap, { flag: unidad(bandera), value: unidad(llegada(x)) });
         }
         var orig = Lv.modo === 'pictorico' ? elegido : (ok ? V.answer : (V.answer === 1 ? 0 : 1));
-        ctx.pick(orig);
+        var E = LINEA.E, hecho = false, hud = document.getElementById('hudGems');
+        /* Cuando el mundo termina de ejecutar la respuesta, el motor la
+           recibe; entonces se sabe si cerro un tramo (una gema). */
+        var entregar = function () {
+          if (hecho) return;
+          hecho = true;
+          var g0 = run ? run.gems : 0;
+          if (ctx) ctx.pick(orig);
+          var cerrado = !!run && run.gems > g0;
+          if (E && E.resultado) E.resultado({ correcto: ok, llego: llegada(x), debia: Lv.final, tramoCerrado: cerrado, hud: hud,
+                                              topoCerca: bandera != null && redondeo10(llegada(x)) === bandera });
+        };
+        if (E && E.viajar) {
+          E.L.redimensionar();
+          E.estado.ver = true;
+          E.pintar({ inicio: inicioDe(x), anillo: Lv.faltante !== 'final' ? Lv.final : null,
+            salto: { desde: inicioDe(x), hasta: llegada(x), texto: signoTxt(llegada(x) - inicioDe(x)) + NB + Lv.unidad } });
+          E.viajar({ desde: Lv.faltante === 'cambio' ? Lv.inicio : inicioDe(x), hasta: llegada(x), alLlegar: entregar });
+          timers.push(setTimeout(entregar, 2600));                  // red de seguridad si el lienzo no se ve
+        } else entregar();
         return orig;
       },
 
       markResult: function (answerOrig, chosenOrig) {
-        var bien = answerOrig === chosenOrig;
+        bien = answerOrig === chosenOrig;
         opts.forEach(function (o) {
           if (o.orig === answerOrig) o.node.classList.add('is-right');
           if (!bien && o.orig === chosenOrig) o.node.classList.add('is-wrong');
         });
-        if (LINEA.E) {
-          if (bien) LINEA.E.celebrar(document.getElementById('hudGems'));
-          else LINEA.E.estado.error = { llego: llegada(valor), debia: Lv.final };
-        }
         ctx.say(bien ? UI.scene.sayLineRight : fmt(UI.scene.sayLineWrong, { value: unidad(llegada(valor)), target: unidad(Lv.final) }));
       },
 
@@ -1161,7 +1205,7 @@
         timers.forEach(function (t) { if (typeof t === 'function') t(); else clearTimeout(t); });
         timers = [];
         if (LINEA.E) { LINEA.E.estado.error = null; }
-        btnUp = btnDown = btnMain = nowEl = notaEl = cajaEl = host = null; opts = []; ctx = null;
+        palancas = []; btnMain = nowEl = notaEl = cajaEl = host = null; opts = []; ctx = null;
       }
     };
     return api;

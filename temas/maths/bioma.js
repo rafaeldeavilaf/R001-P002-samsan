@@ -331,7 +331,9 @@
       });
 
       /* ---------- Explorador en el montacargas ---------- */
-      var exp = { pos: op.pos == null ? -15 : op.pos, posAnim: 0, anim: M.sprites.animador(), rect: null };
+      /* `dx`, `dy`: desplazamiento del explorador respecto al centro de la
+         plataforma (salta a una compuerta); `mira` < 0 lo voltea. */
+      var exp = { pos: op.pos == null ? -15 : op.pos, posAnim: 0, anim: M.sprites.animador(), rect: null, dx: 0, dy: 0, mira: 1 };
       exp.posAnim = exp.pos;
       /* Con arte de PixelLab (assets/img/mascota-base.png, ya procesado): de
          frente, con el casco de minero de la Caverna. Sin arte: el explorador
@@ -347,7 +349,7 @@
         var casco = IMG['sombrero-minero'];
         var A = casco ? M.sprites.conSombrero(base, casco, CABEZA) : base;
         return {
-          A: A, C: A,
+          A: A, C: A, Aesp: M.sprites.espejo(A),
           ax: Math.round(base.width / 2) + (A.izq || 0),
           /* La lampara va 3,5 px a la derecha del centro de la cabeza. */
           lampara: { x: casco ? CABEZA.cx - base.width / 2 + 3.5 : 0, y: -A.height + (casco ? 8 : 6) }
@@ -398,7 +400,7 @@
       luz.fuentes = fuentes; luz.brillos = oros;
       luz.dinamicas = function () {
         return [
-          { x: POZO_X + SPR.lampara.x, y: exp.piso() + SPR.lampara.y, r: 85, c: '255,240,200', kind: 'lamp', ph: 0 },
+          { x: POZO_X + exp.dx + SPR.lampara.x * exp.mira, y: exp.piso() - exp.dy + SPR.lampara.y, r: 85, c: '255,240,200', kind: 'lamp', ph: 0 },
           { x: topo.x + topo.lampara.x, y: topo.pies + topo.lampara.y, r: 48, c: '255,240,200', kind: 'lamp', ph: 0 }
         ];
       };
@@ -423,9 +425,11 @@
       });
       L.capa('mundo', 60, function (bx, camI) {
         var a = exp.anim, img = SPR.codigo ? SPR[(a.alegria > 0 ? 'C' : 'A') + (a.parpadeo > 0 ? 'b' : '')] : SPR[a.alegria > 0 ? 'C' : 'A'];
+        if (exp.mira < 0 && SPR.Aesp) img = SPR.Aesp;
         var piso = Math.round(exp.piso()) - camI;
+        var ax = exp.mira < 0 && SPR.Aesp ? img.width - SPR.ax : SPR.ax;
         // En la plataforma solo salta hacia arriba (nunca se hunde en el piso).
-        var r = M.sprites.dibujar(bx, img, POZO_X - SPR.ax, piso, a.sq, Math.min(0, a.rebote(L.time, L.opts.smooth)));
+        var r = M.sprites.dibujar(bx, img, Math.round(POZO_X + exp.dx) - ax, piso, a.sq, Math.min(0, a.rebote(L.time, L.opts.smooth)) - Math.round(exp.dy));
         L.realzar(img, r);
         exp.rect = { x: r.x, y: r.y + camI, w: r.w, h: r.h };
         var ti = topo.anim.parpadeo > 0 ? topo.imgB : topo.img;
@@ -450,122 +454,253 @@
 
     /* ---------- Escenario de la escena `line` (etapa 2) ----------
        El motor pide un escenario al bioma de la materia y solo toca su
-       estado; aqui se decide como se ve cada piel del instrumento:
-         montacargas -> la plataforma es el valor; regla junto al pozo.
-         termometro  -> panel de pared con tubo y liquido, junto al pozo
-                        (dentro de la franja que se ve en un telefono).
-       estado = { valor, fisica, bandera, error: { llego, debia }, ver,
-                  revelar }. `fisica` es lo que el mundo muestra (la
-       plataforma o el liquido); `valor`, lo que el nino manipula. */
+       estado y su API; aqui se decide como se ve la mision en la mina:
+       el montacargas es el valor, la regla va junto al pozo y cada
+       respuesta se EJECUTA en el mundo (docs/temas/maths-y6-la-mina.md §3):
+         viajar({ desde, hasta, alLlegar })  la plataforma hace el viaje;
+         resultado({ correcto, llego, debia, tramoCerrado, topoCerca, hud })
+           acierto: se abre una compuerta con un cristal, el explorador
+           salta, lo recoge y lo guarda en el saco; al cerrar el tramo, el
+           saco se vuelve la gema del contador. Error: contorno punteado de
+           la plataforma y compuerta cerrada donde debia llegar.
+         cavar(bandera)       el topo cava un tunel hacia la bandera;
+         profundidad(n)       la luz baja con el tramo (n = tramos cerrados);
+         nuevoNivel()         cierra las compuertas del nivel anterior.
+       estado = { valor, fisica, bandera, error: { llego, debia }, ver }. */
     escenario: function (canvas) {
       var M = window.SAMSAN_MUNDO, I = M.inst, BI = BIOMAS.caverna;
       return BI.cargar().then(function () {
         var L = M.crearLienzo(canvas, { quietoSiReducido: false });
         var cav = BI.crear(L, { pos: -12 });
-        var exp = cav.explorador, ctx = L.ctx, K = BI.constantes, RULER_X = 362, TERMO_X = 372;
-        var cfg = null, st = { valor: 0, fisica: 0, bandera: null, error: null, ver: true, revelar: false };
-        var liquido = 0;
-        /* Camara del montacargas: si caben, encuadra juntos la plataforma
-           (con el explorador encima), la salida, el destino y el error; si
-           no caben, sigue a la plataforma. */
+        var exp = cav.explorador, ctx = L.ctx, K = BI.constantes, IMG = BI.arte || {}, RULER_X = 362;
+        var cfg = null, st = { valor: 0, fisica: 0, bandera: null, error: null, ver: true };
+        var puertas = [], saco = 0, tunel = null, viaje = null, salto = null, rebote = 0;
+        var AMB = ['#3A3358', '#332D4E', '#2C2744'];              // la luz baja por tramo (piso: prueba de grises)
+        var suave = function () { return L.opts.smooth; };
+
+        /* ---------- Compuertas (por codigo) ----------
+           En la pared del fondo del pozo, a la izquierda de la plataforma,
+           con el piso a la profundidad del cristal. */
+        var PUERTA = { x: 257, w: 28, h: 34 };
+        function lienzoPuerta(abierta) {
+          var Wd = M.PAL.madera, b = new M.Buf(PUERTA.w, PUERTA.h), w = PUERTA.w, h = PUERTA.h;
+          b.rect(0, 0, w, h, Wd[0]);
+          if (abierta) {
+            b.rect(3, 3, w - 6, h - 3, '#120D1C');
+            b.rect(3, 3, 3, h - 3, Wd[2]); b.rect(3, 3, 1, h - 3, Wd[3]);          // la hoja abierta, de canto
+          } else {
+            for (var i = 0; i < 3; i++) { b.rect(3 + i * 7 + (i ? 1 : 0), 3, 6, h - 3, Wd[2]); b.rect(3 + i * 7 + (i ? 1 : 0), 3, 1, h - 3, Wd[3]); }
+            b.rect(3, 9, w - 6, 3, '#5B5B6E'); b.rect(3, h - 11, w - 6, 3, '#5B5B6E');
+            b.set(w - 7, h / 2 | 0, '#FFD34D');
+          }
+          b.rect(0, 0, w, 3, Wd[1]); b.rect(0, 0, 3, h, Wd[1]); b.rect(w - 3, 0, 3, h, Wd[1]);   // marco
+          M.silhouetteOutline(b, M.PAL.contorno);
+          return b.canvas();
+        }
+        var P_CERRADA = lienzoPuerta(false), P_ABIERTA = lienzoPuerta(true);
+        var CRISTAL = (function () { var b = new M.Buf(22, 18); cristal(b, 11, 17, M.PAL.cian, 7); M.silhouetteOutline(b, M.PAL.contorno); return b.canvas(); })();
+        /* Saco de la plataforma: crece con los cristales del tramo. */
+        function dibujarSaco(bx, x, yPiso, n) {
+          if (!n) return;
+          var Wd = M.PAL.madera, w = 8 + n * 2, h = 7 + n * 2, x0 = Math.round(x - w / 2), y0 = Math.round(yPiso - h);
+          bx.fillStyle = M.PAL.contorno; bx.fillRect(x0 - 1, y0 + 1, w + 2, h);
+          bx.fillStyle = Wd[2]; bx.fillRect(x0, y0 + 2, w, h - 2);
+          bx.fillStyle = Wd[3]; bx.fillRect(x0 + 1, y0 + 2, 2, h - 4);
+          bx.fillStyle = Wd[1]; bx.fillRect(x0 + (w >> 1) - 2, y0, 4, 3);
+          for (var i = 0; i < n; i++) { bx.fillStyle = '#7FE3F0'; bx.fillRect(x0 + 2 + i * 3, y0 + 1, 2, 2); }
+        }
+
+        /* Capa de compuertas y tunel del topo: detras del explorador. */
+        L.capa('mundo', 47, function (bx, camI) {
+          if (tunel) {                                      // tunel punteado desde la galeria del topo
+            var n = Math.round(40 * Math.min(1, tunel.t));
+            var x0 = 150, y0 = 372, x1 = 256, y1 = yOf(tunel.hasta) - 6;
+            for (var i = 0; i < n; i++) {
+              var f = i / 40, x = Math.round(x0 + (x1 - x0) * f), y = Math.round(y0 + (y1 - y0) * f + Math.sin(f * 9) * 3) - camI;
+              bx.fillStyle = M.PAL.roca[0]; bx.fillRect(x - 1, y - 1, 3, 3);
+              bx.fillStyle = M.PAL.roca[4]; bx.fillRect(x - 1, y - 1, 1, 1);
+            }
+          }
+          puertas.forEach(function (P) {
+            var y = Math.round(yOf(P.d)) - PUERTA.h - camI;
+            if (y > L.H || y + PUERTA.h < 0) return;
+            bx.drawImage(P.abierta ? P_ABIERTA : P_CERRADA, PUERTA.x, y);
+            if (!P.abierta) return;
+            if (P.cristal) bx.drawImage(CRISTAL, PUERTA.x + 4, y + PUERTA.h - CRISTAL.height);
+            if (P.topo && IMG['companero-topo']) {          // el topo asomado: solo la cabeza, dentro del marco
+              var T = IMG['companero-topo'];
+              bx.save(); bx.beginPath(); bx.rect(PUERTA.x + 3, y + 3, PUERTA.w - 6, PUERTA.h - 3); bx.clip();
+              bx.drawImage(T, PUERTA.x + PUERTA.w / 2 - T.width / 2 + 2, y + 6);
+              bx.restore();
+            }
+          });
+        });
+        /* Saco, delante de la plataforma. */
+        L.capa('mundo', 61, function (bx, camI) { dibujarSaco(bx, POZO_X + 16, Math.round(exp.piso()) - camI - 1, saco); });
+
+        /* Luz de los cristales de las compuertas abiertas. */
+        var dinBase = cav.luz.dinamicas;
+        cav.luz.dinamicas = function () {
+          var out = dinBase();
+          puertas.forEach(function (P) { if (P.abierta && P.cristal) out.push({ x: PUERTA.x + 15, y: yOf(P.d) - 10, r: 46, c: '127,227,240', kind: 'crystal', ph: P.d }); });
+          return out;
+        };
+
+        /* Camara: si caben, encuadra juntos la plataforma, la salida, el
+           destino y el error; si no, sigue a la plataforma. */
         exp.enfoque = function () {
-          if (!cfg || cfg.piel !== 'montacargas') return exp.piso() - 30;
+          if (!cfg) return exp.piso() - 30;
           var P = cfg.pinta || {}, vals = [exp.posAnim];
-          [P.inicio, P.anillo, P.pregunta, st.bandera, st.error && st.error.debia].forEach(function (v) { if (v != null) vals.push(M.clamp(v, K.DMIN, K.DMAX)); });
+          [P.inicio, P.anillo, st.bandera, st.error && st.error.debia].forEach(function (v) { if (v != null) vals.push(M.clamp(v, K.DMIN, K.DMAX)); });
           if (P.salto) vals.push(P.salto.desde, M.clamp(P.salto.hasta, K.DMIN, K.DMAX));
+          if (P.tapa) vals.push(P.tapa.desde, P.tapa.hasta);
           var arriba = Math.min.apply(null, vals.map(yOf)) - 86, abajo = Math.max.apply(null, vals.map(yOf)) + 24;
           if (abajo - arriba > L.H - 10) return exp.piso() - 30;
           return (arriba + abajo) / 2 + L.H * 0.02;
         };
+
         L.alActualizar(function (dt) {
           if (!cfg) return;
-          if (cfg.piel === 'montacargas') exp.pos = M.clamp(st.fisica, K.DMIN, K.DMAX);
-          var obj = M.clamp(st.fisica, cfg.min, cfg.max);
-          liquido = L.opts.smooth ? liquido + (obj - liquido) * Math.min(1, dt * 7) : obj;
-          if (Math.abs(obj - liquido) < 0.01) liquido = obj;
-        });
-
-        /* Geometria del instrumento en px de pantalla: yDe(v), x de marcas. */
-        function geo() {
-          var s = L.s, cam = L.cam.y, u = I.u(L);
-          if (cfg.piel === 'montacargas') {
-            return { yDe: function (v) { return (yOf(v) - cam) * s; }, xRegla: RULER_X * s, xSalto: (POZO_X - PLAT.ancho / 2 - 14) * s,
-                     xBandera: RULER_X * s - 16 * u, fisicaVis: exp.posAnim };   // a la izquierda del marcador, sin taparse
+          exp.pos = M.clamp(st.fisica, K.DMIN, K.DMAX);
+          if (tunel && tunel.t < 1) tunel.t = suave() ? tunel.t + dt / 1.2 : 1;
+          if (viaje) {                                       // el viaje termina cuando la plataforma llega
+            viaje.t += dt;
+            if (viaje.fase === 0 && (viaje.t > 0.35 || !suave())) { viaje.fase = 1; st.fisica = viaje.hasta; }
+            if (viaje.fase === 1 && Math.abs(exp.posAnim - exp.pos) < 0.02) terminarViaje();
           }
-          var fs = Math.max(14 * L.dpr, 6.5 * s);
-          ctx.font = '900 ' + fs + 'px Nunito, ui-rounded, "Segoe UI", system-ui, sans-serif';
-          var w = Math.max(84 * s, 46 * u + ctx.measureText('−20 ' + cfg.unidad).width + 18 * u);
-          var g = { x: TERMO_X * s, y: 8 * u, w: w, h: L.canvas.height - 16 * u, min: cfg.min, max: cfg.max,
-                    unidad: cfg.unidad, soloDecenas: cfg.soloDecenas };
-          var T = I.termoGeo(L, g);
-          return { termo: g, yDe: T.yDe, xBandera: T.x - T.tubo / 2 - 2 * u, xSalto: T.x - T.tubo / 2 - 8 * u,
-                   xRegla: g.x + g.w, xMarca: T.x + 14 * u, xTubo: T.x, fisicaVis: liquido };
+          if (salto) {                                       // salto a la compuerta y regreso
+            salto.t += suave() ? dt : 10;
+            var ida = Math.min(1, salto.t / 0.35), vuelta = Math.max(0, Math.min(1, (salto.t - 0.9) / 0.35));
+            var k = salto.t < 0.9 ? ida : 1 - vuelta, arco = salto.t < 0.9 ? ida : vuelta;
+            exp.dx = salto.dx * k; exp.dy = Math.sin(Math.PI * arco) * 14; exp.mira = salto.t < 0.9 ? -1 : 1;
+            if (!salto.recogido && salto.t >= 0.55) {
+              salto.recogido = true; salto.puerta.cristal = false;
+              cav.particulas.estallido(PUERTA.x + 15, yOf(salto.puerta.d) - 12);
+            }
+            if (salto.t >= 1.25) { exp.dx = 0; exp.dy = 0; exp.mira = 1; var fin = salto.fin; salto = null; if (fin) fin(); }
+          }
+          if (rebote > 0) { rebote -= dt; exp.dy = Math.max(0, Math.sin(rebote * 9) * 6 * rebote); if (rebote <= 0) exp.dy = 0; }
+        });
+        function terminarViaje() {
+          var v = viaje; viaje = null;
+          if (v.hasta > K.DMAX && suave()) { rebote = 0.8; cav.particulas.polvo(POZO_X, exp.piso()); }   // E1: tope del castillete
+          if (v.alLlegar) v.alLlegar();
         }
 
+        /* ---------- Instrumento: regla, marcas y pictorico tapado ---------- */
+        function yDe(v) { return (yOf(v) - L.cam.y) * L.s; }
         L.capa('alta', 50, function () {
           if (!cfg || !st.ver) return;
-          var G = geo(), u = I.u(L), s = L.s;
-          if (G.termo) I.termometro(ctx, L, G.termo, liquido);
-          else I.regla(ctx, L, { x: G.xRegla, yDe: G.yDe, min: cfg.min, max: cfg.max, unidad: cfg.unidad, cadaEtiqueta: 5, soloDecenas: cfg.soloDecenas });
+          var u = I.u(L), s = L.s, xR = RULER_X * s, xS = (POZO_X - PLAT.ancho / 2 - 14) * s, xB = xR - 16 * u;
+          I.regla(ctx, L, { x: xR, yDe: yDe, min: cfg.min, max: cfg.max, unidad: cfg.unidad, cadaEtiqueta: 5, soloDecenas: cfg.soloDecenas });
           var P = cfg.pinta || {};
-          if (P.inicio != null) I.bandera(ctx, G.xBandera, G.yDe(P.inicio) + 9 * u * 1.7, u * 1.7);
-          if (P.anillo != null) I.anillo(ctx, G.xBandera - 14 * u, G.yDe(P.anillo), u);
-          if (P.salto) I.salto(ctx, L, G.xSalto, G.yDe(P.salto.desde), G.yDe(M.clamp(P.salto.hasta, cfg.min, cfg.max)), P.salto.texto, { punteado: P.salto.punteado });
-          if (P.pregunta != null) I.pregunta(ctx, L, G.xSalto - 30 * s, G.yDe(P.pregunta), 'right');
-          if (st.bandera != null) I.estimacion(ctx, G.xBandera + 4 * u, G.yDe(st.bandera) + 10.5 * u * 1.5, u * 1.5);
-          var yv = G.yDe(M.clamp(G.fisicaVis, cfg.min, cfg.max));
-          I.marcador(ctx, G.termo ? G.xMarca : G.xRegla, yv, u);
+          if (P.inicio != null) I.bandera(ctx, xB, yDe(P.inicio) + 9 * u * 1.7, u * 1.7);
+          if (P.anillo != null) I.anillo(ctx, xB - 14 * u, yDe(P.anillo), u);
+          var ya = P.salto && yDe(P.salto.desde), yb = P.salto && yDe(M.clamp(P.salto.hasta, cfg.min, cfg.max));
+          if (P.salto) I.salto(ctx, L, xS, ya, yb, P.tapa ? null : P.salto.texto, { punteado: P.salto.punteado });
+          /* Pictorico: la franja del dato que falta queda en sombra (marcas y
+             numeros) y una tarjeta "?" tapa la punta de la flecha. La franja
+             no esta centrada en la respuesta: hay que sumar, no leer. */
+          if (P.tapa) {
+            var y0 = yDe(P.tapa.hasta), y1 = yDe(P.tapa.desde);
+            ctx.save();
+            ctx.fillStyle = 'rgba(18,12,28,0.94)';
+            ctx.fillRect(xR - 2 * u, y0, 70 * u, y1 - y0);
+            ctx.fillStyle = 'rgba(247,239,221,0.97)'; ctx.strokeStyle = I.colores.tinta; ctx.lineWidth = 2 * u;
+            I.roundRect(ctx, xS - 12 * s, y0, 22 * s, y1 - y0, 6 * u); ctx.fill(); ctx.stroke();
+            ctx.restore();
+            I.pregunta(ctx, L, xS - 1 * s, (y0 + y1) / 2, 'center');
+            // La etiqueta del salto va encima de todo y fuera de la franja: es el dato.
+            if (P.salto && P.salto.texto) {
+              var ym = (ya + yb) / 2;
+              if (ym > y0 - 10 * u && ym < y1 + 10 * u) ym = Math.abs(ya - y0) > Math.abs(ya - y1) ? y0 - 12 * u : y1 + 12 * u;
+              I.etiqueta(ctx, L, P.salto.texto, xS - 16 * s, ym, 'right', '#0E2A33', 'rgba(127,227,240,0.97)');
+            }
+          }
+          if (st.bandera != null) I.estimacion(ctx, xB + 4 * u, yDe(st.bandera) + 10.5 * u * 1.5, u * 1.5);
+          I.marcador(ctx, xR, yDe(M.clamp(exp.posAnim, cfg.min, cfg.max)), u);
         });
-        /* Error visible: contorno punteado donde debia llegar y corchete con
-           la diferencia. Nunca una silueta de persona. */
+        /* Error visible: contorno punteado de la plataforma donde debia
+           llegar y corchete con la diferencia. Nunca una silueta de persona. */
         L.capa('alta', 60, function () {
           if (!cfg || !st.ver || !st.error) return;
-          var G = geo(), u = I.u(L), s = L.s, E = st.error;
-          var pulso = L.opts.smooth ? 0.7 + 0.3 * Math.sin(L.time * 4) : 1;
-          var yd = G.yDe(M.clamp(E.debia, cfg.min, cfg.max)), yl = G.yDe(M.clamp(E.llego, cfg.min, cfg.max));
+          var u = I.u(L), s = L.s, E = st.error;
+          var pulso = suave() ? 0.7 + 0.3 * Math.sin(L.time * 4) : 1;
+          var yd = yDe(M.clamp(E.debia, cfg.min, cfg.max)), yl = yDe(M.clamp(E.llego, cfg.min, cfg.max));
           ctx.save(); ctx.globalAlpha = pulso;
           ctx.strokeStyle = I.colores.cian; ctx.lineWidth = Math.max(2 * L.dpr, 1.4 * s); ctx.setLineDash([4 * u, 3 * u]);
-          if (cfg.piel === 'montacargas') {
-            var x0 = (POZO_X - PLAT.ancho / 2) * s, w = PLAT.ancho * s;
-            ctx.strokeRect(x0, yd - PLAT.baranda * s, w, (PLAT.baranda + PLAT.piso) * s);
-            ctx.beginPath(); ctx.moveTo(x0, yd); ctx.lineTo(x0 + w, yd); ctx.stroke();
-          } else {
-            ctx.strokeStyle = '#0B5563'; ctx.lineWidth = Math.max(2.5 * L.dpr, 1.8 * s);
-            ctx.beginPath(); ctx.moveTo(G.termo.x + 4 * u, yd); ctx.lineTo(G.termo.x + G.termo.w - 4 * u, yd); ctx.stroke();
-          }
+          var x0 = (POZO_X - PLAT.ancho / 2) * s, w = PLAT.ancho * s;
+          ctx.strokeRect(x0, yd - PLAT.baranda * s, w, (PLAT.baranda + PLAT.piso) * s);
+          ctx.beginPath(); ctx.moveTo(x0, yd); ctx.lineTo(x0 + w, yd); ctx.stroke();
           ctx.restore();
           var dif = E.debia - E.llego;
-          if (dif) I.corchete(ctx, L, (G.termo ? G.termo.x - 3 * u : G.xRegla - 20 * u), yl, yd, I.conSigno(dif) + ' ' + cfg.unidad);
+          if (dif) I.corchete(ctx, L, RULER_X * s - 20 * u, yl, yd, I.conSigno(dif) + ' ' + cfg.unidad);
         });
 
         cav.L = L;
-        return {
+        var E = {
           L: L, cav: cav, estado: st,
-          /* Configura el instrumento para una variante. `pinta` dice que
-             marcas fijas se ven (bandera, anillo, salto, pregunta). */
+          /* Configura el instrumento para una variante. */
           configurar: function (c) {
             cfg = c;
-            st.bandera = null; st.error = null; st.ver = c.ver !== false; st.revelar = false;
+            st.bandera = null; st.error = null; st.ver = c.ver !== false;
             st.valor = c.valor; st.fisica = c.fisica;
-            liquido = M.clamp(c.fisica, c.min, c.max);
-            if (c.piel === 'montacargas') { exp.pos = exp.posAnim = M.clamp(c.fisica, K.DMIN, K.DMAX); L.fijarCam(yOf(exp.pos) - 30 - L.H * 0.52); }
-            else { exp.pos = exp.posAnim = -12; L.fijarCam(yOf(-12) - 30 - L.H * 0.52); }
+            viaje = null; tunel = null; rebote = 0;
+            if (salto) { salto.puerta.cristal = false; if (salto.fin) salto.fin(); } salto = null; exp.dx = exp.dy = 0; exp.mira = 1;
+            puertas = puertas.filter(function (P) { return P.abierta; });   // la compuerta del error se va
+            exp.pos = exp.posAnim = M.clamp(c.fisica, K.DMIN, K.DMAX);
+            L.fijarCam(yOf(exp.pos) - 30 - L.H * 0.52);
             if (!L.corriendo && L.iniciado) L.dibujar();
           },
-          /* La primera vez tras configurar, la camara salta al encuadre (sin paneo). */
+          /* Marcas fijas: inicio (bandera), anillo, salto, tapa. La primera
+             vez tras configurar, la camara salta al encuadre (sin paneo). */
           pintar: function (p) {
             if (!cfg) return;
             var primera = !cfg.pinta; cfg.pinta = p;
-            if (primera && cfg.piel === 'montacargas') L.fijarCam(exp.enfoque() - L.H * 0.52);
+            if (primera) L.fijarCam(exp.enfoque() - L.H * 0.52);
           },
-          celebrar: function (hud, alLlegar) {
-            var yb = cfg && cfg.piel === 'montacargas' ? yOf(exp.pos) - 50 : yOf(exp.pos) - 70;
+          viajar: function (o) {
+            viaje = { desde: o.desde, hasta: o.hasta, alLlegar: o.alLlegar, t: 0, fase: 0 };
+            st.fisica = o.desde;
+            if (!suave()) { exp.pos = exp.posAnim = M.clamp(o.desde, K.DMIN, K.DMAX); }
+          },
+          resultado: function (o) {
+            if (!o.correcto) {
+              st.error = { llego: o.llego, debia: o.debia };
+              puertas.push({ d: o.debia, abierta: false });
+              return;
+            }
+            var P = { d: o.llego, abierta: true, cristal: true, topo: !!o.topoCerca };
+            puertas = puertas.filter(function (Q) { return Math.abs(Q.d - P.d) >= 3; });
+            puertas.push(P);
             exp.celebrar();
-            cav.particulas.estallido(POZO_X, yb);
-            if (hud) cav.particulas.gemaVuela(POZO_X, yb, hud, alLlegar || function () {});
+            var guardar = function () {
+              saco++;
+              if (o.tramoCerrado && o.hud) {                 // el saco se vuelve la gema del contador
+                var ys = yOf(exp.pos) - 8;
+                cav.particulas.estallido(POZO_X + 16, ys);
+                cav.particulas.gemaVuela(POZO_X + 16, ys, o.hud, function () {});
+                saco = 0;
+              }
+            };
+            if (suave()) salto = { t: 0, dx: PUERTA.x + PUERTA.w / 2 - POZO_X, puerta: P, recogido: false, fin: guardar };
+            else { P.cristal = false; guardar(); }
           },
+          cavar: function (bandera) { tunel = { hasta: M.clamp(bandera, K.DMIN, -2), t: 0 }; },
+          profundidad: function (n) { cav.luz.cfg.ambiente = AMB[Math.max(0, Math.min(AMB.length - 1, n - 1))]; },   // n = tramos ya cerrados
+          nuevoNivel: function () { puertas = []; saco = 0; tunel = null; },
           dibujar: function () { L.dibujar(); }
         };
+        /* Para tools/arte/prueba_grises.py: regiones de la escena en px CSS. */
+        window.__samsanMina = {
+          E: E,
+          regiones: function () {
+            var r = canvas.getBoundingClientRect(), k = r.width / L.W, cam = L.cam.y, e = exp.rect || { x: POZO_X - 20, y: yOf(exp.posAnim) - 60, w: 40, h: 60 };
+            function rect(x, y, w, h) { return { x: r.left + x * k, y: r.top + (y - cam) * k, w: w * k, h: h * k }; }
+            return { objeto: rect(e.x, e.y, e.w, e.h), anillo: rect(e.x - 6, e.y - 6, e.w + 12, e.h + 12) };
+          }
+        };
+        return E;
       });
     }
   };

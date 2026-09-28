@@ -96,11 +96,12 @@ function responder(w, v, x, modo) {
       const t = host.querySelector('.linea__ahora').textContent.replace(MENOS, '-');
       return parseInt(t.replace(/[^0-9-]/g, ''), 10);
     };
+    // Palancas: primero las de 10 (descomponer en decenas), luego las de 1.
     let guard = 0;
     while (actual() !== x && guard++ < 200) {
-      const sube = actual() < x;
-      if (modo === 'teclado') tecla(w, sube ? 'ArrowUp' : 'ArrowDown');
-      else pulsar(host.querySelector(sube ? '[data-d="1"]' : '[data-d="-1"]'));
+      const dif = x - actual(), sube = dif > 0, diez = Math.abs(dif) >= 10;
+      if (modo === 'teclado') tecla(w, diez ? (sube ? 'PageUp' : 'PageDown') : (sube ? 'ArrowUp' : 'ArrowDown'));
+      else pulsar(host.querySelector('[data-d="' + (sube ? '' : '-') + (diez ? '10' : '1') + '"]'));
     }
     if (actual() !== x) return 'no llego a ' + x + ' (quedo en ' + actual() + ')';
     if (modo === 'teclado') tecla(w, 'Enter'); else pulsar(host.querySelector('.linea__ok'));

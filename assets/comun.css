@@ -105,7 +105,7 @@ html[data-capa="comun"] .q-tag { font-family: var(--fuente); font-weight: 800; f
 html[data-capa="comun"] .q-stem { font-size: 1.25rem; font-weight: 900; line-height: 1.35; margin-bottom: 4px; }
 html[data-capa="comun"] .q-sub { color: var(--panel-suave); font-size: 1rem; margin-bottom: 8px; }
 html[data-capa="comun"] .scene__help { color: var(--panel-suave); font-size: .95rem; margin: 6px 0 0; }
-html[data-capa="comun"] .scene__help b, html[data-capa="comun"] .scene__help kbd { color: var(--panel-tinta); font-family: var(--fuente); }
+html[data-capa="comun"] .scene__help b, html[data-capa="comun"] .scene__help kbd { color: var(--panel-tinta); font-family: var(--fuente); font-size: inherit; font-weight: 900; }
 html[data-capa="comun"] .hint { border-left: 5px solid #C98A1C; background: #FFF3D6; color: var(--panel-tinta); border-radius: 0 8px 8px 0; }
 html[data-capa="comun"] .feedback { margin-top: 10px; padding: 12px 16px; }
 html[data-capa="comun"] .feedback__title { font-family: var(--fuente); font-weight: 900; font-size: 1.1rem; margin-bottom: 4px; }
@@ -158,3 +158,20 @@ html[data-capa="comun"] .linea__opcion.is-right:disabled, html[data-capa="comun"
    respuesta llevada al instrumento (acierto o error visible). */
 html[data-capa="comun"] .scene--line-abstracto .linea__escena { display: none; }
 html[data-capa="comun"] .scene--line-abstracto.is-revelada .linea__escena { display: block; }
+
+/* Un solo protagonista: el explorador del mundo. El heroe SVG del motor
+   heredado no aparece en las paginas de tema (cabecera y victoria). */
+html[data-capa="comun"] #heroSprite, html[data-capa="comun"] .victory .avatar { display: none; }
+
+/* Palancas del montacargas: 10 y 1 hacia arriba y hacia abajo. La de 10
+   se distingue por forma (numero grande y borde doble), no solo por color. */
+html[data-capa="comun"] .linea__palancas { display: grid; grid-template-columns: repeat(4, 64px); gap: 8px; }
+html[data-capa="comun"] .linea__flecha { flex-direction: column; gap: 0; line-height: 1; font-size: 1rem; padding: 0; }
+html[data-capa="comun"] .linea__flecha b { font-size: 1.25rem; font-weight: 900; }
+html[data-capa="comun"] .linea__flecha--10 { background: #FFF3D6; border-style: double; border-width: 5px; }
+html[data-capa="comun"] .linea__mando { gap: 12px; }
+@media (max-width: 700px) {
+  html[data-capa="comun"] .linea__mando { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+  html[data-capa="comun"] .linea__palancas { grid-column: 1 / -1; justify-content: center; }
+  html[data-capa="comun"] .linea__mando .linea__ok { flex: none; min-width: 140px; }
+}

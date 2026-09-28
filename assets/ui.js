@@ -208,15 +208,17 @@ window.GAME_UI = {
     /* ---------- LINE (mech: "line") ----------
        Mover en la recta: sube o baja el instrumento y comprueba. Tono
        neutro en el error: describe y senala, no juzga. */
-    lineUp:        'Up one mark',
-    lineDown:      'Down one mark',
+    lineUp:        'Up 1 metre',
+    lineDown:      'Down 1 metre',
+    lineUp10:      'Up 10 metres',
+    lineDown10:    'Down 10 metres',
     lineNow:       'Now: {value}',
     lineJumpNow:   'Jump: {value}',
     lineFlagNow:   'Your flag: {value}',
     lineCheck:     'CHECK',
     lineFlag:      'PLANT FLAG',
-    lineHelp:      '<kbd>&uarr; &darr;</kbd> move &nbsp;·&nbsp; <b>Enter</b> check',
-    lineHelpFlag:  'First guess: plant your flag where you think it will land. <kbd>&uarr; &darr;</kbd> move it 10 at a time.',
+    lineHelp:      'Levers <b>10</b> and <b>1</b> &nbsp;·&nbsp; keys <kbd>&uarr; &darr;</kbd> for 1, <kbd>PgUp PgDn</kbd> for 10 &nbsp;·&nbsp; <b>Enter</b> check',
+    lineHelpFlag:  'First guess: plant your flag where you think the gate is. The <b>10</b> levers move it.',
     lineHelpPick:  'Look at the picture, then tap the answer or press <b>A B C D</b>.',
     lineHelpType:  'Type the number with the keys (<b>&minus;</b> for below zero), then press <b>Check</b>.',
     linePickAria:  'Answers',
@@ -224,12 +226,12 @@ window.GAME_UI = {
     keypadAria:    'Number keys',
     keyMinus:      'minus',
     keyBack:       'delete',
-    lineFlagGap:   'Your flag: {flag}. The answer: {value}.',
+    lineFlagGap:   'Your flag: {flag}. The lift went to {value}.',
     sayLineFlag:   'Flag at {value}.',
     sayLineFlagDone: 'Flag planted at {value}. Now move.',
     sayLineEmpty:  'Type a number first.',
-    sayLineRight:  'It lands in the right place.',
-    sayLineWrong:  'It lands at {value}. The dotted outline shows {target}.'
+    sayLineRight:  'The gate opens.',
+    sayLineWrong:  'The lift stopped at {value}. The dotted outline shows {target}.'
   },
 
   /* ---------- COMPANERO DE PANTALLA ----------
