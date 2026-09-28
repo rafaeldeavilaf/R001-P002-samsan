@@ -209,6 +209,14 @@ def main():
             pg.goto(base + "index.html")
             pg.wait_for_timeout(800)
             check("portada: con movimiento reducido no anima", pg.evaluate("() => window.__samsanPortada.L.corriendo") is False)
+            # ...pero la escena se ve: el cuadro quieto no puede quedar negro
+            # (el redimensionado borraba el lienzo; panel de expertos, 27 sep).
+            esc = Image.open(io.BytesIO(pg.locator("#mundo").screenshot())).convert("L")
+            datos = esc.tobytes()
+            media = sum(datos) / float(len(datos))
+            claros = sum(1 for v in datos if v > 60) / float(len(datos))
+            check("portada: con movimiento reducido la escena se ve (no queda negra)", media > 40 and claros > 0.2,
+                  "media %.0f, %.0f %% de píxeles claros" % (media, claros * 100))
             pg.goto(base + "_local/vitrina-caverna.html")
             pg.wait_for_timeout(800)
             o = pg.evaluate("() => window.__samsan.L.opts")

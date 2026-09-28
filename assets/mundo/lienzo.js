@@ -61,6 +61,9 @@
       canvas.width = Math.max(1, Math.round((r.width || W) * L.dpr));
       canvas.height = Math.max(1, Math.round((r.height || H) * L.dpr));
       L.s = canvas.width / W;
+      // Cambiar el tamano borra el lienzo: si el bucle esta parado (movimiento
+      // reducido), se vuelve a pintar el cuadro quieto.
+      if (L.iniciado && !L.corriendo) L.dibujar();
     };
     if (typeof ResizeObserver !== 'undefined') new ResizeObserver(L.redimensionar).observe(canvas);
     if (L.opts.realce == null) L.opts.realce = 0.6;
@@ -147,7 +150,7 @@
       new IntersectionObserver(function (e) { visible = e[0].isIntersecting; reanudar(); }).observe(canvas);
     }
     L.iniciar = function () {
-      L.corriendo = true;
+      L.corriendo = true; L.iniciado = true;
       L.cam.y = L.cam.objetivo;
       /* Con movimiento reducido se dibuja un cuadro quieto y se para:
          nada se mueve si nadie lo pide. */

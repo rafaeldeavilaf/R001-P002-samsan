@@ -1,8 +1,11 @@
 /* ============================================================
    SAMSAN — PORTADA
    La Caverna viva detras del aviso de "en construccion": el
-   explorador sube y baja por la cuerda entre paradas, y a veces
-   celebra. Es decoracion: no responde a nada ni pide nada.
+   explorador espera de pie en la superficie, junto a la boca de la
+   mina, y de vez en cuando da un saltito de alegria. El topo mira
+   desde su hueco. Es decoracion: no responde a nada ni pide nada.
+   Sin cuerda ni marco de polea (panel de expertos, 27 sep 2026):
+   una persona colgando se lee mal para un nino.
    Con movimiento reducido se pinta un solo cuadro quieto.
    ============================================================ */
 (function () {
@@ -12,22 +15,18 @@
   /* Primero el arte procesado (si lo hay); si no, todo va por codigo. */
   window.SAMSAN_BIOMAS.caverna.cargar().then(function () {
     var L = M.crearLienzo(cv, { quietoSiReducido: true });
-    var cav = window.SAMSAN_BIOMAS.caverna.crear(L, { pos: -6, piel: '#E8B088' });
-    /* Trepa metro a metro hacia cada parada, como lo haria el nino. */
-    var paradas = [-6, -14, -21, -9, -25, -3], i = 0, meta = -6, paso = 0, espera = 3, llego = true;
+    var K = window.SAMSAN_BIOMAS.caverna.constantes;
+    var cav = window.SAMSAN_BIOMAS.caverna.crear(L, {
+      cuerda: false, suelo: { x: 212, pies: K.SURF }, cam: K.SURF - 150, piel: '#E8B088'
+    });
+    var espera = 5;
     L.alActualizar(function (dt) {
-      var e = cav.explorador;
-      if (e.pos !== meta) {
-        paso -= dt;
-        if (paso <= 0) { e.pos += e.pos < meta ? 1 : -1; paso = 0.2; }
-        return;
-      }
-      if (!llego) {
-        llego = true;
-        if (i % 3 === 2) { e.celebrar(); cav.particulas.estallido(cav.constantes.ROPE_X - 10, cav.yOf(e.pos) - 16); }
-      }
       espera -= dt;
-      if (espera <= 0) { i = (i + 1) % paradas.length; meta = paradas[i]; llego = false; espera = 3.5; }
+      if (espera <= 0) {
+        espera = 7;
+        cav.explorador.celebrar();
+        cav.particulas.estallido(212, K.SURF - 50);
+      }
     });
     L.iniciar();
     window.__samsanPortada = { L: L, caverna: cav };

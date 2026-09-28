@@ -181,7 +181,10 @@
           buf.set(ox + x, oy + y, q > 0.82 ? S[0] : v > 0.55 ? S[3] : S[2]);
         }
       }
-      if (rr() < 0.22) glifo(buf, keys[rr() * keys.length | 0], ox + 6 + (rr() * 10 | 0), oy + 6 + (rr() * 10 | 0), S[4], S[0]);
+      /* Sin numeros ni signos grabados: en un juego de numeros compiten con los
+         instrumentos (panel de expertos, 27 sep). Se consumen los mismos
+         aleatorios para que la pared no cambie. */
+      if (rr() < 0.22) { rr(); rr(); rr(); }
     }
     M.outlinePass(buf, S[3], S[0], null);
     return buf.canvas();
@@ -198,8 +201,12 @@
       }
     });
   }
-  function props(fuentes, img) {
+  function props(fuentes, img, conPolea) {
     var buf = new M.Buf(M.W, WH), Wd = M.PAL.madera;
+    if (conPolea) polea(buf, Wd);
+    return propsResto(buf, fuentes, img, Wd);
+  }
+  function polea(buf, Wd) {
     buf.rect(248, 36, 6, 158, Wd[1]); buf.rect(248, 36, 2, 158, Wd[2]);
     buf.rect(386, 36, 6, 158, Wd[1]); buf.rect(386, 36, 2, 158, Wd[2]);
     buf.rect(242, 32, 156, 7, Wd[2]); buf.rect(242, 32, 156, 2, Wd[3]); buf.rect(242, 37, 156, 2, Wd[1]);
@@ -210,11 +217,13 @@
       else if (d <= 7.5 && (Math.abs(x) < 1 || Math.abs(y) < 1 || Math.abs(x - y) < 1 || Math.abs(x + y) < 1)) buf.set(ROPE_X + x, 50 + y, Wd[1]);
     }
     buf.rect(ROPE_X - 2, 48, 4, 4, '#8C8C9C');
+  }
+  function propsResto(buf, fuentes, img, Wd) {
     cristal(buf, 182, 384, M.PAL.cian, 1); fuentes.push({ x: 182, y: 374, r: 70, c: '127,227,240', kind: 'crystal', ph: 0 });
     cristal(buf, 470, 512, M.PAL.magenta, 2); fuentes.push({ x: 470, y: 502, r: 70, c: '240,139,234', kind: 'crystal', ph: 2 });
     cristal(buf, 528, 512, M.PAL.cian, 3); fuentes.push({ x: 528, y: 504, r: 55, c: '127,227,240', kind: 'crystal', ph: 4 });
     cristal(buf, 112, 576, M.PAL.magenta, 4); fuentes.push({ x: 112, y: 566, r: 65, c: '240,139,234', kind: 'crystal', ph: 1 });
-    [[130, 322], [500, 452], [182, 542]].forEach(function (q) {
+    [[102, 318], [500, 452], [182, 542]].forEach(function (q) {   // la del hueco del topo, lejos de su cabeza
       if (!img.antorcha) { buf.rect(q[0] - 1, q[1], 3, 12, Wd[1]); buf.set(q[0] - 1, q[1], Wd[3]); buf.rect(q[0] - 3, q[1] + 11, 7, 2, '#5B5B6E'); }
       fuentes.push({ x: q[0], y: q[1] - 4, r: 100, c: '255,176,90', kind: 'torch', ph: q[0] });
     });
@@ -257,7 +266,11 @@
       M.capas.imagen(L, 30, pared(solid));
       /* Cuerda: baja de la polea y termina en el arnes del explorador (su
          cinturon). Cuelga de ella; no hace falta que la agarre. */
+      /* Modo sin cuerda (portada, desde el panel de expertos del 27 sep): ni
+         marco ni polea ni cuerda; el explorador de pie en `op.suelo`. */
+      var conCuerda = op.cuerda !== false, suelo = op.suelo || null;
       L.capa('mundo', 35, function (bx, camI) {
+        if (!conCuerda) return;
         var R = M.PAL.cuerda, fin = Math.round(cinturon());
         for (var y = 59; y < fin; y++) {
           var sy = y - camI; if (sy < -2 || sy > L.H + 2) continue;
@@ -267,7 +280,7 @@
         }
       });
       M.capas.imagen(L, 40, terreno(solid, oros, op.tiles || null));
-      M.capas.imagen(L, 45, props(fuentes, IMG));
+      M.capas.imagen(L, 45, props(fuentes, IMG, conCuerda));
       /* La carretilla de PixelLab viene en tres cuartos (rieles en diagonal) y en
          un mundo de lado parece flotar: queda fuera hasta tener una de perfil. */
       var decorado = [['cofre', 226, 384]].filter(function (d) { return IMG[d[0]]; });
@@ -330,6 +343,8 @@
         };
       }
       var SPR = juego(op.piel);
+      function anclaX() { return suelo ? suelo.x : ROPE_X; }
+      function cinturaMundo() { return suelo ? suelo.pies - (SPR.A.height - SPR.cy) : yOf(exp.posAnim); }
       /* Altura del cinturon en el mundo, con el mismo rebote con que se dibuja. */
       function cinturon() { return yOf(exp.posAnim) + exp.anim.rebote(L.time, L.opts.smooth); }
       /* Mosqueton de metal en la hebilla, con el ultimo tramo de cuerda que
@@ -369,7 +384,7 @@
       luz.fuentes = fuentes; luz.brillos = oros;
       luz.dinamicas = function () {
         return [
-          { x: ROPE_X + SPR.lampara.x, y: yOf(exp.posAnim) + SPR.lampara.y, r: 85, c: '255,240,200', kind: 'lamp', ph: 0 },
+          { x: anclaX() + SPR.lampara.x, y: cinturaMundo() + SPR.lampara.y, r: 85, c: '255,240,200', kind: 'lamp', ph: 0 },
           { x: topo.x + topo.lampara.x, y: topo.pies + topo.lampara.y, r: 48, c: '255,240,200', kind: 'lamp', ph: 0 }
         ];
       };
@@ -390,7 +405,7 @@
         exp.trepa += Math.abs(exp.posAnim - exp.ultimo) * 1.6; exp.ultimo = exp.posAnim;
         exp.anim.actualizar(dt, moviendo, suave, function () { part.polvo(ROPE_X - 6, yOf(exp.posAnim) + 12); });
         topo.anim.actualizar(dt, false, suave);
-        L.seguir(yOf(exp.posAnim));
+        if (!suelo) L.seguir(yOf(exp.posAnim));
       });
       L.capa('mundo', 60, function (bx, camI) {
         var a = exp.anim, par = (exp.trepa | 0) % 2, key;
@@ -399,18 +414,20 @@
           if (a.parpadeo > 0) key += 'b';
         } else key = a.alegria > 0 ? 'C' : (a.moviendo ? (par ? 'B' : 'B2') : 'A');
         var img = SPR[key];
-        var pies = yOf(exp.posAnim) - SPR.cy - camI + img.height;
-        L.realzar(img, M.sprites.dibujar(bx, img, ROPE_X - SPR.ax, pies, a.sq, a.rebote(L.time, L.opts.smooth)));
+        var pies = suelo ? suelo.pies - camI : yOf(exp.posAnim) - SPR.cy - camI + img.height;
+        L.realzar(img, M.sprites.dibujar(bx, img, anclaX() - SPR.ax, pies, a.sq, suelo ? Math.min(0, a.rebote(L.time, L.opts.smooth)) : a.rebote(L.time, L.opts.smooth)));
         var ti = topo.anim.parpadeo > 0 ? topo.imgB : topo.img;
         L.realzar(ti, M.sprites.dibujar(bx, ti, topo.x - ti.width / 2, topo.pies - camI, 0, topo.anim.rebote(L.time + 1.3, L.opts.smooth)));
         // Mosqueton del arnes, delante del cinturon, con el ultimo tramo de cuerda.
+        if (!conCuerda) return;
         var mx = ROPE_X - Math.floor(MOSQUETON.width / 2), my = Math.round(cinturon()) - camI - MOSQUETON.height + 5;
         bx.drawImage(MOSQUETON, mx, my);
         L.realzar(MOSQUETON, { x: mx, y: my, w: MOSQUETON.width, h: MOSQUETON.height });
       });
       M.capas.primerPlano(L, { color: '#0C0812', desde: SURF + 30 });
 
-      L.fijarCam(yOf(exp.pos) - L.H * 0.52);
+      if (suelo) L.fijarCam(op.cam == null ? SURF - L.H * 0.4 : op.cam);
+      else L.fijarCam(yOf(exp.pos) - L.H * 0.52);
       var mapaInfo = {
         T: T, filas: ROWS, columnas: COLS,
         roca: function (r, c) { return !!(solid[r] && solid[r][c]); },
