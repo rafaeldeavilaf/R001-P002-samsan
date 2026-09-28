@@ -45,6 +45,29 @@
   /* El mismo sprite con la piel de un tono (assets/ui.js, armoury.skins). */
   S.conPiel = function (canvas, tono) { return S.recolorear(canvas, M.mapaPiel(tono)); };
 
+  /* Espejo horizontal. */
+  S.espejo = function (canvas) {
+    var c = document.createElement('canvas'); c.width = canvas.width; c.height = canvas.height;
+    var x = c.getContext('2d'); if (!x) return c;
+    x.translate(c.width, 0); x.scale(-1, 1); x.drawImage(canvas, 0, 0);
+    return c;
+  };
+
+  /* Pone un sombrero sobre un personaje. `dx` corre el sombrero en x respecto
+     al centro; `dyFrac` es cuanto sobresale hacia arriba, en fraccion de su
+     alto (negativo = arriba). El canvas crece hacia arriba lo necesario y
+     guarda en `.arriba` cuanto crecio, para corregir los anclajes. */
+  S.conSombrero = function (cuerpo, sombrero, dx, dyFrac) {
+    var arriba = Math.max(0, -Math.round(sombrero.height * dyFrac));
+    var sx = Math.round(cuerpo.width / 2 - sombrero.width / 2 + (dx || 0));
+    var izq = Math.max(0, -sx), der = Math.max(0, sx + sombrero.width - cuerpo.width);
+    var c = document.createElement('canvas'); c.width = cuerpo.width + izq + der; c.height = cuerpo.height + arriba;
+    var x = c.getContext('2d');
+    if (x) { x.imageSmoothingEnabled = false; x.drawImage(cuerpo, izq, arriba); x.drawImage(sombrero, izq + sx, 0); }
+    c.arriba = arriba;
+    return c;
+  };
+
   /* Silueta en un color (el fantasma del error). */
   S.silueta = function (canvas, rgb) {
     var c = document.createElement('canvas'); c.width = canvas.width; c.height = canvas.height;

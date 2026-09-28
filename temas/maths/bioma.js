@@ -230,7 +230,8 @@
        incrusta tools/build.py). Sin arte, resuelve al instante y todo se
        dibuja por codigo. Se llama antes de crear(). */
     cargar: function () {
-      var src = (window.SAMSAN_IMG && window.SAMSAN_IMG.caverna) || {}, listo = {};
+      var I = window.SAMSAN_IMG || {}, src = {}, listo = {};
+      [I.comun || {}, I.caverna || {}].forEach(function (o) { Object.keys(o).forEach(function (k) { src[k] = o[k]; }); });
       var claves = Object.keys(src);
       return Promise.all(claves.map(function (k) {
         return M.sprites.cargar(src[k]).then(function (c) { listo[k] = c; }, function () { /* se dibuja por codigo */ });
@@ -261,6 +262,14 @@
       });
       M.capas.imagen(L, 40, terreno(solid, oros, op.tiles || null));
       M.capas.imagen(L, 45, props(fuentes, IMG));
+      var decorado = [['carretilla', 150, SURF], ['cofre', 226, 384]].filter(function (d) { return IMG[d[0]]; });
+      L.capa('mundo', 46, function (bx, camI) {
+        decorado.forEach(function (d) {
+          var im = IMG[d[0]], y = d[2] - im.height - camI;
+          if (y > L.H || y + im.height < 0) return;
+          bx.drawImage(im, Math.round(d[1] - im.width / 2), Math.round(y));
+        });
+      });
       L.capa('mundo', 50, function (bx, camI) {                   // llamas y faroles animados
         var F = M.PAL.llama;
         fuentes.forEach(function (Q) {
@@ -287,21 +296,44 @@
       /* ---------- Personajes ---------- */
       var exp = { pos: op.pos == null ? -15 : op.pos, posAnim: 0, trepa: 0, ultimo: 0, anim: M.sprites.animador() };
       exp.posAnim = exp.ultimo = exp.pos;
-      var SPR = M.sprites.juegoExplorador(op.piel);
-      exp.fijarPiel = function (tono) { SPR = M.sprites.juegoExplorador(tono); };
+      /* Con arte de PixelLab (assets/img/mascota-*.png, ya procesado): pose de
+         frente en reposo y al celebrar, de espalda al trepar (volteada cada
+         medio metro: mano sobre mano), con el casco de minero de la Caverna.
+         Sin arte: el explorador provisional por codigo. */
+      function juego(tono) {
+        if (!IMG['mascota-base']) {
+          var j = M.sprites.juegoExplorador(tono), E = M.sprites.EXPLORADOR;
+          j.ax = E.manoX + 1; j.cy = E.cinturaY + 1; j.lampara = { x: -10, y: -26 }; j.codigo = true;
+          return j;
+        }
+        var base = IMG['mascota-base'], esp = IMG['mascota-espalda'] || base;
+        if (tono) { base = M.sprites.conPiel(base, tono); esp = M.sprites.conPiel(esp, tono); }
+        var casco = IMG['sombrero-minero'];
+        var A = casco ? M.sprites.conSombrero(base, M.sprites.espejo(casco), -1, -0.35) : base;
+        var B = casco ? M.sprites.conSombrero(esp, casco, -1, -0.35) : esp;
+        var arriba = A.arriba || 0;
+        return {
+          A: A, B: B, B2: M.sprites.espejo(B), C: A,
+          fantasma: M.sprites.silueta(A, [127, 227, 240]),
+          ax: Math.round(A.width / 2), cy: 38 + arriba,              // la cuerda pasa por el centro; cinturon a 38 px
+          lampara: { x: -9, y: -38 - arriba + (casco ? 10 : 6) }     // lampara del casco, respecto al cinturon
+        };
+      }
+      var SPR = juego(op.piel);
+      exp.fijarPiel = function (tono) { SPR = juego(tono); };
       exp.sprites = function () { return SPR; };
       exp.celebrar = function () { exp.anim.celebrar(); };
       exp.cinturaY = function () { return yOf(exp.posAnim); };
       var A = M.sprites.EXPLORADOR;
 
-      var topo = { x: 112, pies: 384, anim: M.sprites.animador(), img: M.sprites.topo(false).canvas(), imgB: M.sprites.topo(true).canvas() };
+      var topo = { x: 140, pies: 384, anim: M.sprites.animador(), img: M.sprites.topo(false).canvas(), imgB: M.sprites.topo(true).canvas() };
 
       var luz = M.crearLuz(L, { ambiente: '#342D52', superficie: SURF, pozo: { x: 252, w: 136, alto: 240 },
         rayos: { x: 262, n: 4, paso: 30 }, sol: { x: 520, y: 58, factor: 0.12 } });
       luz.fuentes = fuentes; luz.brillos = oros;
       luz.dinamicas = function () {
         return [
-          { x: ROPE_X - 10, y: yOf(exp.posAnim) - 26, r: 85, c: '255,240,200', kind: 'lamp', ph: 0 },
+          { x: ROPE_X + SPR.lampara.x, y: yOf(exp.posAnim) + SPR.lampara.y, r: 85, c: '255,240,200', kind: 'lamp', ph: 0 },
           { x: topo.x + M.sprites.TOPO.lamparaX - 13, y: topo.pies - 19, r: 48, c: '255,240,200', kind: 'lamp', ph: 0 }
         ];
       };
@@ -325,11 +357,14 @@
         L.seguir(yOf(exp.posAnim));
       });
       L.capa('mundo', 60, function (bx, camI) {
-        var a = exp.anim, key = a.alegria > 0 ? 'C' : (a.moviendo ? ((exp.trepa | 0) % 2 ? 'B' : 'A') : 'A');
-        if (a.parpadeo > 0) key += 'b';
+        var a = exp.anim, par = (exp.trepa | 0) % 2, key;
+        if (SPR.codigo) {
+          key = a.alegria > 0 ? 'C' : (a.moviendo ? (par ? 'B' : 'A') : 'A');
+          if (a.parpadeo > 0) key += 'b';
+        } else key = a.alegria > 0 ? 'C' : (a.moviendo ? (par ? 'B' : 'B2') : 'A');
         var img = SPR[key];
-        var pies = yOf(exp.posAnim) - A.cinturaY - 1 - camI + img.height;
-        M.sprites.dibujar(bx, img, ROPE_X - A.manoX - 1, pies, a.sq, a.rebote(L.time, L.opts.smooth));
+        var pies = yOf(exp.posAnim) - SPR.cy - camI + img.height;
+        M.sprites.dibujar(bx, img, ROPE_X - SPR.ax, pies, a.sq, a.rebote(L.time, L.opts.smooth));
         var ti = topo.anim.parpadeo > 0 ? topo.imgB : topo.img;
         M.sprites.dibujar(bx, ti, topo.x - ti.width / 2, topo.pies - camI, 0, topo.anim.rebote(L.time + 1.3, L.opts.smooth));
       });

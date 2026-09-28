@@ -24,7 +24,7 @@ Pixel art moderno, no retro. Un explorador pequeño y cabezón construye su base
 |---|---|
 | Lienzo lógico | 640 × 360 px, escalado con vecino más cercano (`image-rendering: pixelated`). ×2 es 1280 × 720 y ×3 es 1920 × 1080 |
 | Tile | 32 × 32 px |
-| Mascota | unos 44 a 48 px de alto en el mundo, cabeza grande; retrato de 64 px para la interfaz |
+| Mascota | 62 px de alto en el mundo (generada en 64 × 64 por PixelLab; reducirla empasta el pixel art), cabeza grande. Sombreros a escala 3/4 por `tools/arte/procesar.py --escala 3/4` |
 | Contorno | 1 px `#1E1426` alrededor de personajes y props; en el terreno, borde superior claro y bordes laterales e inferior oscuros, aplicados por código |
 | Luz | por código, nunca pedida al generador (ver sección 6) |
 | Tipografía | Nunito en alta resolución para todo texto, local, licencia OFL. Sin fuentes pixeladas en textos que el niño debe leer |
@@ -100,6 +100,8 @@ Plan de prueba, 40 generaciones. Se planean 30 (las 24 originales, 3 compañeros
 **Prompt base**, se agrega a todos: `modern hi-bit pixel art, side view, clean readable silhouette, 1px dark outline, hue-shifted palette with purple shadows and warm highlights, flat even lighting, transparent background, no text`.
 
 La primera generación (la mascota base) es la referencia de estilo; en las demás se usa como imagen de referencia si la herramienta lo permite.
+
+Estado al 27 sep 2026: hechos la mascota (Character Creator v3, 8 direcciones: se usan frente, espalda y perfil) y 16 objetos en un solo lote de Create Object (20 generaciones, estilo parejo). PixelLab no cambia la pose de un personaje sin sus herramientas de animación pagas: las filas 2 y 3 (feliz, piensa) se descartan y esas poses se hacen por código. El ladrillo del lote salió vacío y se dibuja por código.
 
 | # | Etapa | Herramienta | Archivo | Prompt específico |
 |---|---|---|---|---|

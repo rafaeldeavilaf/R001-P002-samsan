@@ -285,11 +285,11 @@ MUNDO = ["base.js", "lienzo.js", "luz.js", "particulas.js", "capas.js", "sprites
 
 
 def imagenes():
-    """Arte ya procesado por tools/arte/ (temas/<materia>/img/*.png) como data URI.
+    """Arte ya procesado por tools/arte/ (assets/img/ comun y temas/<materia>/img/) como data URI.
     { 'caverna': { 'antorcha': 'data:image/png;base64,...' } }. Ningun PNG crudo."""
     out = {}
-    for materia, bioma in (("maths", "caverna"),):
-        carpeta = os.path.join(ROOT, "temas", materia, "img")
+    for bioma, carpeta in (("comun", os.path.join(ROOT, "assets", "img")),
+                           ("caverna", os.path.join(ROOT, "temas", "maths", "img"))):
         if not os.path.isdir(carpeta):
             continue
         for nombre in sorted(os.listdir(carpeta)):

@@ -84,13 +84,15 @@
   M.rampaPiel = function (base) {
     var t = M.toHsl(base);
     return [
-      M.fromHsl(t[0] - 22, t[1] * 0.85 + 0.06, t[2] * 0.62),
+      M.fromHsl(t[0] - 14, t[1] * 0.7 + 0.05, t[2] * 0.62),
       M.fromHsl(t[0] - 12, t[1] * 0.9 + 0.04, t[2] * 0.8),
       base.toUpperCase(),
       M.fromHsl(t[0] + 8, t[1] * 0.95, Math.min(0.94, t[2] + (1 - t[2]) * 0.3))
     ];
   };
-  /* Mapa para cambiar la rampa de piel de referencia por la de un tono. */
+  /* Mapa para cambiar la rampa de piel de referencia (3 tonos: profunda,
+     sombra, base) por la de un tono. La luz de la rampa del tono se usa en
+     sprites dibujados por codigo, no en el arte procesado. */
   M.mapaPiel = function (base) {
     var ref = M.PAL.piel || [], dest = M.rampaPiel(base), mapa = {};
     ref.forEach(function (c, i) { mapa[c] = dest[i]; });

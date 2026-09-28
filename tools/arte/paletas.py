@@ -44,6 +44,7 @@ class Paleta:
         if bioma not in BIOMAS:
             raise SystemExit("Paleta desconocida '%s'. Opciones: %s" % (bioma, ", ".join(sorted(BIOMAS))))
         self.nombre = bioma
+        self.rampas = list(BIOMAS[bioma])
         self.colores = []            # (rgb, rampa, paso)
         for rampa in BIOMAS[bioma]:
             for i, c in enumerate(RAMPAS[rampa]):

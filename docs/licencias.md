@@ -17,6 +17,8 @@ Este archivo lista lo que viene de terceros. `tools/build.py` publica en `legal.
 | Press Start 2P, de The Press Start 2P Project Authors (CodeMan38). Subconjunto latino en WOFF2 de Google Fonts, distribuido sin cambios por Fontsource 5.3.0 | Títulos, botones y rótulos. Archivo `assets/fonts/press-start-2p-latin-400.woff2`, incrustado en cada página | SIL Open Font License 1.1 | Conservar el aviso de copyright y la licencia (`assets/fonts/OFL-press-start-2p.txt`) y citarlos en `legal.html`. No vender la fuente por sí sola. "Press Start 2P" es nombre reservado: una versión modificada de la fuente no puede llamarse así |
 | Nunito, de The Nunito Project Authors. Pesos 400, 700, 800 y 900, subconjunto latino en WOFF2 de Google Fonts, distribuido sin cambios por Fontsource 5.3.0 | Texto de lectura. Archivos `assets/fonts/nunito-latin-*.woff2`, incrustados en cada página | SIL Open Font License 1.1 | Conservar el aviso de copyright y la licencia (`assets/fonts/OFL-nunito.txt`) y citarlos en `legal.html`. No vender la fuente por sí sola |
 
+| Arte generado con PixelLab (mascota, casco de minero, cofre, carretilla y demás PNG de `assets/img/` y `temas/*/img/`), procesado por `tools/arte/` | Personajes y props del mundo, incrustados en cada página | Propiedad del autor según los términos de PixelLab (actualizados el 23 nov 2025): uso comercial y no comercial sin permiso ni atribución | No usar las imágenes para entrenar modelos de IA. El autor responde de que el contenido no infrinja derechos de terceros: en los prompts nunca se nombra un juego, personaje ni marca existente |
+
 ## Solo en desarrollo, no se publica
 
 | Componente | Dónde se usa | Licencia | Obligación |

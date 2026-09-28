@@ -19,7 +19,7 @@ import argparse, os, sys
 from collections import deque
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from paletas import Paleta, CONTORNO, luminancia, ROOT  # noqa: E402
+from paletas import Paleta, CONTORNO, RAMPAS, luminancia, ROOT  # noqa: E402
 
 try:
     from PIL import Image
@@ -51,10 +51,83 @@ def quitar_fondo(img, tolerancia=28):
     return n
 
 
-def procesar(ruta, bioma="comun", alto=None, bisel=True, contorno=True):
+def reducir(img, n, pal):
+    """Reduce 1/n por bloques: cada píxel nuevo toma el color de paleta más
+    frecuente de su bloque (transparente si la mayoría lo es). Para pixel art
+    conserva mejor las formas que el vecino más cercano."""
+    w, h = img.size
+    W, H = w // n, h // n
+    src = img.load()
+    out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    o = out.load()
+    for y in range(H):
+        for x in range(W):
+            votos, vacios = {}, 0
+            for dy in range(n):
+                for dx in range(n):
+                    c = src[x * n + dx, y * n + dy]
+                    if c[3] < 128:
+                        vacios += 1
+                        continue
+                    q = pal.cercano(c)[0]
+                    # El contorno oscuro no gana votos: si no, todo borde se ensancha.
+                    peso = 0.5 if luminancia(q) < 0.035 else 1.0
+                    votos[q] = votos.get(q, 0) + peso
+            if vacios * 2 > n * n or not votos:
+                continue
+            o[x, y] = max(votos, key=votos.get) + (255,)
+    return out
+
+
+def limpiar_piel(o, W, H, pal, minimo=6):
+    """La rampa `piel` es la que el juego cambia por el tono elegido (12 tonos).
+    Tras cuantizar, algunos brillos del pelo, correas o botas caen en ella y
+    cambiarían de color con la piel. Solo cuenta como piel una zona conectada
+    que contenga el tono base de piel y tenga al menos `minimo` píxeles; el resto
+    se pasa al color más cercano fuera de la rampa de piel."""
+    piel = [tuple(c) for c in RAMPAS["piel"]]
+    base = piel[-1]                       # el tono más claro de la rampa es la piel iluminada (base)
+    es = lambda x, y: 0 <= x < W and 0 <= y < H and o[x, y][3] == 255 and o[x, y][:3] in piel
+    visto, quitados, zonas = set(), 0, 0
+    otros = [c for c in pal.colores if c[1] != "piel"]
+    for y in range(H):
+        for x in range(W):
+            if (x, y) in visto or not es(x, y):
+                continue
+            zona, pila = [], [(x, y)]
+            while pila:
+                q = pila.pop()
+                if q in visto or not es(*q):
+                    continue
+                visto.add(q)
+                zona.append(q)
+                pila.extend(((q[0] + 1, q[1]), (q[0] - 1, q[1]), (q[0], q[1] + 1), (q[0], q[1] - 1)))
+            if len(zona) >= minimo and any(o[a, b][:3] == base for a, b in zona):
+                zonas += 1
+                continue
+            for a, b in zona:
+                c = o[a, b][:3]
+                o[a, b] = min(otros, key=lambda k: Paleta._dist(c, k[0]))[0] + (255,)
+                quitados += 1
+    return {"zonas": zonas, "reasignados": quitados}
+
+
+def procesar(ruta, bioma="comun", alto=None, bisel=True, contorno=True, divisor=1, escala=None, quitar_abajo=0.0):
     pal = Paleta(bioma)
     img = Image.open(ruta).convert("RGBA")
     quitado = quitar_fondo(img)
+    bbox = img.getbbox()
+    if bbox:
+        img = img.crop(bbox)
+    if quitar_abajo:
+        # Quita una franja de abajo (p. ej. la correa de un casco que irá sobre la cabeza).
+        img = img.crop((0, 0, img.width, max(1, round(img.height * (1 - quitar_abajo)))))
+    if escala:
+        # Escala p/q: se agranda p veces con vecino más cercano y se reduce q por bloques.
+        p_, q_ = escala
+        img = reducir(img.resize((img.width * p_, img.height * p_), Image.NEAREST), q_, pal)
+    elif divisor and divisor > 1:
+        img = reducir(img, divisor, pal)
     if alto:
         # Solo reducir con vecino más cercano: el pixel art no se interpola.
         bbox = img.getbbox()
@@ -80,6 +153,7 @@ def procesar(ruta, bioma="comun", alto=None, bisel=True, contorno=True):
                 o[x - x0 + 1, y - y0 + 1] = pal.cercano(src[x, y])[0] + (255,)
 
     op = lambda x, y: 0 <= x < W and 0 <= y < H and o[x, y][3] == 255
+    piel_info = limpiar_piel(o, W, H, pal) if "piel" in pal.rampas else None
     borde = [(x, y) for y in range(H) for x in range(W)
              if op(x, y) and not (op(x - 1, y) and op(x + 1, y) and op(x, y - 1) and op(x, y + 1))]
     # ¿El borde ya es un contorno oscuro? Entonces se recolorea y no se duplica.
@@ -112,8 +186,8 @@ def procesar(ruta, bioma="comun", alto=None, bisel=True, contorno=True):
     bbox = out.getbbox()
     if bbox:
         out = out.crop(bbox)
-    return out, {"fondo_quitado": quitado, "ya_contorneado": bool(ya_contorneado),
-                 "colores": len({c for c in out.getdata() if c[3]}), "tamano": out.size}
+    return out, {"fondo_quitado": quitado, "ya_contorneado": bool(ya_contorneado), "piel": piel_info,
+                 "colores": len({px for px in zip(*[iter(out.tobytes())] * 4) if px[3]}), "tamano": out.size}
 
 
 def main():
@@ -123,10 +197,14 @@ def main():
     ap.add_argument("--destino", default="assets/img", help="carpeta de salida, relativa al repo")
     ap.add_argument("--nombre", help="nombre del archivo de salida (por defecto, el mismo)")
     ap.add_argument("--alto", type=int, help="alto final en px (reduce con vecino más cercano)")
+    ap.add_argument("--divisor", type=int, default=1, help="reduce 1/N por bloques (2 = mitad), mejor que --alto para pixel art")
+    ap.add_argument("--escala", help="escala p/q por bloques, p. ej. 3/4 o 2/3")
+    ap.add_argument("--quitar-abajo", type=float, default=0.0, help="fracción de alto que se quita abajo antes de procesar (0 a 1)")
     ap.add_argument("--sin-bisel", action="store_true")
     ap.add_argument("--sin-contorno", action="store_true")
     a = ap.parse_args()
-    out, info = procesar(a.png, a.bioma, a.alto, not a.sin_bisel, not a.sin_contorno)
+    escala = tuple(int(v) for v in a.escala.split("/")) if a.escala else None
+    out, info = procesar(a.png, a.bioma, a.alto, not a.sin_bisel, not a.sin_contorno, a.divisor, escala, a.quitar_abajo)
     dest = os.path.join(ROOT, a.destino)
     os.makedirs(dest, exist_ok=True)
     ruta = os.path.join(dest, a.nombre or os.path.basename(a.png))

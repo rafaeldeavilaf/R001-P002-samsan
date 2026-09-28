@@ -155,11 +155,11 @@
     });
     L.capa('alta', 60, function () {
       if (state !== 'wrong' || !prob) return;
-      var s = L.s, cam = L.cam.y, A = M.sprites.EXPLORADOR, G = exp.sprites().fantasma;
+      var s = L.s, cam = L.cam.y, SP = exp.sprites(), G = SP.fantasma;
       var pulse = L.opts.smooth ? 0.45 + 0.2 * Math.sin(L.time * 4) : 0.55;
       ctx.save();
       ctx.imageSmoothingEnabled = false; ctx.globalAlpha = pulse;
-      ctx.drawImage(G, (ROPE_X - A.manoX - 1) * s, (yOf(prob.ans) - A.cinturaY - 1 - cam) * s, G.width * s, G.height * s);
+      ctx.drawImage(G, (ROPE_X - SP.ax) * s, (yOf(prob.ans) - SP.cy - cam) * s, G.width * s, G.height * s);
       ctx.globalAlpha = 1;
       var xa = 282 * s, ya = (yOf(prob.st) - cam) * s, yb = (yOf(prob.ans) - cam) * s;
       ctx.strokeStyle = '#7FE3F0'; ctx.lineWidth = Math.max(2, 1.4 * s); ctx.setLineDash([4 * s, 3 * s]);
