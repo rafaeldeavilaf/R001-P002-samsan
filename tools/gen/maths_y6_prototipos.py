@@ -216,8 +216,89 @@ def valida_cartas(p):
     return True
 
 
+# ---------------------------------------------------------------- Globo minero
+# Cueva lateral de ALTO_CUEVA px (una pantalla) y `largo` px. El techo y el
+# piso salen de puntos de control cada PASO px. La carga neta (globos
+# negativos, lastre y gemas positivos, corrientes con signo) decide la
+# velocidad vertical: + baja, - sube, 0 flota.
+ALTO_CUEVA, PASO, CAPSULA = 360, 80, 136          # CAPSULA: alto de globos + cesta + sacos, con margen
+
+
+def perfil(largo, hueco, centro):
+    """Techo y piso en puntos de control. `centro(i)` da la altura media."""
+    techo, piso = [], []
+    for i in range(largo // PASO + 1):
+        h = R(*hueco)
+        c = centro(i)
+        t = max(12, min(ALTO_CUEVA - 12 - h, c - h // 2))
+        techo.append(t)
+        piso.append(t + h)
+    for k in (0, 1, 2, len(techo) - 5, len(techo) - 4, len(techo) - 3, len(techo) - 2, len(techo) - 1):   # salida y muelle anchos y planos
+        techo[k], piso[k] = 70, 70 + 220
+    return techo, piso
+
+
+def subconjunto_cero(valores, fijo):
+    """Algun subconjunto de `valores` suma -fijo (para flotar en 0)."""
+    sumas = {0}
+    for v in valores:
+        sumas |= {s + v for s in sumas}
+    return -fijo in sumas
+
+
+def globo(nivel):
+    largo = {1: 1760, 2: 2160, 3: 2400}[nivel]
+    hueco = {1: (200, 240), 2: (170, 205), 3: (175, 210)}[nivel]
+    n = largo // PASO + 1
+    if nivel == 3:                                         # la chimenea: el paso sube de abajo hacia arriba
+        centro = lambda i: int(260 - 170 * i / (n - 1))
+    else:
+        centro = lambda i: int(180 + 70 * (1 if (i // 4) % 2 else -1) * (0.5 + 0.5 * rng.random()))
+    while True:
+        techo, piso = perfil(largo, hueco, centro)
+        if min(p - t for t, p in zip(techo, piso)) < CAPSULA + 30:
+            continue
+        valor = {1: 2, 2: 3, 3: 2}[nivel]
+        ngemas = {1: 3, 2: 3, 3: 4}[nivel]
+        gemas = []
+        for k in range(ngemas):
+            i = int(3 + (n - 7) * (k + 0.5) / ngemas)
+            y = R(techo[i] + 30, piso[i] - 30)
+            gemas.append({"x": i * PASO, "y": y, "valor": valor})
+        rack = {1: [-1, -2, -2, -1, 1, 2], 2: [-5, -2, -1, -1, 1, 3], 3: [-2, -2, -3, -1, 1, 2]}[nivel]
+        activos = {1: [1, 5], 2: [2, 4], 3: [3, 4]}[nivel]           # empiezan activos: suman 0
+        corrientes = [] if nivel < 3 else [{"desde": 9 * PASO, "hasta": 12 * PASO, "empuje": 2},
+                                           {"desde": 18 * PASO, "hasta": 22 * PASO, "empuje": -3}]
+        p = {"largo": largo, "alto": ALTO_CUEVA, "paso": PASO, "techo": techo, "piso": piso,
+             "gemas": gemas, "rack": rack, "activos": activos, "corrientes": corrientes,
+             "salida": {"x": 60, "y": 180}, "muelle": {"x": largo - 120, "y": 250, "ancho": 90}}
+        if sum(rack[i] for i in activos) != 0:
+            continue
+        total = sum(g["valor"] for g in gemas)
+        if not subconjunto_cero(rack, total):
+            continue
+        return p
+
+
+def valida_globo(p):
+    assert sum(p["rack"][i] for i in p["activos"]) == 0, "la salida debe flotar en 0"
+    for t, q in zip(p["techo"], p["piso"]):
+        assert q - t >= CAPSULA + 30 and t >= 0 and q <= p["alto"], "pasadizo demasiado estrecho"
+    for g in p["gemas"]:
+        i = g["x"] // p["paso"]
+        assert p["techo"][i] + 20 <= g["y"] <= p["piso"][i] - 20, "gema fuera del pasadizo"
+    assert subconjunto_cero(p["rack"], sum(g["valor"] for g in p["gemas"])), "con todas las gemas no se puede atracar en 0"
+    mu = p["muelle"]
+    for x in range(mu["x"] - mu["ancho"] // 2 - 20, mu["x"] + mu["ancho"] // 2 + 21, 10):
+        i = min(len(p["piso"]) - 1, x // p["paso"])
+        assert p["piso"][i] >= mu["y"] + 8 and p["techo"][i] <= mu["y"] - CAPSULA, "el muelle no tiene espacio para la capsula"
+    return True
+
+
 if __name__ == "__main__":
-    datos = {"excavar": [], "cartas": []}
+    datos = {"excavar": [], "cartas": [], "globo": [globo(n) for n in (1, 2, 3)]}
+    for p in datos["globo"]:
+        valida_globo(p)
     for j in range(JUEGOS):
         datos["excavar"].append([excavar(n) for n in (1, 2, 3, 4)])
         datos["cartas"].append([cartas(n) for n in (1, 2, 3, 4)])

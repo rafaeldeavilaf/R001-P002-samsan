@@ -173,9 +173,87 @@ async function probarCartas() {
   }
 }
 
+/* ---------- Globo minero ---------- */
+function mascaraPara(rack, objetivo) {             // subconjunto de la cesta que suma lo mas cerca de `objetivo`
+  let mejor = 0, dmin = Infinity;
+  for (let m = 0; m < 1 << rack.length; m++) {
+    let s = 0; for (let i = 0; i < rack.length; i++) if (m >> i & 1) s += rack[i];
+    const d = Math.abs(s - objetivo) + (s === objetivo ? 0 : 0.5);
+    if (d < dmin) { dmin = d; mejor = m; }
+  }
+  return mejor;
+}
+/* Piloto automatico: vuela la caverna con la fisica real (paso de 1/60 s),
+   recoge cada gema y atraca en 0. Demuestra que la caverna se puede terminar. */
+function pilotar(w) {
+  const G = w.__protoGlobo;
+  for (let t = 0; t < 60 * 300; t++) {
+    const S = G.estado();
+    if (!S || S.atracado) return { ok: true, segundos: t / 60 };
+    const rack = S.c.rack, sumaRack = rack.reduce((a, v, i) => a + (S.activo[i] ? v : 0), 0), base = G.carga() - sumaRack;
+    const pend = S.gemas.find(g => !g.aBordo), mu = S.c.muelle;
+    const sacos = rack.some((v, i) => v > 0 && S.activo[i]);
+    const obj = pend ? { x: pend.x, y: pend.y + 50 } : { x: mu.x, y: mu.y - (sacos ? 20 : 4) };
+    if (t % 6 === 0) {
+      const dy = obj.y - S.y, cerca = Math.abs(obj.x - S.x) < 60;
+      let quiero = Math.max(-4, Math.min(4, Math.round(dy / 18)));
+      if (!pend && cerca && Math.abs(dy) < 6) quiero = 0;
+      const m = mascaraPara(rack, quiero - base);
+      rack.forEach((v, i) => { if (!!(m >> i & 1) !== !!S.activo[i]) G.alternar(i); });
+      const dx = obj.x - S.x;
+      S.empuje = Math.abs(dx) < 6 ? (Math.abs(S.vx) > 5 ? -Math.sign(S.vx) : 0) : (Math.abs(dx) < 50 && Math.sign(S.vx) === Math.sign(dx) && Math.abs(S.vx) > 25 ? -Math.sign(dx) : Math.sign(dx));
+    }
+    G.paso(1 / 60);
+  }
+  return { ok: false };
+}
+async function probarGlobo() {
+  section('Globo minero: carga con signo, fisica, muelle en 0 y las tres cavernas completas');
+  const dom = abrir('proto-globo.html'), w = dom.window, d = w.document, G = () => w.__protoGlobo;
+  clic(w, d.getElementById('play'));
+  await esperar(5);
+  let S = G().estado();
+  check('Globo: la salida flota en 0', G().carga() === 0);
+  const i0 = S.c.rack.findIndex(v => v < 0);
+  const antes = G().carga();
+  clic(w, d.querySelector('.gl-item[data-i="' + i0 + '"]'));
+  check('Globo: activar un globo resta su valor a la carga', G().carga() === antes + (S.activo[i0] ? S.c.rack[i0] : -S.c.rack[i0]));
+  tecla(w, String(i0 + 1));
+  check('Globo: la tecla del globo lo vuelve a quitar (teclado)', G().carga() === antes);
+  check('Globo: la suma se ve en pantalla', /=/.test(d.querySelector('.gl-suma').textContent));
+  // Fisica: + baja, - sube, 0 flota.
+  const soloEsto = objetivo => { const m = mascaraPara(S.c.rack, objetivo); S.c.rack.forEach((v, i) => { if (!!(m >> i & 1) !== !!S.activo[i]) G().alternar(i); }); };
+  S.x = S.c.salida.x; S.y = 190; S.vy = 0; S.vx = 0; S.empuje = 0;
+  soloEsto(2); let y0 = S.y; for (let k = 0; k < 40; k++) G().paso(1 / 60);
+  check('Globo: con carga +2 la capsula baja', S.y > y0 + 5, (S.y - y0).toFixed(1));
+  soloEsto(-2); y0 = S.y; for (let k = 0; k < 60; k++) G().paso(1 / 60);
+  check('Globo: con carga -2 la capsula sube', S.y < y0 - 5, (S.y - y0).toFixed(1));
+  soloEsto(0); for (let k = 0; k < 120; k++) G().paso(1 / 60);
+  check('Globo: con carga 0 queda flotando', Math.abs(S.vy) < 1, S.vy.toFixed(2));
+  // Muelle: con todas las gemas pero la carga en +2, no atraca.
+  S.gemas.forEach(g => { g.aBordo = true; });
+  const tot = S.gemas.reduce((a, g) => a + g.valor, 0);
+  soloEsto(2 - tot); S.x = S.c.muelle.x; S.y = S.c.muelle.y - 4; S.vy = 0;
+  for (let k = 0; k < 90; k++) G().paso(1 / 60);
+  check('Globo: en el muelle con carga distinta de 0 no atraca', !S.atracado && G().carga() !== 0, 'carga ' + G().carga());
+  S.gemas.forEach(g => { g.aBordo = false; });
+  S.x = S.c.salida.x; S.y = S.c.salida.y; S.vx = S.vy = 0; soloEsto(0);
+  // Las tres cavernas, con el piloto automatico.
+  for (let c = 0; c < 3; c++) {
+    const r = pilotar(w);
+    check('Globo: la caverna ' + (c + 1) + ' se completa (gemas y muelle en 0)', r.ok, JSON.stringify(G().estado() && { x: G().estado().x, y: G().estado().y, carga: G().carga() }));
+    if (r.ok) console.log('  ok   caverna ' + (c + 1) + ' completada por el piloto en ' + r.segundos.toFixed(0) + ' s de juego');
+    await esperar(30);
+  }
+  check('Globo: termina en la pantalla final con 3 gemas', !!d.querySelector('.proto-final') && d.querySelectorAll('.proto-final__gemas svg').length === 3);
+  check('Globo: sin errores de JavaScript', dom.errores.length === 0, dom.errores.join(' | '));
+  w.close();
+}
+
 (async () => {
   await probarExcavar();
   await probarCartas();
+  await probarGlobo();
   console.log('\n--------------------------------------------------------');
   if (failures.length) {
     console.log('FALLAN ' + failures.length + ' de ' + (passed + failures.length) + ':');

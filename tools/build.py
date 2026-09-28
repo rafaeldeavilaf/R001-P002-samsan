@@ -481,7 +481,7 @@ def main():
     write(LOCAL + "/legal.html", legal)
     built.append((LOCAL + "/vitrina-caverna.html", write(LOCAL + "/vitrina-caverna.html", build_vitrina(kit, ui, brand, credits))))
     if os.path.exists(os.path.join(ROOT, "temas", "maths", "y6-la-mina", "prototipos.js")):
-        for cual, titulo in (("excavar", "Prototype E: Dig to the gem"), ("cartas", "Prototype A: Jump cards")):
+        for cual, titulo in (("excavar", "Prototype E: Dig to the gem"), ("cartas", "Prototype A: Jump cards"), ("globo", "Prototype: Balloon miner")):
             rel = LOCAL + "/proto-" + cual + ".html"
             built.append((rel, write(rel, build_proto(kit, ui, brand, credits, cual, titulo))))
 
