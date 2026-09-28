@@ -233,7 +233,18 @@ window.GAME_UI = {
     sayLineFlagDone: 'Flag planted at {value}. Now move.',
     sayLineEmpty:  'Type a number first.',
     sayLineRight:  'The gate opens.',
-    sayLineWrong:  'The lift stopped at {value}. The dotted outline shows {target}.'
+    sayLineWrong:  'The lift stopped at {value}. The dotted outline shows {target}.',
+
+    /* ---------- FILL (mech: "fill", modo balanza) ----------
+       Pesas en el lugar del saco hasta que el brazo queda horizontal. */
+    fillNow:       'On the pan: {tens} × 10 + {ones} × 1 = {value}',
+    fillAdd:       'Add a {n} {unit} weight',
+    fillTake:      'Take off a {n} {unit} weight',
+    fillHelp:      'Put weights where the sack was until the arm is level. <b>+10</b> and <b>+1</b> add, <b>&minus;10</b> and <b>&minus;1</b> take off.',
+    fillHelpPick:  'Look at the bar, then tap the answer or press <b>A B C D</b>.',
+    fillEmpty:     'Put some weights on the pan first.',
+    fillRight:     'Level. The sack goes back and the scale stays level.',
+    fillWrong:     'With {value} the scale is not level: see how much is missing or extra.'
   },
 
   /* ---------- COMPANERO DE PANTALLA ----------

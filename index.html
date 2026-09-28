@@ -1952,6 +1952,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         /* Camara: si caben, encuadra juntos la plataforma, la salida, el
            destino y el error; si no, sigue a la plataforma. */
         exp.enfoque = function () {
+          if (bal) return L.altoMundo - L.H + L.H * 0.52;             // balanza: el fondo del pozo
           if (!cfg) return exp.piso() - 30;
           var P = cfg.pinta || {}, vals = [exp.posAnim];
           [P.inicio, P.anillo, st.bandera, st.error && st.error.debia].forEach(function (v) { if (v != null) vals.push(M.clamp(v, K.DMIN, K.DMAX)); });
@@ -1993,7 +1994,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         /* ---------- Instrumento: regla, marcas y pictorico tapado ---------- */
         function yDe(v) { return (yOf(v) - L.cam.y) * L.s; }
         L.capa('alta', 50, function () {
-          if (!cfg || !st.ver) return;
+          if (!cfg || !st.ver || bal) return;
           var u = I.u(L), s = L.s, xR = RULER_X * s, xS = (POZO_X - PLAT.ancho / 2 - 14) * s, xB = xR - 16 * u;
           I.regla(ctx, L, { x: xR, yDe: yDe, min: cfg.min, max: cfg.max, unidad: cfg.unidad, cadaEtiqueta: 5, soloDecenas: cfg.soloDecenas });
           var P = cfg.pinta || {};
@@ -2026,7 +2027,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         /* Error visible: contorno punteado de la plataforma donde debia
            llegar y corchete con la diferencia. Nunca una silueta de persona. */
         L.capa('alta', 60, function () {
-          if (!cfg || !st.ver || !st.error) return;
+          if (!cfg || !st.ver || !st.error || bal) return;
           var u = I.u(L), s = L.s, E = st.error;
           var pulso = suave() ? 0.7 + 0.3 * Math.sin(L.time * 4) : 1;
           var yd = yDe(M.clamp(E.debia, cfg.min, cfg.max)), yl = yDe(M.clamp(E.llego, cfg.min, cfg.max));
@@ -2040,12 +2041,110 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
           if (dif) I.corchete(ctx, L, RULER_X * s - 20 * u, yl, yd, I.conSigno(dif) + ' ' + cfg.unidad);
         });
 
+        /* El cristal va al saco de la plataforma; al cerrar un tramo, el saco
+           se vuelve la gema del contador (una gema por tramo). */
+        function guardarEnSaco(o) {
+          saco++;
+          if (o.tramoCerrado && o.hud) {
+            var ys = yOf(exp.pos) - 8;
+            cav.particulas.estallido(POZO_X + 16, ys);
+            cav.particulas.gemaVuela(POZO_X + 16, ys, o.hud, function () {});
+            saco = 0;
+          }
+        }
+        /* ---------- Balanza del mercader (escena `fill`, modo balanza) ----------
+           Por codigo, en el fondo del pozo y en la franja que se ve en un
+           telefono (x 185 a 455). Modelo de la incognita que falta: el
+           saco "?" espera al lado; el nino pone pesas en su lugar hasta que
+           el brazo queda horizontal. Si acierta, el saco vuelve al plato y
+           la balanza sigue nivelada: c + fijas = total.
+           bal = { letra, fijas: [..], total, unidad, pesas: {10: n, 1: m},
+                   figura: 'balanza' | 'barra', ver, mostrarDif, saco: bool } */
+        var bal = null, angulo = 0;
+        function sumaPesas() { return bal ? (bal.pesas[100] || 0) * 100 + (bal.pesas[10] || 0) * 10 + (bal.pesas[1] || 0) : 0; }
+        function izquierda() { return bal.fijas.reduce(function (a, b) { return a + b; }, 0) + (bal.saco ? bal.valorSaco : sumaPesas()); }
+        L.alActualizar(function (dt) {
+          if (!bal) return;
+          var dif = izquierda() - bal.total, obj = dif === 0 ? 0 : (dif > 0 ? 1 : -1) * Math.min(0.16, 0.05 + Math.abs(dif) * 0.004);
+          if (bal.ciego && !bal.mostrarDif && !bal.saco) obj = 0;      // sin pista grafica: el brazo no avisa hasta confirmar
+          angulo = suave() ? angulo + (obj - angulo) * Math.min(1, dt * 5) : obj;
+        });
+        function bloque(x, yb, w, h, fondo, borde, texto, L_, escala) {
+          ctx.fillStyle = fondo; ctx.strokeStyle = borde; ctx.lineWidth = Math.max(1.5, I.u(L_));
+          I.roundRect(ctx, x - w / 2, yb - h, w, h, Math.min(6, h / 4)); ctx.fill(); ctx.stroke();
+          if (texto) I.etiqueta(ctx, L_, texto, x, yb - h / 2, 'center', '#2A211A', 'rgba(247,239,221,0.97)', escala || 0.85);
+        }
+        L.capa('alta', 55, function () {
+          if (!bal || !bal.ver) return;
+          var s = L.s, u = I.u(L), H = L.canvas.height, cx = POZO_X * s, un = ' ' + bal.unidad;
+          if (bal.figura === 'barra') {                       // pictorico: modelo de barra
+            var x0 = 200 * s, w = 240 * s, y0 = H * 0.46, alto = Math.max(30 * L.dpr, 26 * s);
+            var conocido = bal.fijas.reduce(function (a, b) { return a + b; }, 0), wc = w * conocido / bal.total;
+            ctx.save();
+            ctx.fillStyle = 'rgba(247,239,221,0.97)'; ctx.strokeStyle = I.colores.tinta; ctx.lineWidth = 2 * u;
+            I.roundRect(ctx, x0 - 10 * u, y0 - alto - 22 * u, w + 20 * u, alto * 2 + 36 * u, 8 * u); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#D19A5E'; ctx.fillRect(x0, y0 - alto - 12 * u, w, alto); ctx.strokeRect(x0, y0 - alto - 12 * u, w, alto);
+            ctx.fillStyle = '#A6E06A'; ctx.fillRect(x0, y0, wc, alto); ctx.strokeRect(x0, y0, wc, alto);
+            ctx.fillStyle = '#5C4A3B'; ctx.fillRect(x0 + wc, y0, w - wc, alto); ctx.strokeRect(x0 + wc, y0, w - wc, alto);
+            ctx.restore();
+            I.etiqueta(ctx, L, I.num(bal.total) + un, x0 + w / 2, y0 - alto / 2 - 12 * u, 'center', '#2A211A', 'rgba(247,239,221,0.97)');
+            I.etiqueta(ctx, L, bal.fijas.map(I.num).join(' + ') + un, x0 + wc / 2, y0 + alto / 2, 'center', '#1F3D2A', 'rgba(247,239,221,0.97)', 0.85);
+            I.pregunta(ctx, L, x0 + wc + (w - wc) / 2, y0 + alto / 2, 'center');
+            return;
+          }
+          var piv = H * 0.40, base = H - 8 * u, med = 95 * s, cuelga = 44 * s, wp = 80 * s;
+          var dx = Math.cos(angulo) * med, dy = Math.sin(angulo) * med;
+          ctx.save();
+          ctx.fillStyle = '#6B3D22'; ctx.strokeStyle = I.colores.tinta; ctx.lineWidth = 2 * u;
+          ctx.fillRect(cx - 5 * u, piv, 10 * u, base - piv); ctx.strokeRect(cx - 5 * u, piv, 10 * u, base - piv);     // poste
+          ctx.fillRect(cx - 30 * u, base - 6 * u, 60 * u, 6 * u); ctx.strokeRect(cx - 30 * u, base - 6 * u, 60 * u, 6 * u);
+          ctx.beginPath(); ctx.moveTo(cx - dx, piv + dy); ctx.lineTo(cx + dx, piv - dy);                             // brazo
+          ctx.lineWidth = 7 * u; ctx.strokeStyle = I.colores.tinta; ctx.stroke();
+          ctx.lineWidth = 4 * u; ctx.strokeStyle = '#A0643A'; ctx.stroke();
+          ctx.fillStyle = '#FFD34D'; ctx.beginPath(); ctx.arc(cx, piv, 6 * u, 0, Math.PI * 2); ctx.fill(); ctx.lineWidth = 2 * u; ctx.strokeStyle = I.colores.tinta; ctx.stroke();
+          // Fiel: una aguja vertical; si el brazo esta horizontal, apunta a la marca del centro (forma, no color).
+          ctx.beginPath(); ctx.moveTo(cx, piv); ctx.lineTo(cx + Math.sin(angulo) * 26 * u, piv - Math.cos(angulo) * 26 * u); ctx.lineWidth = 3 * u; ctx.stroke();
+          ctx.fillStyle = I.colores.tinta; ctx.fillRect(cx - 1 * u, piv - 32 * u, 2 * u, 5 * u);
+          ctx.restore();
+          var platos = [{ x: cx - dx, y: piv + dy + cuelga }, { x: cx + dx, y: piv - dy + cuelga }];
+          platos.forEach(function (p, i) {
+            var ex = i ? cx + dx : cx - dx, ey = i ? piv - dy : piv + dy;
+            ctx.save(); ctx.strokeStyle = '#5B5B6E'; ctx.lineWidth = 1.5 * u;
+            ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(p.x - wp / 2 + 6 * u, p.y); ctx.moveTo(ex, ey); ctx.lineTo(p.x + wp / 2 - 6 * u, p.y); ctx.stroke();
+            ctx.fillStyle = '#8C8C9C'; ctx.strokeStyle = I.colores.tinta; ctx.lineWidth = 2 * u;
+            ctx.beginPath(); ctx.moveTo(p.x - wp / 2, p.y); ctx.lineTo(p.x + wp / 2, p.y); ctx.lineTo(p.x + wp / 2 - 8 * u, p.y + 7 * u); ctx.lineTo(p.x - wp / 2 + 8 * u, p.y + 7 * u); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.restore();
+          });
+          // Derecha: el cajon con el total.
+          bloque(platos[1].x, platos[1].y, 46 * s, 30 * s, '#A0643A', I.colores.tinta, I.num(bal.total) + un, L);
+          // Izquierda: pesas fijas, y el saco o las pesas del nino en su lugar.
+          var L0 = platos[0], xi = L0.x - wp / 2 + 4 * u;
+          bal.fijas.forEach(function (f) { var w = 26 * s; bloque(xi + w / 2, L0.y, w, 18 * s, '#8C8C9C', I.colores.tinta, I.num(f), L, 0.75); xi += w + 3 * u; });
+          if (bal.saco) bloque(xi + 14 * s, L0.y, 26 * s, 22 * s, '#D19A5E', I.colores.tinta, bal.letra, L, 0.9);
+          else {
+            var n10 = bal.pesas[10] || 0, n1 = bal.pesas[1] || 0, fila = L0.y;
+            for (var k = 0; k < n10; k++) { ctx.fillStyle = '#5B5B6E'; ctx.strokeStyle = I.colores.tinta; ctx.lineWidth = 1.5 * u;
+              ctx.fillRect(xi + (k % 5) * 7 * s, fila - 14 * s - Math.floor(k / 5) * 15 * s, 6 * s, 14 * s);
+              ctx.strokeRect(xi + (k % 5) * 7 * s, fila - 14 * s - Math.floor(k / 5) * 15 * s, 6 * s, 14 * s); }
+            var xo = xi + Math.min(5, Math.max(1, n10)) * 7 * s + 2 * u;
+            for (k = 0; k < n1; k++) { ctx.fillStyle = '#C0C0CC'; ctx.strokeStyle = I.colores.tinta; ctx.lineWidth = 1.2 * u;
+              ctx.fillRect(xo + (k % 3) * 5 * s, fila - 5 * s - Math.floor(k / 3) * 6 * s, 4 * s, 5 * s);
+              ctx.strokeRect(xo + (k % 3) * 5 * s, fila - 5 * s - Math.floor(k / 3) * 6 * s, 4 * s, 5 * s); }
+            // El saco espera al lado, en el suelo, con su "?".
+            bloque(cx - 150 * s, base, 26 * s, 22 * s, '#D19A5E', I.colores.tinta, bal.letra, L, 0.9);
+          }
+          if (bal.mostrarDif) {                               // al confirmar: cuanto sobra o falta (E4)
+            var dif = izquierda() - bal.total;
+            if (dif) I.etiqueta(ctx, L, I.conSigno(dif) + un, L0.x, L0.y + 20 * u, 'center', '#3A1410', 'rgba(255,158,138,0.97)');
+          }
+        });
+
         cav.L = L;
         var E = {
           L: L, cav: cav, estado: st,
           /* Configura el instrumento para una variante. */
           configurar: function (c) {
-            cfg = c;
+            cfg = c; bal = null;
             st.bandera = null; st.error = null; st.ver = c.ver !== false;
             st.valor = c.valor; st.fisica = c.fisica;
             viaje = null; tunel = null; rebote = 0;
@@ -2077,17 +2176,30 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
             puertas = puertas.filter(function (Q) { return Math.abs(Q.d - P.d) >= 3; });
             puertas.push(P);
             exp.celebrar();
-            var guardar = function () {
-              saco++;
-              if (o.tramoCerrado && o.hud) {                 // el saco se vuelve la gema del contador
-                var ys = yOf(exp.pos) - 8;
-                cav.particulas.estallido(POZO_X + 16, ys);
-                cav.particulas.gemaVuela(POZO_X + 16, ys, o.hud, function () {});
-                saco = 0;
-              }
-            };
+            var guardar = function () { guardarEnSaco(o); };
             if (suave()) salto = { t: 0, dx: PUERTA.x + PUERTA.w / 2 - POZO_X, puerta: P, recogido: false, fin: guardar };
             else { P.cristal = false; guardar(); }
+          },
+          /* Balanza (escena `fill`). c = { letra, fijas, total, unidad,
+             figura: 'balanza'|'barra', ver, pesas }. */
+          configurarBalanza: function (c) {
+            cfg = { min: K.DMIN, max: K.DMAX, unidad: c.unidad, pinta: {} };
+            bal = { letra: c.letra, fijas: c.fijas, total: c.total, unidad: c.unidad, pesas: c.pesas || { 10: 0, 1: 0 },
+                    figura: c.figura || 'balanza', ver: c.ver !== false, mostrarDif: false, saco: false, valorSaco: 0, ciego: !!c.ciego };
+            st.error = null; viaje = null; tunel = null; salto = null; exp.dx = exp.dy = 0; exp.mira = 1;
+            st.fisica = -12; exp.pos = exp.posAnim = -12;
+            angulo = 0;
+            L.fijarCam(exp.enfoque() - L.H * 0.52);
+            if (!L.corriendo && L.iniciado) L.dibujar();
+          },
+          pesas: function (p) { if (bal) { bal.pesas = p; bal.figura = 'balanza'; bal.ver = true; } },
+          resultadoBalanza: function (o) {
+            if (!bal) return;
+            if (!o.correcto) { bal.mostrarDif = true; return; }
+            bal.saco = true; bal.valorSaco = o.valor;                       // el saco vuelve y la balanza sigue nivelada
+            exp.celebrar();
+            cav.particulas.estallido(POZO_X - 95, yOf(exp.pos) + 120);
+            guardarEnSaco(o);
           },
           cavar: function (bandera) { tunel = { hasta: M.clamp(bandera, K.DMIN, -2), t: 0 }; },
           profundidad: function (n) { cav.luz.cfg.ambiente = AMB[Math.max(0, Math.min(AMB.length - 1, n - 1))]; },   // n = tramos ya cerrados

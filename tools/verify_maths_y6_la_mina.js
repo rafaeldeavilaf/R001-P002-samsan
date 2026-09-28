@@ -94,8 +94,10 @@ const MODOS = ['raton', 'tactil', 'teclado'];
 
 /* Lleva la escena a `x` y confirma, con el modo de entrada dado. */
 function responder(w, v, x, modo) {
-  const d = w.document, L = v.line, host = d.getElementById('qScene');
+  const d = w.document, host = d.getElementById('qScene');
   const pulsar = (el) => (modo === 'tactil' ? toque(w, el) : clic(w, el));
+  if (v.fill) return responderBalanza(w, v, x, modo, host, pulsar);
+  const L = v.line;
   if (L.modo === 'concreto') {
     if (L.bandera) {                                        // primero la bandera
       if (modo === 'teclado') tecla(w, 'Enter'); else pulsar(host.querySelector('.linea__ok'));
@@ -132,8 +134,36 @@ function responder(w, v, x, modo) {
   return null;
 }
 
+/* Balanza: pesas de 10 y de 1 hasta x (teclado: RePag = 10, flecha = 1). */
+function responderBalanza(w, v, x, modo, host, pulsar) {
+  const F = v.fill;
+  if (F.sello === 'concreto') {
+    const tens = Math.floor(x / 10), ones = x % 10;
+    for (let i = 0; i < tens; i++) { if (modo === 'teclado') tecla(w, 'PageUp'); else pulsar(host.querySelector('[data-d="10"]')); }
+    for (let i = 0; i < ones; i++) { if (modo === 'teclado') tecla(w, 'ArrowUp'); else pulsar(host.querySelector('[data-d="1"]')); }
+    const t = host.querySelector('.linea__ahora').textContent.replace(MENOS, '-');
+    const puesto = parseInt(t.split('=').pop().replace(/[^0-9-]/g, ''), 10);
+    if (puesto !== x) return 'la balanza quedo en ' + puesto + ', no en ' + x;
+    if (modo === 'teclado') tecla(w, 'Enter'); else pulsar(host.querySelector('.linea__ok'));
+  } else if (F.sello === 'pictorico') {
+    const btns = Array.from(host.querySelectorAll('.linea__opcion'));
+    const i = btns.findIndex(b => b.textContent.replace(/^[A-E]/, '').trim() === num(x));
+    if (i < 0) return 'no hay opcion ' + num(x);
+    if (modo === 'teclado') tecla(w, 'ABCD'[i]); else pulsar(btns[i]);
+  } else {
+    const s = String(x);
+    if (modo === 'teclado') { for (const ch of s) tecla(w, ch); tecla(w, 'Enter'); }
+    else { for (const ch of s) pulsar(host.querySelector('.linea__tecla[data-k="' + ch + '"]')); pulsar(host.querySelector('.linea__teclado .linea__ok')); }
+  }
+  return null;
+}
+
 /* Una incorrecta que la escena puede recibir (dentro del instrumento). */
 function incorrecta(v) {
+  if (v.fill) {
+    if (v.fill.sello === 'pictorico') return parseInt(v.options.find((t, i) => i !== v.answer).replace(MENOS, '-'), 10);
+    return v.solucion % 10 < 9 ? v.solucion + 1 : v.solucion - 1;
+  }
   const L = v.line, sol = v.solucion;
   if (L.modo === 'pictorico') {
     const fmt = L.faltante === 'cambio' ? (n => (n > 0 ? '+' + n : num(n))) : num;
@@ -167,12 +197,19 @@ section('1. Datos generados');
     check('nivel ' + lv.id + ': orden ' + inicio + ', 3 sellos, jefe',
       orden === inicio + ',concreto,pictorico,abstracto,concreto,pictorico,abstracto,concreto,pictorico,abstracto,jefe', orden);
     lv.questions.forEach(f => f.variants.forEach(v => {
+      if (v.fill) {
+        const F = v.fill;
+        check(f.id + ': incognita + fijas = total', v.solucion + F.fijas.reduce((a, b) => a + b, 0) === F.total, v.stem);
+        check(f.id + ': se puede armar con 9 de 10 y 9 de 1', v.solucion > 0 && v.solucion <= 99);
+        if (F.sello === 'pictorico') check(f.id + ': incluye E4 (sumar en vez de restar)', v.options.includes(num(F.total + F.fijas.reduce((a, b) => a + b, 0))), v.stem);
+        return;
+      }
       const L = v.line;
       check(f.id + ': inicio + cambio = final', L.inicio + L.cambio === L.final);
       check(f.id + ': solucion es el dato que falta', v.solucion === L[L.faltante]);
       check(f.id + ': dentro del instrumento', L.min <= L.inicio && L.inicio <= L.max && L.min <= L.final && L.final <= L.max);
     }));
-    lv.questions.filter(f => f.variants[0].line.modo === 'pictorico' && f.variants[0].line.faltante === 'final').forEach(f => f.variants.forEach(v => {
+    lv.questions.filter(f => f.variants[0].line && f.variants[0].line.modo === 'pictorico' && f.variants[0].line.faltante === 'final').forEach(f => f.variants.forEach(v => {
       const L = v.line, e1 = Math.abs(L.inicio) + Math.abs(L.cambio);
       if (L.inicio < 0 && L.cambio > 0) check(f.id + ': incluye la suma sin signo (E1)', v.options.includes(num(e1)), v.stem);
     }));

@@ -1211,6 +1211,247 @@
     return api;
   };
 
+  /* ---------- SCENES.fill — Llenar, modo balanza (etapa 2) ----------
+     Verbo: poner unidades hasta equilibrar. El dato que falta es la
+     incognita de una suma: `letra + fijas = total`. En el mundo del bioma
+     (el mismo lienzo que `line`), el saco "?" espera al lado y el nino pone
+     pesas de 10 y de 1 en su lugar hasta que el brazo queda horizontal. Al
+     confirmar, si acierta, el saco vuelve al plato y la balanza sigue
+     nivelada; si no, se ve cuanto sobra o falta.
+
+     Variante en data.js (ademas de stem/options/answer del contrato):
+       solucion: el valor de la incognita
+       fill: { modo: 'balanza', sello: 'concreto'|'pictorico'|'abstracto',
+               letra, fijas: [..], total, unidad, pesas: [10, 1],
+               existencias: { 10: 9, 1: 9 }, pistaGrafica }
+
+     Sello: concreto (pesas de 10 y de 1, con existencias limitadas: hay que
+     descomponer), pictorico (modelo de barra con la parte desconocida
+     tapada y cuatro opciones con E4), abstracto (`c + 17 = 55` con el
+     teclado en pantalla).
+
+     check(estado) -> true si la suma de las pesas es la solucion. */
+  function tecladoHTML() {
+    return '<div class="linea__teclado">' +
+      '<div class="linea__caja" role="textbox" aria-readonly="true" aria-label="' + esc(UI.scene.lineTypeAria) + '"></div>' +
+      '<div class="linea__teclas" role="group" aria-label="' + esc(UI.scene.keypadAria) + '">' +
+      ['7', '8', '9', '4', '5', '6', '1', '2', '3', '-', '0', 'back'].map(function (k) {
+        var t = k === '-' ? '−' : k === 'back' ? '&#9003;' : k;
+        var aria = k === '-' ? UI.scene.keyMinus : k === 'back' ? UI.scene.keyBack : k;
+        return '<button type="button" class="btn linea__tecla" data-k="' + k + '" aria-label="' + esc(aria) + '">' + t + '</button>';
+      }).join('') +
+      '</div>' +
+      '<button type="button" class="btn btn--primary linea__ok">' + esc(UI.scene.lineCheck) + '</button>' +
+    '</div>';
+  }
+  function tecleoMas(tecleo, k) {
+    if (k === 'back') return tecleo.slice(0, -1);
+    if (k === '-') return tecleo.charAt(0) === '-' ? tecleo.slice(1) : '-' + tecleo;
+    return tecleo.replace('-', '').length < 4 ? tecleo + k : tecleo;
+  }
+
+  SCENES.fill = function () {
+    var ctx = null, dead = false, host = null, V = null, F = null;
+    var pesas = { 10: 0, 1: 0 }, tecleo = '', cursor = -1, elegido = null, valor = 0;
+    var palancas = [], btnMain = null, nowEl = null, cajaEl = null, opts = [], timers = [], onKey = null;
+    var NB = ' ';
+
+    function suma() { return (pesas[10] || 0) * 10 + (pesas[1] || 0); }
+    function existe(p) { return (F.existencias && F.existencias[p] != null) ? F.existencias[p] : 9; }
+    function kg(n) { return numTxt(n) + NB + F.unidad; }
+    function sync() {
+      if (LINEA.E && !dead && F.sello === 'concreto' && LINEA.E.pesas) LINEA.E.pesas({ 10: pesas[10], 1: pesas[1] });
+      if (nowEl) nowEl.textContent = fmt(UI.scene.fillNow, { tens: pesas[10], ones: pesas[1], value: kg(suma()) });
+      palancas.forEach(function (b) {
+        var d = parseInt(b.getAttribute('data-d'), 10), p = Math.abs(d);
+        b.disabled = dead || (d > 0 ? pesas[p] >= existe(p) : pesas[p] <= 0);
+      });
+      if (cajaEl) cajaEl.textContent = tecleo === '' ? ' ' : tecleo.replace(/-/g, '−');
+    }
+    function configurarMundo() {
+      if (!LINEA.E || dead || !LINEA.E.configurarBalanza) return;
+      if (LINEA.run !== run) { LINEA.run = run; if (LINEA.E.nuevoNivel) LINEA.E.nuevoNivel(); }
+      if (LINEA.E.profundidad && run) LINEA.E.profundidad(run.gems);
+      LINEA.E.configurarBalanza({ letra: F.letra, fijas: F.fijas, total: F.total, unidad: F.unidad,
+        figura: F.sello === 'pictorico' ? 'barra' : 'balanza', ver: F.sello !== 'abstracto', pesas: { 10: 0, 1: 0 },
+        ciego: F.pistaGrafica === false });
+      sync();
+    }
+    function poner(d) {
+      if (dead || F.sello !== 'concreto') return;
+      var p = Math.abs(d);
+      if (d > 0 && pesas[p] >= existe(p)) return;
+      if (d < 0 && pesas[p] <= 0) return;
+      pesas[p] += d > 0 ? 1 : -1;
+      sync();
+      ctx.say(fmt(UI.scene.fillNow, { tens: pesas[10], ones: pesas[1], value: kg(suma()) }));
+    }
+    function pintarOpciones() { opts.forEach(function (o, i) { o.node.classList.toggle('is-here', i === cursor); }); }
+
+    var api = {
+      check: function (estado) { return estado.valor === V.solucion; },
+
+      mount: function (container, context) {
+        ctx = context; dead = false; V = ctx.variant; F = V.fill; host = container;
+        pesas = { 10: 0, 1: 0 }; tecleo = ''; cursor = -1; elegido = null; opts = []; palancas = [];
+        var h = '<div class="scene scene--line scene--fill scene--line-' + F.sello + '">' +
+          '<div class="linea__escena" aria-hidden="true"></div>';
+        if (F.sello === 'concreto') {
+          var palanca = function (d) {
+            var p = Math.abs(d), aria = fmt(d > 0 ? UI.scene.fillAdd : UI.scene.fillTake, { n: p, unit: F.unidad });
+            return '<button type="button" class="btn linea__flecha' + (p === 10 ? ' linea__flecha--10' : '') + '" data-d="' + d +
+              '" aria-label="' + esc(aria) + '">' + (d > 0 ? '+' : '−') + '<b>' + p + '</b></button>';
+          };
+          h += '<div class="linea__mando">' +
+            '<div class="linea__palancas">' + palanca(10) + palanca(1) + palanca(-1) + palanca(-10) + '</div>' +
+            '<span class="linea__ahora" aria-live="off"></span>' +
+            '<button type="button" class="btn btn--primary linea__ok">' + esc(UI.scene.lineCheck) + '</button>' +
+          '</div>';
+        } else if (F.sello === 'pictorico') {
+          h += '<div class="linea__opciones" role="group" aria-label="' + esc(UI.scene.linePickAria) + '">';
+          ctx.order.forEach(function (orig, pos) {
+            h += '<button type="button" class="btn linea__opcion" data-orig="' + orig + '">' +
+              '<span class="door__key">' + ctx.keys[pos] + '</span>' + esc(V.options[orig]) + '</button>';
+          });
+          h += '</div>';
+        } else h += tecladoHTML();
+        h += '<p class="linea__nota" aria-live="polite"></p></div>';
+        container.innerHTML = h;
+
+        var escena = container.querySelector('.linea__escena'), self = this;
+        btnMain = container.querySelector('.linea__ok');
+        if (F.sello === 'concreto') {
+          palancas = Array.prototype.slice.call(container.querySelectorAll('.linea__flecha'));
+          palancas.forEach(function (b) {
+            var d = parseInt(b.getAttribute('data-d'), 10);
+            b.addEventListener('click', function () { poner(d); });
+          });
+          nowEl = container.querySelector('.linea__ahora');
+          if (ctx.help) ctx.help(UI.scene.fillHelp, false);
+          /* Teclado: flechas = pesa de 1; AvPag/RePag o Mayus + flechas = de 10. */
+          onKey = function (e) {
+            if (dead || e.ctrlKey || e.metaKey || e.altKey) return;
+            var d = e.key === 'PageUp' ? 10 : e.key === 'PageDown' ? -10
+              : (e.shiftKey && e.key === 'ArrowUp') ? 10 : (e.shiftKey && e.key === 'ArrowDown') ? -10 : 0;
+            if (!d) return;
+            e.preventDefault(); e.stopPropagation();
+            if (!e.repeat) poner(d);
+          };
+          window.addEventListener('keydown', onKey, true);
+        } else if (F.sello === 'pictorico') {
+          opts = Array.prototype.map.call(container.querySelectorAll('.linea__opcion'), function (n) {
+            return { node: n, orig: parseInt(n.getAttribute('data-orig'), 10) };
+          });
+          opts.forEach(function (o, i) {
+            o.node.addEventListener('click', function () { self.jump(i); });
+            o.node.addEventListener('focus', function () { if (!dead) { cursor = i; pintarOpciones(); } });
+          });
+          if (ctx.help) ctx.help(UI.scene.fillHelpPick, false);
+        } else {
+          cajaEl = container.querySelector('.linea__caja');
+          Array.prototype.forEach.call(container.querySelectorAll('.linea__tecla'), function (b) {
+            b.addEventListener('click', function () { self.teclear(b.getAttribute('data-k')); });
+          });
+          onKey = function (e) {
+            if (dead || e.ctrlKey || e.metaKey || e.altKey) return;
+            var k = e.key;
+            if (/^[0-9]$/.test(k) || k === '-' || k === '−' || k === 'Backspace' || k === 'Delete') {
+              e.preventDefault(); e.stopPropagation();
+              self.teclear(k === 'Backspace' || k === 'Delete' ? 'back' : (k === '−' ? '-' : k));
+            }
+          };
+          window.addEventListener('keydown', onKey, true);
+          if (ctx.help) ctx.help(UI.scene.lineHelpType, false);
+        }
+        if (btnMain) btnMain.addEventListener('click', function () { self.confirm(); });
+
+        lineaEscenario().then(function (E) {
+          if (dead || !E) return;
+          escena.appendChild(LINEA.canvas); E.L.redimensionar(); configurarMundo();
+        });
+        if (LINEA.E) { escena.appendChild(LINEA.canvas); LINEA.E.L.redimensionar(); configurarMundo(); }
+        sync();
+      },
+
+      teclear: function (k) {
+        if (dead || F.sello !== 'abstracto') return;
+        tecleo = tecleoMas(tecleo, k); sync();
+        ctx.say(tecleo === '' ? UI.scene.sayLineEmpty : tecleo.replace(/-/g, '−'));
+      },
+      setMood: function () {},
+      /* Flechas: pesa de 1 (arriba pone, abajo quita). */
+      move: function (delta) {
+        if (dead) return;
+        if (F.sello === 'concreto') { poner(delta < 0 ? 1 : -1); return; }
+        if (F.sello === 'pictorico') {
+          cursor = Math.max(0, Math.min(opts.length - 1, (cursor < 0 ? (delta > 0 ? -1 : opts.length) : cursor) + delta));
+          pintarOpciones(); opts[cursor].node.focus();
+        }
+      },
+      jump: function (i) {
+        if (dead || F.sello !== 'pictorico' || i < 0 || i >= opts.length) return;
+        cursor = i; pintarOpciones(); this.confirm();
+      },
+
+      confirm: function () {
+        if (dead) return null;
+        var x;
+        if (F.sello === 'pictorico') {
+          if (cursor < 0) { ctx.say(UI.scene.sayNeedMove); return null; }
+          elegido = opts[cursor].orig; x = numDe(V.options[elegido]);
+        } else if (F.sello === 'abstracto') {
+          if (tecleo === '' || tecleo === '-') { ctx.say(UI.scene.sayLineEmpty); return null; }
+          x = numDe(tecleo);
+        } else {
+          if (!suma()) { ctx.say(UI.scene.fillEmpty); return null; }
+          x = suma();
+        }
+        valor = x;
+        var ok = this.check({ valor: x });
+        dead = true;
+        palancas.concat([btnMain]).forEach(function (b) { if (b) b.disabled = true; });
+        opts.forEach(function (o) { o.node.disabled = true; });
+        if (host) Array.prototype.forEach.call(host.querySelectorAll('.linea__tecla'), function (b) { b.disabled = true; });
+        var sc = host && host.querySelector('.scene--line');
+        if (sc) sc.classList.add('is-revelada');
+        var orig = F.sello === 'pictorico' ? elegido : (ok ? V.answer : (V.answer === 1 ? 0 : 1));
+        var E = LINEA.E, hecho = false, hud = document.getElementById('hudGems');
+        /* La respuesta va a la balanza (en pesas de 10 y de 1); cuando el brazo
+           se asienta, el motor la recibe. */
+        var entregar = function () {
+          if (hecho) return;
+          hecho = true;
+          var g0 = run ? run.gems : 0;
+          if (ctx) ctx.pick(orig);
+          if (E && E.resultadoBalanza) E.resultadoBalanza({ correcto: ok, valor: x, tramoCerrado: !!run && run.gems > g0, hud: hud });
+        };
+        if (E && E.pesas) {
+          E.L.redimensionar();
+          if (x > 0) E.pesas({ 10: Math.floor(x / 10), 1: x % 10 });
+          timers.push(setTimeout(entregar, motionOff() ? 0 : 700));
+        } else entregar();
+        return orig;
+      },
+
+      markResult: function (answerOrig, chosenOrig) {
+        var bien = answerOrig === chosenOrig;
+        opts.forEach(function (o) {
+          if (o.orig === answerOrig) o.node.classList.add('is-right');
+          if (!bien && o.orig === chosenOrig) o.node.classList.add('is-wrong');
+        });
+        ctx.say(bien ? UI.scene.fillRight : fmt(UI.scene.fillWrong, { value: kg(valor) }));
+      },
+
+      destroy: function () {
+        dead = true;
+        if (onKey) { window.removeEventListener('keydown', onKey, true); onKey = null; }
+        timers.forEach(function (t) { clearTimeout(t); }); timers = [];
+        palancas = []; btnMain = nowEl = cajaEl = host = null; opts = []; ctx = null;
+      }
+    };
+    return api;
+  };
+
   /* El mensaje va al HUD; la REACCION va al heroe de la escena, que es el que
      el nino esta mirando porque es el que mueve. */
   function setMate(mood, msg, cls) {

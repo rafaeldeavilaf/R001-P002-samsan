@@ -354,6 +354,128 @@ n2.tramo([fam("MY6-2-J", "find the missing number", "jefe",
               pista=False)])
 
 
+# ---------------------------------------------------------------- escena fill (balanza)
+def kg(n):
+    return num(n) + NB + "kg"
+
+
+def check_fill(v):
+    F = v["fill"]
+    assert F["modo"] == "balanza"
+    assert sum(F["fijas"]) + v["solucion"] == F["total"], v["stem"]
+    assert 0 < v["solucion"] <= 10 * F["existencias"]["10"] + F["existencias"]["1"], "no se puede armar con las pesas: " + v["stem"]
+    assert v["solucion"] not in F["fijas"] and v["solucion"] != F["total"], v["stem"]
+    if F["sello"] == "pictorico":
+        return v["options"][v["answer"]] == num(v["solucion"]) and len(set(v["options"])) == 4
+    return True
+
+
+CHECKS["fill"] = check_fill
+
+
+def menor_del_mayor(t, f):
+    """E4 de la llevada: resta cifra a cifra el menor del mayor (55 - 17 -> 42)."""
+    return abs(t // 10 - f // 10) * 10 + abs(t % 10 - f % 10)
+
+
+def distractores_fill(total, fijas):
+    f, sol = sum(fijas), total - sum(fijas)
+    return [total + f, menor_del_mayor(total, f), sol + 10, sol - 10, sol + 1, sol - 1]
+
+
+OBJETOS = ["lantern", "pickaxe", "helmet", "rope coil", "lamp", "shovel", "bucket", "hammer"]
+
+
+def item_fill(letra, fijas, total, sello, obj=None, pista=True):
+    sol = total - sum(fijas)
+    etiqueta = "?" if obj else letra
+    F = {"modo": "balanza", "sello": sello, "letra": etiqueta, "fijas": fijas, "total": total, "unidad": "kg",
+         "pesas": [10, 1], "existencias": {"10": 9, "1": 9}, "pistaGrafica": pista}
+    conocido = " + ".join(num(x) for x in fijas)
+    nombre = ("the " + obj) if obj else ("sack " + letra)
+    sub = None
+    if sello == "concreto":
+        if obj:
+            stem = "A %s and %s balance %s. Put weights where the %s was to find its weight." % (obj, kg(sum(fijas)) if len(fijas) == 1 else conocido + NB + "kg", kg(total), obj)
+        else:
+            stem = "Sack %s and %s balance %s. Put weights where the sack was." % (letra, conocido + NB + "kg", kg(total))
+    elif sello == "pictorico":
+        stem = "The merchant drew the deal as a bar: %s and %s make %s. How heavy is %s?" % (nombre, conocido + NB + "kg", kg(total), nombre)
+    else:
+        izq = ("?" if obj else letra) + " + " + conocido
+        stem, sub = "%s = %s" % (izq, num(total)), ("Write the weight of the %s in kg." % obj) if obj else ("%s = [ ]" % letra)
+    pistas = [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level." if sello == "concreto"
+        else "%s and %s together make %s." % (nombre[0].upper() + nombre[1:], conocido + NB + "kg", kg(total)),
+        "Take the known part away from the total: %s %s %s." % (num(total), MENOS, conocido if len(fijas) == 1 else "(" + conocido + ")"),
+        "Example: c + 20 = 45, so c = 45 %s 20 = 25." % MENOS,
+    ]
+    explain = "%s + %s = %s, so %s = %s %s %s = %s." % ("?" if obj else letra, conocido, num(total), nombre, num(total), MENOS,
+                                                          num(sum(fijas)), kg(sol))
+    if sello == "pictorico":
+        opts = opciones(sol, [d for d in distractores_fill(total, fijas) if 0 < d], rng)
+    else:
+        opts = [num(sol), "?"], 0
+    v = {"stem": stem, "options": opts[0], "answer": opts[1], "solucion": sol, "fill": F,
+         "hint": pistas[0], "pistas": pistas, "explain": explain}
+    if sub:
+        v["sub"] = sub
+    return v
+
+
+def famf(fid, skill, sello, items, pista=True):
+    return familia(fid, skill, "fill", sello, items, pista)
+
+
+LETRAS = ["c", "a", "m", "p", "g", "k", "s", "t"]
+
+
+def sin_llevada():                     # tramo 2: dos cifras, sin llevada
+    t = R(40, 99)
+    f = R(11, t - 11)
+    return (f, t) if t % 10 >= f % 10 and (t - f) % 10 else sin_llevada()
+
+
+def con_llevada():                     # tramo 3: la cifra de las unidades pide llevada
+    t = R(41, 99)
+    f = R(12, t - 11)
+    return (f, t) if t % 10 < f % 10 else con_llevada()
+
+
+# ---- Nivel 3 — The Merchant's Scales: la incognita de una suma
+n3 = tema.nivel(name="THE MERCHANT'S SCALES", subtitle="Find the missing weight",
+                skill="find the unknown in a sum",
+                briefing=["<p>At the bottom of the shaft the merchant buys crystals by weight.</p>",
+                          "<p>Each sack has a letter. Put weights where the sack was until the arm is level: then you know what the sack weighs.</p>"])
+n3.tramo([
+    fam("MY6-3-R1", "find the change", "repaso", [item_cambio(a, f, "concreto") for a, f in unicos(cambio_gen(-12, 10), ok=ok_cambio(-12, 6))]),
+    fam("MY6-3-R2", "find the start", "repaso", [item_inicio(a, b, "abstracto") for a, b in unicos(inicio_gen(-22, -8), ok=ok_inicio(-22, -8))]),
+])
+obj = unicos(lambda: (R(3, 9), R(12, 30)), NV * 3, ok=lambda t: t[1] - t[0] >= 5 and (t[1] - t[0]) % 10 != 0)
+n3.tramo([
+    famf("MY6-3-T1C", "weigh an object", "concreto", [item_fill(None, [f], t, "concreto", OBJETOS[i % 8]) for i, (f, t) in enumerate(obj[:NV])]),
+    famf("MY6-3-T1P", "weigh an object", "pictorico", [item_fill(None, [f], t, "pictorico", OBJETOS[(i + 3) % 8]) for i, (f, t) in enumerate(obj[NV:2 * NV])]),
+    famf("MY6-3-T1A", "weigh an object", "abstracto", [item_fill(None, [f], t, "abstracto", OBJETOS[(i + 5) % 8]) for i, (f, t) in enumerate(obj[2 * NV:])]),
+])
+for t_, gen, pista in ((2, sin_llevada, True), (3, con_llevada, False)):
+    tr = unicos(gen, NV * 3)
+    n3.tramo([
+        famf("MY6-3-T%dC" % t_, "find the unknown in a sum", "concreto", [item_fill(LETRAS[i % 8], [f], t, "concreto", pista=pista) for i, (f, t) in enumerate(tr[:NV])], pista),
+        famf("MY6-3-T%dP" % t_, "find the unknown in a sum", "pictorico", [item_fill(LETRAS[(i + 2) % 8], [f], t, "pictorico", pista=pista) for i, (f, t) in enumerate(tr[NV:2 * NV])], pista),
+        famf("MY6-3-T%dA" % t_, "find the unknown in a sum", "abstracto", [item_fill(LETRAS[(i + 4) % 8], [f], t, "abstracto", pista=pista) for i, (f, t) in enumerate(tr[2 * NV:])], pista),
+    ])
+
+
+def jefe3():
+    f1, f2 = R(12, 29), R(5, 9)
+    t = R(f1 + f2 + 12, 99)
+    return (f1, f2, t) if (t - f1 - f2) % 10 and t % 10 < (f1 + f2) % 10 else jefe3()
+
+
+n3.tramo([famf("MY6-3-J", "find the unknown in a sum", "jefe",
+               [item_fill(LETRAS[i % 8], [f1, f2], t, "concreto", pista=False) for i, (f1, f2, t) in enumerate(unicos(jefe3))], pista=False)])
+
+
 # ---------------------------------------------------------------- validacion propia
 def finales(fam_):
     return [v["line"]["final"] for v in fam_["variants"]]
@@ -361,18 +483,21 @@ def finales(fam_):
 
 for nv in tema.niveles:
     assert len(nv.items) == 12, "nivel %d: Year 6 lleva 12 items" % nv.id
-    # Cada tramo de sello baja mas que el anterior (el descenso de la historia).
-    hondo = [min(x for f in nv.items[a:b] for x in finales(f)) for a, b in nv.tramos[1:4]]
-    assert hondo[0] > hondo[1] > hondo[2], "nivel %d: los tramos no bajan: %s" % (nv.id, hondo)
+    # Cada tramo de sello del montacargas baja mas que el anterior (el descenso).
+    if all(f["mech"] == "line" for f in nv.items[nv.tramos[1][0]:nv.tramos[3][1]]):
+        hondo = [min(x for f in nv.items[a:b] for x in finales(f)) for a, b in nv.tramos[1:4]]
+        assert hondo[0] > hondo[1] > hondo[2], "nivel %d: los tramos no bajan: %s" % (nv.id, hondo)
     for fam_ in nv.items:
         for v in fam_["variants"]:
+            assert len(v["stem"].split()) <= 25, "enunciado largo: " + v["stem"]
+            if "line" not in v:
+                continue
             L = v["line"]
             # E1 fuera del pozo en pictorico: el montacargas sale disparado.
             if L["modo"] == "pictorico" and L["faltante"] == "final":
                 assert num(abs(L["inicio"]) + abs(L["cambio"])) in v["options"], "falta E1: " + v["stem"]
             # La bandera solo tiene sentido cuando falta el final.
             assert not L.get("bandera") or L["faltante"] == "final"
-            assert len(v["stem"].split()) <= 25, "enunciado largo: " + v["stem"]
 
 if __name__ == "__main__":
     ruta, data = escribir(tema, CHECKS)
