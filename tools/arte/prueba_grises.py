@@ -150,29 +150,32 @@ def main():
                 pg.goto(base + "_local/vitrina-caverna.html")
                 pg.wait_for_timeout(1500)
                 pg.evaluate("() => { window.__samsan.L.opts.particles = false; }")   # capturas estables
-                pg.wait_for_timeout(300)
-                reg = pg.evaluate("() => window.__samsan.regiones()")
-                png = pg.screenshot()
-                gris = Image.open(io.BytesIO(png)).convert("L")
-                gris.save(os.path.join(SALIDA, "grises-vitrina-%dx%d.png" % (w, h)))
-                anillo = reg.pop("anillo", None)
-                medias = {k: media_gris(gris, r) for k, r in reg.items()}
-                print("       luminancia media: " + ", ".join("%s %.0f" % (k, v or -1) for k, v in medias.items()))
-                visibles = {k: v for k, v in medias.items() if v is not None}
-                check("vitrina: las cuatro capas están en pantalla", len(visibles) == 4, medias)
-                # Dos planos (pared/roca) y panel contra todo, por media. El objeto
-                # interactivo se mide contra lo que lo rodea en pantalla: así lee
-                # el niño un personaje (docs/direccion-grafica.md §4).
-                pares = [("fondo", "suelo"), ("fondo", "panel"), ("suelo", "panel"), ("objeto", "panel")]
-                if anillo and medias.get("objeto") is not None:
-                    alrededor = media_anillo(gris, anillo, reg["objeto"])
-                    print("       objeto %.0f contra su entorno %.0f" % (medias["objeto"], alrededor))
-                    check("vitrina: en grises el explorador se distingue de lo que lo rodea",
-                          abs(medias["objeto"] - alrededor) >= DIF_GRIS, "%.0f vs %.0f" % (medias["objeto"], alrededor))
-                for a, b in pares:
-                    if a in visibles and b in visibles:
-                        check("vitrina: en grises se distinguen %s y %s" % (a, b), abs(visibles[a] - visibles[b]) >= DIF_GRIS,
-                              "%.0f vs %.0f" % (visibles[a], visibles[b]))
+                # Posiciones fijas (la vitrina empieza en un problema al azar): en la
+                # cueva y en la superficie a plena luz.
+                for lugar, metros in (("cueva", -15), ("superficie", 5)):
+                    pg.evaluate("(m) => window.__samsan.setPos(m)", metros)
+                    pg.wait_for_timeout(1500)
+                    reg = pg.evaluate("() => window.__samsan.regiones()")
+                    gris = Image.open(io.BytesIO(pg.screenshot())).convert("L")
+                    gris.save(os.path.join(SALIDA, "grises-vitrina-%s-%dx%d.png" % (lugar, w, h)))
+                    anillo = reg.pop("anillo", None)
+                    medias = {k: media_gris(gris, r) for k, r in reg.items()}
+                    print("       %s: " % lugar + ", ".join("%s %.0f" % (k, v if v is not None else -1) for k, v in medias.items()))
+                    if lugar == "cueva":
+                        visibles = {k: v for k, v in medias.items() if v is not None}
+                        check("vitrina: las cuatro capas están en pantalla", len(visibles) == 4, medias)
+                        # Dos planos (pared/roca) y panel contra todo, por media.
+                        for a, b in [("fondo", "suelo"), ("fondo", "panel"), ("suelo", "panel"), ("objeto", "panel")]:
+                            if a in visibles and b in visibles:
+                                check("vitrina: en grises se distinguen %s y %s" % (a, b), abs(visibles[a] - visibles[b]) >= DIF_GRIS,
+                                      "%.0f vs %.0f" % (visibles[a], visibles[b]))
+                    # El objeto interactivo contra lo que lo rodea en pantalla: así lee
+                    # el niño un personaje (docs/direccion-grafica.md §4).
+                    if anillo and medias.get("objeto") is not None:
+                        alrededor = media_anillo(gris, anillo, reg["objeto"])
+                        print("       explorador %.0f contra su entorno %.0f" % (medias["objeto"], alrededor))
+                        check("vitrina (%s): en grises el explorador se distingue de lo que lo rodea" % lugar,
+                              abs(medias["objeto"] - alrededor) >= DIF_GRIS, "%.0f vs %.0f" % (medias["objeto"], alrededor))
                 cuadros = pg.evaluate("() => { window.__samsan.L.opts.particles = true; return null; }") or pg.evaluate(JS_CUADROS)
                 med = statistics.median(cuadros) if cuadros else 0
                 print("       cuadro medio en la vitrina: %.1f ms (p95 %.1f ms)" % (med, sorted(cuadros)[int(len(cuadros) * 0.95)] if cuadros else 0))
