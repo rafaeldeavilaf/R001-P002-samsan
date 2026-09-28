@@ -32,7 +32,7 @@
   var yOf = function (d) { return SURF - d * MET; };
   /* Cabeza de la mascota de PixelLab (assets/img/mascota-*.png): centro en x
      y fila de la frente, donde se apoya el ala de un sombrero. */
-  var CABEZA = { cx: 21.5, frente: 11 };
+  var CABEZA = { cx: 17.5, frente: 14 };
   /* Montacargas: plataforma de 52 px con barandilla baja de 16 px. */
   var PLAT = { ancho: 52, baranda: 16, piso: 4 };
 
@@ -349,7 +349,8 @@
         return {
           A: A, C: A,
           ax: Math.round(base.width / 2) + (A.izq || 0),
-          lampara: { x: casco ? 6 : 0, y: -A.height + (casco ? 8 : 6) }
+          /* La lampara va 3,5 px a la derecha del centro de la cabeza. */
+          lampara: { x: casco ? CABEZA.cx - base.width / 2 + 3.5 : 0, y: -A.height + (casco ? 8 : 6) }
         };
       }
       var SPR = juego(op.piel), PLATAFORMA = imagenPlataforma();

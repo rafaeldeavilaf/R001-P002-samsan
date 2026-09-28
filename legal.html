@@ -186,6 +186,8 @@ a { color: var(--enlace); text-underline-offset: 3px; }
 .lic__item dt { color: #5C4A3B; font-weight: 700; }
 .lic__item dd { margin: 0; overflow-wrap: anywhere; }
 .lic__item code { font-size: .9rem; }
+.lic__plegado { margin-top: 18px; }
+.lic__plegado summary { cursor: pointer; font-weight: 800; font-size: 1.05rem; padding: 10px 0; }
 .back { display: inline-block; margin-top: 22px; font-weight: 800; }
 .zonas { display: grid; gap: 12px; margin-top: 18px; }
 @media (max-width: 520px) { .lic__item dl { grid-template-columns: 1fr; } .lic__item dt { margin-top: 6px; } }
@@ -222,7 +224,7 @@ a { color: var(--enlace); text-underline-offset: 3px; }
 <div class="lic__item"><h4>Nunito, de The Nunito Project Authors. Pesos 400, 700, 800 y 900, subconjunto latino en WOFF2 de Google Fonts, distribuido sin cambios por Fontsource 5.3.0</h4><dl><dt>Dónde se usa</dt><dd>Texto de lectura. Archivos <code>assets/fonts/nunito-latin-*.woff2</code>, incrustados en cada página</dd><dt>Licencia</dt><dd>SIL Open Font License 1.1</dd><dt>Obligación</dt><dd>Conservar el aviso de copyright y la licencia (<code>assets/fonts/OFL-nunito.txt</code>) y citarlos en <code>legal.html</code>. No vender la fuente por sí sola</dd></dl></div>
 <div class="lic__item"><h4>Arte generado con PixelLab (mascota, casco de minero, cofre, carretilla y demás PNG de <code>assets/img/</code> y <code>temas/*/img/</code>), procesado por <code>tools/arte/</code></h4><dl><dt>Dónde se usa</dt><dd>Personajes y props del mundo, incrustados en cada página</dd><dt>Licencia</dt><dd>Propiedad del autor según los términos de PixelLab (actualizados el 23 nov 2025): uso comercial y no comercial sin permiso ni atribución</dd><dt>Obligación</dt><dd>No usar las imágenes para entrenar modelos de IA. El autor responde de que el contenido no infrinja derechos de terceros: en los prompts nunca se nombra un juego, personaje ni marca existente</dd></dl></div>
 </div>
-<h3>Solo en desarrollo, no se publica</h3>
+<details class="lic__plegado"><summary>Solo en desarrollo, no se publica</summary>
 <div class="lic">
 <div class="lic__item"><h4>jsdom 24</h4><dl><dt>Dónde se usa</dt><dd>Pruebas del harness (<code>tools/harness.js</code>, <code>tools/verify_*.js</code>), instalado con <code>npm install</code></dd><dt>Licencia</dt><dd>MIT</dd><dt>Obligación</dt><dd>Ninguna mientras no se redistribuya; si se redistribuye, conservar su aviso de copyright y licencia</dd></dl></div>
 <div class="lic__item"><h4>Dependencias de jsdom (62 paquetes)</h4><dl><dt>Dónde se usa</dt><dd>Instaladas con jsdom en <code>node_modules/</code>, que no se versiona</dd><dt>Licencia</dt><dd>MIT (55), BSD-2-Clause (2), ISC (2), BSD-3-Clause (1), Apache-2.0 (1), MIT-0 (1)</dd><dt>Obligación</dt><dd>Ninguna mientras no se redistribuyan. Revisar esta fila si cambia la versión de jsdom</dd></dl></div>
@@ -230,7 +232,7 @@ a { color: var(--enlace); text-underline-offset: 3px; }
 <div class="lic__item"><h4>Playwright para Python y el Chromium que descarga</h4><dl><dt>Dónde se usa</dt><dd>Prueba de grises y contraste (<code>tools/arte/prueba_grises.py</code>), en local y en Actions</dd><dt>Licencia</dt><dd>Apache-2.0 (Playwright); Chromium bajo BSD-3-Clause y otras</dd><dt>Obligación</dt><dd>Ninguna: se ejecutan, no se distribuyen</dd></dl></div>
 <div class="lic__item"><h4>GitHub Actions: <code>actions/checkout</code>, <code>actions/setup-python</code>, <code>actions/setup-node</code>, <code>actions/upload-pages-artifact</code>, <code>actions/deploy-pages</code></h4><dl><dt>Dónde se usa</dt><dd>Verificación y publicación en <code>.github/workflows/verificar-y-publicar.yml</code></dd><dt>Licencia</dt><dd>MIT</dd><dt>Obligación</dt><dd>Ninguna: se ejecutan, no se distribuyen</dd></dl></div>
 <div class="lic__item"><h4>Python 3 y Node.js</h4><dl><dt>Dónde se usa</dt><dd>Generadores, build y pruebas</dd><dt>Licencia</dt><dd>PSF License 2.0 y MIT</dd><dt>Obligación</dt><dd>Ninguna: se ejecutan, no se distribuyen</dd></dl></div>
-</div>
+</div></details>
 </section>
 <a class="back" href="index.html">Volver a la portada</a>
 </main>

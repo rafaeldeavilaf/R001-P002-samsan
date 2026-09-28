@@ -208,6 +208,8 @@ SITE_CSS = """
 .lic__item dt { color: #5C4A3B; font-weight: 700; }
 .lic__item dd { margin: 0; overflow-wrap: anywhere; }
 .lic__item code { font-size: .9rem; }
+.lic__plegado { margin-top: 18px; }
+.lic__plegado summary { cursor: pointer; font-weight: 800; font-size: 1.05rem; padding: 10px 0; }
 .back { display: inline-block; margin-top: 22px; font-weight: 800; }
 .zonas { display: grid; gap: 12px; margin-top: 18px; }
 @media (max-width: 520px) { .lic__item dl { grid-template-columns: 1fr; } .lic__item dt { margin-top: 6px; } }
@@ -242,14 +244,18 @@ def licencias_html():
         cab, filas = sec["filas"][0], sec["filas"][1:]
         if len(cab) != 4 or any(len(f) != 4 for f in filas):
             fail("docs/licencias.md: la tabla de '%s' debe tener 4 columnas." % sec["titulo"])
-        partes.append('<h3>' + html.escape(sec["titulo"]) + '</h3>\n<div class="lic">')
+        # Lo que no se publica va plegado: en movil alargaba mucho la pagina.
+        plegar = sec["titulo"].startswith("Solo en desarrollo")
+        titulo = html.escape(sec["titulo"])
+        partes.append(('<details class="lic__plegado"><summary>' + titulo + '</summary>' if plegar
+                       else '<h3>' + titulo + '</h3>') + '\n<div class="lic">')
         for f in filas:
             total += 1
             partes.append(
                 '<div class="lic__item"><h4>' + md_inline(f[0]) + '</h4><dl>' +
                 ''.join('<dt>' + html.escape(cab[i]) + '</dt><dd>' + md_inline(f[i]) + '</dd>' for i in (1, 2, 3)) +
                 '</dl></div>')
-        partes.append('</div>')
+        partes.append('</div>' + ('</details>' if plegar else ''))
     if total == 0:
         fail("docs/licencias.md no tiene ninguna tabla de licencias.")
     return "\n".join(partes)

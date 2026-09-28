@@ -1,6 +1,6 @@
 ---
 estado: vigente
-actualizado: 2026-09-27
+actualizado: 2026-09-28
 descripcion: Dirección gráfica de SAMSAN (pixel art moderno). Capas de render, luz, movimiento, paletas, pipeline, reglas de legibilidad y lista de generaciones de PixelLab con sus prompts.
 ---
 
@@ -101,7 +101,7 @@ Plan de prueba, 40 generaciones. Se planean 30 (las 24 originales, 3 compañeros
 
 La primera generación (la mascota base) es la referencia de estilo; en las demás se usa como imagen de referencia si la herramienta lo permite.
 
-Estado al 27 sep 2026: hechos la mascota (Character Creator v3, 8 direcciones: se usan frente, espalda y perfil) y 16 objetos en un solo lote de Create Object (20 generaciones, estilo parejo). PixelLab no cambia la pose de un personaje sin sus herramientas de animación pagas: las filas 2 y 3 (feliz, piensa) se descartan y esas poses se hacen por código. El ladrillo del lote salió vacío y se dibuja por código.
+Estado al 27 sep 2026: hechos la mascota (Character Creator v3, 8 direcciones: se usan frente, espalda y perfil) y 16 objetos en un solo lote de Create Object (20 generaciones, estilo parejo). PixelLab no cambia la pose de un personaje sin sus herramientas de animación pagas: las filas 2 y 3 (feliz, piensa) se descartan y esas poses se hacen por código. El ladrillo del lote salió vacío y se dibuja por código. El 28 sep se regeneraron el explorador (neutro y sonriente, pelo a media longitud, sin sombrero; se usa la vista "south" como `mascota-base.png`) y el cofre (Create Object Pro de perfil estricto, con la mascota como referencia de estilo), 2 generaciones más.
 
 | # | Etapa | Herramienta | Archivo | Prompt específico |
 |---|---|---|---|---|
