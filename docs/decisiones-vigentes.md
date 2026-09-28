@@ -90,7 +90,9 @@ Referencia aprobada el 27 de septiembre de 2026: `docs/referencia/muestra-estilo
 | 3 | Escena `place` 14 h, Maths y Español migrados a la base 6 h, biomas Biblioteca y Jungla 8 h, tema de sumas Year 2 4 h, pruebas 3 h | 35 | 40 | El jugador menor abre su tema solo dos veces en siete días |
 | 4 | Mundo: base propia de cada jugador con piezas instaladas, compañeros por bioma, portales a los biomas, sombreros de premio, sala secreta, cofre, regalo | 12 | 14 | Los dos jugadores ven su base con sus piezas y compañeros |
 
-Total 154 h, USD 0 al mes. Etapa en curso: **1, en ronda de corrección** (tope 46 h). Horas antes de la primera validación con un niño: 107 (etapas 0 a 2). Desde la etapa 4, modo operación: un tema por cada tema nuevo del colegio.
+Total 154 h, USD 0 al mes. Etapa en curso: **1, en ronda de corrección** (tope 46 h).
+
+**Para retomar la etapa 1 (28 sep 2026).** Hecho y publicado: montacargas abierto aprobado por Rafael (castillete en A con rueda, plataforma con barandilla, contorno punteado para el error), regla legible en móvil, escena que cabe en portátil y encuadre alto en móvil, roca y pared sin costuras, textos de "The Lift". Pendiente, en este orden: (1) Rafael genera en PixelLab el explorador neutro y sonriente y el cofre de perfil (prompts en `arte/crudo/LISTA-PIXELLAB-2.md`, carpeta ignorada por git); (2) procesarlos con `tools/arte/procesar.py` (mascota con `--bioma mascota` a `assets/img/`, cofre con `--bioma caverna` a `temas/maths/img/`), medir de nuevo la cabeza (`CABEZA` en `temas/maths/bioma.js`) y revisar los 12 tonos de piel; (3) revisión final con capturas en 1366×768 y 390×844 y `prueba_grises.py`; (4) compuerta de Rafael y cierre de la etapa. Pendientes menores del panel de expertos para etapas siguientes: corona y capucha que no sirven sobre la cabeza, carretilla de perfil, ladrillo por código, detalle de faroles y cristales, `legal.html` más corto en móvil. Horas antes de la primera validación con un niño: 107 (etapas 0 a 2). Desde la etapa 4, modo operación: un tema por cada tema nuevo del colegio.
 
 ## 8. Preguntas abiertas
 
