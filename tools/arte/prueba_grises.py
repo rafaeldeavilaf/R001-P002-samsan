@@ -187,6 +187,39 @@ def main():
                 fallos_c = [c for c in pg.evaluate(JS_CONTRASTE, ".k-panel") if c["ratio"] < c["min"]]
                 check("vitrina: todo texto de los paneles cumple AA", not fallos_c, fallos_c[:3])
 
+                # 1b. La Mina (tema de la base): el explorador en la luz mas oscura
+                # del tema (tramo final del ultimo nivel) y los paneles del juego.
+                mina = os.path.join(ROOT, "_local", "maths-y6-la-mina.html")
+                if os.path.exists(mina):
+                    ctx2 = nav.new_context(viewport={"width": w, "height": h}, device_scale_factor=1)
+                    ctx2.add_init_script("localStorage.setItem('samsan:hero', JSON.stringify({v:1,body:'a',alias:'',chosen:true}));")
+                    pg2 = ctx2.new_page()
+                    pg2.on("pageerror", lambda e: errores.append(str(e)))
+                    pg2.goto(base + "_local/maths-y6-la-mina.html")
+                    pg2.wait_for_timeout(600)
+                    pg2.locator("#levelList .level-card").nth(0).click()
+                    pg2.locator("#briefGo").click()
+                    pg2.wait_for_timeout(1800)
+                    pg2.evaluate("() => { const M = window.__samsanMina; M.E.L.opts.particles = false; M.E.profundidad(9); }")
+                    pg2.locator("#qScene canvas").scroll_into_view_if_needed()
+                    pg2.wait_for_timeout(1200)
+                    reg = pg2.evaluate("() => window.__samsanMina.regiones()")
+                    gris = Image.open(io.BytesIO(pg2.screenshot())).convert("L")
+                    gris.save(os.path.join(SALIDA, "grises-mina-%dx%d.png" % (w, h)))
+                    obj = media_gris(gris, reg["objeto"])
+                    alrededor = media_anillo(gris, reg["anillo"], reg["objeto"]) if obj is not None else None
+                    print("       La Mina (luz mas oscura): explorador %s contra su entorno %s" % (
+                        "%.0f" % obj if obj is not None else "-", "%.0f" % alrededor if alrededor is not None else "-"))
+                    check("La Mina: en la luz mas oscura el explorador se distingue de lo que lo rodea",
+                          obj is not None and alrededor is not None and abs(obj - alrededor) >= DIF_GRIS,
+                          "%s vs %s" % (obj, alrededor))
+                    res = pg2.evaluate(JS_CONTRASTE, ".pixel-box")
+                    malos = [c for c in res if c["ratio"] < c["min"]]
+                    check("La Mina: todo texto de los paneles cumple AA (%d textos)" % len(res), res and not malos, malos[:3])
+                    ancho = pg2.evaluate("() => document.documentElement.scrollWidth")
+                    check("La Mina: sin desborde horizontal", ancho <= w, ancho)
+                    ctx2.close()
+
                 # 2. Portada y legal: contraste
                 for pagina in ("index.html", "legal.html"):
                     pg.goto(base + pagina)

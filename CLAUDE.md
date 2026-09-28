@@ -17,6 +17,7 @@ python3 tools/arte/procesar.py <png>   # pasa un PNG generado por el pipeline de
 python3 tools/arte/prueba_grises.py    # capturas en grises y contraste de paneles
 python3 tools/arte/prueba_pipeline.py  # prueba procesar.py y tiles.py con PNG sintéticos
 node tools/verify_mundo.js             # lógica de la capa del mundo (assets/mundo/)
+python3 tools/panel_la_mina.py         # mide en navegador lo que evalúa el panel de La Mina (no es CI)
 git add -A && git commit -m "..." && git push   # Actions verifica y publica
 ```
 
@@ -44,9 +45,9 @@ Contrato en `engine.js`: `SCENES[mech]()` devuelve `mount`, `move`, `jump`, `con
 | Escena | Verbo | Configuración | Estado |
 |---|---|---|---|
 | `doors` | elegir | opciones | existe; solo como recurso ocasional |
-| `forge` | Construir | reglas `categorias` y `ecuacion`, modo `pasos` | `categorias` existe; `ecuacion` y `pasos` en etapa 2 |
+| `forge` | Construir | reglas `categorias` y `ecuacion` | existen; `ecuacion` es un envoltorio registrado después de `forge`, que no cambia. El modo `pasos` no hizo falta: en La Mina los pasos son el sello |
 | `line` | Mover en la recta | vertical u horizontal, elemento faltante, bandera de estimación, piel del instrumento, sello (concreto, pictórico, abstracto con teclado) | vertical con piel `montacargas` existe; horizontal y `recta` en etapa 3 |
-| `fill` | Llenar | modos `conteo` y `balanza` | etapa 2 |
+| `fill` | Llenar | modos `conteo` y `balanza` | `balanza` existe (pesas de 100, 10 y 1); `conteo` en etapa 3 |
 | `place` | Ordenar y Asignar | modos `secuencia` y `destinos` | etapa 3 |
 
 Las mecánicas `bridge`, `ruler`, `planks`, `lift`, `rule`, `machine` y `smash` de los datos viejos de Maths no existen en el motor. Se mapean a `doors` en la etapa 0 y se reasignan al migrar en la etapa 3.

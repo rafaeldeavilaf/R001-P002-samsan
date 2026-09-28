@@ -15,7 +15,7 @@ Pixel art moderno, no retro. Un explorador pequeño y cabezón construye su base
 ## 2. Tres reglas que ganan sobre la estética
 
 1. **Legibilidad primero.** Todo panel con texto, pregunta o respuesta tiene fondo claro y texto oscuro con contraste AA o mejor, en todos los biomas. La oscuridad y la luz de antorcha son del paisaje, nunca del panel.
-2. **Los instrumentos pedagógicos se dibujan con código.** Termómetro, cuerda con profundidades, recta numérica, balanza, cajón de diez, taller de ecuaciones. Deben ser exactos al píxel y cambiar con los datos; un generador de imágenes no garantiza que la marca del −7 esté donde va.
+2. **Los instrumentos pedagógicos se dibujan con código.** Regla de profundidad del montacargas, recta numérica, balanza con pesas, modelo de barra, cajón de diez, taller de ecuaciones (en `assets/mundo/instrumentos.js` y en el escenario de cada bioma). Deben ser exactos al píxel y cambiar con los datos; un generador de imágenes no garantiza que la marca del −7 esté donde va.
 3. **Ningún significado depende solo del color.** Acierto y error se distinguen también por forma, ícono y movimiento.
 
 ## 3. Especificación técnica
@@ -78,7 +78,7 @@ El mundo se dibuja en Canvas; los paneles, textos y botones siguen en HTML encim
 4. **Resplandor** aditivo en cada fuente, rayos de luz desde la boca del pozo y halo del sol.
 5. **Partículas** en subpíxel: polvo en la luz, chispas de antorchas, esporas en la caverna profunda, destellos al acertar, polvo al frenar.
 6. **Tono de color** (luz suave: cálido arriba, frío abajo) y viñeta.
-7. **Instrumentos y guías** nítidos encima de todo: regla de profundidad, bandera de inicio, fantasma y flecha del error, gema que vuela al contador.
+7. **Instrumentos y guías** nítidos encima de todo: regla de profundidad, bandera de inicio, bandera de estimación, anillo de destino, contorno punteado y corchete del error, tarjeta "?" y franja en sombra del pictórico, gema que vuela al contador. Bajo tierra, una sombra suave en la pared detrás del explorador lo despega del cono de luz del pozo (prueba de grises).
 
 **Rendimiento.** Objetivo de 60 cuadros por segundo con resolución de pantalla limitada a ×2. Si durante dos segundos un cuadro tarda más de 20 ms, el juego apaga primero el resplandor y después las partículas, sin avisar al niño.
 
@@ -141,6 +141,6 @@ Las filas marcadas "Inglés" se generan cuando el colegio ponga el primer tema d
 | Etapa | Qué queda hecho |
 |---|---|
 | 1 | Capa de render en Canvas con cámara, luz, resplandor, partículas, parallax y tono de color; pipeline de arte a 32 px; kit de interfaz; mascota con poses y tonos de piel; bioma Caverna completo. Iguala o supera `docs/referencia/muestra-estilo.html` |
-| 2 | Arte de los instrumentos de La Mina: termómetro, cuerda con profundidades, balanza, taller de ecuaciones, cajas del sello |
+| 2 | Arte de los instrumentos de La Mina, por código: regla del montacargas, compuertas con cristal, saco, balanza con pesas de 100, 10 y 1, modelo de barra, fichas del taller (sin termómetro ni cuerda, decisiones del 27 y 28 sep) |
 | 3 | Biomas Jungla de día (Year 2) y Biblioteca (Español); instrumentos de Colocar |
 | 4 | Base propia con piezas instaladas y compañeros, portales a los biomas, sombreros de premio |

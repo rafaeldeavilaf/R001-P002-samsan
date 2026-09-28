@@ -1207,6 +1207,52 @@ async function main() {
         res.status !== 0 && /mech "bridge"/.test(res.stderr) && /SCENES/.test(res.stderr),
         'status=' + res.status + ' ' + String(res.stderr || res.error).slice(0, 160));
 
+  /* ---------- 13. La Mina: el primer tema de la base ----------
+     El detalle (todas las variantes, bien y mal, raton, tactil y teclado,
+     escalera de pistas) vive en tools/verify_maths_y6_la_mina.js. Aqui, la
+     regresion minima: la pagina construida arranca en la capa comun, el
+     nivel 1 se juega entero con las palancas y da una gema por tramo. */
+  section('13. La Mina (temas/maths/y6-la-mina): capa comun y nivel 1 completo');
+  if (!gameFile('maths-y6-la-mina')) {
+    check('existe _local/maths-y6-la-mina.html (python3 tools/build.py)', false);
+  } else {
+    const mDom = openGame('maths-y6-la-mina', null, { reducedMotion: true });
+    const mw = mDom.window, md = mw.document;
+    check('La Mina: la pagina lleva data-capa="comun"', md.documentElement.getAttribute('data-capa') === 'comun');
+    check('La Mina: meta del tema (materia, tema, bioma)', mw.QUIZ_DATA.meta.materia === 'maths' && mw.QUIZ_DATA.meta.bioma === 'caverna');
+    check('La Mina: cinco niveles de 12 items', mw.QUIZ_DATA.levels.length === 5 && mw.QUIZ_DATA.levels.every(l => l.questions.length === 12));
+    md.querySelectorAll('#levelList .level-card')[0].dispatchEvent(new mw.MouseEvent('click', { bubbles: true }));
+    md.getElementById('briefGo').dispatchEvent(new mw.MouseEvent('click', { bubbles: true }));
+    const lv1 = mw.QUIZ_DATA.levels[0];
+    let pasos = 0, error = '';
+    while (md.getElementById('scrPlay').classList.contains('is-on') && pasos++ < 40) {
+      const stem = md.getElementById('qStem').textContent.trim();
+      let v = null;
+      lv1.questions.forEach(f => f.variants.forEach(x => { if (x.stem === stem) v = x; }));
+      if (!v) { error = 'variante no encontrada: ' + stem; break; }
+      const host = md.querySelector('#qScene .scene-slot:not(.is-out)'), L = v.line, clic = el => el.dispatchEvent(new mw.MouseEvent('click', { bubbles: true, detail: 1 }));
+      if (L.modo === 'concreto') {
+        if (L.bandera) clic(host.querySelector('.linea__ok'));
+        const ahora = () => parseInt(host.querySelector('.linea__ahora').textContent.replace('−', '-').replace(/[^0-9-]/g, ''), 10);
+        let g = 0;
+        while (ahora() !== v.solucion && g++ < 60) { const d = v.solucion - ahora(); clic(host.querySelector('[data-d="' + (d > 0 ? '' : '-') + (Math.abs(d) >= 10 ? '10' : '1') + '"]')); }
+        clic(host.querySelector('.linea__ok'));
+      } else if (L.modo === 'pictorico') {
+        const t = v.solucion < 0 ? '−' + Math.abs(v.solucion) : String(v.solucion);
+        clic(Array.from(host.querySelectorAll('.linea__opcion')).find(b => b.textContent.replace(/^[A-E]/, '').trim() === t));
+      } else {
+        String(v.solucion).split('').forEach(c => clic(host.querySelector('.linea__tecla[data-k="' + c + '"]')));
+        clic(host.querySelector('.linea__teclado .linea__ok'));
+      }
+      if (!md.getElementById('qFeed').classList.contains('feedback--good')) { error = 'no acepto la solucion: ' + stem; break; }
+      clic(md.getElementById('btnNext'));
+    }
+    check('La Mina: el nivel 1 se juega entero con la solucion declarada', !error && md.getElementById('scrWin').classList.contains('is-on'), error);
+    check('La Mina: cinco gemas, una por tramo', /5\s*\/\s*5|5 gems/i.test(md.getElementById('winBody').textContent) || md.querySelectorAll('#winBody .gems span:not(.off)').length === 5,
+          md.getElementById('winBody').textContent.slice(0, 80));
+    mw.close();
+  }
+
   /* ---------- resumen ---------- */
   console.log('\n' + '-'.repeat(56));
   if (failures.length) {

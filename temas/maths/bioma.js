@@ -423,6 +423,18 @@
         /* `enfoque` (opcional) encuadra otra cosa que el explorador, p. ej. todo un salto. */
         if (op.camaraFija == null) L.seguir(exp.enfoque ? exp.enfoque() : exp.piso() - 30);
       });
+      /* Sombra en la pared detras del explorador (la proyecta su propia
+         lampara): lo despega del cono de luz del pozo, tambien en grises
+         (regla 9; tools/arte/prueba_grises.py). */
+      L.capa('mundo', 59, function (bx, camI) {
+        // Solo bajo tierra: contra el cielo claro, la sombra restaria contraste.
+        var fondo = M.clamp((exp.piso() - SURF - 20) / 50, 0, 1);
+        if (!fondo) return;
+        var cx = POZO_X + exp.dx, cy = Math.round(exp.piso()) - camI - exp.dy - 38;
+        var g = bx.createRadialGradient(cx, cy, 12, cx, cy, 58);
+        g.addColorStop(0, 'rgba(8,5,18,' + (0.8 * fondo).toFixed(2) + ')'); g.addColorStop(1, 'rgba(8,5,18,0)');
+        bx.fillStyle = g; bx.fillRect(cx - 58, cy - 58, 116, 116);
+      });
       L.capa('mundo', 60, function (bx, camI) {
         var a = exp.anim, img = SPR.codigo ? SPR[(a.alegria > 0 ? 'C' : 'A') + (a.parpadeo > 0 ? 'b' : '')] : SPR[a.alegria > 0 ? 'C' : 'A'];
         if (exp.mira < 0 && SPR.Aesp) img = SPR.Aesp;

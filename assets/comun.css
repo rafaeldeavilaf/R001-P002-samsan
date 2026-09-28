@@ -206,3 +206,27 @@ html[data-capa="comun"] .linea__opciones--frases .linea__opcion { font-size: 1.1
 /* Seis palancas (pesas de 100, 10 y 1) en el jefe: dos filas en telefono. */
 html[data-capa="comun"] .linea__palancas--6 { grid-template-columns: repeat(6, 64px); }
 @media (max-width: 700px) { html[data-capa="comun"] .linea__palancas--6 { grid-template-columns: repeat(3, 64px); } }
+
+/* Resultado y NEXT como franja fija abajo, sobre los controles (ya
+   apagados): el mundo que ejecuta la respuesta sigue a la vista y NEXT
+   se alcanza sin que la pagina salte (panel del 28 sep, F10). */
+html[data-capa="comun"] #scrPlay .feedback.is-on {
+  position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 40; margin: 0;
+  width: min(1028px, calc(100% - 20px)); padding: 10px 150px 10px 16px; max-height: 40vh; overflow: auto;
+}
+html[data-capa="comun"] #scrPlay > .row--end { position: fixed; z-index: 41; bottom: 22px; right: max(22px, calc(50% - 502px)); margin: 0; }
+html[data-capa="comun"] #scrPlay .feedback__body > p[style] { display: none; }   /* el reintento es inmediato: la nota ya no aplica */
+html[data-capa="comun"] #scrPlay { padding-bottom: 150px; }
+@media (max-width: 700px) {
+  html[data-capa="comun"] #scrPlay .feedback.is-on { padding: 10px 12px 84px; }
+  html[data-capa="comun"] #scrPlay > .row--end { left: 22px; right: 22px; bottom: 20px; }
+  html[data-capa="comun"] #scrPlay > .row--end .btn { width: 100%; }
+}
+
+/* La nota de la escena (absurdo de la oracion, distancia a la bandera) va
+   justo bajo el mundo y la oracion, fuera de la franja del resultado. */
+html[data-capa="comun"] .scene--line > * { order: 3; }
+html[data-capa="comun"] .scene--line > .linea__escena { order: 0; }
+html[data-capa="comun"] .scene--line > .forge__preview { order: 1; }
+html[data-capa="comun"] .scene--line > .linea__nota { order: 2; }
+html[data-capa="comun"] .linea__nota:empty { display: none; }
