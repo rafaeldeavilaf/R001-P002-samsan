@@ -158,7 +158,15 @@ try {
 } catch (e) { err = e; }
 check('el bioma se crea y corre 300 cuadros', !err, err && err.stack.split('\n').slice(0, 2).join(' '));
 check('el explorador llega a su nueva profundidad', cav && Math.abs(cav.explorador.posAnim + 3) < 0.05, cav && cav.explorador.posAnim);
-check('la camara sigue al explorador', cav && Math.abs(LB.cam.y - LB.cam.objetivo) < 2 && LB.cam.objetivo === LB.limiteCam(cav.yOf(-3) - 360 * 0.52));
+check('la camara sigue al explorador', cav && Math.abs(LB.cam.y - LB.cam.objetivo) < 2 && LB.cam.objetivo === LB.limiteCam(cav.yOf(-3) - 30 - 360 * 0.52));
+/* Decision del 27 sep: nadie cuelga de una cuerda. El explorador esta de pie
+   en el piso de la plataforma y la posicion en metros es ese piso. */
+check('el explorador esta de pie en la plataforma (pies sobre el piso)',
+  cav && cav.explorador.rect && Math.abs(cav.explorador.rect.y + cav.explorador.rect.h - cav.yOf(-3)) <= 1,
+  cav && cav.explorador.rect && (cav.explorador.rect.y + cav.explorador.rect.h) + ' vs ' + cav.yOf(-3));
+check('la posicion en metros es el piso de la plataforma', cav && cav.explorador.piso() === cav.yOf(cav.explorador.posAnim));
+const biomaSrc = read('temas', 'maths', 'bioma.js').replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+check('el bioma no tiene cuerda al cuerpo, arnes ni mosqueton', !/MOSQUETON|HEBILLA|cinturon\(\)|arnes/i.test(biomaSrc));
 check('hay fuentes de luz del escenario y dinamicas (casco y topo)', cav && cav.luz.fuentes.length >= 10 && cav.luz.dinamicas().length === 2);
 check('el mundo dibuja todas sus capas en orden', LB.bx.calls && LB.bx.calls.drawImage > 0 && LB.ctx.calls.drawImage > 0);
 check('el topo (compañero de la Caverna) esta en su hueco, con la luz de su lampara', cav && cav.topo && cav.topo.pies === 384 && cav.topo.lampara && cav.luz.dinamicas()[1].y < 384);

@@ -75,6 +75,10 @@ a { color: var(--enlace); text-underline-offset: 3px; }
   border-radius: 12px; overflow: hidden; box-shadow: 0 14px 34px rgba(10, 6, 20, .38);
 }
 .k-escena canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; touch-action: none; }
+/* El juego cabe en el alto visible de un portatil o proyector (con la
+   cabecera): nunca deja el panel ni el boton principal bajo el borde. */
+.k-juego { width: min(100%, calc((100svh - 200px) * 16 / 9)); margin-inline: auto; }
+.k-panel h2 { text-wrap: balance; }
 
 /* ---------- Panel de papel: siempre claro ---------- */
 .k-panel {
@@ -108,7 +112,7 @@ a { color: var(--enlace); text-underline-offset: 3px; }
 .k-mensaje { margin: 10px 0 0; min-height: 2.6em; font-weight: 700; }
 .k-mensaje.is-bien { color: var(--bien); }
 .k-mensaje.is-bien::before { content: '\2714\FE0E  '; }
-.k-mensaje.is-mal { color: var(--mal); }
+.k-mensaje.is-mal { color: var(--panel-tinta); }     /* neutro: describe, no juzga */
 .k-mensaje.is-mal::before { content: '\21BA  '; }
 
 /* ---------- Contador de gemas ---------- */
@@ -154,6 +158,13 @@ a { color: var(--enlace); text-underline-offset: 3px; }
 .k-juego .k-panel { margin-top: 14px; }
 @media (min-width: 860px) {
   .k-juego .k-panel--sobre { position: absolute; right: 18px; bottom: 18px; width: 340px; margin: 0; }
+}
+/* Movil vertical: la escena se vuelve alta y muestra el centro del mundo
+   (el pozo) a mayor escala, en vez de encoger los 640 px de ancho. */
+@media (max-width: 600px) {
+  .k-juego { width: 100%; }
+  .k-juego .k-escena { aspect-ratio: 4 / 5; }
+  .k-escena canvas { position: absolute; top: 0; left: 50%; width: auto; height: 100%; aspect-ratio: 16 / 9; transform: translateX(-50%); }
 }
 @media (max-width: 600px) {
   .k-escena .k-gemas { top: 8px; left: 8px; padding: 2px 10px 2px 5px; font-size: .9rem; border-width: 2px; }
@@ -474,7 +485,9 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
 
     /* Camara: sigue un objetivo en el eje vertical del mundo. Con
        movimiento suave apagado (o movimiento reducido), salta. */
-    L.limiteCam = function (y) { return M.clamp(y, 0, Math.max(0, L.altoMundo - H)); };
+    /* `camMin` negativo deja ver cielo por encima del mundo (p. ej. una torre alta). */
+    L.camMin = cfg.camMin || 0;
+    L.limiteCam = function (y) { return M.clamp(y, L.camMin, Math.max(L.camMin, L.altoMundo - H)); };
     L.seguir = function (yMundo, fraccion) {
       L.cam.objetivo = L.limiteCam(yMundo - H * (fraccion == null ? 0.52 : fraccion));
     };
@@ -748,8 +761,9 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       /* La gema vuela del mundo al contador (un elemento del HUD). */
       gemaVuela: function (xMundo, yMundo, destino, alLlegar) {
         var hr = destino.getBoundingClientRect(), vr = L.canvas.getBoundingClientRect();
+        /* Termina en el icono del contador (en px del lienzo). */
         voladoras.push({ t: 0, x0: xMundo * L.s, y0: (yMundo - L.cam.y) * L.s,
-          tx: (hr.left - vr.left + 18) * L.dpr, ty: (hr.top - vr.top + hr.height / 2) * L.dpr, fin: alLlegar });
+          tx: (hr.left - vr.left + Math.min(28, hr.width / 3)) * L.dpr, ty: (hr.top - vr.top + hr.height / 2) * L.dpr, fin: alLlegar });
       },
       volando: function () { return voladoras.length; }
     };
@@ -799,7 +813,8 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       var s = L.s, dpr = L.dpr;
       voladoras.forEach(function (f) {
         var t = f.t, e = 1 - Math.pow(1 - t, 3);
-        var cx = (f.x0 + f.tx) / 2, cy = Math.min(f.y0, f.ty) - 120 * dpr;
+        // El arco no sale del lienzo: la gema se ve todo el viaje.
+        var cx = (f.x0 + f.tx) / 2, cy = Math.max(24 * dpr, Math.min(f.y0, f.ty) - 120 * dpr);
         var x = (1 - e) * (1 - e) * f.x0 + 2 * (1 - e) * e * cx + e * e * f.tx;
         var y = (1 - e) * (1 - e) * f.y0 + 2 * (1 - e) * e * cy + e * e * f.ty;
         var z = Math.max(2, s * 1.4) * (1 + Math.sin(t * Math.PI) * 0.6);
@@ -1199,19 +1214,26 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
 /* ============================================================
    SAMSAN — BIOMA CAVERNA (materia Maths)
    Lo que el motor del mundo dibuja para la Caverna: el pozo de la
-   mina con su cuerda, la pared de pizarra con fosiles numericos,
-   la roca calida que se pisa, cristales, antorchas y faroles, la
-   superficie con cielo, el explorador en la cuerda y el topo minero
-   (compañero del bioma) en su hueco.
+   mina con su castillete y su montacargas, la pared de pizarra, la
+   roca calida que se pisa, cristales, antorchas y faroles, la
+   superficie con cielo, el explorador de pie en la plataforma y el
+   topo minero (compañero del bioma) en su hueco.
+
+   Decision del 27 sep 2026 (panel de expertos): ningun personaje
+   cuelga de una cuerda; se leia como una horca. El explorador viaja
+   de pie en un montacargas abierto (plataforma con barandilla baja)
+   y los cables van a la plataforma, nunca a la persona. La posicion
+   en metros es el PISO de la plataforma.
 
    El motor (assets/mundo/) no conoce nada de esto: este archivo lo
    declara. Si llega arte procesado por tools/arte/ (window.SAMSAN_IMG),
-   se usa; si no, todo se dibuja por codigo como en la muestra aprobada
-   (docs/referencia/muestra-estilo.html).
+   se usa; si no, todo se dibuja por codigo.
 
    Uso:
-     var cav = SAMSAN_BIOMAS.caverna.crear(L, { piel: '#E8B088' });
-     cav.explorador.pos = -15;   // metros; la camara lo sigue
+     SAMSAN_BIOMAS.caverna.cargar().then(function () {
+       var cav = SAMSAN_BIOMAS.caverna.crear(L, { piel: '#E8B088', pos: -15 });
+       cav.explorador.pos = -9;   // metros; la plataforma baja y la camara la sigue
+     });
    ============================================================ */
 (function (BIOMAS) {
   'use strict';
@@ -1219,12 +1241,13 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
 
   var T = 32, COLS = 20, ROWS = 20, WH = ROWS * T;
   var MET = 12, SURF = 192;                   // px por metro; y del suelo (0 m)
-  var ROPE_X = 320, DMIN = -30, DMAX = 10;
+  var POZO_X = 320, DMIN = -30, DMAX = 10;    // eje del pozo y del montacargas
   var yOf = function (d) { return SURF - d * MET; };
   /* Cabeza de la mascota de PixelLab (assets/img/mascota-*.png): centro en x
      y fila de la frente, donde se apoya el ala de un sombrero. */
-  var CABEZA = { frente: { cx: 21.5, frente: 11 }, espalda: { cx: 15, frente: 11 } };
-  var HEBILLA = { x: 24, y: 43 };
+  var CABEZA = { cx: 21.5, frente: 11 };
+  /* Montacargas: plataforma de 52 px con barandilla baja de 16 px. */
+  var PLAT = { ancho: 52, baranda: 16, piso: 4 };
 
   /* ---------- Mapa: el pozo y tres huecos laterales ---------- */
   function mapa() {
@@ -1238,39 +1261,45 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     return solid;
   }
 
-  /* ---------- Roca que se pisa (calida, saturada) ----------
-     Provisional por codigo. Con arte, cada tile sale de tools/arte/tiles.py. */
-  function rocaTile(buf, ox, oy, seed, oros) {
-    var r = M.rng(seed), C = M.PAL.roca;
-    for (var y = 0; y < T; y++) for (var x = 0; x < T; x++) buf.set(ox + x, oy + y, r() < 0.1 ? C[1] : C[2]);
-    var n = 3 + (r() * 2 | 0);
+  /* Piedras redondeadas repartidas por TODO el mapa (no por tile): las que
+     cruzan el borde de una celda siguen en la vecina, asi no hay costuras.
+     `dentro(x, y)` dice si el pixel pertenece a la capa. */
+  function piedras(buf, dentro, semilla, dens, colores) {
+    var r = M.rng(semilla), n = Math.round(buf.w * buf.h / (T * T) * dens);
     for (var k = 0; k < n; k++) {
-      var cx = r() * T, cy = r() * T, rx = 7 + r() * 6, ry = 6 + r() * 5;
-      for (y = Math.max(0, cy - ry | 0); y < Math.min(T, cy + ry + 1); y++) {
-        for (x = Math.max(0, cx - rx | 0); x < Math.min(T, cx + rx + 1); x++) {
+      var cx = r() * buf.w, cy = r() * buf.h, rx = 7 + r() * 6, ry = 6 + r() * 5;
+      for (var y = Math.max(0, cy - ry | 0); y < Math.min(buf.h, cy + ry + 1); y++) {
+        for (var x = Math.max(0, cx - rx | 0); x < Math.min(buf.w, cx + rx + 1); x++) {
+          if (!dentro(x, y)) continue;
           var nx = (x + 0.5 - cx) / rx, ny = (y + 0.5 - cy) / ry, q = nx * nx + ny * ny;
           if (q > 1) continue;
-          var col;
-          if (q > 0.8) col = C[1];
-          else {
-            var v = -(nx * 0.75 + ny * 0.9);
-            col = v > 0.55 ? C[4] : v > -0.35 ? C[3] : C[2];
-            if (v > 0.8 && r() < 0.3) col = C[5];
-          }
-          buf.set(ox + x, oy + y, col);
+          buf.set(x, y, colores(q, -(nx * 0.75 + ny * 0.9), r));
         }
       }
     }
-    var grietas = 1 + (r() * 2 | 0);
-    for (k = 0; k < grietas; k++) {
-      var gx = r() * T | 0, gy = r() * T | 0, len = 5 + (r() * 6 | 0);
+  }
+
+  /* ---------- Roca que se pisa (calida, saturada, mas clara) ---------- */
+  function rocaGlobal(buf, solid, oros) {
+    var C = M.PAL.roca, r = M.rng(77);
+    var roca = function (x, y) { var f = solid[y / T | 0]; return !!(f && f[x / T | 0]); };
+    for (var y = 0; y < buf.h; y++) for (var x = 0; x < buf.w; x++) if (roca(x, y)) buf.set(x, y, r() < 0.03 ? C[1] : C[2]);
+    piedras(buf, roca, 91, 5.5, function (q, v, rn) {
+      if (q > 0.8) return C[1];
+      var col = v > 0.5 ? C[4] : v > -0.45 ? C[3] : C[2];
+      return (v > 0.8 && rn() < 0.3) ? C[5] : col;
+    });
+    var g = M.rng(13);
+    for (var k = 0; k < 60; k++) {                         // grietas
+      var gx = g() * buf.w | 0, gy = g() * buf.h | 0, len = 5 + (g() * 6 | 0);
       for (var i = 0; i < len; i++) {
-        buf.set(ox + gx, oy + gy, C[0]);
-        gx += r() < 0.5 ? 1 : (r() < 0.5 ? -1 : 0); gy += r() < 0.6 ? 1 : 0;
-        if (gx < 0 || gx >= T || gy >= T) break;
+        if (roca(gx, gy)) buf.set(gx, gy, C[0]);
+        gx += g() < 0.5 ? 1 : (g() < 0.5 ? -1 : 0); gy += g() < 0.6 ? 1 : 0;
       }
     }
-    pepita(buf, ox, oy, r, oros);
+    for (var rr = 0; rr < ROWS; rr++) for (var c = 0; c < COLS; c++) {
+      if (solid[rr][c]) pepita(buf, c * T, rr * T, M.rng(rr * 97 + c * 13 + 5), oros);
+    }
   }
   /* Pepita de oro incrustada (brilla con la luz): una de cada cuatro celdas. */
   function pepita(buf, ox, oy, r, oros) {
@@ -1306,12 +1335,12 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
   function terreno(solid, oros, tiles) {
     var buf = new M.Buf(M.W, WH);
     var isSolid = function (r, c) { return r < 0 ? false : (r >= ROWS || c < 0 || c >= COLS) ? true : solid[r][c]; };
+    if (!tiles) rocaGlobal(buf, solid, oros);
     for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
       if (!solid[r][c]) continue;
       var ox = c * T, oy = r * T;
       var t = !isSolid(r - 1, c), b = !isSolid(r + 1, c), l = !isSolid(r, c - 1), rr = !isSolid(r, c + 1);
       if (tiles) { tiles.pintar(buf, ox, oy, (t ? 1 : 0) | (rr ? 2 : 0) | (b ? 4 : 0) | (l ? 8 : 0), r * 97 + c * 13 + 5, oros); continue; }
-      rocaTile(buf, ox, oy, r * 97 + c * 13 + 5, oros);
       for (var y = 0; y < 4; y++) for (var x = 0; x < ESQUINA[y]; x++) {
         if (t && l) buf.clear(ox + x, oy + y);
         if (t && rr) buf.clear(ox + T - 1 - x, oy + y);
@@ -1321,14 +1350,14 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     }
     if (!tiles) M.outlinePass(buf, M.PAL.roca[5], M.PAL.roca[0], M.PAL.roca[4]);
     var rnd = M.rng(42), P = M.PAL.pasto;
-    for (c = 0; c < COLS; c++) {
+    for (c = 0; c < COLS; c++) {                               // pasto de la superficie
       if (!solid[6][c]) continue;
       ox = c * T; oy = 6 * T;
       for (x = 0; x < T; x++) {
         if (!buf.a(ox + x, oy + 1)) continue;
-        buf.set(ox + x, oy, P[3]); buf.set(ox + x, oy + 1, P[2]); buf.set(ox + x, oy + 2, P[1]);
-        if (rnd() < 0.5) buf.set(ox + x, oy + 3, P[1]);
-        if (rnd() < 0.2) buf.set(ox + x, oy + 4, P[0]);
+        buf.set(ox + x, oy, P[3]); buf.set(ox + x, oy + 1, P[2]); buf.set(ox + x, oy + 2, P[2]);
+        buf.set(ox + x, oy + 3, P[1]); buf.set(ox + x, oy + 4, rnd() < 0.5 ? P[1] : P[0]);
+        if (rnd() < 0.5) buf.set(ox + x, oy + 5, P[0]);
         if (rnd() < 0.35) { var h = 1 + (rnd() * 4 | 0); for (var k = 1; k <= h; k++) buf.set(ox + x, oy - k, k === h ? P[3] : P[2]); }
         if (rnd() < 0.03) { buf.set(ox + x, oy - 3, rnd() < 0.5 ? '#FF8FB1' : '#FFE066'); buf.set(ox + x, oy - 2, P[1]); buf.set(ox + x, oy - 1, P[1]); }
       }
@@ -1345,50 +1374,19 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     return buf.canvas();
   }
 
-  /* ---------- Pared del fondo (fria, oscura) con fosiles numericos ---------- */
-  var GLIFOS = {
-    '0': ['111', '101', '101', '101', '111'], '1': ['010', '110', '010', '010', '111'], '2': ['111', '001', '111', '100', '111'],
-    '3': ['111', '001', '111', '001', '111'], '4': ['101', '101', '111', '001', '001'], '5': ['111', '100', '111', '001', '111'],
-    '6': ['111', '100', '111', '101', '111'], '7': ['111', '001', '010', '010', '010'], '8': ['111', '101', '111', '101', '111'],
-    '9': ['111', '101', '111', '001', '111'], '+': ['000', '010', '111', '010', '000'], '-': ['000', '000', '111', '000', '000'],
-    '=': ['000', '111', '000', '111', '000'], 'tri': ['00100', '01010', '10001', '11111', '00000'], 'sq': ['1111', '1001', '1001', '1111', '0000']
-  };
-  function glifo(buf, ch, x, y, col, sombra) {
-    GLIFOS[ch].forEach(function (row, j) {
-      row.split('').forEach(function (v, i) {
-        if (v !== '1') return;
-        buf.rect(x + i * 2 + 1, y + j * 2 + 1, 2, 2, sombra);
-        buf.rect(x + i * 2, y + j * 2, 2, 2, col);
-      });
-    });
-  }
+  /* ---------- Pared del fondo (fria, oscura, sin numeros) ----------
+     Sin numeros ni signos grabados: en un juego de numeros compiten con los
+     instrumentos. Baja por todo el pozo (sin corte recto que parezca piso). */
   function pared(solid) {
-    var buf = new M.Buf(M.W, WH), S = M.PAL.pizarra, keys = Object.keys(GLIFOS);
-    var hueco = function (r, c) { return c >= 8 && c <= 11 && r >= 12 && r <= 17; };
-    for (var r = 6; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
-      if (solid[r][c] || hueco(r, c)) continue;
-      var ox = c * T, oy = r * T, rr = M.rng(r * 131 + c * 17);
-      for (var y = 0; y < T; y++) for (var x = 0; x < T; x++) buf.set(ox + x, oy + y, rr() < 0.12 ? S[0] : S[1]);
-      var n = 3 + (rr() * 2 | 0);
-      for (var k = 0; k < n; k++) {
-        var cx = rr() * T, cy = rr() * T, rx = 7 + rr() * 6, ry = 5 + rr() * 5;
-        for (y = Math.max(0, cy - ry | 0); y < Math.min(T, cy + ry + 1); y++) for (x = Math.max(0, cx - rx | 0); x < Math.min(T, cx + rx + 1); x++) {
-          var nx = (x + 0.5 - cx) / rx, ny = (y + 0.5 - cy) / ry, q = nx * nx + ny * ny;
-          if (q > 1) continue;
-          var v = -(nx * 0.75 + ny * 0.9);
-          buf.set(ox + x, oy + y, q > 0.82 ? S[0] : v > 0.55 ? S[3] : S[2]);
-        }
-      }
-      /* Sin numeros ni signos grabados: en un juego de numeros compiten con los
-         instrumentos (panel de expertos, 27 sep). Se consumen los mismos
-         aleatorios para que la pared no cambie. */
-      if (rr() < 0.22) { rr(); rr(); rr(); }
-    }
+    var buf = new M.Buf(M.W, WH), S = M.PAL.pizarra, r = M.rng(55);
+    var muro = function (x, y) { var f = y / T | 0, c = x / T | 0; return f >= 6 && f < ROWS && !solid[f][c]; };
+    for (var y = 0; y < buf.h; y++) for (var x = 0; x < buf.w; x++) if (muro(x, y)) buf.set(x, y, r() < 0.1 ? S[0] : S[1]);
+    piedras(buf, muro, 57, 4.5, function (q, v) { return q > 0.82 ? S[0] : v > 0.55 ? S[3] : S[2]; });
     M.outlinePass(buf, S[3], S[0], null);
     return buf.canvas();
   }
 
-  /* ---------- Props: polea, cristales, antorchas, faroles ---------- */
+  /* ---------- Props: castillete, cristales, antorchas, faroles ---------- */
   function cristal(buf, x, yb, pal, seed) {
     var r = M.rng(seed);
     [[0, 13, 4], [-5, 8, 3], [5, 9, 3], [-9, 5, 2]].forEach(function (q) {
@@ -1399,33 +1397,66 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       }
     });
   }
-  function props(fuentes, img, conPolea) {
-    var buf = new M.Buf(M.W, WH), Wd = M.PAL.madera;
-    if (conPolea) polea(buf, Wd);
-    return propsResto(buf, fuentes, img, Wd);
+  /* Linea gruesa de madera con luz a la izquierda y sombra a la derecha. */
+  function viga(buf, x0, y0, x1, y1, Wd) {
+    M.drawLine(buf, x0, y0, x1, y1, Wd[1], 3);
+    M.drawLine(buf, x0, y0, x1, y1, Wd[2], 2);
+    M.drawLine(buf, x0, y0, x1, y1, Wd[3], 1);
   }
-  function polea(buf, Wd) {
-    buf.rect(248, 36, 6, 158, Wd[1]); buf.rect(248, 36, 2, 158, Wd[2]);
-    buf.rect(386, 36, 6, 158, Wd[1]); buf.rect(386, 36, 2, 158, Wd[2]);
-    buf.rect(242, 32, 156, 7, Wd[2]); buf.rect(242, 32, 156, 2, Wd[3]); buf.rect(242, 37, 156, 2, Wd[1]);
-    for (var i = 0; i < 26; i++) { buf.set(254 + i, 70 - i, Wd[1]); buf.set(255 + i, 70 - i, Wd[2]); buf.set(386 - i, 70 - i, Wd[1]); buf.set(385 - i, 70 - i, Wd[2]); }
-    for (var y = -10; y <= 10; y++) for (var x = -10; x <= 10; x++) {
-      var d = Math.hypot(x, y);
-      if (d <= 10 && d > 7.5) buf.set(ROPE_X + x, 50 + y, d > 9.2 ? Wd[0] : (x + y < 0 ? Wd[3] : Wd[2]));
-      else if (d <= 7.5 && (Math.abs(x) < 1 || Math.abs(y) < 1 || Math.abs(x - y) < 1 || Math.abs(x + y) < 1)) buf.set(ROPE_X + x, 50 + y, Wd[1]);
+  /* Castillete de mina en A: patas abiertas, travesaños bajos, guias del
+     montacargas, techo a dos aguas con banderin y una rueda grande en el
+     vertice. Es alto (sube por el cielo, sobre y = 0) para que el montacargas
+     llegue a +10 m sin tocar la rueda. A la derecha, el torno con su cable.
+     Se dibuja en su propio buffer desplazado CAST_OY px hacia arriba. */
+  var CAST_OY = 140, APEX = -86;
+  var RUEDA = { x: POZO_X, y: APEX + 12, r: 13 }, TORNO = { x: 452, y: 178 };
+  function castillete() {
+    var buf = new M.Buf(M.W, SURF + CAST_OY), Y = function (y) { return y + CAST_OY; };
+    var Wd = M.PAL.madera, Lm = M.PAL.llama;
+    viga(buf, 236, Y(SURF), 308, Y(APEX + 4), Wd); viga(buf, 404, Y(SURF), 332, Y(APEX + 4), Wd);
+    var guiaIzq = POZO_X - PLAT.ancho / 2 - 6, guiaDer = POZO_X + PLAT.ancho / 2 + 5;
+    var ancho = function (y) { return Math.round((SURF - y) * 72 / (SURF - APEX - 4)); };
+    [0, 60, 120, 160].forEach(function (y) {                          // travesaños, fuera del recorrido
+      var dx = ancho(y);
+      buf.rect(236 + dx, Y(y), guiaIzq - (236 + dx), 3, Wd[2]); buf.rect(236 + dx, Y(y), guiaIzq - (236 + dx), 1, Wd[3]);
+      buf.rect(guiaDer, Y(y), (404 - dx) - guiaDer, 3, Wd[2]); buf.rect(guiaDer, Y(y), (404 - dx) - guiaDer, 1, Wd[3]);
+    });
+    buf.rect(guiaIzq - 1, Y(RUEDA.y + RUEDA.r + 2), 2, SURF - RUEDA.y - RUEDA.r - 2, Wd[1]);   // guias
+    buf.rect(guiaDer, Y(RUEDA.y + RUEDA.r + 2), 2, SURF - RUEDA.y - RUEDA.r - 2, Wd[1]);
+    for (var j = 0; j < 12; j++) {                                    // techo a dos aguas
+      buf.rect(POZO_X - 6 - j * 2, Y(APEX - 22 + j), 12 + j * 4, 1, j === 0 ? Wd[3] : (j % 3 === 0 ? Wd[1] : '#9A3B2C'));
     }
-    buf.rect(ROPE_X - 2, 48, 4, 4, '#8C8C9C');
+    buf.rect(POZO_X - 30, Y(APEX - 10), 60, 2, Wd[0]);
+    buf.rect(POZO_X, Y(APEX - 38), 1, 16, '#5B5B6E');                  // mastil y banderin
+    for (var f = 0; f < 6; f++) buf.rect(POZO_X + 1, Y(APEX - 37 + f), 10 - f * 1.6 | 0, 1, f < 2 ? Lm[3] : Lm[2]);
+    for (var y = -RUEDA.r; y <= RUEDA.r; y++) for (var x = -RUEDA.r; x <= RUEDA.r; x++) {   // rueda
+      var d = Math.hypot(x, y);
+      if (d <= RUEDA.r && d > RUEDA.r - 2.6) buf.set(RUEDA.x + x, Y(RUEDA.y + y), d > RUEDA.r - 0.8 ? Wd[0] : (x + y < 0 ? Wd[3] : Wd[2]));
+      else if (d <= RUEDA.r - 2.6 && (Math.abs(x) < 1 || Math.abs(y) < 1 || Math.abs(x - y) < 1 || Math.abs(x + y) < 1)) buf.set(RUEDA.x + x, Y(RUEDA.y + y), Wd[1]);
+    }
+    buf.rect(RUEDA.x - 2, Y(RUEDA.y - 2), 4, 4, '#8C8C9C');
+    M.drawLine(buf, RUEDA.x + RUEDA.r - 1, Y(RUEDA.y), TORNO.x, Y(TORNO.y - 4), M.PAL.cuerda[1], 1);
+    buf.rect(TORNO.x - 12, Y(TORNO.y - 2), 3, SURF - TORNO.y + 2, Wd[1]); buf.rect(TORNO.x + 10, Y(TORNO.y - 2), 3, SURF - TORNO.y + 2, Wd[1]);
+    for (y = -6; y <= 6; y++) for (x = -9; x <= 9; x++) buf.set(TORNO.x + x, Y(TORNO.y + y), Math.abs(y) > 4 ? Wd[0] : (y < -1 ? Wd[3] : Wd[2]));
+    buf.rect(TORNO.x + 13, Y(TORNO.y - 1), 6, 2, '#5B5B6E'); buf.rect(TORNO.x + 18, Y(TORNO.y - 1), 2, 7, '#5B5B6E');
+    M.silhouetteOutline(buf, M.PAL.contorno);
+    return buf.canvas();
   }
-  function propsResto(buf, fuentes, img, Wd) {
+  function props(fuentes, img) {
+    var buf = new M.Buf(M.W, WH), Wd = M.PAL.madera;
     cristal(buf, 182, 384, M.PAL.cian, 1); fuentes.push({ x: 182, y: 374, r: 70, c: '127,227,240', kind: 'crystal', ph: 0 });
     cristal(buf, 470, 512, M.PAL.magenta, 2); fuentes.push({ x: 470, y: 502, r: 70, c: '240,139,234', kind: 'crystal', ph: 2 });
     cristal(buf, 528, 512, M.PAL.cian, 3); fuentes.push({ x: 528, y: 504, r: 55, c: '127,227,240', kind: 'crystal', ph: 4 });
     cristal(buf, 112, 576, M.PAL.magenta, 4); fuentes.push({ x: 112, y: 566, r: 65, c: '240,139,234', kind: 'crystal', ph: 1 });
+    // Mas cristales hacia lo hondo: lo profundo es mas valioso, no mas oscuro.
+    cristal(buf, 300, 606, M.PAL.cian, 5); fuentes.push({ x: 300, y: 596, r: 60, c: '127,227,240', kind: 'crystal', ph: 3 });
+    cristal(buf, 350, 606, M.PAL.magenta, 6); fuentes.push({ x: 350, y: 596, r: 60, c: '240,139,234', kind: 'crystal', ph: 5 });
     [[102, 318], [500, 452], [182, 542]].forEach(function (q) {   // la del hueco del topo, lejos de su cabeza
       if (!img.antorcha) { buf.rect(q[0] - 1, q[1], 3, 12, Wd[1]); buf.set(q[0] - 1, q[1], Wd[3]); buf.rect(q[0] - 3, q[1] + 11, 7, 2, '#5B5B6E'); }
       fuentes.push({ x: q[0], y: q[1] - 4, r: 100, c: '255,176,90', kind: 'torch', ph: q[0] });
     });
-    [[258, 262, 1], [382, 336, -1], [258, 470, 1]].forEach(function (q) {
+    // Faroles del pozo, con el soporte apoyado en la roca (x 255 | 384).
+    [[256, 262, 1], [383, 336, -1], [256, 470, 1]].forEach(function (q) {
       buf.rect(q[2] > 0 ? q[0] : q[0] - 8, q[1] - 12, 9, 2, '#5B5B6E'); buf.rect(q[0] + q[2] * 7, q[1] - 12, 1, 4, '#5B5B6E');
       fuentes.push({ x: q[0] + q[2] * 7, y: q[1] - 1, r: 80, c: '255,200,112', kind: 'lantern', ph: q[1] });
     });
@@ -1433,18 +1464,32 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     return buf.canvas();
   }
 
+  /* Plataforma del montacargas: piso de tablones y barandilla baja. Se
+     dibuja una vez en un canvas (y delante del explorador, con realce).
+     `PLAT_Y` = fila del piso dentro de ese canvas. */
+  var PLAT_Y = PLAT.baranda + 1;
+  function imagenPlataforma() {
+    var Wd = M.PAL.madera, a = PLAT.ancho, h = PLAT.baranda;
+    var b = new M.Buf(a + 2, h + PLAT.piso + 3), x0 = 1, piso = PLAT_Y;
+    b.rect(x0, piso, a, PLAT.piso, Wd[2]); b.rect(x0, piso, a, 1, Wd[3]);
+    for (var i = 6; i < a; i += 8) b.rect(x0 + i, piso + 1, 1, PLAT.piso - 1, Wd[1]);
+    b.rect(x0, piso - h, 2, h, Wd[2]); b.rect(x0 + a - 2, piso - h, 2, h, Wd[2]);
+    b.rect(x0, piso - h, a, 1, Wd[3]); b.rect(x0, piso - (h >> 1), a, 1, Wd[2]);
+    M.silhouetteOutline(b, M.PAL.contorno);
+    return b.canvas();
+  }
+
   BIOMAS.caverna = {
     nombre: 'caverna',
-    constantes: { T: T, MET: MET, SURF: SURF, ROPE_X: ROPE_X, DMIN: DMIN, DMAX: DMAX, altoMundo: WH, yOf: yOf },
+    constantes: { T: T, MET: MET, SURF: SURF, POZO_X: POZO_X, DMIN: DMIN, DMAX: DMAX, altoMundo: WH, yOf: yOf, PLAT: PLAT },
 
-    /* Carga el arte procesado (window.SAMSAN_IMG.caverna, data URIs que
-       incrusta tools/build.py). Sin arte, resuelve al instante y todo se
-       dibuja por codigo. Se llama antes de crear(). */
+    /* Carga el arte procesado (window.SAMSAN_IMG, data URIs que incrusta
+       tools/build.py). Sin arte, resuelve al instante y todo se dibuja por
+       codigo. Se llama antes de crear(). */
     cargar: function () {
       var I = window.SAMSAN_IMG || {}, src = {}, listo = {};
       [I.comun || {}, I.caverna || {}].forEach(function (o) { Object.keys(o).forEach(function (k) { src[k] = o[k]; }); });
-      var claves = Object.keys(src);
-      return Promise.all(claves.map(function (k) {
+      return Promise.all(Object.keys(src).map(function (k) {
         return M.sprites.cargar(src[k]).then(function (c) { listo[k] = c; }, function () { /* se dibuja por codigo */ });
       })).then(function () { BIOMAS.caverna.arte = listo; return listo; });
     },
@@ -1455,32 +1500,18 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       var IMG = BIOMAS.caverna.arte || {};
       if (!op.tiles && IMG['tiles-roca']) op.tiles = pintorTiles(IMG['tiles-roca']);
       L.altoMundo = WH;
+      L.camMin = -CAST_OY + 20;                  // se ve el cielo sobre la torre
       var solid = mapa(), oros = [], fuentes = [];
 
       M.capas.lejano(L, { fondo: ['#15142B', '#221F44'], colorA: '#2E3262', planoA: '#1B1C38', colorB: '#1C1D3E', planoB: '#141429',
         brillo: '127,227,240', brillosY: 380, ancla: 250, suelo: 600, techo: 376 });
       M.capas.superficie(L, { superficie: SURF, cielo: ['#5FA8F5', '#A9D8FF', '#FFDDB0'], sol: { x: 520, y: 58, factor: 0.12 } });
-      M.capas.niebla(L, { color: '120,104,190', alfa: 0.09, velo: 0.1, desde: SURF + 60, hasta: WH, bandas: 5 });
+      M.capas.niebla(L, { color: '120,104,190', alfa: 0.07, velo: 0.06, desde: SURF + 60, hasta: WH, bandas: 5 });
       M.capas.imagen(L, 30, pared(solid));
-      /* Cuerda: baja de la polea y termina en el arnes del explorador (su
-         cinturon). Cuelga de ella; no hace falta que la agarre. */
-      /* Modo sin cuerda (portada, desde el panel de expertos del 27 sep): ni
-         marco ni polea ni cuerda; el explorador de pie en `op.suelo`. */
-      var conCuerda = op.cuerda !== false, suelo = op.suelo || null;
-      L.capa('mundo', 35, function (bx, camI) {
-        if (!conCuerda) return;
-        var R = M.PAL.cuerda, fin = Math.round(cinturon());
-        for (var y = 59; y < fin; y++) {
-          var sy = y - camI; if (sy < -2 || sy > L.H + 2) continue;
-          var t = (y + Math.floor(y / 3)) % 3;
-          bx.fillStyle = t === 0 ? R[0] : R[1]; bx.fillRect(ROPE_X - 1, sy, 1, 1);
-          bx.fillStyle = t === 1 ? R[0] : R[2]; bx.fillRect(ROPE_X, sy, 1, 1);
-        }
-      });
       M.capas.imagen(L, 40, terreno(solid, oros, op.tiles || null));
-      M.capas.imagen(L, 45, props(fuentes, IMG, conCuerda));
-      /* La carretilla de PixelLab viene en tres cuartos (rieles en diagonal) y en
-         un mundo de lado parece flotar: queda fuera hasta tener una de perfil. */
+      var CAST = castillete();
+      L.capa('mundo', 32, function (bx, camI) { bx.drawImage(CAST, 0, -CAST_OY - camI); });
+      M.capas.imagen(L, 45, props(fuentes, IMG));
       var decorado = [['cofre', 226, 384]].filter(function (d) { return IMG[d[0]]; });
       L.capa('mundo', 46, function (bx, camI) {
         decorado.forEach(function (d) {
@@ -1512,64 +1543,61 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         });
       });
 
-      /* ---------- Personajes ---------- */
-      var exp = { pos: op.pos == null ? -15 : op.pos, posAnim: 0, trepa: 0, ultimo: 0, anim: M.sprites.animador() };
-      exp.posAnim = exp.ultimo = exp.pos;
-      /* Con arte de PixelLab (assets/img/mascota-*.png, ya procesado): pose de
-         frente en reposo y al celebrar, de espalda al trepar (volteada cada
-         medio metro: mano sobre mano), con el casco de minero de la Caverna.
-         Sin arte: el explorador provisional por codigo. */
+      /* ---------- Explorador en el montacargas ---------- */
+      var exp = { pos: op.pos == null ? -15 : op.pos, posAnim: 0, anim: M.sprites.animador(), rect: null };
+      exp.posAnim = exp.pos;
+      /* Con arte de PixelLab (assets/img/mascota-base.png, ya procesado): de
+         frente, con el casco de minero de la Caverna. Sin arte: el explorador
+         provisional por codigo. `lampara`: la luz del casco respecto a los pies. */
       function juego(tono) {
         if (!IMG['mascota-base']) {
-          var j = M.sprites.juegoExplorador(tono), E = M.sprites.EXPLORADOR;
-          j.ax = E.manoX + 1; j.cy = E.cinturaY + 1; j.lampara = { x: -10, y: -26 }; j.codigo = true;
+          var j = M.sprites.juegoExplorador(tono);
+          j.ax = 17; j.lampara = { x: -4, y: -42 }; j.codigo = true;
           return j;
         }
-        var base = IMG['mascota-base'], esp = IMG['mascota-espalda'] || base;
-        if (tono) { base = M.sprites.conPiel(base, tono); esp = M.sprites.conPiel(esp, tono); }
-        /* Cabeza medida en los PNG procesados: centro en x y fila de la frente. */
+        var base = IMG['mascota-base'];
+        if (tono) base = M.sprites.conPiel(base, tono);
         var casco = IMG['sombrero-minero'];
-        var A = casco ? M.sprites.conSombrero(base, casco, CABEZA.frente) : base;
-        var B = casco ? M.sprites.conSombrero(esp, casco, CABEZA.espalda) : esp;
-        var arriba = A.arriba || 0;
+        var A = casco ? M.sprites.conSombrero(base, casco, CABEZA) : base;
         return {
-          A: A, B: B, B2: M.sprites.espejo(B), C: A,
-          fantasma: M.sprites.silueta(A, [127, 227, 240]),
-          // Hebilla del cinturon medida en el PNG (x 24, fila 43): ahi se engancha la cuerda.
-          ax: HEBILLA.x + (A.izq || 0), cy: HEBILLA.y + arriba,
-          lampara: { x: casco ? 6 : 0, y: -HEBILLA.y - arriba + (casco ? 6 : 4) } // lampara del casco, respecto al cinturon
+          A: A, C: A,
+          ax: Math.round(base.width / 2) + (A.izq || 0),
+          lampara: { x: casco ? 6 : 0, y: -A.height + (casco ? 8 : 6) }
         };
       }
-      var SPR = juego(op.piel);
-      function anclaX() { return suelo ? suelo.x : ROPE_X; }
-      function cinturaMundo() { return suelo ? suelo.pies - (SPR.A.height - SPR.cy) : yOf(exp.posAnim); }
-      /* Altura del cinturon en el mundo, con el mismo rebote con que se dibuja. */
-      function cinturon() { return yOf(exp.posAnim) + exp.anim.rebote(L.time, L.opts.smooth); }
-      /* Mosqueton de metal en la hebilla, con el ultimo tramo de cuerda que
-         entra en el: 9 x 15 px, contorneado para leerse sobre la ropa. */
-      var MOSQUETON = (function () {
-        var b = new M.Buf(9, 15), R = M.PAL.cuerda;
-        for (var y = 1; y < 7; y++) { b.set(4, y, y % 3 === 0 ? R[0] : R[1]); b.set(5, y, y % 3 === 1 ? R[0] : R[2]); }
-        var anillo = ['.XXXXX.', 'XHHHHSX', 'XH...SX', 'XH...SX', 'XS...SX', '.XSSSX.'];
-        anillo.forEach(function (row, j) {
-          row.split('').forEach(function (c, i) {
-            if (c === 'X') b.set(1 + i, 7 + j, '#8C8C9C');
-            else if (c === 'H') b.set(1 + i, 7 + j, '#E8E8F4');
-            else if (c === 'S') b.set(1 + i, 7 + j, '#5B5B6E');
-          });
-        });
-        M.silhouetteOutline(b, M.PAL.contorno);
-        return b.canvas();
-      })();
+      var SPR = juego(op.piel), PLATAFORMA = imagenPlataforma();
       exp.fijarPiel = function (tono) { SPR = juego(tono); };
       exp.sprites = function () { return SPR; };
       exp.celebrar = function () { exp.anim.celebrar(); };
-      exp.cinturaY = function () { return yOf(exp.posAnim); };
-      var A = M.sprites.EXPLORADOR;
+      /* Piso de la plataforma en el mundo: la posicion que marca la regla. */
+      exp.piso = function () { return yOf(exp.posAnim); };
+      function alto() { return SPR.A.height; }
+      function gancho() { return exp.piso() - alto() - 14; }
 
-      /* Topo minero, compañero de la Caverna: arte de PixelLab si existe
-         (temas/maths/img/companero-topo.png); si no, el provisional por codigo.
-         `lampara`: la luz del casco, respecto a (x, pies). */
+      /* Cable principal: de la rueda del castillete al gancho, sobre la cabeza. */
+      L.capa('mundo', 35, function (bx, camI) {
+        var R = M.PAL.cuerda, fin = Math.round(gancho());
+        for (var y = RUEDA.y + RUEDA.r; y < fin; y++) {
+          var sy = y - camI; if (sy < -2 || sy > L.H + 2) continue;
+          var t = (y + Math.floor(y / 3)) % 3;
+          bx.fillStyle = t === 0 ? R[0] : R[1]; bx.fillRect(POZO_X - 1, sy, 1, 1);
+          bx.fillStyle = t === 1 ? R[0] : R[2]; bx.fillRect(POZO_X, sy, 1, 1);
+        }
+      });
+      /* Cables en V del gancho a las esquinas de la barandilla, y el gancho. */
+      L.capa('mundo', 58, function (bx, camI) {
+        var g = Math.round(gancho()) - camI, p = Math.round(exp.piso()) - camI - PLAT.baranda, a = PLAT.ancho / 2 - 1;
+        bx.fillStyle = M.PAL.cuerda[0];
+        [-1, 1].forEach(function (lado) {
+          var n = Math.max(1, p - g);
+          for (var i = 0; i <= n; i++) bx.fillRect(Math.round(POZO_X + lado * a * i / n), g + i, 1, 1);
+        });
+        bx.fillStyle = M.PAL.contorno; bx.fillRect(POZO_X - 3, g - 3, 6, 5);
+        bx.fillStyle = '#8C8C9C'; bx.fillRect(POZO_X - 2, g - 2, 4, 3);
+        bx.fillStyle = '#E8E8F4'; bx.fillRect(POZO_X - 2, g - 2, 2, 1);
+      });
+
+      /* Topo minero, compañero de la Caverna. `lampara`: respecto a (x, pies). */
       var topoArte = IMG['companero-topo'];
       var topo = topoArte
         ? { x: 136, pies: 384, anim: M.sprites.animador(), img: topoArte, imgB: topoArte,
@@ -1577,12 +1605,12 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         : { x: 140, pies: 384, anim: M.sprites.animador(), img: M.sprites.topo(false).canvas(), imgB: M.sprites.topo(true).canvas(),
             lampara: { x: M.sprites.TOPO.lamparaX - 13, y: -19 } };
 
-      var luz = M.crearLuz(L, { ambiente: '#342D52', superficie: SURF, pozo: { x: 252, w: 136, alto: 240 },
+      var luz = M.crearLuz(L, { ambiente: '#3A3358', superficie: SURF, pozo: { x: 252, w: 136, alto: 240 },
         rayos: { x: 262, n: 4, paso: 30 }, sol: { x: 520, y: 58, factor: 0.12 } });
       luz.fuentes = fuentes; luz.brillos = oros;
       luz.dinamicas = function () {
         return [
-          { x: anclaX() + SPR.lampara.x, y: cinturaMundo() + SPR.lampara.y, r: 85, c: '255,240,200', kind: 'lamp', ph: 0 },
+          { x: POZO_X + SPR.lampara.x, y: exp.piso() + SPR.lampara.y, r: 85, c: '255,240,200', kind: 'lamp', ph: 0 },
           { x: topo.x + topo.lampara.x, y: topo.pies + topo.lampara.y, r: 48, c: '255,240,200', kind: 'lamp', ph: 0 }
         ];
       };
@@ -1597,42 +1625,38 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
 
       L.alActualizar(function (dt) {
         var suave = L.opts.smooth;
-        if (suave) exp.posAnim += (exp.pos - exp.posAnim) * Math.min(1, dt * 9); else exp.posAnim = exp.pos;
+        if (suave) exp.posAnim += (exp.pos - exp.posAnim) * Math.min(1, dt * 6); else exp.posAnim = exp.pos;
         if (Math.abs(exp.pos - exp.posAnim) < 0.01) exp.posAnim = exp.pos;
         var moviendo = Math.abs(exp.pos - exp.posAnim) > 0.06;
-        exp.trepa += Math.abs(exp.posAnim - exp.ultimo) * 1.6; exp.ultimo = exp.posAnim;
-        exp.anim.actualizar(dt, moviendo, suave, function () { part.polvo(ROPE_X - 6, yOf(exp.posAnim) + 12); });
+        exp.anim.actualizar(dt, moviendo, suave, function () { part.polvo(POZO_X - 20, exp.piso()); part.polvo(POZO_X + 20, exp.piso()); });
         topo.anim.actualizar(dt, false, suave);
-        if (!suelo) L.seguir(yOf(exp.posAnim));
+        if (op.camaraFija == null) L.seguir(exp.piso() - 30);
       });
       L.capa('mundo', 60, function (bx, camI) {
-        var a = exp.anim, par = (exp.trepa | 0) % 2, key;
-        if (SPR.codigo) {
-          key = a.alegria > 0 ? 'C' : (a.moviendo ? (par ? 'B' : 'A') : 'A');
-          if (a.parpadeo > 0) key += 'b';
-        } else key = a.alegria > 0 ? 'C' : (a.moviendo ? (par ? 'B' : 'B2') : 'A');
-        var img = SPR[key];
-        var pies = suelo ? suelo.pies - camI : yOf(exp.posAnim) - SPR.cy - camI + img.height;
-        L.realzar(img, M.sprites.dibujar(bx, img, anclaX() - SPR.ax, pies, a.sq, suelo ? Math.min(0, a.rebote(L.time, L.opts.smooth)) : a.rebote(L.time, L.opts.smooth)));
+        var a = exp.anim, img = SPR.codigo ? SPR[(a.alegria > 0 ? 'C' : 'A') + (a.parpadeo > 0 ? 'b' : '')] : SPR[a.alegria > 0 ? 'C' : 'A'];
+        var piso = Math.round(exp.piso()) - camI;
+        // En la plataforma solo salta hacia arriba (nunca se hunde en el piso).
+        var r = M.sprites.dibujar(bx, img, POZO_X - SPR.ax, piso, a.sq, Math.min(0, a.rebote(L.time, L.opts.smooth)));
+        L.realzar(img, r);
+        exp.rect = { x: r.x, y: r.y + camI, w: r.w, h: r.h };
         var ti = topo.anim.parpadeo > 0 ? topo.imgB : topo.img;
-        L.realzar(ti, M.sprites.dibujar(bx, ti, topo.x - ti.width / 2, topo.pies - camI, 0, topo.anim.rebote(L.time + 1.3, L.opts.smooth)));
-        // Mosqueton del arnes, delante del cinturon, con el ultimo tramo de cuerda.
-        if (!conCuerda) return;
-        var mx = ROPE_X - Math.floor(MOSQUETON.width / 2), my = Math.round(cinturon()) - camI - MOSQUETON.height + 5;
-        bx.drawImage(MOSQUETON, mx, my);
-        L.realzar(MOSQUETON, { x: mx, y: my, w: MOSQUETON.width, h: MOSQUETON.height });
+        L.realzar(ti, M.sprites.dibujar(bx, ti, topo.x - ti.width / 2, topo.pies - camI, 0, Math.min(0, topo.anim.rebote(L.time + 1.3, L.opts.smooth))));
+        var px = POZO_X - Math.round(PLATAFORMA.width / 2), py = piso - PLAT_Y;
+        bx.drawImage(PLATAFORMA, px, py);
+        L.realzar(PLATAFORMA, { x: px, y: py, w: PLATAFORMA.width, h: PLATAFORMA.height });
       });
       M.capas.primerPlano(L, { color: '#0C0812', desde: SURF + 30 });
 
-      if (suelo) L.fijarCam(op.cam == null ? SURF - L.H * 0.4 : op.cam);
-      else L.fijarCam(yOf(exp.pos) - L.H * 0.52);
+      if (op.camaraFija != null) L.fijarCam(op.camaraFija);
+      else L.fijarCam(yOf(exp.pos) - 30 - L.H * 0.52);
       var mapaInfo = {
         T: T, filas: ROWS, columnas: COLS,
         roca: function (r, c) { return !!(solid[r] && solid[r][c]); },
-        /* Pared de pizarra visible: no es roca, esta bajo la superficie y no es el pozo abierto. */
-        pared: function (r, c) { return r >= 6 && r < ROWS && !solid[r][c] && !(c >= 8 && c <= 11 && r >= 12 && r <= 17) && !(c >= 8 && c <= 11); }
+        /* Pared de pizarra visible fuera del pozo abierto. */
+        pared: function (r, c) { return r >= 6 && r < ROWS && !solid[r][c] && !(c >= 8 && c <= 11); }
       };
-      return { L: L, luz: luz, particulas: part, explorador: exp, topo: topo, yOf: yOf, mapa: mapaInfo, constantes: this.constantes };
+      return { L: L, luz: luz, particulas: part, explorador: exp, topo: topo, yOf: yOf, mapa: mapaInfo,
+               plataforma: function () { return PLATAFORMA; }, PLAT_Y: PLAT_Y, constantes: this.constantes };
     }
   };
 })(window.SAMSAN_BIOMAS = window.SAMSAN_BIOMAS || {});
@@ -1642,11 +1666,11 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
 /* ============================================================
    SAMSAN — PORTADA
    La Caverna viva detras del aviso de "en construccion": el
-   explorador espera de pie en la superficie, junto a la boca de la
-   mina, y de vez en cuando da un saltito de alegria. El topo mira
-   desde su hueco. Es decoracion: no responde a nada ni pide nada.
-   Sin cuerda ni marco de polea (panel de expertos, 27 sep 2026):
-   una persona colgando se lee mal para un nino.
+   explorador baja y sube de pie en el montacargas de la mina, para
+   entre paradas y a veces celebra. El topo mira desde su hueco. Es
+   decoracion: no responde a nada ni pide nada.
+   Ningun personaje cuelga de una cuerda (panel de expertos, 27 sep
+   2026): los cables van a la plataforma, nunca a la persona.
    Con movimiento reducido se pinta un solo cuadro quieto.
    ============================================================ */
 (function () {
@@ -1656,18 +1680,22 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
   /* Primero el arte procesado (si lo hay); si no, todo va por codigo. */
   window.SAMSAN_BIOMAS.caverna.cargar().then(function () {
     var L = M.crearLienzo(cv, { quietoSiReducido: true });
-    var K = window.SAMSAN_BIOMAS.caverna.constantes;
-    var cav = window.SAMSAN_BIOMAS.caverna.crear(L, {
-      cuerda: false, suelo: { x: 212, pies: K.SURF }, cam: K.SURF - 150, piel: '#E8B088'
-    });
-    var espera = 5;
+    var cav = window.SAMSAN_BIOMAS.caverna.crear(L, { pos: 0, piel: '#E8B088' });
+    var K = cav.constantes, e = cav.explorador;
+    /* Baja metro a metro hacia cada parada y vuelve a la superficie. */
+    var paradas = [0, -8, -15, -8, 0], i = 0, meta = 0, paso = 0, espera = 3, llego = true;
     L.alActualizar(function (dt) {
-      espera -= dt;
-      if (espera <= 0) {
-        espera = 7;
-        cav.explorador.celebrar();
-        cav.particulas.estallido(212, K.SURF - 50);
+      if (e.pos !== meta) {
+        paso -= dt;
+        if (paso <= 0) { e.pos += e.pos < meta ? 1 : -1; paso = 0.22; }
+        return;
       }
+      if (!llego) {
+        llego = true;
+        if (meta === -15) { e.celebrar(); cav.particulas.estallido(K.POZO_X, K.yOf(e.pos) - 50); }
+      }
+      espera -= dt;
+      if (espera <= 0) { i = (i + 1) % paradas.length; meta = paradas[i]; llego = false; espera = 3.5; }
     });
     L.iniciar();
     window.__samsanPortada = { L: L, caverna: cav };

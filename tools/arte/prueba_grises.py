@@ -87,6 +87,8 @@ def media_anillo(img, fuera, dentro):
 
 
 def media_gris(img, r):
+    if not r:                  # la capa no está en pantalla en esta posición
+        return None
     x0, y0 = max(0, int(r["x"])), max(0, int(r["y"]))
     x1, y1 = min(img.width, int(r["x"] + r["w"])), min(img.height, int(r["y"] + r["h"]))
     if x1 <= x0 or y1 <= y0:

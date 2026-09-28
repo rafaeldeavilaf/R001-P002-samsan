@@ -55,8 +55,9 @@
       /* La gema vuela del mundo al contador (un elemento del HUD). */
       gemaVuela: function (xMundo, yMundo, destino, alLlegar) {
         var hr = destino.getBoundingClientRect(), vr = L.canvas.getBoundingClientRect();
+        /* Termina en el icono del contador (en px del lienzo). */
         voladoras.push({ t: 0, x0: xMundo * L.s, y0: (yMundo - L.cam.y) * L.s,
-          tx: (hr.left - vr.left + 18) * L.dpr, ty: (hr.top - vr.top + hr.height / 2) * L.dpr, fin: alLlegar });
+          tx: (hr.left - vr.left + Math.min(28, hr.width / 3)) * L.dpr, ty: (hr.top - vr.top + hr.height / 2) * L.dpr, fin: alLlegar });
       },
       volando: function () { return voladoras.length; }
     };
@@ -106,7 +107,8 @@
       var s = L.s, dpr = L.dpr;
       voladoras.forEach(function (f) {
         var t = f.t, e = 1 - Math.pow(1 - t, 3);
-        var cx = (f.x0 + f.tx) / 2, cy = Math.min(f.y0, f.ty) - 120 * dpr;
+        // El arco no sale del lienzo: la gema se ve todo el viaje.
+        var cx = (f.x0 + f.tx) / 2, cy = Math.max(24 * dpr, Math.min(f.y0, f.ty) - 120 * dpr);
         var x = (1 - e) * (1 - e) * f.x0 + 2 * (1 - e) * e * cx + e * e * f.tx;
         var y = (1 - e) * (1 - e) * f.y0 + 2 * (1 - e) * e * cy + e * e * f.ty;
         var z = Math.max(2, s * 1.4) * (1 + Math.sin(t * Math.PI) * 0.6);

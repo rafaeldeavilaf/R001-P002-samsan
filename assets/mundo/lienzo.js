@@ -80,7 +80,9 @@
 
     /* Camara: sigue un objetivo en el eje vertical del mundo. Con
        movimiento suave apagado (o movimiento reducido), salta. */
-    L.limiteCam = function (y) { return M.clamp(y, 0, Math.max(0, L.altoMundo - H)); };
+    /* `camMin` negativo deja ver cielo por encima del mundo (p. ej. una torre alta). */
+    L.camMin = cfg.camMin || 0;
+    L.limiteCam = function (y) { return M.clamp(y, L.camMin, Math.max(L.camMin, L.altoMundo - H)); };
     L.seguir = function (yMundo, fraccion) {
       L.cam.objetivo = L.limiteCam(yMundo - H * (fraccion == null ? 0.52 : fraccion));
     };
