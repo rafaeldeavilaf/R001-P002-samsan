@@ -1,0 +1,27 @@
+/* ============================================================
+   SAMSAN — BOCETOS (solo local). Encima de kit.css.
+   Estilos comunes de prototipos/comun/proto-comun.js: pantalla
+   inicial, gema grande en el centro y pantalla final. Cada boceto
+   trae sus propios estilos dentro de su .js si los necesita.
+   ============================================================ */
+.proto-inicio h2 { font-size: 1.5rem; }
+.proto-piel-rotulo { margin-top: 10px; font-weight: 800; }
+.proto-pieles .k-piel { width: 36px; height: 36px; }
+
+/* ---------- Gema grande en el centro ---------- */
+.proto-gema { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; pointer-events: none;
+  animation: proto-gema-entra .45s cubic-bezier(.2,1.6,.4,1); }
+.proto-gema p { margin: 6px 0 0; padding: 4px 14px; border-radius: 999px; background: #F7EFDD; border: 3px solid #1E1426; font-weight: 900; font-size: 1.4rem; }
+.proto-gema__brillo { position: absolute; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(255,247,214,.95), rgba(127,227,240,.35) 45%, transparent 70%); animation: proto-giro 1.3s ease-out; }
+.proto-gema__svg { position: relative; image-rendering: pixelated; filter: drop-shadow(0 0 10px rgba(127,227,240,.9)); }
+.proto-gema.is-vuela { animation: proto-gema-vuela .6s ease-in forwards; }
+@keyframes proto-gema-entra { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes proto-gema-vuela { to { transform: translate(-40%, -45%) scale(.2); opacity: 0; } }
+@keyframes proto-giro { from { transform: scale(.4) rotate(0); } to { transform: scale(1.1) rotate(90deg); } }
+
+.proto-final { text-align: center; }
+.proto-final__gemas { display: flex; justify-content: center; gap: 12px; margin: 14px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .proto-gema, .proto-gema.is-vuela, .proto-gema__brillo { animation: none; }
+}

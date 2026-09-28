@@ -8,7 +8,9 @@ assets/props.js + assets/engine.js) y el data.js de cada juego en UN .html
 autocontenido por juego, y genera las páginas del sitio con el kit nuevo
 (assets/kit.css) y la capa del mundo (assets/mundo/): la portada
 (index.html), las notas legales (legal.html) y, solo en local, la vitrina
-del bioma Caverna (_local/vitrina-caverna.html).
+del bioma Caverna (_local/vitrina-caverna.html) y cada boceto de
+prototipos/<materia>-<tema>/<nombre>.js (_local/proto-<materia>-<tema>-<nombre>.html,
+listados en _local/prototipos.json).
 
 Qué se publica lo decide el registro: `materias.js` para los temas de la
 base (temas/<materia>/<tema>/data.js) y `subjects.js` para los juegos viejos
@@ -409,17 +411,44 @@ def build_vitrina(kit, ui, brand, credits):
     return page
 
 
-def build_proto(kit, ui, brand, credits, cual, titulo):
-    """Solo local: prototipos de nucleo de La Mina (28 sep 2026) para que Rafael
-    elija jugando. No usan el motor: kit, capa del mundo, bioma y sus datos."""
-    page = head(titulo + " — " + brand, "Prototipo local de La Mina.", kit + SITE_CSS + read("assets", "sitio", "proto.css"), "maths", "en")
+PROTO = "prototipos"
+TITULO_RE = re.compile(r"^\s*/[/*]\s*titulo:\s*(.+?)\s*(?:\*/)?\s*$", re.M)
+
+
+def bocetos():
+    """Cada prototipos/<materia>-<tema>/<nombre>.js es un boceto: (carpeta, nombre, materia)."""
+    raiz = os.path.join(ROOT, PROTO)
+    if not os.path.isdir(raiz):
+        return []
+    lista = []
+    for carpeta in sorted(os.listdir(raiz)):
+        if carpeta == "comun" or not os.path.isdir(os.path.join(raiz, carpeta)):
+            continue
+        materia = carpeta.split("-")[0]
+        if not os.path.exists(os.path.join(ROOT, "temas", materia, "bioma.js")):
+            fail("%s/%s: la carpeta debe empezar por una materia con bioma (temas/<materia>/bioma.js)." % (PROTO, carpeta))
+        for f in sorted(os.listdir(os.path.join(raiz, carpeta))):
+            if f.endswith(".js"):
+                lista.append((carpeta, f[:-3], materia))
+    return lista
+
+
+def build_proto(kit, ui, brand, credits, carpeta, nombre, materia):
+    """Solo local: un boceto para que Rafael lo juegue antes de construir nada
+    (metodo del 28 sep 2026). No usa el motor: kit, capa del mundo, el bioma de
+    la materia, lo comun de prototipos/comun/ y el boceto. Titulo: primera
+    linea '// titulo: ...' del boceto."""
+    js = read(PROTO, carpeta, nombre + ".js")
+    m = TITULO_RE.search(js)
+    titulo = m.group(1) if m else nombre
+    page = head(titulo + " — " + brand, "Boceto local.", kit + SITE_CSS + read(PROTO, "comun", "proto.css"), materia, "en")
     page += ('<div class="k-pagina">\n<header>\n  <h1 class="k-titulo">' + html.escape(brand) + '</h1>\n'
              '  <p class="k-lema">' + html.escape(titulo) + '</p>\n</header>\n<main id="proto"></main>\n')
     page += foot(credits) + '</div>\n'
     page += '<script>\n' + ui + '\n</script>\n'
-    page += mundo_scripts("maths")
-    for partes in (("temas", "maths", "y6-la-mina", "prototipos.js"), ("assets", "sitio", "proto-comun.js"), ("assets", "sitio", "proto-" + cual + ".js")):
-        page += '<script>\n' + read(*partes) + '\n</script>\n'
+    page += mundo_scripts(materia)
+    page += '<script>\n' + read(PROTO, "comun", "proto-comun.js") + '\n</script>\n'
+    page += '<script>\n' + js + '\n</script>\n'
     page += '</body>\n</html>\n'
     return page
 
@@ -480,10 +509,14 @@ def main():
     # Copia local para que el enlace del pie funcione al jugar desde _local/.
     write(LOCAL + "/legal.html", legal)
     built.append((LOCAL + "/vitrina-caverna.html", write(LOCAL + "/vitrina-caverna.html", build_vitrina(kit, ui, brand, credits))))
-    if os.path.exists(os.path.join(ROOT, "temas", "maths", "y6-la-mina", "prototipos.js")):
-        for cual, titulo in (("excavar", "Prototype E: Dig to the gem"), ("cartas", "Prototype A: Jump cards"), ("globo", "Prototype: Balloon miner")):
-            rel = LOCAL + "/proto-" + cual + ".html"
-            built.append((rel, write(rel, build_proto(kit, ui, brand, credits, cual, titulo))))
+    # Bocetos: solo en _local/. La lista escrita le dice a tools/humo_prototipos.js
+    # cuales probar, sin tomar paginas viejas que ya no tienen fuente.
+    hechos = []
+    for carpeta, nombre, materia in bocetos():
+        rel = LOCAL + "/proto-" + carpeta + "-" + nombre + ".html"
+        built.append((rel, write(rel, build_proto(kit, ui, brand, credits, carpeta, nombre, materia))))
+        hechos.append(rel)
+    write(LOCAL + "/prototipos.json", json.dumps(hechos, indent=1) + "\n")
 
     for rel, _ in built:
         guard(rel)

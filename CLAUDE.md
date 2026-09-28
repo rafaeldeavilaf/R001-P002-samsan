@@ -18,6 +18,7 @@ python3 tools/arte/prueba_grises.py    # capturas en grises y contraste de panel
 python3 tools/arte/prueba_pipeline.py  # prueba procesar.py y tiles.py con PNG sintéticos
 node tools/verify_mundo.js             # lógica de la capa del mundo (assets/mundo/)
 python3 tools/panel_la_mina.py         # mide en navegador lo que evalúa el panel de La Mina (no es CI)
+node tools/humo_prototipos.js          # los bocetos de prototipos/ cargan sin errores de JS
 git add -A && git commit -m "..." && git push   # Actions verifica y publica
 ```
 
@@ -32,8 +33,10 @@ Los temas de la base siguen la estructura de abajo desde la etapa 2 (el primero 
 - `temas/<materia>/<tema>/data.js` — contenido de un tema. **Nunca se escribe a mano**; sale de su generador, que valida con `assert`.
 - `temas/<materia>/img/` — arte del bioma de esa materia.
 - `tools/gen/<materia>_<tema>.py` — generador de un tema, apoyado en `tools/gen/samsan_gen.py` (familias, variantes, sello de tres pasos, distractores, validaciones comunes).
+- `prototipos/` — bocetos grises para que Rafael juegue un reto antes de construirlo: `comun/` (inicio, gema, sonido) y `<materia>-<tema>/<nombre>.js`, con el nivel escrito a mano. Se construyen solo en `_local/` y nunca se publican. **Un boceto no entra a `temas/` sin pasar la prueba de Rafael** (método en `docs/decisiones-vigentes.md`). `maths-plantilla/gris.js` es el punto de partida.
 - `tools/arte/` — pipeline de arte. Ningún PNG entra al juego sin pasar por aquí. Sus dependencias de Python van en `requirements.txt`.
 - `docs/decisiones-vigentes.md` — fuente única de verdad.
+- `docs/referencia/` — documentos en estado `referencia` (sistema de diseño viejo, niveles y jefes, plan de ambientes, errores típicos de inglés, muestra de estilo aprobada).
 - `docs/direccion-grafica.md` — reglas gráficas, paletas, pipeline y lista de generaciones de PixelLab.
 - `docs/temas/<materia>-<tema>.md` — ficha de cada tema: objetivos, errores típicos, niveles, contratos.
 - Cada documento de `docs/` abre con `estado:` (`vigente`, `referencia` o `reemplazado`) y `actualizado:`. Actions falla si falta.

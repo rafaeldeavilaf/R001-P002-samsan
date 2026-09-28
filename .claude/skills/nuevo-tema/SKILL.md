@@ -7,7 +7,7 @@ description: Construye un tema del colegio sobre la base de SAMSAN, desde la fic
 
 Un tema es una ficha en `docs/temas/`, un generador en `tools/gen/`, sus datos generados, una entrada en `materias.js` y, si es la primera zona de su materia, el arte del bioma. El motor no se toca salvo para agregar una configuración genérica a una escena.
 
-Sigue los pasos en orden. No saltes el paso 4: sin él se vuelve a construir un examen con dibujitos.
+Sigue los pasos en orden. No saltes los pasos 4 y 5: sin ellos se vuelve a construir un examen con dibujitos. Cinco núcleos de La Mina se rechazaron por construir primero y probar después.
 
 ## 1. Partir de la ficha
 
@@ -23,7 +23,38 @@ Uno o dos por objetivo, propios del tema. Marca uno como eje. De ellos salen los
 
 Year 1 a 3: 8 ítems por nivel, instrucciones con voz, respuesta sin depender de leer. Year 4 a 6: 12 ítems por nivel.
 
-## 4. Verbo de cada nivel
+## 4. Reto de juego y boceto (con compuertas de Rafael)
+
+Antes de escenas, generador o arte:
+
+1. **Ficha de juego, sin código.** Una sección al principio de la ficha del tema:
+   - el verbo;
+   - qué hace difícil el reto además de la cuenta (tiempo, espacio, elegir bajo presión);
+   - cómo son los primeros 30 segundos;
+   - por qué se repite;
+   - dónde la matemática es la mecánica y no un control escondido;
+   - un juego de referencia del jugador (el mayor juega Minecraft, Fortnite y Rocket League).
+
+   **Compuerta:** Rafael la aprueba o la corta.
+2. **Un boceto gris.** Copia `prototipos/maths-plantilla/` como `prototipos/<materia>-<tema>/`:
+   - cajas y colores planos, sin arte ni generador;
+   - el nivel escrito a mano;
+   - tope de 1 h.
+
+   Prueba única: `python3 tools/build.py && node tools/humo_prototipos.js`.
+3. **Prueba de Rafael.** Él (y si puede, el jugador) lo juega 3 minutos:
+   - ¿se entiende sin leer instrucciones?
+   - ¿pide otra ronda?
+
+   **Compuerta:** si no pasa, una corrección o se descarta. Nada se pule antes.
+
+Reglas de diseño aprendidas:
+- Arriba es + y abajo es − (también la profundidad).
+- Un tipo de botón hace una sola acción.
+- Sin derrota: chocar o fallar detiene, no castiga.
+- Nunca un panel simulado decide si algo es divertido.
+
+## 5. Verbo de cada nivel
 
 | Escena | Úsala cuando el niño debe | Ejemplos |
 |---|---|---|
@@ -38,7 +69,7 @@ Prueba: si el nivel se puede jugar igual con cuatro botones, el verbo está mal.
 
 Si ninguna escena sirve, no inventes una en silencio: detente y explícale a Rafael qué verbo falta, con horas estimadas.
 
-## 5. Estructura del nivel
+## 6. Estructura del nivel
 
 - Tres tramos y un jefe que combina verbos ya vistos.
 - Cada tramo es un sello de tres ítems de la misma familia: concreto (manipula), pictórico (ve la figura y toca la respuesta), abstracto (formato del cuaderno del colegio, con teclado numérico en pantalla cuando aplica).
@@ -47,13 +78,13 @@ Si ninguna escena sirve, no inventes una en silencio: detente y explícale a Raf
 - La pista gráfica desaparece en el tercer tramo.
 - Error visible definido para cada verbo usado.
 
-## 6. Mundo y arte
+## 7. Mundo y arte
 
 La zona vive en el bioma de su materia. Contextos, personajes y textos originales, escritos en el generador, nunca en el motor.
 
 Si la materia no tiene bioma, sigue `docs/direccion-grafica.md`: define su paleta, pide a Rafael las generaciones de PixelLab de la tabla, pasa cada PNG por `tools/arte/procesar.py`, deriva los tiles con `tools/arte/tiles.py` y corre `tools/arte/prueba_grises.py`. Instrumentos pedagógicos siempre por código.
 
-## 7. Generador
+## 8. Generador
 
 Escribe `tools/gen/<materia>_<tema>.py` sobre `tools/gen/samsan_gen.py`. Valida con `assert`:
 
@@ -67,11 +98,11 @@ Escribe `tools/gen/<materia>_<tema>.py` sobre `tools/gen/samsan_gen.py`. Valida 
 
 Registra el tema en `materias.js`.
 
-## 8. Construir y verificar
+## 9. Construir y verificar
 
 Corre la definición de terminado de `CLAUDE.md`. Escribe `tools/verify_<materia>_<tema>.js`: juega cada nivel con la solución declarada y con una incorrecta, con ratón, táctil simulado y teclado, y toma capturas en 1366×768 y 390×844.
 
-## 9. Entregar
+## 10. Entregar
 
 Resume a Rafael en español, sin tecnicismos innecesarios:
 

@@ -70,7 +70,7 @@ jobs:
       - name: Documentos con estado
         run: |
           shopt -s nullglob
-          for f in docs/*.md docs/temas/*.md; do
+          for f in docs/*.md docs/temas/*.md docs/referencia/*.md; do
             head -5 "$f" | grep -q '^estado:' || { echo "$f no declara estado: en su encabezado"; exit 1; }
           done
 
@@ -109,6 +109,9 @@ jobs:
         run: |
           shopt -s nullglob
           for v in tools/verify_*.js; do echo "== $v"; node "$v"; done
+
+      - name: Humo de bocetos (solo carga sin errores; no se publican)
+        run: node tools/humo_prototipos.js
 
       - name: Preparar sitio
         run: |

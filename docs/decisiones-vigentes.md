@@ -115,16 +115,56 @@ Tiempo de la etapa 2 hasta aquí: unas 3,3 h de reloj (tope 60 h).
 
 **Prueba de Rafael y prototipos (28 sep 2026).** Rafael jugó La Mina y se aburrió en un minuto: cada pantalla era una sola decisión obvia (calcular y llevar el marcador), se contaban marcas porque la regla solo rotula múltiplos de 5, la recompensa no se entendía y la pantalla inicial mostraba los personajes del motor viejo. El panel simulado había proyectado 8/10 de diversión y se equivocó: midió coherencia y toques, no ganas de seguir jugando. **Regla desde ahora: la diversión la juzga Rafael jugando, nunca una proyección.** Un panel de gamers comparó seis núcleos y Rafael aprobó prototipar dos, solo locales y sin tocar el motor:
 
-- **E. Excavar** (`_local/proto-excavar.html`): pared de bloques con números con signo; se cava un camino y cada bloque suma al contador del pico; la puerta de la gema abre solo con el número exacto del candado. Fichas azules (+) y rojas (−) que se anulan.
-- **A. Cartas de salto** (`_local/proto-cartas.html`): el pozo con vetas a distintas profundidades, franjas de roca y una mano de cartas con signo; hay que recoger todas las vetas.
+- **E. Excavar** (retirado; en 489c87e): pared de bloques con números con signo; se cava un camino y cada bloque suma al contador del pico; la puerta de la gema abre solo con el número exacto del candado. Fichas azules (+) y rojas (−) que se anulan.
+- **A. Cartas de salto** (retirado; en 489c87e): el pozo con vetas a distintas profundidades, franjas de roca y una mano de cartas con signo; hay que recoger todas las vetas.
 - Los dos: pantalla inicial con el explorador de PixelLab y sus 12 tonos, gema grande en el centro al completar, deshacer siempre. Datos de `tools/gen/maths_y6_prototipos.py` (tres juegos de cuatro puzzles, validados con un buscador); `tools/verify_prototipos.js` los juega todos (179 comprobaciones).
 - Pendiente conocido: entre −3 y −8 m la cabeza del explorador queda en la línea del suelo y en grises se confunde con el entorno; en la luz más oscura (−12 a −27 m) la diferencia es 23 a 30. Arreglo propuesto: un borde claro alrededor del explorador, después de elegir el núcleo.
 
 **Veredicto sobre E y A (28 sep 2026): 2/10, aburridos.** Rafael: siguen siendo "bajar desde un punto y encontrar algo"; eso se hace igual en papel. Pide un juego con reto e interacción donde se aprenda jugando. Decisiones: **sin derrota** (no se pierde; chocar solo detiene), y se diseña pensando en los juegos del jugador mayor: Minecraft, Fortnite y Rocket League. Tras una segunda ronda de ideas de dos equipos (gamers y creadores de videojuegos), Rafael eligió prototipar:
 
-- **Globo minero** (`_local/proto-globo.html`, `assets/sitio/proto-globo.js`): se pilota en tiempo real una canasta por una caverna lateral. La velocidad vertical es la suma con signo de la carga: globos (−) tiran hacia arriba, sacos y gemas recogidas (+) hacia abajo, y las corrientes de aire suman ±. El niño enciende y apaga globos y sacos para subir, bajar o flotar, esquiva techo y piso, recoge todas las gemas y atraca en el muelle con carga exactamente 0. Barra de suma siempre visible ("▲ −2 sube", "▬ 0 flota"). Tres cavernas con datos del mismo generador (valida que el muelle es alcanzable y que el estante puede dejar la carga en 0); `tools/verify_prototipos.js` las completa con un piloto automático con la física real (192 comprobaciones en total).
+- **Globo minero** (retirado; en 990c766): se pilota en tiempo real una canasta por una caverna lateral. La velocidad vertical es la suma con signo de la carga: globos (−) tiran hacia arriba, sacos y gemas recogidas (+) hacia abajo, y las corrientes de aire suman ±. El niño enciende y apaga globos y sacos para subir, bajar o flotar, esquiva techo y piso, recoge todas las gemas y atraca en el muelle con carga exactamente 0. Barra de suma siempre visible ("▲ −2 sube", "▬ 0 flota"). Tres cavernas con datos del mismo generador (valida que el muelle es alcanzable y que el estante puede dejar la carga en 0); `tools/verify_prototipos.js` las completa con un piloto automático con la física real (192 comprobaciones en total).
 
-Pendiente en la etapa 2: Rafael juega el Globo minero 5 minutos y decide (criterio: ¿quiere jugar otra ronda sin que nadie se lo pida?). Con su veredicto, plan aparte para integrar el núcleo ganador en La Mina y su pantalla inicial en el shell de los temas. Nada se sube ni se publica hasta entonces. La fase H (dos jugadores) queda para la etapa 3.
+**Veredicto sobre el Globo (28 sep 2026): confuso.** Rafael se confundió al "explotar globos y poner pesos". Causas:
+- el mismo botón servía para dos acciones opuestas;
+- el signo iba al revés de la intuición y de la profundidad de La Mina (− subía);
+- había demasiadas cosas a la vez (seis botones, movimiento lateral, corrientes y gemas que cambian la carga).
+
+Los tres prototipos rechazados salieron del árbol y siguen en la historia de git: E y A en 489c87e, el Globo en 990c766.
+
+**Decisión: seguir con el motor, cambiar el método de diseño (28 sep 2026).** Rafael mantiene la visión de la base (un bioma por materia, un tema por zona). Los cinco rechazos tuvieron la misma causa: se construía todo (arte, física, generador, cientos de comprobaciones) antes de que él jugara. Método para cada zona, empezando por La Mina:
+
+1. **Ficha de juego en papel, sin código.** Contiene:
+   - el verbo;
+   - qué hace difícil el reto además de la cuenta;
+   - cómo son los primeros 30 segundos;
+   - por qué se repite;
+   - dónde la matemática es la mecánica;
+   - un juego de referencia del jugador mayor.
+
+   Rafael la aprueba o la corta.
+2. **Un boceto gris** en `prototipos/<materia>-<tema>/`:
+   - sin arte ni generador; nivel a mano;
+   - tope de 1 h;
+   - solo la prueba de humo `tools/humo_prototipos.js`.
+3. **Prueba de Rafael,** y si puede del jugador mayor: 3 minutos. ¿Se entiende sin leer? ¿Pide otra ronda? Si no pasa, una corrección o se descarta.
+4. **Solo si pasa:** arte, niveles y generador, escena aditiva del motor, pruebas completas y definición de terminado.
+
+Reglas de diseño aprendidas:
+- arriba es + y abajo es −;
+- un tipo de botón hace una sola acción;
+- la matemática está en el reto, no escondida en los controles;
+- sin derrota;
+- ningún panel simulado decide la diversión.
+
+Para ahorrar tokens: sin agentes múltiples, y capturas solo cuando Rafael las pida.
+
+**Carpetas según el método.**
+- `assets/` es el motor.
+- `temas/` guarda solo lo que pasó la prueba de Rafael.
+- `prototipos/` guarda los bocetos: `comun/` tiene el inicio con 12 tonos, la gema y el sonido, y `maths-plantilla/gris.js` es el punto de partida. `tools/build.py` los construye solo en `_local/` y nunca se publican.
+- `docs/referencia/` reúne los documentos en estado referencia.
+
+Pendiente en la etapa 2: la ficha de juego de La Mina (paso 1), con la aprobación de Rafael. Nada se sube ni se publica hasta que Rafael lo pida. La fase H (dos jugadores) queda para la etapa 3.
 
 ## 8. Preguntas abiertas
 

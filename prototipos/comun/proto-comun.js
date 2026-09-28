@@ -1,11 +1,10 @@
 /* ============================================================
-   SAMSAN — PROTOTIPOS DE NUCLEO (solo local, _local/proto-*.html)
-   Lo comun a los dos prototipos de La Mina (28 sep 2026): pantalla
-   inicial con el explorador de PixelLab en el mundo y sus 12 tonos de
-   piel, sonidos cortos, la gema grande en el centro al completar un
-   puzzle y la secuencia de cuatro puzzles con "play again".
-   Los textos del prototipo viven aqui y en cada prototipo: no es el
-   motor (assets/engine.js no se toca hasta elegir el ganador).
+   SAMSAN — LO COMUN DE LOS BOCETOS (solo local, _local/proto-*.html)
+   Pantalla inicial con el explorador de PixelLab en el mundo y sus 12
+   tonos de piel, sonidos cortos, la gema grande en el centro al
+   completar un reto y una secuencia de retos con "play again".
+   Los textos viven aqui y en cada boceto: no es el motor
+   (assets/engine.js no se toca hasta que un boceto pasa la prueba).
    ============================================================ */
 (function () {
   'use strict';
