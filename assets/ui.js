@@ -89,6 +89,8 @@ window.GAME_UI = {
     hintLabel:   '<b>Hint:</b> ',
     hintRetry:   '<b>You saw this one before &mdash; here is the method:</b> ',
     hintFallback:'Look at the size of each jump.',
+    /* Escalera de pistas: accion minima, figura, ejemplo resuelto. */
+    hintSteps:   ['<b>Hint {n} of {total} &middot; Try this:</b> ', '<b>Hint {n} of {total} &middot; Picture it:</b> ', '<b>Hint {n} of {total} &middot; An example:</b> '],
     goodTitle:   '&#10003; CORRECT',
     badTitle:    '&#10007; NOT YET',
     badNote:     '<b>This challenge comes back later with different numbers</b> &mdash; so work out the method, not the answer.',

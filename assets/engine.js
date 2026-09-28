@@ -2002,7 +2002,55 @@
     updateHUD();
     // El andamiaje automatico usa exactamente el mismo disparador que el boton.
     if (retry) setTimeout(summonHint, 220);
+    escaleraPistas(q);
   }
+
+  /* ---------- Escalera de pistas (etapa 2, capa comun) ----------
+     Si la variante trae `pistas: [accion minima, figura, ejemplo resuelto]`
+     (docs/decisiones-vigentes.md §3), la pista sube un peldano con cada
+     fallo (q.tries) y con 20 s sin accion en la escena; pulsar HINT con la
+     pista ya abierta tambien sube uno. Usa summonHint() tal cual. Sin
+     `pistas`, nada cambia: los juegos viejos siguen con su pista unica. */
+  var PISTA = { q: null, peldano: 0, reloj: 0, SEG: 20000 };
+  function pintarPeldano() {
+    var P = PISTA.q && PISTA.q.v.pistas;
+    if (!P) return;
+    var n = Math.min(P.length - 1, PISTA.peldano);
+    el('qHint').innerHTML = fmt((UI.play.hintSteps || [])[n] || UI.play.hintLabel, { n: n + 1, total: P.length }) + heroText(P[n]);
+    el('qHint').setAttribute('data-peldano', String(n + 1));
+  }
+  function subirPeldano() {
+    var P = PISTA.q && PISTA.q.v.pistas;
+    if (!P || locked || PISTA.q !== q) return;
+    var abierta = el('qHint').classList.contains('is-on');
+    if (abierta && PISTA.peldano < P.length - 1) PISTA.peldano++;
+    pintarPeldano();
+    if (!abierta) summonHint();
+    if (PISTA.peldano < P.length - 1) armarReloj();   // en el ultimo peldano el reloj se detiene
+  }
+  function armarReloj() {
+    clearTimeout(PISTA.reloj);
+    if (!PISTA.q || !PISTA.q.v.pistas || locked) return;
+    PISTA.reloj = setTimeout(subirPeldano, PISTA.SEG);
+  }
+  function escaleraPistas(qq) {
+    clearTimeout(PISTA.reloj);
+    PISTA.q = qq;
+    if (!qq.v.pistas) return;
+    PISTA.peldano = Math.max(0, Math.min(qq.v.pistas.length - 1, qq.tries - 1));
+    pintarPeldano();
+    el('btnHint').style.display = 'inline-block';
+    armarReloj();
+  }
+  /* Cualquier accion en la escena reinicia los 20 s. */
+  ['pointerdown', 'keydown'].forEach(function (ev) {
+    document.addEventListener(ev, function () { if (PISTA.q && PISTA.q.v.pistas && !locked) armarReloj(); }, true);
+  });
+  /* HINT con la pista ya abierta: el peldano siguiente. */
+  el('btnHint').addEventListener('click', function () {
+    if (!PISTA.q || !PISTA.q.v.pistas) return;
+    if (el('qHint').classList.contains('is-on')) subirPeldano();
+  });
 
   /* Invocar la calculadora magica. Unico camino a la pista: lo llaman tanto
      el boton HINT como el andamiaje del reintento. Con reduced-motion se salta

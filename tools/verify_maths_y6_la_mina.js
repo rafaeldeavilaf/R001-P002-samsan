@@ -38,7 +38,7 @@ function ok(t) { console.log('  ok   ' + t); }
 if (!fs.existsSync(PAGINA)) { console.error('Falta ' + PAGINA + '. Corre antes: python3 tools/build.py'); process.exit(1); }
 const HTML = fs.readFileSync(PAGINA, 'utf8');
 
-function abrir(guardado) {
+function abrir(guardado, reloj) {
   const vc = new VirtualConsole();
   const errores = [];
   vc.on('jsdomError', e => { if (!/Not implemented|getContext/i.test(String(e && e.message))) errores.push(String(e && e.message)); });
@@ -48,6 +48,14 @@ function abrir(guardado) {
     beforeParse(w) {
       w.scrollTo = () => {}; w.confirm = () => true; w.alert = () => {};
       w.Math.random = () => 0;                     // variantes en orden, barajas fijas
+      if (reloj) {                                 // reloj simulado: los temporizadores esperan a tick(ms)
+        let ahora = 0, id = 0; const cola = [];
+        w.setTimeout = (fn, ms) => { cola.push({ id: ++id, t: ahora + (ms || 0), fn }); return id; };
+        w.clearTimeout = (i) => { const k = cola.findIndex(c => c.id === i); if (k >= 0) cola.splice(k, 1); };
+        w.setInterval = () => 0; w.clearInterval = () => {};
+        w.tick = (ms) => { const fin = ahora + ms; for (;;) { cola.sort((a, b) => a.t - b.t); const c = cola[0];
+          if (!c || c.t > fin) break; cola.shift(); ahora = c.t; c.fn(); } ahora = fin; };
+      }
       w.matchMedia = q => ({ matches: /reduce/.test(q), media: q, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
       w.localStorage.setItem('samsan:hero', JSON.stringify({ v: 1, body: 'a', alias: '', chosen: true }));
       if (guardado) w.localStorage.setItem('samsan:maths-y6-la-mina', JSON.stringify(guardado));
@@ -258,6 +266,38 @@ section('3. Escena line: respuesta vacia, bandera, gema por tramo');
   ok('escena revisada');
 }
 
+/* ---------- 4. Escalera de pistas ---------- */
+section('4. Escalera de pistas: 20 s sin accion, tecla que reinicia, fallo que sube');
+{
+  const dom = abrir(null, true), w = dom.window, d = w.document;
+  clic(w, d.querySelectorAll('#levelList .level-card')[0]);
+  if (d.getElementById('briefGo')) clic(w, d.getElementById('briefGo'));
+  const hint = d.getElementById('qHint'), peldano = () => hint.getAttribute('data-peldano'), abierta = () => hint.classList.contains('is-on');
+  check('pistas: el primer intento empieza cerrado en el peldano 1', !abierta() && peldano() === '1', peldano());
+  w.tick(19000);
+  check('pistas: a los 19 s todavia no abre', !abierta());
+  tecla(w, 'Shift'); w.tick(19000);
+  check('pistas: una tecla reinicia la cuenta de 20 s', !abierta());
+  w.tick(1500);
+  check('pistas: 20 s sin accion abren el peldano 1', abierta() && peldano() === '1', peldano());
+  w.tick(20000);
+  check('pistas: otros 20 s suben al peldano 2 (figura)', peldano() === '2', peldano());
+  w.tick(20000);
+  check('pistas: y al 3 (ejemplo resuelto)', peldano() === '3', peldano());
+  w.tick(60000);
+  check('pistas: no pasa del peldano 3', peldano() === '3', peldano());
+  check('pistas: el texto es el de la variante', hint.textContent.indexOf(servida(w, w.QUIZ_DATA.levels[0]).v.pistas[2]) >= 0);
+  // Un fallo: la misma familia vuelve con otra variante y la pista arranca un peldano mas arriba.
+  const s0 = servida(w, w.QUIZ_DATA.levels[0]);
+  responder(w, s0.v, incorrecta(s0.v), 'raton'); siguiente(w); w.tick(300);
+  check('pistas: tras un fallo arranca en el peldano 2 y se abre sola', peldano() === '2' && abierta(), peldano() + ' ' + abierta());
+  // Pulsar HINT con la pista abierta sube un peldano.
+  clic(w, d.getElementById('btnHint'));
+  check('pistas: HINT con la pista abierta sube al peldano 3', peldano() === '3', peldano());
+  ok('escalera revisada');
+}
+
+
 console.log('\n--------------------------------------------------------');
 if (failures.length) {
   console.log('FALLAN ' + failures.length + ' de ' + (passed + failures.length) + ':');
@@ -265,3 +305,4 @@ if (failures.length) {
   process.exit(1);
 }
 console.log('TODO OK — ' + passed + ' comprobaciones.');
+process.exit(0);   // las ventanas de jsdom pueden tener relojes vivos
