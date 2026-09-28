@@ -32,7 +32,7 @@ Defectos del juego anterior, **resueltos en la etapa 0** (27 sep 2026):
 - Mecánicas declaradas sin escena que caían a `doors` sin error: ahora `tools/build.py` falla con un mensaje claro (regla 7) y el motor ya no cae en silencio.
 - Prototipo y documentos de trabajo publicados en la raíz: la raíz publica solo `index.html` (portada) y `legal.html`; `build.py` decide qué se publica según `publicar` en `subjects.js`.
 
-El sitio anterior (`Cycle_test`) está apagado y su repo quedó privado el 27 de septiembre de 2026. SAMSAN vive en https://rafaeldeavilaf.github.io/R001-P002-samsan/ y publica solo la portada "en construcción" y las notas legales hasta que La Mina esté lista.
+El sitio anterior (`Cycle_test`) está apagado y su repo quedó privado el 27 de septiembre de 2026. SAMSAN vive en https://rafaeldeavilaf.github.io/R001-P002-samsan/ y publica solo la portada "en construcción" y las notas legales hasta que La Mina esté lista. Desde el cierre de la etapa 1, las dos usan el kit de interfaz nuevo y la portada lleva de fondo la Caverna viva (decorativa).
 
 ## 3. Decisiones de diseño de la base
 
@@ -62,6 +62,8 @@ El sitio anterior (`Cycle_test`) está apagado y su repo quedó privado el 27 de
 
 ## 4. Dirección gráfica
 
+**Estado al cierre de la etapa 1 (27 sep 2026).** La capa del mundo vive en `assets/mundo/` (lienzo, luz, partículas, parallax con niebla, sprites con 12 tonos de piel, gobernador de rendimiento) y el bioma Caverna en `temas/maths/bioma.js`. El kit de interfaz es `assets/kit.css`. El pipeline de arte es `tools/arte/` (`procesar.py`, `tiles.py`, `prueba_pipeline.py`, `prueba_grises.py`), con las paletas en `assets/paletas.json` como fuente única. Arte de PixelLab en uso: la mascota (frente, espalda y perfil, 62 px de alto), el casco de minero anclado a la cabeza medida, el cofre y el topo minero. El explorador cuelga de la cuerda por un arnés, y los personajes se realzan sobre el mapa de luz para leerse en la penumbra. Por código: roca, pared, antorchas, faroles, llamas, cristales y las poses de alegría y trepar. Pendiente para etapas 3 y 4: corona de cristales y capucha, que no funcionan puestas sobre la cabeza y se regeneran; una carretilla de perfil; el ladrillo, por código.
+
 Pixel art moderno, no retro. Detalle completo en `docs/direccion-grafica.md`. Lienzo de 640 × 360, tiles de 32 px, mascota de unos 48 px. El mundo se dibuja en Canvas con luz dinámica, resplandor, partículas, cinco capas de parallax, cámara suave y tono de color por bioma; los textos y paneles, en HTML nítido encima. Instrumentos pedagógicos, tiles, luz y movimiento por código; mascota, sombreros, props y texturas base por PixelLab en poses quietas (plan de prueba, 24 generaciones planeadas de 40). Paneles de texto siempre claros.
 
 Referencia aprobada el 27 de septiembre de 2026: `docs/referencia/muestra-estilo.html`. Es el piso de calidad de todo lo gráfico.
@@ -83,12 +85,12 @@ Referencia aprobada el 27 de septiembre de 2026: `docs/referencia/muestra-estilo
 | Etapa | Qué entrega | Horas | Tope | Compuerta |
 |---|---|---|---|---|
 | 0 | Repo SAMSAN nuevo y anónimo, hook y Actions, defectos corregidos, portada con créditos y notas legales, documentos y skill instalados. **Cerrada el 27 sep 2026 con 0,6 h reales de trabajo** (2,6 h de reloj contando una pausa); compuerta verificada (run de Actions en verde y portada publicada), confirmada por Rafael | 13 | 15 | Actions en verde y la portada de SAMSAN arriba |
-| 1 | Sistema gráfico moderno, partiendo de la muestra aprobada: capa de render en Canvas, cámara y escalado 6 h; luz, resplandor y tono por bioma 6 h; partículas y animación por código 6 h; parallax de cinco capas con niebla 3 h; pipeline de arte a 32 px con cambio de tono y bordes automáticos 8 h; kit de interfaz en alta resolución 6 h; mascota y bioma Caverna con PixelLab y retoque 5 h | 40 | 46 | El bioma Caverna con arte definitivo iguala o supera la muestra aprobada y pasa la prueba de grises |
+| 1 | Sistema gráfico moderno, partiendo de la muestra aprobada: capa de render en Canvas, cámara y escalado 6 h; luz, resplandor y tono por bioma 6 h; partículas y animación por código 6 h; parallax de cinco capas con niebla 3 h; pipeline de arte a 32 px con cambio de tono y bordes automáticos 8 h; kit de interfaz en alta resolución 6 h; mascota y bioma Caverna con PixelLab y retoque 5 h | 40 | 46 | El bioma Caverna con arte definitivo iguala o supera la muestra aprobada y pasa la prueba de grises. **Cerrada el 27 sep 2026 con 1,9 h de reloj** (incluye la espera del arte de PixelLab); compuerta aprobada por Rafael |
 | 2 | Base y primer tema: jerarquía materia y tema 4 h, capa común 12 h, `line` 10 h, `fill` 7 h, regla `ecuacion` y modo `pasos` en `forge` 5 h, librería de generadores 3 h, arte de instrumentos 4 h, generador de La Mina 5 h, pruebas 4 h | 54 | 60 | El jugador mayor abre La Mina solo dos veces en siete días |
 | 3 | Escena `place` 14 h, Maths y Español migrados a la base 6 h, biomas Biblioteca y Jungla 8 h, tema de sumas Year 2 4 h, pruebas 3 h | 35 | 40 | El jugador menor abre su tema solo dos veces en siete días |
 | 4 | Mundo: base propia de cada jugador con piezas instaladas, compañeros por bioma, portales a los biomas, sombreros de premio, sala secreta, cofre, regalo | 12 | 14 | Los dos jugadores ven su base con sus piezas y compañeros |
 
-Total 154 h, USD 0 al mes. Etapa en curso: **1**, desde el 27 sep 2026 (tope 46 h). Horas antes de la primera validación con un niño: 107 (etapas 0 a 2). Desde la etapa 4, modo operación: un tema por cada tema nuevo del colegio.
+Total 154 h, USD 0 al mes. Etapa en curso: ninguna; la etapa 2 empieza cuando Rafael la confirme. Horas antes de la primera validación con un niño: 107 (etapas 0 a 2). Desde la etapa 4, modo operación: un tema por cada tema nuevo del colegio.
 
 ## 8. Preguntas abiertas
 
