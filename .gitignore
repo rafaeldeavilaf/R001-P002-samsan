@@ -25,3 +25,6 @@ package-lock.json
 
 # Juegos construidos solo para jugar y probar en este equipo (tools/build.py)
 _local/
+
+# Arte crudo de PixelLab: nunca entra sin pasar por tools/arte/
+arte/crudo/

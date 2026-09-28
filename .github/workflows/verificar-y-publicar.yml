@@ -32,6 +32,7 @@ jobs:
         run: |
           npm install
           if [ -f requirements.txt ]; then pip install -r requirements.txt; else echo "OMITIDO: requirements.txt aún no existe (llega con tools/arte/ en la etapa 1)"; fi
+          if [ -f requirements.txt ] && grep -qi '^playwright' requirements.txt; then python3 -m playwright install --with-deps chromium; fi
           if grep -q '"playwright' package.json; then npx playwright install --with-deps chromium; else echo "OMITIDO: playwright no está en package.json"; fi
 
       - name: Anonimato
@@ -87,6 +88,14 @@ jobs:
 
       - name: Regresión
         run: node tools/harness.js
+
+      - name: Pipeline de arte
+        run: |
+          if [ -f tools/arte/prueba_pipeline.py ]; then
+            python3 tools/arte/prueba_pipeline.py
+          else
+            echo "OMITIDO: tools/arte/prueba_pipeline.py aún no existe"
+          fi
 
       - name: Prueba de grises y contraste
         run: |

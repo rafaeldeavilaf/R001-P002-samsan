@@ -1,0 +1,109 @@
+{
+  "_nota": "Fuente única de las rampas de docs/direccion-grafica.md §4. La leen tools/arte/paletas.py (pipeline) y tools/build.py (la incrusta como window.SAMSAN_PALETAS para assets/mundo/). Cada rampa va de oscuro a claro. La rampa 'piel' es la de referencia de la mascota: el juego la cambia por la rampa del tono elegido (12 tonos, assets/ui.js).",
+  "contorno": "#1E1426",
+  "rampas": {
+    "roca": [
+      "#2A1024",
+      "#5B1F2A",
+      "#9A3B2C",
+      "#D0652F",
+      "#F0A04B",
+      "#FFD27A"
+    ],
+    "pizarra": [
+      "#0E0F20",
+      "#1A1C36",
+      "#262B4C",
+      "#34406A",
+      "#4E5F92"
+    ],
+    "oro": [
+      "#7A4A10",
+      "#C98A1C",
+      "#FFD34D",
+      "#FFF3B0"
+    ],
+    "cian": [
+      "#1D4E6B",
+      "#2F9BB8",
+      "#7FE3F0",
+      "#E8FEFF"
+    ],
+    "magenta": [
+      "#4A1B52",
+      "#9C3FA8",
+      "#F08BEA",
+      "#FFE3FB"
+    ],
+    "pasto": [
+      "#1F3D2A",
+      "#2F6B3A",
+      "#58A64A",
+      "#A6E06A"
+    ],
+    "madera": [
+      "#3B2215",
+      "#6B3D22",
+      "#A0643A",
+      "#D19A5E"
+    ],
+    "cuerda": [
+      "#5A3E24",
+      "#A8814F",
+      "#D8B680"
+    ],
+    "llama": [
+      "#C2410C",
+      "#F59E0B",
+      "#FCD34D",
+      "#FFF7D6"
+    ],
+    "papel": [
+      "#2A211A",
+      "#5C4A3B",
+      "#B9A58A",
+      "#EADCC0",
+      "#F7EFDD"
+    ],
+    "piel": [
+      "#B8735A",
+      "#D8966F",
+      "#F2B98F",
+      "#FCD9B8"
+    ]
+  },
+  "biomas": {
+    "caverna": [
+      "roca",
+      "pizarra",
+      "oro",
+      "cian",
+      "magenta",
+      "pasto",
+      "madera",
+      "cuerda",
+      "llama"
+    ],
+    "comun": [
+      "roca",
+      "pizarra",
+      "oro",
+      "cian",
+      "magenta",
+      "pasto",
+      "madera",
+      "cuerda",
+      "llama",
+      "papel"
+    ],
+    "mascota": [
+      "piel",
+      "pizarra",
+      "oro",
+      "cian",
+      "pasto",
+      "madera",
+      "papel"
+    ]
+  }
+}

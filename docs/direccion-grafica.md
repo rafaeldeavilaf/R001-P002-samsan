@@ -8,7 +8,7 @@ descripcion: Dirección gráfica de SAMSAN (pixel art moderno). Capas de render,
 
 ## 1. La idea
 
-Pixel art moderno, no retro. Un explorador pequeño y cabezón recorre un mundo de biomas conectados, uno por materia. Cada tema del colegio es una zona nueva dentro de su bioma. Lo moderno no sale de quitar los pixeles sino de seis cosas: más resolución, color con cambio de tono, luz dinámica, movimiento fluido, partículas y profundidad. No se copia ningún personaje, tile ni pantalla de ningún juego existente, y el nombre de ningún juego aparece en los prompts de generación.
+Pixel art moderno, no retro. Un explorador pequeño y cabezón construye su base y sale por portales a un mundo de biomas, uno por materia. Cada tema del colegio es una zona nueva dentro de su bioma; cada bioma aporta un compañero que se muda a la base (Caverna: un topo minero). Lo moderno no sale de quitar los pixeles sino de seis cosas: más resolución, color con cambio de tono, luz dinámica, movimiento fluido, partículas y profundidad. No se copia ningún personaje, tile ni pantalla de ningún juego existente, y el nombre de ningún juego aparece en los prompts de generación.
 
 **Referencia aprobada.** `docs/referencia/muestra-estilo.html`, aprobada por Rafael el 27 de septiembre de 2026. Es el piso de calidad: la versión con arte definitivo debe igualarla o superarla. Su código de luz, partículas, parallax, cámara y regla de profundidad es el punto de partida de la etapa 1.
 
@@ -50,7 +50,7 @@ Rampas con cambio de tono: las sombras tiran a morado o azul y las luces a amari
 | Interfaz, papel | `#2A211A` `#5C4A3B` `#B9A58A` `#EADCC0` `#F7EFDD` |
 | Contorno | `#1E1426` |
 
-Tonos de piel del avatar, por intercambio de paleta en código: cuatro rampas elegibles en el selector de perfil.
+Tonos de piel del avatar, por intercambio de paleta en código: los 12 tonos que ya existen (`assets/ui.js`, `armoury.skins`), cada uno convertido en una rampa de piel, con sus rasgos de ojo y boca medidos. Ninguno se bloquea nunca.
 
 **Regla de dos planos.** El terreno que se pisa es cálido y saturado; la pared del fondo es el mismo tipo de patrón, oscuro y frío. El niño siempre distingue dónde se puede estar.
 
@@ -95,7 +95,7 @@ Todo PNG generado pasa por `tools/arte/` antes de entrar al juego. Nadie mete un
 
 ## 8. Generaciones de PixelLab
 
-Plan de prueba, 40 generaciones. Se planean 24 y quedan 16 de reserva para reintentos. El costo en generaciones cambia según el tamaño: después de la primera (la mascota), revisar cuánto bajó el contador y ajustar esta lista antes de seguir. Se generan a mano en la web de PixelLab, nunca por API, y nunca se sube una foto de una persona. Cada PNG se descarga apenas sale, con el nombre de la tabla.
+Plan de prueba, 40 generaciones. Se planean 30 (las 24 originales, 3 compañeros por la temática de constructor y 3 piezas de base) y quedan 10 de reserva para reintentos. El costo en generaciones cambia según el tamaño: después de la primera (la mascota), revisar cuánto bajó el contador y ajustar esta lista antes de seguir. Se generan a mano en la web de PixelLab, nunca por API, y nunca se sube una foto de una persona. Cada PNG se descarga apenas sale, con el nombre de la tabla.
 
 **Prompt base**, se agrega a todos: `modern hi-bit pixel art, side view, clean readable silhouette, 1px dark outline, hue-shifted palette with purple shadows and warm highlights, flat even lighting, transparent background, no text`.
 
@@ -113,6 +113,7 @@ La primera generación (la mascota base) es la referencia de estilo; en las dem�
 | 8 | 1 | Object Creator | `gema.png` | faceted gem, single object |
 | 9 | 1 | Object Creator | `carretilla.png` | small mine cart on rails |
 | 10 | 1 | Object Creator | `farol.png` | hanging oil lantern |
+| 10b | 1 | Character Creator, 64 × 64 | `companero-topo.png` | small friendly mole miner with tiny helmet and head lamp, standing idle, side view |
 | 11 | 3 | Object Creator | `textura-jungla.png` | seamless jungle soil and moss texture, grayscale, 64x64 |
 | 12 | 3 | Object Creator | `sombrero-constructor.png` | builder hard hat, fits a small round head |
 | 13 | 3 | Object Creator | `casa-arbol.png` | small wooden treehouse with ladder, daytime |
@@ -121,12 +122,15 @@ La primera generación (la mascota base) es la referencia de estilo; en las dem�
 | 16 | 3 | Object Creator | `sombrero-archivista.png` | hooded cloak hood, fits a small round head |
 | 17 | 3 | Object Creator | `estante.png` | tall bookshelf with old books |
 | 18 | 3 | Object Creator | `vela.png` | candle on brass holder |
+| 18b | 3 | Character Creator | `companero-jungla.png` | compañero de la Jungla; se define con la ficha del tema de Year 2 |
+| 18c | 3 | Character Creator | `companero-biblioteca.png` | compañero de la Biblioteca; se define al migrar Español |
 | 19 | Inglés | Object Creator | `textura-escenario.png` | seamless wooden stage floor texture, grayscale, 64x64 |
 | 20 | Inglés | Object Creator | `sombrero-teatro.png` | feathered theatre hat, fits a small round head |
 | 21 | 4 | Object Creator | `sombrero-premio-1.png` | explorer wide brim hat |
 | 22 | 4 | Object Creator | `sombrero-premio-2.png` | crown made of crystals |
 | 23 | 4 | Object Creator | `sombrero-premio-3.png` | pirate tricorn hat |
 | 24 | 4 | Object Creator | `portal-bioma.png` | stone archway portal with glowing runes |
+| 25–27 | 4 | Object Creator | `base-*.png` | piezas de la base propia (casa, taller, jardín); se definen al planear la etapa 4 |
 
 Las filas marcadas "Inglés" se generan cuando el colegio ponga el primer tema de Inglés. Science recibe su textura, sombrero (gafas de laboratorio) y props cuando llegue su primer tema, con la reserva.
 
@@ -137,4 +141,4 @@ Las filas marcadas "Inglés" se generan cuando el colegio ponga el primer tema d
 | 1 | Capa de render en Canvas con cámara, luz, resplandor, partículas, parallax y tono de color; pipeline de arte a 32 px; kit de interfaz; mascota con poses y tonos de piel; bioma Caverna completo. Iguala o supera `docs/referencia/muestra-estilo.html` |
 | 2 | Arte de los instrumentos de La Mina: termómetro, cuerda con profundidades, balanza, taller de ecuaciones, cajas del sello |
 | 3 | Biomas Jungla de día (Year 2) y Biblioteca (Español); instrumentos de Colocar |
-| 4 | Mapa del mundo con biomas, portales, piezas instaladas, sombreros de premio |
+| 4 | Base propia con piezas instaladas y compañeros, portales a los biomas, sombreros de premio |

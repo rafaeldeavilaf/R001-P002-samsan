@@ -50,7 +50,7 @@ El sitio anterior (`Cycle_test`) está apagado y su repo quedó privado el 27 de
 
 **Pistas.** Escalera de tres peldaños que avanza con cada fallo o con 20 segundos sin acción: acción mínima, figura, ejemplo resuelto parecido.
 
-**Recompensa y meta.** Gemas por tramo completado, sin importar intentos, que se gastan en sombreros. Mapa de biomas donde cada nivel instala una pieza permanente. Sala secreta opcional por nivel. Cofre del día con tres ítems de repaso, sin castigo si no se abre. Sin rachas, sin porcentajes, sin comparar partidas.
+**Recompensa y meta.** Gemas por tramo completado, sin importar intentos, que se gastan en sombreros y en piezas para la base. Temática: **constructor de mundo** (decidido el 27 sep 2026). Cada jugador tiene una base propia que crece con lo que aprende: cada nivel superado instala una pieza permanente, y cada bioma aporta un compañero que se muda a la base cuando el jugador completa su primera zona (Caverna: un topo minero con casco y lámpara). Los biomas se recorren desde la base por portales. Sala secreta opcional por nivel. Cofre del día con tres ítems de repaso, sin castigo si no se abre. Sin rachas, sin porcentajes, sin comparar partidas.
 
 **Dos jugadores, un computador.** Selector de perfil con avatar y tono de piel, sin nombres. Al elegir perfil, una pantalla de asentimiento en lenguaje para niños explica que lo que hacen se queda en ese computador, con opción de no continuar (RC-07). Regalo de una gema al bioma del otro jugador. Exportar e importar progreso a un archivo.
 
@@ -82,17 +82,17 @@ Referencia aprobada el 27 de septiembre de 2026: `docs/referencia/muestra-estilo
 
 | Etapa | Qué entrega | Horas | Tope | Compuerta |
 |---|---|---|---|---|
-| 0 | Repo SAMSAN nuevo y anónimo, hook y Actions, defectos corregidos, portada con créditos y notas legales, documentos y skill instalados. **Cerrada el 27 sep 2026 con 0,6 h reales de trabajo** (2,6 h de reloj contando una pausa); compuerta verificada (run de Actions en verde y portada publicada), pendiente de la confirmación de Rafael | 13 | 15 | Actions en verde y la portada de SAMSAN arriba |
+| 0 | Repo SAMSAN nuevo y anónimo, hook y Actions, defectos corregidos, portada con créditos y notas legales, documentos y skill instalados. **Cerrada el 27 sep 2026 con 0,6 h reales de trabajo** (2,6 h de reloj contando una pausa); compuerta verificada (run de Actions en verde y portada publicada), confirmada por Rafael | 13 | 15 | Actions en verde y la portada de SAMSAN arriba |
 | 1 | Sistema gráfico moderno, partiendo de la muestra aprobada: capa de render en Canvas, cámara y escalado 6 h; luz, resplandor y tono por bioma 6 h; partículas y animación por código 6 h; parallax de cinco capas con niebla 3 h; pipeline de arte a 32 px con cambio de tono y bordes automáticos 8 h; kit de interfaz en alta resolución 6 h; mascota y bioma Caverna con PixelLab y retoque 5 h | 40 | 46 | El bioma Caverna con arte definitivo iguala o supera la muestra aprobada y pasa la prueba de grises |
 | 2 | Base y primer tema: jerarquía materia y tema 4 h, capa común 12 h, `line` 10 h, `fill` 7 h, regla `ecuacion` y modo `pasos` en `forge` 5 h, librería de generadores 3 h, arte de instrumentos 4 h, generador de La Mina 5 h, pruebas 4 h | 54 | 60 | El jugador mayor abre La Mina solo dos veces en siete días |
 | 3 | Escena `place` 14 h, Maths y Español migrados a la base 6 h, biomas Biblioteca y Jungla 8 h, tema de sumas Year 2 4 h, pruebas 3 h | 35 | 40 | El jugador menor abre su tema solo dos veces en siete días |
-| 4 | Mundo: mapa de biomas, portales, piezas instaladas, sombreros de premio, sala secreta, cofre, regalo | 12 | 14 | Los dos jugadores ven el mapa con sus zonas |
+| 4 | Mundo: base propia de cada jugador con piezas instaladas, compañeros por bioma, portales a los biomas, sombreros de premio, sala secreta, cofre, regalo | 12 | 14 | Los dos jugadores ven su base con sus piezas y compañeros |
 
-Total 154 h, USD 0 al mes. Etapa en curso: ninguna; la etapa 1 empieza cuando Rafael confirme la compuerta de la etapa 0. Horas antes de la primera validación con un niño: 107 (etapas 0 a 2). Desde la etapa 4, modo operación: un tema por cada tema nuevo del colegio.
+Total 154 h, USD 0 al mes. Etapa en curso: **1**, desde el 27 sep 2026 (tope 46 h). Horas antes de la primera validación con un niño: 107 (etapas 0 a 2). Desde la etapa 4, modo operación: un tema por cada tema nuevo del colegio.
 
 ## 8. Preguntas abiertas
 
-- Temática del mundo: explorador de biomas (actual) o constructor de mundo con base propia y compañeros por bioma, recomendado por el panel de jugadores del 27 de septiembre. Se decide antes de la etapa 1, porque cambia la lista de PixelLab y la etapa 4.
+- Ninguna. La temática del mundo se decidió el 27 sep 2026: constructor de mundo con base propia y compañeros por bioma (ver §3).
 
 ## 9. Documentos reemplazados
 

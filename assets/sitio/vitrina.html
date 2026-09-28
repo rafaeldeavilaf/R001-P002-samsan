@@ -1,0 +1,61 @@
+<div class="k-pagina">
+<header>
+  <h1 class="k-titulo">SAMSAN</h1>
+  <p class="k-lema">Vitrina local del bioma Caverna, construida sobre la capa del mundo (<code>assets/mundo/</code>). Sirve para compararla con la muestra aprobada y decidir la compuerta de la etapa 1. No se publica.</p>
+</header>
+
+<main>
+  <div class="k-juego">
+    <div class="k-escena">
+      <canvas id="mundo" aria-label="Escena de juego: un explorador sujeto a una cuerda dentro de una mina, junto a una regla de profundidad"></canvas>
+      <div class="k-gemas" id="hud" aria-label="Gemas">
+        <svg viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true">
+          <rect x="2" y="0" width="3" height="1" fill="#1E1426"/><rect x="1" y="1" width="5" height="1" fill="#1E1426"/>
+          <rect x="0" y="2" width="7" height="2" fill="#1E1426"/><rect x="1" y="4" width="5" height="1" fill="#1E1426"/>
+          <rect x="2" y="5" width="3" height="1" fill="#1E1426"/><rect x="3" y="6" width="1" height="1" fill="#1E1426"/>
+          <rect x="2" y="1" width="3" height="1" fill="#7FE3F0"/><rect x="1" y="2" width="5" height="2" fill="#2F9BB8"/>
+          <rect x="2" y="2" width="1" height="1" fill="#E8FEFF"/><rect x="2" y="4" width="3" height="1" fill="#1D4E6B"/>
+          <rect x="3" y="5" width="1" height="1" fill="#1D4E6B"/>
+        </svg>
+        <span id="gems">0</span>
+      </div>
+    </div>
+
+    <section class="k-panel k-panel--sobre" aria-live="polite">
+      <p class="k-rotulo">The Rope</p>
+      <h2 id="q"></h2>
+      <p class="k-suave">You're at <b id="now"></b> m</p>
+      <div class="k-botones">
+        <button class="k-boton k-boton--icono" id="up" aria-label="Move up 1 metre">&#9650;</button>
+        <button class="k-boton k-boton--icono" id="down" aria-label="Move down 1 metre">&#9660;</button>
+        <button class="k-boton k-boton--primario" id="main">Check</button>
+      </div>
+      <p class="k-mensaje" id="fb"></p>
+    </section>
+  </div>
+
+  <section class="k-panel" style="margin-top:22px">
+    <h2>Qué aporta cada capa</h2>
+    <p class="k-suave">Apaga una por una para ver cuánto de lo "moderno" viene de la luz, el resplandor, las partículas, la profundidad y el movimiento.</p>
+    <div class="k-chips" id="toggles">
+      <button class="k-chip" data-opt="light" aria-pressed="true">Luz</button>
+      <button class="k-chip" data-opt="glow" aria-pressed="true">Resplandor</button>
+      <button class="k-chip" data-opt="particles" aria-pressed="true">Partículas</button>
+      <button class="k-chip" data-opt="depth" aria-pressed="true">Profundidad y niebla</button>
+      <button class="k-chip" data-opt="smooth" aria-pressed="true">Movimiento suave</button>
+    </div>
+    <div class="k-chips" style="margin-top:10px">
+      <button class="k-chip" id="allOn">Encender todo</button>
+      <button class="k-chip" id="allOff">Apagar todo</button>
+    </div>
+    <h3>Tono de piel</h3>
+    <div class="k-chips" id="pieles" role="group" aria-label="Tono de piel"></div>
+    <h3>Sello de tres pasos</h3>
+    <ol class="k-sello" aria-label="Sello: concreto hecho, pictórico en curso, abstracto pendiente">
+      <li class="is-hecho"></li><li class="is-ahora">2</li><li>3</li>
+    </ol>
+    <p class="k-suave" id="estado" style="margin-top:14px"></p>
+    <p class="k-suave">Con teclado, las flechas mueven al explorador y Enter comprueba.</p>
+  </section>
+</main>
+</div>

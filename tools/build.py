@@ -5,8 +5,10 @@ BUILD — SAMSAN
 
 Inlina el motor compartido (assets/engine.css + fuentes + assets/ui.js +
 assets/props.js + assets/engine.js) y el data.js de cada juego en UN .html
-autocontenido por juego, y genera las páginas del sitio: la portada
-(index.html) y las notas legales (legal.html).
+autocontenido por juego, y genera las páginas del sitio con el kit nuevo
+(assets/kit.css) y la capa del mundo (assets/mundo/): la portada
+(index.html), las notas legales (legal.html) y, solo en local, la vitrina
+del bioma Caverna (_local/vitrina-caverna.html).
 
 Qué se publica lo decide `subjects.js`: solo los juegos con `publicar: true`
 van a la raíz, que es lo único que Actions sube a GitHub Pages. Los demás se
@@ -48,35 +50,20 @@ def fail(msg):
 FAVICON = ("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' "
            "viewBox='0 0 16 16'><text y='14' font-size='14'>%F0%9F%8E%AE</text></svg>")
 
-# Mismo sprite que dibuja engine.js (cuerpo 'a', colores por defecto). Si
-# cambia el heroe en engine.js, cambia aqui tambien.
-SPRITE = """<svg class="avatar avatar--lg avatar--bob" viewBox="0 0 17 20" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" aria-hidden="true">
-      <path fill="#8a5a30" d="M4 1h9v2H4z M3 2h1v3H3z M13 2h1v3h-1z M4 2h9v2H4z"/>
-      <path fill="#3f2a18" d="M4 1h9v1H4z M3 2h1v1H3z M13 2h1v1h-1z"/>
-      <path fill="#e8b088" d="M4 4h9v8H4z"/>
-      <path fill="#fae8d6" d="M5 6h2v2H5z M10 6h2v2h-2z"/>
-      <path fill="#2d1f16" d="M6 6h1v2H6z M10 6h1v2h-1z"/>
-      <path fill="#5e4534" d="M7 10h3v1H7z"/>
-      <path fill="#7ee8fa" d="M3 5h1v3H3z M13 5h1v3h-1z M3 4h11v1H3z"/>
-      <path fill="#c77dff" d="M5 12h7v6H5z M3 13h2v2H3z M12 13h2v2h-2z"/>
-      <path fill="#c77dff" d="M3 15h2v2H3z M12 15h2v2h-2z"/>
-      <path fill="rgba(0,0,0,.22)" d="M10 12h2v6h-2z"/>
-      <path fill="#5b8cff" d="M5 18h3v2H5z M9 18h3v2H9z"/>
-    </svg>"""
-
 # ---------------------------------------------------------------- textos del sitio
 # Textos de la portada y de legal.html. Los del pie (credito, derechos, enlace)
 # NO van aqui: se leen de `credits` en assets/ui.js, igual que en los juegos.
 PORTADA = {
     "descripcion": "SAMSAN: un juego educativo gratuito, un mundo de biomas para aprender jugando.",
     "lema": "Un mundo de biomas para aprender jugando.",
-    "obra_titulo": "EL MUNDO ESTÁ EN CONSTRUCCIÓN",
+    "escena": "Escena decorativa: un explorador sube y baja por la cuerda de una mina iluminada por antorchas y cristales, junto a un topo minero.",
+    "obra_titulo": "El mundo está en construcción",
     "obra_texto": [
         "Estamos construyendo la primera zona del mundo. Cada tema del colegio "
         "se convertirá en un lugar nuevo para explorar.",
         "Vuelve pronto.",
     ],
-    "juegos_titulo": "ZONAS ABIERTAS",
+    "juegos_titulo": "Zonas abiertas",
 }
 
 LEGAL = {
@@ -202,30 +189,27 @@ def head(title, description, css, accent, lang):
 
 def foot(credits):
     e = html.escape
-    return ('<footer class="site-foot">\n'
+    return ('<footer class="site-foot k-pie">\n'
             '  <p>' + e(credits["designed"]) + '</p>\n'
             '  <p>' + e(credits["copyright"]) + '</p>\n'
             '  <p><a href="' + e(credits["legalHref"]) + '">' + e(credits["legalLink"]) + '</a></p>\n'
             '</footer>\n')
 
 
-# Estilos propios de las paginas del sitio (portada y legal). Son pocos: todo
-# lo demas sale de engine.css para que el sitio y los juegos se vean iguales.
+# Estilos propios de las paginas del sitio, encima de assets/kit.css.
 SITE_CSS = """
-.site-page { max-width: 760px; }
-.site-page .brief p { margin-top: 12px; }
-.site-page .brief h2 { line-height: 1.6; }
-.legal h2 { font-size: 13px; margin-top: 30px; line-height: 1.6; color: var(--accent); }
-.legal h3 { font-size: 11px; margin-top: 22px; color: var(--ink-dim); }
-.legal p { margin-top: 10px; line-height: 1.6; }
-.lic { margin-top: 14px; display: grid; gap: 14px; }
-.lic__item { border: var(--px) solid var(--line); padding: 14px; background: var(--bg-0); }
-.lic__item h4 { font-size: 15px; margin-bottom: 6px; }
-.lic__item dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; font-size: 14px; }
-.lic__item dt { color: var(--ink-dim); }
+.legal h2 { font-size: 1.2rem; margin-top: 26px; }
+.legal section:first-child h2 { margin-top: 0; }
+.legal p { max-width: 70ch; }
+.lic { margin-top: 12px; display: grid; gap: 12px; }
+.lic__item { border: 2px solid #B9A58A; border-radius: 8px; padding: 12px 14px; background: #FFFDF6; }
+.lic__item h4 { font-size: 1rem; margin: 0 0 6px; }
+.lic__item dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; font-size: .95rem; margin: 0; }
+.lic__item dt { color: #5C4A3B; font-weight: 700; }
 .lic__item dd { margin: 0; overflow-wrap: anywhere; }
-.lic__item code { font-size: 13px; }
-.back { display: inline-block; margin-top: 24px; color: var(--accent); }
+.lic__item code { font-size: .9rem; }
+.back { display: inline-block; margin-top: 22px; font-weight: 800; }
+.zonas { display: grid; gap: 12px; margin-top: 18px; }
 @media (max-width: 520px) { .lic__item dl { grid-template-columns: 1fr; } .lic__item dt { margin-top: 6px; } }
 """
 
@@ -285,40 +269,70 @@ def build_game(sub, css, ui, props, engine, brand, credits):
     return page
 
 
-def build_portada(css, ui, brand, credits, publicados):
+def mundo_scripts():
+    """Paletas, capa del mundo, arte procesado y bioma Caverna, en orden."""
+    paletas = json.loads(read("assets", "paletas.json"))
+    partes = ["window.SAMSAN_PALETAS = " + json.dumps({"contorno": paletas["contorno"], "rampas": paletas["rampas"]}) + ";",
+              "window.SAMSAN_IMG = " + json.dumps(imagenes()) + ";"]
+    for f in MUNDO:
+        partes.append(read("assets", "mundo", f))
+    partes.append(read("temas", "maths", "bioma.js"))
+    return "".join("<script>\n" + p + "\n</script>\n" for p in partes)
+
+
+# Orden de carga de la capa del mundo.
+MUNDO = ["base.js", "lienzo.js", "luz.js", "particulas.js", "capas.js", "sprites.js"]
+
+
+def imagenes():
+    """Arte ya procesado por tools/arte/ (temas/<materia>/img/*.png) como data URI.
+    { 'caverna': { 'antorcha': 'data:image/png;base64,...' } }. Ningun PNG crudo."""
+    out = {}
+    for materia, bioma in (("maths", "caverna"),):
+        carpeta = os.path.join(ROOT, "temas", materia, "img")
+        if not os.path.isdir(carpeta):
+            continue
+        for nombre in sorted(os.listdir(carpeta)):
+            if not nombre.endswith(".png"):
+                continue
+            with open(os.path.join(carpeta, nombre), "rb") as fh:
+                b64 = base64.b64encode(fh.read()).decode("ascii")
+            out.setdefault(bioma, {})[nombre[:-4]] = "data:image/png;base64," + b64
+    return out
+
+
+def build_portada(kit, brand, credits, publicados):
     e = html.escape
-    page = head(brand, e(PORTADA["descripcion"]), css + SITE_CSS, "maths", "es")
-    page += '<div class="wrap site-page">\n'
-    page += ('<header class="site-head">\n    ' + SPRITE + '\n    <div>\n'
-             '      <h1>' + e(brand) + '</h1>\n'
-             '      <p>' + e(PORTADA["lema"]) + '</p>\n'
-             '    </div>\n</header>\n')
-    page += ('<main>\n<section class="pixel-box brief">\n'
-             '  <h2>' + e(PORTADA["obra_titulo"]) + '</h2>\n' +
-             ''.join('  <p>' + e(t) + '</p>\n' for t in PORTADA["obra_texto"]) +
-             '</section>\n')
+    page = head(brand, e(PORTADA["descripcion"]), kit + SITE_CSS, "maths", "es")
+    page += '<div class="k-pagina">\n'
+    page += ('<header>\n  <h1 class="k-titulo">' + e(brand) + '</h1>\n'
+             '  <p class="k-lema">' + e(PORTADA["lema"]) + '</p>\n</header>\n')
+    page += ('<main>\n<div class="k-juego">\n'
+             '  <div class="k-escena"><canvas id="mundo" role="img" aria-label="' + e(PORTADA["escena"]) + '"></canvas></div>\n'
+             '  <section class="k-panel k-panel--sobre">\n'
+             '    <h2>' + e(PORTADA["obra_titulo"]) + '</h2>\n' +
+             ''.join('    <p>' + e(t) + '</p>\n' for t in PORTADA["obra_texto"]) +
+             '  </section>\n</div>\n')
     # Solo los juegos publicables. Hoy no hay ninguno: la lista no se pinta.
     if publicados:
-        page += '<h2 class="mt-lg">' + e(PORTADA["juegos_titulo"]) + '</h2>\n<div class="levels">\n'
-        for s in publicados:
-            page += ('<a class="pixel-box level-card" data-accent="' + e(s.get("accent", "maths")) +
-                     '" href="' + e(s["slug"]) + '.html" style="text-decoration:none;color:inherit">'
-                     '<div class="level-card__num" style="font-size:11px">' + e(s["subject"][:4].upper()) + '</div>'
-                     '<div><div class="level-card__name">' + e(s["topic"]) + '</div>'
-                     '<div class="level-card__sub">' + e(s["blurb"]) + '</div></div></a>\n')
-        page += '</div>\n'
-    page += '</main>\n' + foot(credits) + '</div>\n</body>\n</html>\n'
+        page += '<section class="k-panel zonas">\n<h2>' + e(PORTADA["juegos_titulo"]) + '</h2>\n'
+        for s_ in publicados:
+            page += ('<p><a href="' + e(s_["slug"]) + '.html"><b>' + e(s_["topic"]) + '</b></a> &middot; ' +
+                     e(s_["blurb"]) + '</p>\n')
+        page += '</section>\n'
+    page += '</main>\n' + foot(credits) + '</div>\n'
+    page += mundo_scripts()
+    page += '<script>\n' + read("assets", "sitio", "portada.js") + '\n</script>\n'
+    page += '</body>\n</html>\n'
     return page
 
 
-def build_legal(css, brand, credits):
+def build_legal(kit, brand, credits):
     e = html.escape
-    page = head(e(LEGAL["titulo"]) + " — " + e(brand), e(LEGAL["descripcion"]), css + SITE_CSS, "maths", "es")
-    page += '<div class="wrap site-page">\n'
-    page += ('<header class="site-head"><div>\n'
-             '  <h1>' + e(brand) + '</h1>\n'
-             '  <p>' + e(LEGAL["titulo"]) + '</p>\n'
-             '</div></header>\n<main class="pixel-box brief legal">\n')
+    page = head(e(LEGAL["titulo"]) + " — " + e(brand), e(LEGAL["descripcion"]), kit + SITE_CSS, "maths", "es")
+    page += '<div class="k-pagina">\n'
+    page += ('<header>\n  <h1 class="k-titulo">' + e(brand) + '</h1>\n'
+             '  <p class="k-lema">' + e(LEGAL["titulo"]) + '</p>\n</header>\n<main class="k-panel legal">\n')
     for i, (titulo, parrafos) in enumerate(LEGAL["secciones"], 1):
         page += '<section>\n<h2>' + str(i) + '. ' + e(titulo) + '</h2>\n'
         if parrafos is None:
@@ -328,6 +342,19 @@ def build_legal(css, brand, credits):
         page += '</section>\n'
     page += '<a class="back" href="index.html">' + e(LEGAL["volver"]) + '</a>\n</main>\n'
     page += foot(credits) + '</div>\n</body>\n</html>\n'
+    return page
+
+
+def build_vitrina(kit, ui, brand, credits):
+    """Solo local: la muestra aprobada reconstruida sobre assets/mundo/, para
+    comparar y decidir la compuerta de la etapa 1. No se publica."""
+    page = head("Vitrina Caverna — " + brand, "Vitrina local del bioma Caverna.", kit + SITE_CSS, "maths", "es")
+    page += read("assets", "sitio", "vitrina.html")
+    page += foot(credits)
+    page += '<script>\n' + ui + '\n</script>\n'
+    page += mundo_scripts()
+    page += '<script>\n' + read("assets", "sitio", "vitrina.js") + '\n</script>\n'
+    page += '</body>\n</html>\n'
     return page
 
 
@@ -378,11 +405,13 @@ def main():
                 os.remove(stale)
         built.append((rel, write(rel, page)))
 
-    built.insert(0, ("index.html", write("index.html", build_portada(css, ui, brand, credits, publicados))))
-    legal = build_legal(css, brand, credits)
+    kit = inline_fonts(read("assets", "kit.css"))
+    built.insert(0, ("index.html", write("index.html", build_portada(kit, brand, credits, publicados))))
+    legal = build_legal(kit, brand, credits)
     built.insert(1, ("legal.html", write("legal.html", legal)))
     # Copia local para que el enlace del pie funcione al jugar desde _local/.
     write(LOCAL + "/legal.html", legal)
+    built.append((LOCAL + "/vitrina-caverna.html", write(LOCAL + "/vitrina-caverna.html", build_vitrina(kit, ui, brand, credits))))
 
     for rel, _ in built:
         guard(rel)

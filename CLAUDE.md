@@ -15,6 +15,8 @@ node tools/harness.js                  # regresión completa; debe salir con có
 node tools/verify_<materia>_<tema>.js  # verificación propia de un tema
 python3 tools/arte/procesar.py <png>   # pasa un PNG generado por el pipeline de arte
 python3 tools/arte/prueba_grises.py    # capturas en grises y contraste de paneles
+python3 tools/arte/prueba_pipeline.py  # prueba procesar.py y tiles.py con PNG sintéticos
+node tools/verify_mundo.js             # lógica de la capa del mundo (assets/mundo/)
 git add -A && git commit -m "..." && git push   # Actions verifica y publica
 ```
 

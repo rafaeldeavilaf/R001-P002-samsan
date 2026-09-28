@@ -23,5 +23,7 @@ Este archivo lista lo que viene de terceros. `tools/build.py` publica en `legal.
 |---|---|---|---|
 | jsdom 24 | Pruebas del harness (`tools/harness.js`, `tools/verify_*.js`), instalado con `npm install` | MIT | Ninguna mientras no se redistribuya; si se redistribuye, conservar su aviso de copyright y licencia |
 | Dependencias de jsdom (62 paquetes) | Instaladas con jsdom en `node_modules/`, que no se versiona | MIT (55), BSD-2-Clause (2), ISC (2), BSD-3-Clause (1), Apache-2.0 (1), MIT-0 (1) | Ninguna mientras no se redistribuyan. Revisar esta fila si cambia la versión de jsdom |
+| Pillow | Pipeline de arte (`tools/arte/`), instalado desde `requirements.txt` | MIT-CMU (HPND) | Ninguna mientras no se redistribuya; si se redistribuye, conservar su aviso |
+| Playwright para Python y el Chromium que descarga | Prueba de grises y contraste (`tools/arte/prueba_grises.py`), en local y en Actions | Apache-2.0 (Playwright); Chromium bajo BSD-3-Clause y otras | Ninguna: se ejecutan, no se distribuyen |
 | GitHub Actions: `actions/checkout`, `actions/setup-python`, `actions/setup-node`, `actions/upload-pages-artifact`, `actions/deploy-pages` | Verificación y publicación en `.github/workflows/verificar-y-publicar.yml` | MIT | Ninguna: se ejecutan, no se distribuyen |
 | Python 3 y Node.js | Generadores, build y pruebas | PSF License 2.0 y MIT | Ninguna: se ejecutan, no se distribuyen |

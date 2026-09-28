@@ -529,11 +529,13 @@ async function main() {
   check('legal.html no referencia assets/', !extRe.test(legalHtml));
   check(slug + '.html no referencia assets/', !extRe.test(gameHtml));
   /* RC-04: cero peticiones a terceros. Las fuentes van incrustadas. */
-  [['index.html', hubHtml], ['legal.html', legalHtml], [slug + '.html', gameHtml]].forEach(([n, h]) => {
+  /* El juego viejo lleva Press Start 2P + Nunito (5); el sitio, con el kit
+     nuevo, solo Nunito (4): sin fuentes pixeladas en textos que se leen. */
+  [['index.html', hubHtml, 4], ['legal.html', legalHtml, 4], [slug + '.html', gameHtml, 5]].forEach(([n, h, nf]) => {
     check(n + ': sin Google Fonts ni @import',
           !/fonts\.(googleapis|gstatic)\.com|@import/.test(h));
-    check(n + ': las 5 fuentes van incrustadas (Press Start 2P y Nunito 400/700/800/900)',
-          (h.match(/url\('data:font\/woff2;base64,/g) || []).length === 5);
+    check(n + ': sus ' + nf + ' fuentes van incrustadas',
+          (h.match(/url\('data:font\/woff2;base64,/g) || []).length === nf);
     check(n + ': ninguna etiqueta pide un recurso a otro dominio',
           !/<(link|script|img|iframe)\b[^>]*\b(src|href)\s*=\s*["']?(https?:)?\/\//i.test(h));
   });
@@ -1158,7 +1160,11 @@ async function main() {
           !!f.querySelector('a[href="legal.html"]'), t.slice(0, 120));
     check(n + ': el credito no va en el titulo', d.title.indexOf('Rafael') === -1, d.title);
   });
-  check('la portada dice que el mundo esta en construccion', /EN CONSTRUCCIÓN/.test(pDoc.body.textContent));
+  check('la portada dice que el mundo esta en construccion', /en construcción/i.test(pDoc.body.textContent));
+  check('la portada usa el kit nuevo y la Caverna viva de fondo',
+        !!pDoc.querySelector('.k-escena canvas#mundo') && !!pDoc.querySelector('.k-panel') &&
+        /SAMSAN_BIOMAS/.test(hubHtml) && /SAMSAN_MUNDO/.test(hubHtml));
+  check('las paginas del sitio no usan la fuente pixelada', ![hubHtml, legalHtml].some(h => /font-family:\s*'Press Start 2P'/.test(h)));
   const unpublished = subs.filter(x => !x.publicar);
   check('subjects.js marca los juegos viejos como no publicables',
         subs.every(x => typeof x.publicar === 'boolean') && unpublished.length === 2,
