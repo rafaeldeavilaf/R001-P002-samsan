@@ -164,7 +164,16 @@ Para ahorrar tokens: sin agentes múltiples, y capturas solo cuando Rafael las p
 - `prototipos/` guarda los bocetos: `comun/` tiene el inicio con 12 tonos, la gema y el sonido, y `maths-plantilla/gris.js` es el punto de partida. `tools/build.py` los construye solo en `_local/` y nunca se publican.
 - `docs/referencia/` reúne los documentos en estado referencia.
 
-Pendiente en la etapa 2: la ficha de juego de La Mina (paso 1), con la aprobación de Rafael. Nada se sube ni se publica hasta que Rafael lo pida. La fase H (dos jugadores) queda para la etapa 3.
+**Parque de minijuegos (28 sep 2026).** Rafael cambia a algo más sencillo: un parque donde cada jugador elige su personaje y el minijuego que quiera, cada uno con un tema del colegio. El motor se mantiene. Cada materia es un área del parque y cada tema es un puesto con su minijuego. La visión de biomas en CLAUDE.md y en §1 se actualiza solo cuando un boceto pase la prueba de Rafael.
+
+**Primer minijuego:** para el jugador menor (Year 2), «Atrapa la canasta».
+- Completa el 10 atrapando la fruta justa: parejas y luego tríos.
+- Ficha en `docs/temas/maths-y2-sumar-restar.md`.
+- Boceto gris en `prototipos/maths-y2-canasta/atrapa.js`, con rondas 1 y 2.
+
+La ficha de juego de La Mina queda en espera.
+
+Pendiente en la etapa 2: Rafael (y si puede el jugador menor) juega el boceto 3 minutos. Si pasa, siguen las rondas 3 y 4, el parque con sus puestos y un minijuego para el jugador mayor. Nada se sube ni se publica hasta que Rafael lo pida. La fase H (dos jugadores) queda para la etapa 3.
 
 ## 8. Preguntas abiertas
 
