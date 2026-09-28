@@ -98,7 +98,9 @@
   S.dibujar = function (bx, img, x, yPies, sq, dy) {
     sq = sq || 0;
     var sy = 1 + sq, sx = 1 - sq * 0.6, w = img.width * sx, h = img.height * sy;
-    bx.drawImage(img, Math.round(x + img.width / 2 - w / 2), Math.round(yPies - h + (dy || 0)), Math.round(w), Math.round(h));
+    var r = { x: Math.round(x + img.width / 2 - w / 2), y: Math.round(yPies - h + (dy || 0)), w: Math.round(w), h: Math.round(h) };
+    bx.drawImage(img, r.x, r.y, r.w, r.h);
+    return r;
   };
 
   /* Animador por codigo de un personaje quieto: parpadeo, rebote y salto. */

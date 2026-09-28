@@ -63,6 +63,16 @@
       L.s = canvas.width / W;
     };
     if (typeof ResizeObserver !== 'undefined') new ResizeObserver(L.redimensionar).observe(canvas);
+    if (L.opts.realce == null) L.opts.realce = 0.6;
+    L.capa('alta', 15, function (ctx) {
+      if (!L.opts.light || !L.opts.realce || !realces.length) return;
+      ctx.save();
+      ctx.imageSmoothingEnabled = false; ctx.globalAlpha = L.opts.realce;
+      realces.forEach(function (q) {
+        ctx.drawImage(q.img, q.r.x * L.s, (q.r.y - L.frac) * L.s, q.r.w * L.s, q.r.h * L.s);
+      });
+      ctx.restore();
+    });
     L.redimensionar();
 
     /* Camara: sigue un objetivo en el eje vertical del mundo. Con
@@ -93,10 +103,19 @@
       L.dibujar();
     };
 
+    /* Realce de personajes: lo que se pida aqui se vuelve a dibujar despues
+       del mapa de luz con opacidad `opts.realce`. El paisaje se oscurece con
+       la luz; los personajes quedan medio iluminados por su propia lampara y
+       se leen contra cualquier fondo, tambien en grises (regla 9). */
+    var realces = [];
+    L.realzar = function (img, r) { if (r) realces.push({ img: img, r: r }); };
+    L.frac = 0;
+
     L.dibujar = function () {
       var ctx = L.ctx, bx = L.bx;
       if (!ctx || !bx) return;
       var camI = Math.floor(L.cam.y), frac = L.cam.y - camI, s = L.s;
+      L.frac = frac; realces.length = 0;
       bx.clearRect(0, 0, W, H + 2);
       capas.mundo.forEach(function (c) { c.fn(bx, camI, L); });
       ctx.save();

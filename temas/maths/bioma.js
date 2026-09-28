@@ -376,9 +376,9 @@
         } else key = a.alegria > 0 ? 'C' : (a.moviendo ? (par ? 'B' : 'B2') : 'A');
         var img = SPR[key];
         var pies = yOf(exp.posAnim) - SPR.cy - camI + img.height;
-        M.sprites.dibujar(bx, img, ROPE_X - SPR.ax, pies, a.sq, a.rebote(L.time, L.opts.smooth));
+        L.realzar(img, M.sprites.dibujar(bx, img, ROPE_X - SPR.ax, pies, a.sq, a.rebote(L.time, L.opts.smooth)));
         var ti = topo.anim.parpadeo > 0 ? topo.imgB : topo.img;
-        M.sprites.dibujar(bx, ti, topo.x - ti.width / 2, topo.pies - camI, 0, topo.anim.rebote(L.time + 1.3, L.opts.smooth));
+        L.realzar(ti, M.sprites.dibujar(bx, ti, topo.x - ti.width / 2, topo.pies - camI, 0, topo.anim.rebote(L.time + 1.3, L.opts.smooth)));
       });
       M.capas.primerPlano(L, { color: '#0C0812', desde: SURF + 30 });
 

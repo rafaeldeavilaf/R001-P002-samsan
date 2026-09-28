@@ -72,6 +72,20 @@ def navegador(p):
         raise SystemExit("No hay Chromium para Playwright: python -m playwright install chromium")
 
 
+def media_anillo(img, fuera, dentro):
+    """Luminancia media del borde entre dos rectángulos (lo que rodea a un objeto)."""
+    def suma(r):
+        x0, y0 = max(0, int(r["x"])), max(0, int(r["y"]))
+        x1, y1 = min(img.width, int(r["x"] + r["w"])), min(img.height, int(r["y"] + r["h"]))
+        if x1 <= x0 or y1 <= y0:
+            return 0, 0
+        b = img.crop((x0, y0, x1, y1)).tobytes()
+        return sum(b), len(b)
+    so, no = suma(fuera)
+    si, ni = suma(dentro)
+    return (so - si) / float(no - ni) if no > ni else None
+
+
 def media_gris(img, r):
     x0, y0 = max(0, int(r["x"])), max(0, int(r["y"]))
     x1, y1 = min(img.width, int(r["x"] + r["w"])), min(img.height, int(r["y"] + r["h"]))
@@ -141,11 +155,20 @@ def main():
                 png = pg.screenshot()
                 gris = Image.open(io.BytesIO(png)).convert("L")
                 gris.save(os.path.join(SALIDA, "grises-vitrina-%dx%d.png" % (w, h)))
+                anillo = reg.pop("anillo", None)
                 medias = {k: media_gris(gris, r) for k, r in reg.items()}
                 print("       luminancia media: " + ", ".join("%s %.0f" % (k, v or -1) for k, v in medias.items()))
                 visibles = {k: v for k, v in medias.items() if v is not None}
                 check("vitrina: las cuatro capas están en pantalla", len(visibles) == 4, medias)
-                pares = [("fondo", "suelo"), ("fondo", "objeto"), ("suelo", "objeto"), ("fondo", "panel"), ("suelo", "panel"), ("objeto", "panel")]
+                # Dos planos (pared/roca) y panel contra todo, por media. El objeto
+                # interactivo se mide contra lo que lo rodea en pantalla: así lee
+                # el niño un personaje (docs/direccion-grafica.md §4).
+                pares = [("fondo", "suelo"), ("fondo", "panel"), ("suelo", "panel"), ("objeto", "panel")]
+                if anillo and medias.get("objeto") is not None:
+                    alrededor = media_anillo(gris, anillo, reg["objeto"])
+                    print("       objeto %.0f contra su entorno %.0f" % (medias["objeto"], alrededor))
+                    check("vitrina: en grises el explorador se distingue de lo que lo rodea",
+                          abs(medias["objeto"] - alrededor) >= DIF_GRIS, "%.0f vs %.0f" % (medias["objeto"], alrededor))
                 for a, b in pares:
                     if a in visibles and b in visibles:
                         check("vitrina: en grises se distinguen %s y %s" % (a, b), abs(visibles[a] - visibles[b]) >= DIF_GRIS,

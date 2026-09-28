@@ -209,7 +209,12 @@
         return {
           fondo: celda(mp.pared),
           suelo: celda(function (f, c) { return mp.roca(f, c) && f > 6; }),
-          objeto: rect(ROPE_X - 20, yOf(exp.posAnim) - 30, 20, 26),
+          /* El explorador tal como esta dibujado (su caja) y un anillo de 6 px
+           alrededor: la legibilidad es el personaje contra lo que lo rodea. */
+        objeto: (function () { var S = exp.sprites(), A = S.A;
+          return rect(ROPE_X - S.ax, yOf(exp.posAnim) - S.cy, A.width, A.height); })(),
+        anillo: (function () { var S = exp.sprites(), A = S.A;
+          return rect(ROPE_X - S.ax - 6, yOf(exp.posAnim) - S.cy - 6, A.width + 12, A.height + 12); })(),
           panel: { x: p.left, y: p.top, w: p.width, h: p.height }
         };
       }

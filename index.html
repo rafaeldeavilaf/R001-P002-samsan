@@ -457,6 +457,16 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       L.s = canvas.width / W;
     };
     if (typeof ResizeObserver !== 'undefined') new ResizeObserver(L.redimensionar).observe(canvas);
+    if (L.opts.realce == null) L.opts.realce = 0.6;
+    L.capa('alta', 15, function (ctx) {
+      if (!L.opts.light || !L.opts.realce || !realces.length) return;
+      ctx.save();
+      ctx.imageSmoothingEnabled = false; ctx.globalAlpha = L.opts.realce;
+      realces.forEach(function (q) {
+        ctx.drawImage(q.img, q.r.x * L.s, (q.r.y - L.frac) * L.s, q.r.w * L.s, q.r.h * L.s);
+      });
+      ctx.restore();
+    });
     L.redimensionar();
 
     /* Camara: sigue un objetivo en el eje vertical del mundo. Con
@@ -487,10 +497,19 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       L.dibujar();
     };
 
+    /* Realce de personajes: lo que se pida aqui se vuelve a dibujar despues
+       del mapa de luz con opacidad `opts.realce`. El paisaje se oscurece con
+       la luz; los personajes quedan medio iluminados por su propia lampara y
+       se leen contra cualquier fondo, tambien en grises (regla 9). */
+    var realces = [];
+    L.realzar = function (img, r) { if (r) realces.push({ img: img, r: r }); };
+    L.frac = 0;
+
     L.dibujar = function () {
       var ctx = L.ctx, bx = L.bx;
       if (!ctx || !bx) return;
       var camI = Math.floor(L.cam.y), frac = L.cam.y - camI, s = L.s;
+      L.frac = frac; realces.length = 0;
       bx.clearRect(0, 0, W, H + 2);
       capas.mundo.forEach(function (c) { c.fn(bx, camI, L); });
       ctx.save();
@@ -1061,7 +1080,9 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
   S.dibujar = function (bx, img, x, yPies, sq, dy) {
     sq = sq || 0;
     var sy = 1 + sq, sx = 1 - sq * 0.6, w = img.width * sx, h = img.height * sy;
-    bx.drawImage(img, Math.round(x + img.width / 2 - w / 2), Math.round(yPies - h + (dy || 0)), Math.round(w), Math.round(h));
+    var r = { x: Math.round(x + img.width / 2 - w / 2), y: Math.round(yPies - h + (dy || 0)), w: Math.round(w), h: Math.round(h) };
+    bx.drawImage(img, r.x, r.y, r.w, r.h);
+    return r;
   };
 
   /* Animador por codigo de un personaje quieto: parpadeo, rebote y salto. */
@@ -1550,9 +1571,9 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         } else key = a.alegria > 0 ? 'C' : (a.moviendo ? (par ? 'B' : 'B2') : 'A');
         var img = SPR[key];
         var pies = yOf(exp.posAnim) - SPR.cy - camI + img.height;
-        M.sprites.dibujar(bx, img, ROPE_X - SPR.ax, pies, a.sq, a.rebote(L.time, L.opts.smooth));
+        L.realzar(img, M.sprites.dibujar(bx, img, ROPE_X - SPR.ax, pies, a.sq, a.rebote(L.time, L.opts.smooth)));
         var ti = topo.anim.parpadeo > 0 ? topo.imgB : topo.img;
-        M.sprites.dibujar(bx, ti, topo.x - ti.width / 2, topo.pies - camI, 0, topo.anim.rebote(L.time + 1.3, L.opts.smooth));
+        L.realzar(ti, M.sprites.dibujar(bx, ti, topo.x - ti.width / 2, topo.pies - camI, 0, topo.anim.rebote(L.time + 1.3, L.opts.smooth)));
       });
       M.capas.primerPlano(L, { color: '#0C0812', desde: SURF + 30 });
 
