@@ -892,6 +892,12 @@
     }, function () { return null; });
     return LINEA.promesa;
   }
+  /* El nivel final del tema baja mas oscuro (dos peldanos de luz). */
+  function nivelHondo() { return run && DATA.levels.length > 1 && run.level === DATA.levels[DATA.levels.length - 1] ? 2 : 0; }
+  /* Remate del tema: al cerrar el ultimo tramo del ultimo nivel. */
+  function remateFinal(E) {
+    if (E && E.granCristal && run && !run.queue.length && run.level === DATA.levels[DATA.levels.length - 1]) E.granCristal();
+  }
   function numDe(t) { return parseInt(String(t).replace(/−/g, '-').replace(/[^0-9-]/g, ''), 10); }
   function numTxt(n) { return n < 0 ? '−' + Math.abs(n) : String(n); }
   function signoTxt(n) { return n > 0 ? '+' + n : numTxt(n); }
@@ -960,7 +966,7 @@
     function configurarMundo() {
       if (!LINEA.E || dead) return;
       if (LINEA.run !== run) { LINEA.run = run; if (LINEA.E.nuevoNivel) LINEA.E.nuevoNivel(); }
-      if (LINEA.E.profundidad && run) LINEA.E.profundidad(run.gems);
+      if (LINEA.E.profundidad && run) LINEA.E.profundidad(run.gems + nivelHondo());
       var fis = Lv.modo === 'concreto' ? (Lv.faltante === 'cambio' ? Lv.inicio : valor)
         : Lv.modo === 'pictorico' ? (Lv.faltante === 'inicio' ? Lv.final : Lv.inicio) : Lv.inicio;
       LINEA.E.configurar({ piel: Lv.piel, unidad: Lv.unidad, min: Lv.min, max: Lv.max, valor: valor, fisica: fis,
@@ -1178,6 +1184,7 @@
           var cerrado = !!run && run.gems > g0;
           if (E && E.resultado) E.resultado({ correcto: ok, llego: llegada(x), debia: Lv.final, tramoCerrado: cerrado, hud: hud,
                                               topoCerca: bandera != null && redondeo10(llegada(x)) === bandera });
+          if (ok) remateFinal(E);
         };
         if (E && E.viajar) {
           E.L.redimensionar();
@@ -1256,12 +1263,13 @@
     var palancas = [], btnMain = null, nowEl = null, cajaEl = null, opts = [], timers = [], onKey = null;
     var NB = ' ';
 
-    function suma() { return (pesas[10] || 0) * 10 + (pesas[1] || 0); }
+    function suma() { return (pesas[100] || 0) * 100 + (pesas[10] || 0) * 10 + (pesas[1] || 0); }
+    function usaCien() { return (F.pesas || []).indexOf(100) >= 0; }
     function existe(p) { return (F.existencias && F.existencias[p] != null) ? F.existencias[p] : 9; }
     function kg(n) { return numTxt(n) + NB + F.unidad; }
     function sync() {
-      if (LINEA.E && !dead && F.sello === 'concreto' && LINEA.E.pesas) LINEA.E.pesas({ 10: pesas[10], 1: pesas[1] });
-      if (nowEl) nowEl.textContent = fmt(UI.scene.fillNow, { tens: pesas[10], ones: pesas[1], value: kg(suma()) });
+      if (LINEA.E && !dead && F.sello === 'concreto' && LINEA.E.pesas) LINEA.E.pesas({ 100: pesas[100], 10: pesas[10], 1: pesas[1] });
+      if (nowEl) nowEl.textContent = fmt(pesas[100] || usaCien() ? UI.scene.fillNow100 : UI.scene.fillNow, { hundreds: pesas[100], tens: pesas[10], ones: pesas[1], value: kg(suma()) });
       palancas.forEach(function (b) {
         var d = parseInt(b.getAttribute('data-d'), 10), p = Math.abs(d);
         b.disabled = dead || (d > 0 ? pesas[p] >= existe(p) : pesas[p] <= 0);
@@ -1271,7 +1279,7 @@
     function configurarMundo() {
       if (!LINEA.E || dead || !LINEA.E.configurarBalanza) return;
       if (LINEA.run !== run) { LINEA.run = run; if (LINEA.E.nuevoNivel) LINEA.E.nuevoNivel(); }
-      if (LINEA.E.profundidad && run) LINEA.E.profundidad(run.gems);
+      if (LINEA.E.profundidad && run) LINEA.E.profundidad(run.gems + nivelHondo());
       LINEA.E.configurarBalanza({ letra: F.letra, fijas: F.fijas, total: F.total, unidad: F.unidad,
         figura: F.sello === 'pictorico' ? 'barra' : 'balanza', ver: F.sello !== 'abstracto', pesas: { 10: 0, 1: 0 },
         ciego: F.pistaGrafica === false });
@@ -1293,7 +1301,7 @@
 
       mount: function (container, context) {
         ctx = context; dead = false; V = ctx.variant; F = V.fill; host = container;
-        pesas = { 10: 0, 1: 0 }; tecleo = ''; cursor = -1; elegido = null; opts = []; palancas = [];
+        pesas = { 100: 0, 10: 0, 1: 0 }; tecleo = ''; cursor = -1; elegido = null; opts = []; palancas = [];
         var h = '<div class="scene scene--line scene--fill scene--line-' + F.sello + '">' +
           '<div class="linea__escena" aria-hidden="true"></div>';
         if (F.sello === 'concreto') {
@@ -1302,8 +1310,9 @@
             return '<button type="button" class="btn linea__flecha' + (p === 10 ? ' linea__flecha--10' : '') + '" data-d="' + d +
               '" aria-label="' + esc(aria) + '">' + (d > 0 ? '+' : '−') + '<b>' + p + '</b></button>';
           };
+          var cien = usaCien() ? palanca(100) : '', menosCien = usaCien() ? palanca(-100) : '';
           h += '<div class="linea__mando">' +
-            '<div class="linea__palancas">' + palanca(10) + palanca(1) + palanca(-1) + palanca(-10) + '</div>' +
+            '<div class="linea__palancas' + (cien ? ' linea__palancas--6' : '') + '">' + cien + palanca(10) + palanca(1) + palanca(-1) + palanca(-10) + menosCien + '</div>' +
             '<span class="linea__ahora" aria-live="off"></span>' +
             '<button type="button" class="btn btn--primary linea__ok">' + esc(UI.scene.lineCheck) + '</button>' +
           '</div>';
@@ -1333,6 +1342,7 @@
             if (dead || e.ctrlKey || e.metaKey || e.altKey) return;
             var d = e.key === 'PageUp' ? 10 : e.key === 'PageDown' ? -10
               : (e.shiftKey && e.key === 'ArrowUp') ? 10 : (e.shiftKey && e.key === 'ArrowDown') ? -10 : 0;
+            if (e.shiftKey && d && Math.abs(d) === 10 && (e.key === 'PageUp' || e.key === 'PageDown') && usaCien()) d *= 10;   // Mayus + AvPag: 100
             if (!d) return;
             e.preventDefault(); e.stopPropagation();
             if (!e.repeat) poner(d);
@@ -1531,7 +1541,7 @@
       var E = LINEA.E;
       if (!E || dead) return;
       if (LINEA.run !== run) { LINEA.run = run; if (E.nuevoNivel) E.nuevoNivel(); }
-      if (E.profundidad && run) E.profundidad(run.gems);
+      if (E.profundidad && run) E.profundidad(run.gems + nivelHondo());
       if (R.mundo === 'balanza' && E.configurarBalanza) {
         var B = R.balanza;
         E.configurarBalanza({ letra: R.letra, fijas: B.fijas, total: B.total, unidad: B.unidad,

@@ -238,9 +238,10 @@ window.GAME_UI = {
     /* ---------- FILL (mech: "fill", modo balanza) ----------
        Pesas en el lugar del saco hasta que el brazo queda horizontal. */
     fillNow:       'On the pan: {tens} × 10 + {ones} × 1 = {value}',
+    fillNow100:    'On the pan: {hundreds} × 100 + {tens} × 10 + {ones} × 1 = {value}',
     fillAdd:       'Add a {n} {unit} weight',
     fillTake:      'Take off a {n} {unit} weight',
-    fillHelp:      'Put weights where the sack was until the arm is level. <b>+10</b> and <b>+1</b> add, <b>&minus;10</b> and <b>&minus;1</b> take off.',
+    fillHelp:      'Put weights where the sack was until the arm is level. The <b>+</b> levers add a weight, the <b>&minus;</b> levers take one off.',
     fillHelpPick:  'Look at the bar, then tap the answer or press <b>A B C D</b>.',
     fillEmpty:     'Put some weights on the pan first.',
     fillRight:     'Level. The sack goes back and the scale stays level.',

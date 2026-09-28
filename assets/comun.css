@@ -202,3 +202,7 @@ html[data-capa="comun"] .linea__opciones--frases .linea__opcion { font-size: 1.1
   html[data-capa="comun"] .linea__opciones--frases .linea__opcion { font-size: 1rem; white-space: nowrap; gap: 6px; padding: 0 8px; }
   html[data-capa="comun"] .scene--ecuacion .forge__piece { min-width: 50px; min-height: 52px; font-size: 1.2rem; }
 }
+
+/* Seis palancas (pesas de 100, 10 y 1) en el jefe: dos filas en telefono. */
+html[data-capa="comun"] .linea__palancas--6 { grid-template-columns: repeat(6, 64px); }
+@media (max-width: 700px) { html[data-capa="comun"] .linea__palancas--6 { grid-template-columns: repeat(3, 64px); } }

@@ -88,7 +88,7 @@ function toque(w, el) {
   el.dispatchEvent(pu);
   el.dispatchEvent(new w.MouseEvent('click', { bubbles: true, detail: 1 }));
 }
-function tecla(w, key) { w.document.dispatchEvent(new w.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })); }
+function tecla(w, key, shiftKey) { w.document.dispatchEvent(new w.KeyboardEvent('keydown', { key, shiftKey: !!shiftKey, bubbles: true, cancelable: true })); }
 
 const MODOS = ['raton', 'tactil', 'teclado'];
 
@@ -139,7 +139,8 @@ function responder(w, v, x, modo) {
 function responderBalanza(w, v, x, modo, host, pulsar) {
   const F = v.fill;
   if (F.sello === 'concreto') {
-    const tens = Math.floor(x / 10), ones = x % 10;
+    const hundreds = Math.floor(x / 100), tens = Math.floor(x % 100 / 10), ones = x % 10;
+    for (let i = 0; i < hundreds; i++) { if (modo === 'teclado') tecla(w, 'PageUp', true); else pulsar(host.querySelector('[data-d="100"]')); }
     for (let i = 0; i < tens; i++) { if (modo === 'teclado') tecla(w, 'PageUp'); else pulsar(host.querySelector('[data-d="10"]')); }
     for (let i = 0; i < ones; i++) { if (modo === 'teclado') tecla(w, 'ArrowUp'); else pulsar(host.querySelector('[data-d="1"]')); }
     const t = host.querySelector('.linea__ahora').textContent.replace(MENOS, '-');

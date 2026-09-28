@@ -660,7 +660,7 @@ for t_, (lo, hi, lf), plantillas, pista in ((1, (30, 99, 11), range(0, 6), True)
 def item_ecuacion2(k, letra, f1, f2, t):
     """Jefe: dos partes conocidas (la carretilla, las herramientas) y la carga."""
     sol = t - f1 - f2
-    stem = "The cart weighs %s and the tools %s. With the load, it all weighs %s. %s is the load. Build the sentence." % (kg(f1), kg(f2), kg(t), letra)
+    stem = "The cart weighs %s and the tools %s. Cart, tools and load weigh %s. %s is the load. Build the sentence." % (kg(f1), kg(f2), kg(t), letra)
     R = {"tipo": "ecuacion", "letra": letra, "valor": sol, "usar": sorted([num(f1), num(f2), num(t)]), "sello": "concreto",
          "mundo": "balanza", "balanza": {"fijas": [f1, f2], "total": t, "unidad": "kg"},
          "esperada": [letra, "+", num(f1), "+", num(f2), "=", num(t)],
@@ -679,6 +679,86 @@ n4.tramo([famq("MY6-4-J", "write and solve a sentence with a letter", "jefe",
                [item_ecuacion2(i, LETRAS[i % 8], f1, f2, t) for i, (f1, f2, t) in
                 enumerate(unicos(lambda: (R(20, 45), R(11, 25), R(90, 150)), ok=lambda x: x[2] - x[0] - x[1] >= 12 and (x[2] - x[0] - x[1]) % 10))],
                pista=False)])
+
+
+# ---- Nivel 5 — The Bottom of the Mine (jefe del tema): los tres verbos
+def item_fill100(letra, fijas, total, sello, pista=True):
+    v = item_fill(letra, fijas, total, sello, pista=pista)
+    v["fill"]["pesas"] = [100, 10, 1]
+    v["fill"]["existencias"] = {"100": 9, "10": 9, "1": 9}
+    return v
+
+
+def item_ecuacion2_pic(k, letra, f1, f2, t):
+    """Pictorico de dos partes: elegir el paso que da la letra."""
+    v = item_ecuacion2(k, letra, f1, f2, t)
+    R = dict(v["rule"], sello="pictorico")
+    frases = [" ".join([letra, "=", num(t), MENOS, num(f1), MENOS, num(f2)]),
+              " ".join([letra, "=", num(t), "+", num(f1), "+", num(f2)]),
+              " ".join([letra, "=", num(t), MENOS, num(f1), "+", num(f2)]),
+              " ".join([letra, "=", num(f1), "+", num(f2), MENOS, num(t)])]
+    correcta = frases[0]
+    rng.shuffle(frases)
+    v.update({"stem": v["stem"].replace(" Build the sentence.", " Which step finds %s?" % letra),
+              "options": frases, "answer": frases.index(correcta), "pieces": [], "rule": R})
+    return v
+
+
+def tres_cifras():
+    t = R(300, 999)
+    f = R(110, t - 110)
+    return (f, t) if (t - f) % 10 and (t - f) % 100 >= 10 else tres_cifras()
+
+
+def dos_partes():
+    f1, f2 = R(20, 45), R(11, 25)
+    t = R(f1 + f2 + 12, 150)
+    return (f1, f2, t) if (t - f1 - f2) % 10 else dos_partes()
+
+
+n5 = tema.nivel(name="THE BOTTOM OF THE MINE", subtitle="The great crystal sleeps at the bottom",
+                skill="use everything together",
+                briefing=["<p>The last trip goes down in the dark, to the very bottom of the mine.</p>",
+                          "<p>The lift, the scales and the smith's sentences: you need all of them. At the bottom sleeps the great crystal.</p>"])
+n5.tramo([
+    famq("MY6-5-R1", "write the number sentence", "repaso",
+         [item_ecuacion(i, LETRAS[i % 8], f, t, "concreto") for i, (f, t) in enumerate(unicos(pares(30, 99, 11)))]),
+    famf("MY6-5-R2", "find the unknown in a sum", "repaso",
+         [item_fill(LETRAS[(i + 2) % 8], [f], t, "abstracto") for i, (f, t) in enumerate(unicos(con_llevada))]),
+])
+tr = unicos(n1_t3, NV * 3, ok=lambda t: -30 <= t[0] + t[1] <= -18)
+n5.tramo([
+    fam("MY6-5-T1C", "add across zero", "concreto", [item_final(a, b, "concreto", bandera=True) for a, b in tr[:NV]]),
+    fam("MY6-5-T1P", "add across zero", "pictorico", [item_final(a, b, "pictorico") for a, b in tr[NV:2 * NV]]),
+    fam("MY6-5-T1A", "add across zero", "abstracto", [item_final(a, b, "abstracto") for a, b in tr[2 * NV:]]),
+])
+tr = unicos(tres_cifras, NV * 3)
+n5.tramo([
+    famf("MY6-5-T2C", "find the unknown in a sum", "concreto", [item_fill100(LETRAS[i % 8], [f], t, "concreto") for i, (f, t) in enumerate(tr[:NV])]),
+    famf("MY6-5-T2P", "find the unknown in a sum", "pictorico", [item_fill100(LETRAS[(i + 1) % 8], [f], t, "pictorico") for i, (f, t) in enumerate(tr[NV:2 * NV])]),
+    famf("MY6-5-T2A", "find the unknown in a sum", "abstracto", [item_fill100(LETRAS[(i + 2) % 8], [f], t, "abstracto") for i, (f, t) in enumerate(tr[2 * NV:])]),
+])
+tr = unicos(dos_partes, NV * 3)
+n5.tramo([
+    famq("MY6-5-T3C", "write and solve a sentence with a letter", "concreto",
+         [item_ecuacion2(i, LETRAS[i % 8], f1, f2, t) for i, (f1, f2, t) in enumerate(tr[:NV])], False),
+    famq("MY6-5-T3P", "choose the inverse step", "pictorico",
+         [item_ecuacion2_pic(i, LETRAS[(i + 3) % 8], f1, f2, t) for i, (f1, f2, t) in enumerate(tr[NV:2 * NV])], False),
+    famf("MY6-5-T3A", "find the unknown in a sum", "abstracto",
+         [item_fill(LETRAS[(i + 5) % 8], [f1, f2], t, "abstracto", pista=False) for i, (f1, f2, t) in enumerate(tr[2 * NV:])], False),
+])
+
+
+def item_cristal(a, b):
+    """El jefe: la compuerta del gran cristal, en el fondo, desde el castillete."""
+    v = item_final(a, b, "concreto", bandera=True, pista=False)
+    v["stem"] = "The great crystal is %s below the flag at %s. Guess first, then take the lift down." % (met(abs(b)), met(a))
+    return v
+
+
+n5.tramo([fam("MY6-5-J", "add across zero", "jefe",
+              [item_cristal(a, b) for a, b in unicos(lambda: (R(4, 10), -R(30, 40)), ok=lambda t: -30 <= t[0] + t[1] <= -26)],
+              pista=False)])
 
 
 # ---------------------------------------------------------------- validacion propia

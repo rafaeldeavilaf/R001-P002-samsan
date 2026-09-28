@@ -2207,7 +2207,18 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
           },
           cavar: function (bandera) { tunel = { hasta: M.clamp(bandera, K.DMIN, -2), t: 0 }; },
           profundidad: function (n) { cav.luz.cfg.ambiente = AMB[Math.max(0, Math.min(AMB.length - 1, n - 1))]; },   // n = tramos ya cerrados
-          nuevoNivel: function () { puertas = []; saco = 0; tunel = null; },
+          nuevoNivel: function () { puertas = []; saco = 0; tunel = null; cav.luz.cfg.ambiente = AMB[0]; },
+          /* Remate del tema: el gran cristal del fondo ilumina toda la mina;
+             todas las compuertas del pozo se abren con su cristal. */
+          granCristal: function () {
+            for (var d = -3; d >= -28; d -= 5) {
+              var Q = puertas.filter(function (P) { return Math.abs(P.d - d) < 3; })[0];
+              if (Q) { Q.abierta = true; Q.cristal = true; } else puertas.push({ d: d, abierta: true, cristal: true });
+            }
+            cav.luz.cfg.ambiente = '#7466A8';
+            for (var k = 0; k < 6; k++) cav.particulas.estallido(POZO_X + (k - 3) * 28, yOf(-24 + k * 3));
+            exp.celebrar();
+          },
           dibujar: function () { L.dibujar(); }
         };
         /* Para tools/arte/prueba_grises.py: regiones de la escena en px CSS. */

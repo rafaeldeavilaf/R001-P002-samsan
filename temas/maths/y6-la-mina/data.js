@@ -10705,7 +10705,7 @@ window.QUIZ_DATA = {
      "pistaGrafica": false,
      "variants": [
       {
-       "stem": "The cart weighs 33 kg and the tools 13 kg. With the load, it all weighs 113 kg. c is the load. Build the sentence.",
+       "stem": "The cart weighs 33 kg and the tools 13 kg. Cart, tools and load weigh 113 kg. c is the load. Build the sentence.",
        "options": [
         "67",
         "?"
@@ -10780,7 +10780,7 @@ window.QUIZ_DATA = {
        "explain": "c + 33 + 13 = 113, so c = 67 kg."
       },
       {
-       "stem": "The cart weighs 39 kg and the tools 11 kg. With the load, it all weighs 144 kg. n is the load. Build the sentence.",
+       "stem": "The cart weighs 39 kg and the tools 11 kg. Cart, tools and load weigh 144 kg. n is the load. Build the sentence.",
        "options": [
         "94",
         "?"
@@ -10855,7 +10855,7 @@ window.QUIZ_DATA = {
        "explain": "n + 39 + 11 = 144, so n = 94 kg."
       },
       {
-       "stem": "The cart weighs 21 kg and the tools 23 kg. With the load, it all weighs 125 kg. m is the load. Build the sentence.",
+       "stem": "The cart weighs 21 kg and the tools 23 kg. Cart, tools and load weigh 125 kg. m is the load. Build the sentence.",
        "options": [
         "81",
         "?"
@@ -10930,7 +10930,7 @@ window.QUIZ_DATA = {
        "explain": "m + 21 + 23 = 125, so m = 81 kg."
       },
       {
-       "stem": "The cart weighs 43 kg and the tools 21 kg. With the load, it all weighs 149 kg. p is the load. Build the sentence.",
+       "stem": "The cart weighs 43 kg and the tools 21 kg. Cart, tools and load weigh 149 kg. p is the load. Build the sentence.",
        "options": [
         "85",
         "?"
@@ -11005,7 +11005,7 @@ window.QUIZ_DATA = {
        "explain": "p + 43 + 21 = 149, so p = 85 kg."
       },
       {
-       "stem": "The cart weighs 39 kg and the tools 25 kg. With the load, it all weighs 135 kg. g is the load. Build the sentence.",
+       "stem": "The cart weighs 39 kg and the tools 25 kg. Cart, tools and load weigh 135 kg. g is the load. Build the sentence.",
        "options": [
         "71",
         "?"
@@ -11080,7 +11080,7 @@ window.QUIZ_DATA = {
        "explain": "g + 39 + 25 = 135, so g = 71 kg."
       },
       {
-       "stem": "The cart weighs 22 kg and the tools 14 kg. With the load, it all weighs 112 kg. k is the load. Build the sentence.",
+       "stem": "The cart weighs 22 kg and the tools 14 kg. Cart, tools and load weigh 112 kg. k is the load. Build the sentence.",
        "options": [
         "76",
         "?"
@@ -11153,6 +11153,3138 @@ window.QUIZ_DATA = {
         "Example: b + 10 + 5 = 40."
        ],
        "explain": "k + 22 + 14 = 112, so k = 76 kg."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "name": "THE BOTTOM OF THE MINE",
+   "subtitle": "The great crystal sleeps at the bottom",
+   "skill": "use everything together",
+   "briefing": [
+    "<p>The last trip goes down in the dark, to the very bottom of the mine.</p>",
+    "<p>The lift, the scales and the smith's sentences: you need all of them. At the bottom sleeps the great crystal.</p>"
+   ],
+   "sello": true,
+   "tramosItems": [
+    [
+     0,
+     2
+    ],
+    [
+     2,
+     5
+    ],
+    [
+     5,
+     8
+    ],
+    [
+     8,
+     11
+    ],
+    [
+     11,
+     12
+    ]
+   ],
+   "tramos": 5,
+   "questions": [
+    {
+     "id": "MY6-5-R1",
+     "skill": "write the number sentence",
+     "mech": "forge",
+     "sello": "repaso",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "The cart and its load weigh 32 kg. The empty cart weighs 21 kg. c is the load. Build the number sentence.",
+       "options": [
+        "11",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 11,
+       "pieces": [
+        {
+         "text": "21"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "c"
+        },
+        {
+         "text": "32"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "c",
+        "valor": 11,
+        "usar": [
+         "21",
+         "32"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          21
+         ],
+         "total": 32,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "c",
+         "+",
+         "21",
+         "=",
+         "32"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than the cart and load altogether!",
+         "menor": "Then the cart and load would weigh {suma} kg, not 32 kg."
+        }
+       },
+       "hint": "Start with the letter c for what you do not know.",
+       "pistas": [
+        "Start with the letter c for what you do not know.",
+        "Picture the bar: 32 kg in total, 21 kg known, the rest is c.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "c + 21 = 32, so c = 32 − 21 = 11 kg."
+      },
+      {
+       "stem": "A crate of crystals weighs 44 kg. The crate alone weighs 27 kg. n is the crystals. Build the number sentence.",
+       "options": [
+        "17",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 17,
+       "pieces": [
+        {
+         "text": "+"
+        },
+        {
+         "text": "44"
+        },
+        {
+         "text": "n"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "27"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "n",
+        "valor": 17,
+        "usar": [
+         "27",
+         "44"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          27
+         ],
+         "total": 44,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "n",
+         "+",
+         "27",
+         "=",
+         "44"
+        ],
+        "absurdo": {
+         "mayor": "Then the crystals would weigh {valor} kg: more than the full crate altogether!",
+         "menor": "Then the full crate would weigh {suma} kg, not 44 kg."
+        }
+       },
+       "hint": "Start with the letter n for what you do not know.",
+       "pistas": [
+        "Start with the letter n for what you do not know.",
+        "Picture the bar: 44 kg in total, 27 kg known, the rest is n.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "n + 27 = 44, so n = 44 − 27 = 17 kg."
+      },
+      {
+       "stem": "The bucket of ore weighs 48 kg. The bucket weighs 36 kg. m is the ore. Build the number sentence.",
+       "options": [
+        "12",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 12,
+       "pieces": [
+        {
+         "text": "36"
+        },
+        {
+         "text": "m"
+        },
+        {
+         "text": "48"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "m",
+        "valor": 12,
+        "usar": [
+         "36",
+         "48"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          36
+         ],
+         "total": 48,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "m",
+         "+",
+         "36",
+         "=",
+         "48"
+        ],
+        "absurdo": {
+         "mayor": "Then the ore would weigh {valor} kg: more than the full bucket altogether!",
+         "menor": "Then the full bucket would weigh {suma} kg, not 48 kg."
+        }
+       },
+       "hint": "Start with the letter m for what you do not know.",
+       "pistas": [
+        "Start with the letter m for what you do not know.",
+        "Picture the bar: 48 kg in total, 36 kg known, the rest is m.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "m + 36 = 48, so m = 48 − 36 = 12 kg."
+      },
+      {
+       "stem": "A new wheel and its axle weigh 42 kg. The axle weighs 14 kg. p is the wheel. Build the number sentence.",
+       "options": [
+        "28",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 28,
+       "pieces": [
+        {
+         "text": "+"
+        },
+        {
+         "text": "14"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "42"
+        },
+        {
+         "text": "p"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 28,
+        "usar": [
+         "14",
+         "42"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          14
+         ],
+         "total": 42,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "p",
+         "+",
+         "14",
+         "=",
+         "42"
+        ],
+        "absurdo": {
+         "mayor": "Then the wheel would weigh {valor} kg: more than the wheel and axle altogether!",
+         "menor": "Then the wheel and axle would weigh {suma} kg, not 42 kg."
+        }
+       },
+       "hint": "Start with the letter p for what you do not know.",
+       "pistas": [
+        "Start with the letter p for what you do not know.",
+        "Picture the bar: 42 kg in total, 14 kg known, the rest is p.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "p + 14 = 42, so p = 42 − 14 = 28 kg."
+      },
+      {
+       "stem": "The hammer weighs 84 kg. Its handle weighs 15 kg. g is the head. Build the number sentence.",
+       "options": [
+        "69",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 69,
+       "pieces": [
+        {
+         "text": "84"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "g"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "15"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 69,
+        "usar": [
+         "15",
+         "84"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          15
+         ],
+         "total": 84,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "g",
+         "+",
+         "15",
+         "=",
+         "84"
+        ],
+        "absurdo": {
+         "mayor": "Then the head would weigh {valor} kg: more than the whole hammer altogether!",
+         "menor": "Then the whole hammer would weigh {suma} kg, not 84 kg."
+        }
+       },
+       "hint": "Start with the letter g for what you do not know.",
+       "pistas": [
+        "Start with the letter g for what you do not know.",
+        "Picture the bar: 84 kg in total, 15 kg known, the rest is g.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "g + 15 = 84, so g = 84 − 15 = 69 kg."
+      },
+      {
+       "stem": "The barrel of water weighs 60 kg. The water weighs 33 kg. k is the barrel. Build the number sentence.",
+       "options": [
+        "27",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 27,
+       "pieces": [
+        {
+         "text": "k"
+        },
+        {
+         "text": "33"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "60"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 27,
+        "usar": [
+         "33",
+         "60"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          33
+         ],
+         "total": 60,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "k",
+         "+",
+         "33",
+         "=",
+         "60"
+        ],
+        "absurdo": {
+         "mayor": "Then the barrel would weigh {valor} kg: more than the full barrel altogether!",
+         "menor": "Then the full barrel would weigh {suma} kg, not 60 kg."
+        }
+       },
+       "hint": "Start with the letter k for what you do not know.",
+       "pistas": [
+        "Start with the letter k for what you do not know.",
+        "Picture the bar: 60 kg in total, 33 kg known, the rest is k.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "k + 33 = 60, so k = 60 − 33 = 27 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-R2",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "repaso",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "m + 32 = 60",
+       "options": [
+        "28",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 28,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "m",
+        "fijas": [
+         32
+        ],
+        "total": 60,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack m and 32 kg together make 60 kg.",
+       "pistas": [
+        "Sack m and 32 kg together make 60 kg.",
+        "Take the known part away from the total: 60 − 32.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "m + 32 = 60, so sack m = 60 − 32 = 28 kg.",
+       "sub": "m = [ ]"
+      },
+      {
+       "stem": "p + 39 = 96",
+       "options": [
+        "57",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 57,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "p",
+        "fijas": [
+         39
+        ],
+        "total": 96,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack p and 39 kg together make 96 kg.",
+       "pistas": [
+        "Sack p and 39 kg together make 96 kg.",
+        "Take the known part away from the total: 96 − 39.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "p + 39 = 96, so sack p = 96 − 39 = 57 kg.",
+       "sub": "p = [ ]"
+      },
+      {
+       "stem": "g + 26 = 44",
+       "options": [
+        "18",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 18,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "g",
+        "fijas": [
+         26
+        ],
+        "total": 44,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack g and 26 kg together make 44 kg.",
+       "pistas": [
+        "Sack g and 26 kg together make 44 kg.",
+        "Take the known part away from the total: 44 − 26.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "g + 26 = 44, so sack g = 44 − 26 = 18 kg.",
+       "sub": "g = [ ]"
+      },
+      {
+       "stem": "k + 15 = 61",
+       "options": [
+        "46",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 46,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "k",
+        "fijas": [
+         15
+        ],
+        "total": 61,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack k and 15 kg together make 61 kg.",
+       "pistas": [
+        "Sack k and 15 kg together make 61 kg.",
+        "Take the known part away from the total: 61 − 15.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 15 = 61, so sack k = 61 − 15 = 46 kg.",
+       "sub": "k = [ ]"
+      },
+      {
+       "stem": "s + 28 = 60",
+       "options": [
+        "32",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 32,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "s",
+        "fijas": [
+         28
+        ],
+        "total": 60,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack s and 28 kg together make 60 kg.",
+       "pistas": [
+        "Sack s and 28 kg together make 60 kg.",
+        "Take the known part away from the total: 60 − 28.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "s + 28 = 60, so sack s = 60 − 28 = 32 kg.",
+       "sub": "s = [ ]"
+      },
+      {
+       "stem": "t + 59 = 72",
+       "options": [
+        "13",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 13,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "t",
+        "fijas": [
+         59
+        ],
+        "total": 72,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack t and 59 kg together make 72 kg.",
+       "pistas": [
+        "Sack t and 59 kg together make 72 kg.",
+        "Take the known part away from the total: 72 − 59.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "t + 59 = 72, so sack t = 72 − 59 = 13 kg.",
+       "sub": "t = [ ]"
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-T1C",
+     "skill": "add across zero",
+     "mech": "line",
+     "sello": "concreto",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "A crystal gate is 23 m below the flag at 2 m. Take the lift there. Guess first: plant your flag.",
+       "options": [
+        "−21",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -21,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 2,
+        "cambio": -23,
+        "final": -21,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: 2 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 2 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 23 = 20 + 3. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "2 + (−23) = −21: the gate is at −21 m."
+      },
+      {
+       "stem": "A crystal gate is 14 m below the flag at −8 m. Take the lift there. Guess first: plant your flag.",
+       "options": [
+        "−22",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -22,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": -8,
+        "cambio": -14,
+        "final": -22,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: −8 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: −8 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 14 = 10 + 4. Use the 10 lever first, then the 1 lever.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "−8 + (−14) = −22: the gate is at −22 m."
+      },
+      {
+       "stem": "A crystal gate is 25 m below the flag at 7 m. Take the lift there. Guess first: plant your flag.",
+       "options": [
+        "−18",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -18,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 7,
+        "cambio": -25,
+        "final": -18,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: 7 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 7 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 25 = 20 + 5. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "7 + (−25) = −18: the gate is at −18 m."
+      },
+      {
+       "stem": "A crystal gate is 27 m below the flag at 5 m. Take the lift there. Guess first: plant your flag.",
+       "options": [
+        "−22",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -22,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 5,
+        "cambio": -27,
+        "final": -22,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: 5 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 5 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 27 = 20 + 7. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "5 + (−27) = −22: the gate is at −22 m."
+      },
+      {
+       "stem": "A crystal gate is 17 m below the flag at −6 m. Take the lift there. Guess first: plant your flag.",
+       "options": [
+        "−23",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -23,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": -6,
+        "cambio": -17,
+        "final": -23,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: −6 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: −6 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 17 = 10 + 7. Use the 10 lever first, then the 1 lever.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "−6 + (−17) = −23: the gate is at −23 m."
+      },
+      {
+       "stem": "A crystal gate is 27 m below the flag at −2 m. Take the lift there. Guess first: plant your flag.",
+       "options": [
+        "−29",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -29,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": -2,
+        "cambio": -27,
+        "final": -29,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: −2 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: −2 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 27 = 20 + 7. Use the 10 lever first, then the 1 lever.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "−2 + (−27) = −29: the gate is at −29 m."
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-T1P",
+     "skill": "add across zero",
+     "mech": "line",
+     "sello": "pictorico",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "The winch board shows a trip down 17 m from −10 m. Where is the gate?",
+       "options": [
+        "27",
+        "−26",
+        "−27",
+        "−28"
+       ],
+       "answer": 2,
+       "solucion": -27,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": -10,
+        "cambio": -17,
+        "final": -27,
+        "faltante": "final",
+        "modo": "pictorico",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: −10 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: −10 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 17 = 10 + 7. Use the 10 lever first, then the 1 lever.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "−10 + (−17) = −27: the gate is at −27 m."
+      },
+      {
+       "stem": "The winch board shows a trip down 24 m from 3 m. Where is the gate?",
+       "options": [
+        "−22",
+        "−20",
+        "−21",
+        "27"
+       ],
+       "answer": 2,
+       "solucion": -21,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 3,
+        "cambio": -24,
+        "final": -21,
+        "faltante": "final",
+        "modo": "pictorico",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: 3 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 3 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 24 = 20 + 4. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "3 + (−24) = −21: the gate is at −21 m."
+      },
+      {
+       "stem": "The winch board shows a trip down 16 m from −9 m. Where is the gate?",
+       "options": [
+        "−25",
+        "−26",
+        "25",
+        "−24"
+       ],
+       "answer": 0,
+       "solucion": -25,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": -9,
+        "cambio": -16,
+        "final": -25,
+        "faltante": "final",
+        "modo": "pictorico",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: −9 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: −9 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 16 = 10 + 6. Use the 10 lever first, then the 1 lever.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "−9 + (−16) = −25: the gate is at −25 m."
+      },
+      {
+       "stem": "The winch board shows a trip down 16 m from −10 m. Where is the gate?",
+       "options": [
+        "26",
+        "−26",
+        "−25",
+        "−27"
+       ],
+       "answer": 1,
+       "solucion": -26,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": -10,
+        "cambio": -16,
+        "final": -26,
+        "faltante": "final",
+        "modo": "pictorico",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: −10 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: −10 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 16 = 10 + 6. Use the 10 lever first, then the 1 lever.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "−10 + (−16) = −26: the gate is at −26 m."
+      },
+      {
+       "stem": "The winch board shows a trip down 29 m from −1 m. Where is the gate?",
+       "options": [
+        "−30",
+        "−29",
+        "−31",
+        "30"
+       ],
+       "answer": 0,
+       "solucion": -30,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": -1,
+        "cambio": -29,
+        "final": -30,
+        "faltante": "final",
+        "modo": "pictorico",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: −1 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: −1 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 29 = 20 + 9. Use the 10 lever first, then the 1 lever.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "−1 + (−29) = −30: the gate is at −30 m."
+      },
+      {
+       "stem": "The winch board shows a trip down 27 m from 8 m. Where is the gate?",
+       "options": [
+        "35",
+        "−19",
+        "−18",
+        "−20"
+       ],
+       "answer": 1,
+       "solucion": -19,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 8,
+        "cambio": -27,
+        "final": -19,
+        "faltante": "final",
+        "modo": "pictorico",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: 8 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 8 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 27 = 20 + 7. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "8 + (−27) = −19: the gate is at −19 m."
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-T1A",
+     "skill": "add across zero",
+     "mech": "line",
+     "sello": "abstracto",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "1 + (−21) = [ ]",
+       "options": [
+        "−20",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -20,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 1,
+        "cambio": -21,
+        "final": -20,
+        "faltante": "final",
+        "modo": "abstracto",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: 1 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 1 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 21 = 20 + 1. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "1 + (−21) = −20: the gate is at −20 m.",
+       "sub": "Write where the gate is."
+      },
+      {
+       "stem": "4 + (−26) = [ ]",
+       "options": [
+        "−22",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -22,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 4,
+        "cambio": -26,
+        "final": -22,
+        "faltante": "final",
+        "modo": "abstracto",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: 4 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 4 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 26 = 20 + 6. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "4 + (−26) = −22: the gate is at −22 m.",
+       "sub": "Write where the gate is."
+      },
+      {
+       "stem": "2 + (−25) = [ ]",
+       "options": [
+        "−23",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -23,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 2,
+        "cambio": -25,
+        "final": -23,
+        "faltante": "final",
+        "modo": "abstracto",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: 2 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 2 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 25 = 20 + 5. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "2 + (−25) = −23: the gate is at −23 m.",
+       "sub": "Write where the gate is."
+      },
+      {
+       "stem": "5 + (−26) = [ ]",
+       "options": [
+        "−21",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -21,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 5,
+        "cambio": -26,
+        "final": -21,
+        "faltante": "final",
+        "modo": "abstracto",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: 5 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 5 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 26 = 20 + 6. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "5 + (−26) = −21: the gate is at −21 m.",
+       "sub": "Write where the gate is."
+      },
+      {
+       "stem": "−8 + (−16) = [ ]",
+       "options": [
+        "−24",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -24,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": -8,
+        "cambio": -16,
+        "final": -24,
+        "faltante": "final",
+        "modo": "abstracto",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: −8 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: −8 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 16 = 10 + 6. Use the 10 lever first, then the 1 lever.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "−8 + (−16) = −24: the gate is at −24 m.",
+       "sub": "Write where the gate is."
+      },
+      {
+       "stem": "−2 + (−18) = [ ]",
+       "options": [
+        "−20",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -20,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": -2,
+        "cambio": -18,
+        "final": -20,
+        "faltante": "final",
+        "modo": "abstracto",
+        "bandera": false,
+        "pistaGrafica": true
+       },
+       "hint": "Start at the flag: −2 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: −2 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 18 = 10 + 8. Use the 10 lever first, then the 1 lever.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "−2 + (−18) = −20: the gate is at −20 m.",
+       "sub": "Write where the gate is."
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-T2C",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "concreto",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "Sack c and 141 kg balance 359 kg. Put weights where the sack was.",
+       "options": [
+        "218",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 218,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "c",
+        "fijas": [
+         141
+        ],
+        "total": 359,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 359 − 141.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "c + 141 = 359, so sack c = 359 − 141 = 218 kg."
+      },
+      {
+       "stem": "Sack n and 538 kg balance 737 kg. Put weights where the sack was.",
+       "options": [
+        "199",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 199,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "n",
+        "fijas": [
+         538
+        ],
+        "total": 737,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 737 − 538.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "n + 538 = 737, so sack n = 737 − 538 = 199 kg."
+      },
+      {
+       "stem": "Sack m and 366 kg balance 632 kg. Put weights where the sack was.",
+       "options": [
+        "266",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 266,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "m",
+        "fijas": [
+         366
+        ],
+        "total": 632,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 632 − 366.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "m + 366 = 632, so sack m = 632 − 366 = 266 kg."
+      },
+      {
+       "stem": "Sack p and 177 kg balance 964 kg. Put weights where the sack was.",
+       "options": [
+        "787",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 787,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "p",
+        "fijas": [
+         177
+        ],
+        "total": 964,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 964 − 177.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "p + 177 = 964, so sack p = 964 − 177 = 787 kg."
+      },
+      {
+       "stem": "Sack g and 351 kg balance 505 kg. Put weights where the sack was.",
+       "options": [
+        "154",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 154,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "g",
+        "fijas": [
+         351
+        ],
+        "total": 505,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 505 − 351.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "g + 351 = 505, so sack g = 505 − 351 = 154 kg."
+      },
+      {
+       "stem": "Sack k and 135 kg balance 332 kg. Put weights where the sack was.",
+       "options": [
+        "197",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 197,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "k",
+        "fijas": [
+         135
+        ],
+        "total": 332,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 332 − 135.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 135 = 332, so sack k = 332 − 135 = 197 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-T2P",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "pictorico",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "The merchant drew the deal as a bar: sack n and 121 kg make 418 kg. How heavy is sack n?",
+       "options": [
+        "287",
+        "539",
+        "297",
+        "307"
+       ],
+       "answer": 2,
+       "solucion": 297,
+       "fill": {
+        "modo": "balanza",
+        "sello": "pictorico",
+        "letra": "n",
+        "fijas": [
+         121
+        ],
+        "total": 418,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack n and 121 kg together make 418 kg.",
+       "pistas": [
+        "Sack n and 121 kg together make 418 kg.",
+        "Take the known part away from the total: 418 − 121.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "n + 121 = 418, so sack n = 418 − 121 = 297 kg."
+      },
+      {
+       "stem": "The merchant drew the deal as a bar: sack m and 354 kg make 688 kg. How heavy is sack m?",
+       "options": [
+        "344",
+        "334",
+        "1042",
+        "324"
+       ],
+       "answer": 1,
+       "solucion": 334,
+       "fill": {
+        "modo": "balanza",
+        "sello": "pictorico",
+        "letra": "m",
+        "fijas": [
+         354
+        ],
+        "total": 688,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack m and 354 kg together make 688 kg.",
+       "pistas": [
+        "Sack m and 354 kg together make 688 kg.",
+        "Take the known part away from the total: 688 − 354.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "m + 354 = 688, so sack m = 688 − 354 = 334 kg."
+      },
+      {
+       "stem": "The merchant drew the deal as a bar: sack p and 626 kg make 854 kg. How heavy is sack p?",
+       "options": [
+        "238",
+        "228",
+        "1480",
+        "232"
+       ],
+       "answer": 1,
+       "solucion": 228,
+       "fill": {
+        "modo": "balanza",
+        "sello": "pictorico",
+        "letra": "p",
+        "fijas": [
+         626
+        ],
+        "total": 854,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack p and 626 kg together make 854 kg.",
+       "pistas": [
+        "Sack p and 626 kg together make 854 kg.",
+        "Take the known part away from the total: 854 − 626.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "p + 626 = 854, so sack p = 854 − 626 = 228 kg."
+      },
+      {
+       "stem": "The merchant drew the deal as a bar: sack g and 808 kg make 970 kg. How heavy is sack g?",
+       "options": [
+        "162",
+        "172",
+        "178",
+        "1778"
+       ],
+       "answer": 0,
+       "solucion": 162,
+       "fill": {
+        "modo": "balanza",
+        "sello": "pictorico",
+        "letra": "g",
+        "fijas": [
+         808
+        ],
+        "total": 970,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack g and 808 kg together make 970 kg.",
+       "pistas": [
+        "Sack g and 808 kg together make 970 kg.",
+        "Take the known part away from the total: 970 − 808.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "g + 808 = 970, so sack g = 970 − 808 = 162 kg."
+      },
+      {
+       "stem": "The merchant drew the deal as a bar: sack k and 177 kg make 333 kg. How heavy is sack k?",
+       "options": [
+        "166",
+        "164",
+        "156",
+        "510"
+       ],
+       "answer": 2,
+       "solucion": 156,
+       "fill": {
+        "modo": "balanza",
+        "sello": "pictorico",
+        "letra": "k",
+        "fijas": [
+         177
+        ],
+        "total": 333,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack k and 177 kg together make 333 kg.",
+       "pistas": [
+        "Sack k and 177 kg together make 333 kg.",
+        "Take the known part away from the total: 333 − 177.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 177 = 333, so sack k = 333 − 177 = 156 kg."
+      },
+      {
+       "stem": "The merchant drew the deal as a bar: sack s and 456 kg make 597 kg. How heavy is sack s?",
+       "options": [
+        "1053",
+        "141",
+        "131",
+        "151"
+       ],
+       "answer": 1,
+       "solucion": 141,
+       "fill": {
+        "modo": "balanza",
+        "sello": "pictorico",
+        "letra": "s",
+        "fijas": [
+         456
+        ],
+        "total": 597,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack s and 456 kg together make 597 kg.",
+       "pistas": [
+        "Sack s and 456 kg together make 597 kg.",
+        "Take the known part away from the total: 597 − 456.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "s + 456 = 597, so sack s = 597 − 456 = 141 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-T2A",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "abstracto",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "m + 220 = 462",
+       "options": [
+        "242",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 242,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "m",
+        "fijas": [
+         220
+        ],
+        "total": 462,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack m and 220 kg together make 462 kg.",
+       "pistas": [
+        "Sack m and 220 kg together make 462 kg.",
+        "Take the known part away from the total: 462 − 220.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "m + 220 = 462, so sack m = 462 − 220 = 242 kg.",
+       "sub": "m = [ ]"
+      },
+      {
+       "stem": "p + 728 = 917",
+       "options": [
+        "189",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 189,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "p",
+        "fijas": [
+         728
+        ],
+        "total": 917,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack p and 728 kg together make 917 kg.",
+       "pistas": [
+        "Sack p and 728 kg together make 917 kg.",
+        "Take the known part away from the total: 917 − 728.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "p + 728 = 917, so sack p = 917 − 728 = 189 kg.",
+       "sub": "p = [ ]"
+      },
+      {
+       "stem": "g + 205 = 321",
+       "options": [
+        "116",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 116,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "g",
+        "fijas": [
+         205
+        ],
+        "total": 321,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack g and 205 kg together make 321 kg.",
+       "pistas": [
+        "Sack g and 205 kg together make 321 kg.",
+        "Take the known part away from the total: 321 − 205.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "g + 205 = 321, so sack g = 321 − 205 = 116 kg.",
+       "sub": "g = [ ]"
+      },
+      {
+       "stem": "k + 163 = 931",
+       "options": [
+        "768",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 768,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "k",
+        "fijas": [
+         163
+        ],
+        "total": 931,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack k and 163 kg together make 931 kg.",
+       "pistas": [
+        "Sack k and 163 kg together make 931 kg.",
+        "Take the known part away from the total: 931 − 163.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 163 = 931, so sack k = 931 − 163 = 768 kg.",
+       "sub": "k = [ ]"
+      },
+      {
+       "stem": "s + 537 = 776",
+       "options": [
+        "239",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 239,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "s",
+        "fijas": [
+         537
+        ],
+        "total": 776,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack s and 537 kg together make 776 kg.",
+       "pistas": [
+        "Sack s and 537 kg together make 776 kg.",
+        "Take the known part away from the total: 776 − 537.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "s + 537 = 776, so sack s = 776 − 537 = 239 kg.",
+       "sub": "s = [ ]"
+      },
+      {
+       "stem": "t + 660 = 907",
+       "options": [
+        "247",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 247,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "t",
+        "fijas": [
+         660
+        ],
+        "total": 907,
+        "unidad": "kg",
+        "pesas": [
+         100,
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack t and 660 kg together make 907 kg.",
+       "pistas": [
+        "Sack t and 660 kg together make 907 kg.",
+        "Take the known part away from the total: 907 − 660.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "t + 660 = 907, so sack t = 907 − 660 = 247 kg.",
+       "sub": "t = [ ]"
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-T3C",
+     "skill": "write and solve a sentence with a letter",
+     "mech": "forge",
+     "sello": "concreto",
+     "pistaGrafica": false,
+     "variants": [
+      {
+       "stem": "The cart weighs 33 kg and the tools 11 kg. Cart, tools and load weigh 108 kg. c is the load. Build the sentence.",
+       "options": [
+        "64",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 64,
+       "pieces": [
+        {
+         "text": "11"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "33"
+        },
+        {
+         "text": "c"
+        },
+        {
+         "text": "108"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "c",
+        "valor": 64,
+        "usar": [
+         "108",
+         "11",
+         "33"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          33,
+          11
+         ],
+         "total": 108,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "c",
+         "+",
+         "33",
+         "+",
+         "11",
+         "=",
+         "108"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 108 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 108 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 108 kg.",
+        "Picture the bar: 108 kg in total, 33 kg and 11 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "c + 33 + 11 = 108, so c = 64 kg."
+      },
+      {
+       "stem": "The cart weighs 25 kg and the tools 19 kg. Cart, tools and load weigh 101 kg. n is the load. Build the sentence.",
+       "options": [
+        "57",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 57,
+       "pieces": [
+        {
+         "text": "−"
+        },
+        {
+         "text": "19"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "101"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "n"
+        },
+        {
+         "text": "25"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "n",
+        "valor": 57,
+        "usar": [
+         "101",
+         "19",
+         "25"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          25,
+          19
+         ],
+         "total": 101,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "n",
+         "+",
+         "25",
+         "+",
+         "19",
+         "=",
+         "101"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 101 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 101 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 101 kg.",
+        "Picture the bar: 101 kg in total, 25 kg and 19 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "n + 25 + 19 = 101, so n = 57 kg."
+      },
+      {
+       "stem": "The cart weighs 28 kg and the tools 23 kg. Cart, tools and load weigh 138 kg. m is the load. Build the sentence.",
+       "options": [
+        "87",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 87,
+       "pieces": [
+        {
+         "text": "+"
+        },
+        {
+         "text": "m"
+        },
+        {
+         "text": "138"
+        },
+        {
+         "text": "23"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "28"
+        },
+        {
+         "text": "="
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "m",
+        "valor": 87,
+        "usar": [
+         "138",
+         "23",
+         "28"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          28,
+          23
+         ],
+         "total": 138,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "m",
+         "+",
+         "28",
+         "+",
+         "23",
+         "=",
+         "138"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 138 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 138 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 138 kg.",
+        "Picture the bar: 138 kg in total, 28 kg and 23 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "m + 28 + 23 = 138, so m = 87 kg."
+      },
+      {
+       "stem": "The cart weighs 39 kg and the tools 19 kg. Cart, tools and load weigh 79 kg. p is the load. Build the sentence.",
+       "options": [
+        "21",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 21,
+       "pieces": [
+        {
+         "text": "39"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "79"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "19"
+        },
+        {
+         "text": "+"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 21,
+        "usar": [
+         "19",
+         "39",
+         "79"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          39,
+          19
+         ],
+         "total": 79,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "p",
+         "+",
+         "39",
+         "+",
+         "19",
+         "=",
+         "79"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 79 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 79 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 79 kg.",
+        "Picture the bar: 79 kg in total, 39 kg and 19 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "p + 39 + 19 = 79, so p = 21 kg."
+      },
+      {
+       "stem": "The cart weighs 38 kg and the tools 16 kg. Cart, tools and load weigh 102 kg. g is the load. Build the sentence.",
+       "options": [
+        "48",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 48,
+       "pieces": [
+        {
+         "text": "102"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "16"
+        },
+        {
+         "text": "g"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "38"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 48,
+        "usar": [
+         "102",
+         "16",
+         "38"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          38,
+          16
+         ],
+         "total": 102,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "g",
+         "+",
+         "38",
+         "+",
+         "16",
+         "=",
+         "102"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 102 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 102 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 102 kg.",
+        "Picture the bar: 102 kg in total, 38 kg and 16 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "g + 38 + 16 = 102, so g = 48 kg."
+      },
+      {
+       "stem": "The cart weighs 24 kg and the tools 23 kg. Cart, tools and load weigh 146 kg. k is the load. Build the sentence.",
+       "options": [
+        "99",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 99,
+       "pieces": [
+        {
+         "text": "k"
+        },
+        {
+         "text": "146"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "23"
+        },
+        {
+         "text": "24"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 99,
+        "usar": [
+         "146",
+         "23",
+         "24"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          24,
+          23
+         ],
+         "total": 146,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "k",
+         "+",
+         "24",
+         "+",
+         "23",
+         "=",
+         "146"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 146 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 146 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 146 kg.",
+        "Picture the bar: 146 kg in total, 24 kg and 23 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "k + 24 + 23 = 146, so k = 99 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-T3P",
+     "skill": "choose the inverse step",
+     "mech": "forge",
+     "sello": "pictorico",
+     "pistaGrafica": false,
+     "variants": [
+      {
+       "stem": "The cart weighs 25 kg and the tools 25 kg. Cart, tools and load weigh 82 kg. p is the load. Which step finds p?",
+       "options": [
+        "p = 82 − 25 + 25",
+        "p = 25 + 25 − 82",
+        "p = 82 − 25 − 25",
+        "p = 82 + 25 + 25"
+       ],
+       "answer": 2,
+       "solucion": 32,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 32,
+        "usar": [
+         "25",
+         "25",
+         "82"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          25,
+          25
+         ],
+         "total": 82,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "p",
+         "+",
+         "25",
+         "+",
+         "25",
+         "=",
+         "82"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 82 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 82 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 82 kg.",
+        "Picture the bar: 82 kg in total, 25 kg and 25 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "p + 25 + 25 = 82, so p = 32 kg."
+      },
+      {
+       "stem": "The cart weighs 36 kg and the tools 13 kg. Cart, tools and load weigh 127 kg. g is the load. Which step finds g?",
+       "options": [
+        "g = 127 − 36 + 13",
+        "g = 127 + 36 + 13",
+        "g = 127 − 36 − 13",
+        "g = 36 + 13 − 127"
+       ],
+       "answer": 2,
+       "solucion": 78,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 78,
+        "usar": [
+         "127",
+         "13",
+         "36"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          36,
+          13
+         ],
+         "total": 127,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "g",
+         "+",
+         "36",
+         "+",
+         "13",
+         "=",
+         "127"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 127 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 127 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 127 kg.",
+        "Picture the bar: 127 kg in total, 36 kg and 13 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "g + 36 + 13 = 127, so g = 78 kg."
+      },
+      {
+       "stem": "The cart weighs 36 kg and the tools 13 kg. Cart, tools and load weigh 95 kg. k is the load. Which step finds k?",
+       "options": [
+        "k = 36 + 13 − 95",
+        "k = 95 − 36 − 13",
+        "k = 95 + 36 + 13",
+        "k = 95 − 36 + 13"
+       ],
+       "answer": 1,
+       "solucion": 46,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 46,
+        "usar": [
+         "13",
+         "36",
+         "95"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          36,
+          13
+         ],
+         "total": 95,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "k",
+         "+",
+         "36",
+         "+",
+         "13",
+         "=",
+         "95"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 95 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 95 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 95 kg.",
+        "Picture the bar: 95 kg in total, 36 kg and 13 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "k + 36 + 13 = 95, so k = 46 kg."
+      },
+      {
+       "stem": "The cart weighs 34 kg and the tools 22 kg. Cart, tools and load weigh 115 kg. s is the load. Which step finds s?",
+       "options": [
+        "s = 115 + 34 + 22",
+        "s = 34 + 22 − 115",
+        "s = 115 − 34 + 22",
+        "s = 115 − 34 − 22"
+       ],
+       "answer": 3,
+       "solucion": 59,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "s",
+        "valor": 59,
+        "usar": [
+         "115",
+         "22",
+         "34"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          34,
+          22
+         ],
+         "total": 115,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "s",
+         "+",
+         "34",
+         "+",
+         "22",
+         "=",
+         "115"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 115 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 115 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 115 kg.",
+        "Picture the bar: 115 kg in total, 34 kg and 22 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "s + 34 + 22 = 115, so s = 59 kg."
+      },
+      {
+       "stem": "The cart weighs 41 kg and the tools 20 kg. Cart, tools and load weigh 126 kg. t is the load. Which step finds t?",
+       "options": [
+        "t = 41 + 20 − 126",
+        "t = 126 − 41 + 20",
+        "t = 126 + 41 + 20",
+        "t = 126 − 41 − 20"
+       ],
+       "answer": 3,
+       "solucion": 65,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "t",
+        "valor": 65,
+        "usar": [
+         "126",
+         "20",
+         "41"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          41,
+          20
+         ],
+         "total": 126,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "t",
+         "+",
+         "41",
+         "+",
+         "20",
+         "=",
+         "126"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 126 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 126 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 126 kg.",
+        "Picture the bar: 126 kg in total, 41 kg and 20 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "t + 41 + 20 = 126, so t = 65 kg."
+      },
+      {
+       "stem": "The cart weighs 41 kg and the tools 15 kg. Cart, tools and load weigh 120 kg. c is the load. Which step finds c?",
+       "options": [
+        "c = 41 + 15 − 120",
+        "c = 120 − 41 − 15",
+        "c = 120 − 41 + 15",
+        "c = 120 + 41 + 15"
+       ],
+       "answer": 1,
+       "solucion": 64,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "c",
+        "valor": 64,
+        "usar": [
+         "120",
+         "15",
+         "41"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          41,
+          15
+         ],
+         "total": 120,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "c",
+         "+",
+         "41",
+         "+",
+         "15",
+         "=",
+         "120"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 120 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 120 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 120 kg.",
+        "Picture the bar: 120 kg in total, 41 kg and 15 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "c + 41 + 15 = 120, so c = 64 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-T3A",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "abstracto",
+     "pistaGrafica": false,
+     "variants": [
+      {
+       "stem": "k + 39 + 24 = 144",
+       "options": [
+        "81",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 81,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "k",
+        "fijas": [
+         39,
+         24
+        ],
+        "total": 144,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack k and 39 + 24 kg together make 144 kg.",
+       "pistas": [
+        "Sack k and 39 + 24 kg together make 144 kg.",
+        "Take the known part away from the total: 144 − (39 + 24).",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 39 + 24 = 144, so sack k = 144 − 63 = 81 kg.",
+       "sub": "k = [ ]"
+      },
+      {
+       "stem": "s + 30 + 19 = 95",
+       "options": [
+        "46",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 46,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "s",
+        "fijas": [
+         30,
+         19
+        ],
+        "total": 95,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack s and 30 + 19 kg together make 95 kg.",
+       "pistas": [
+        "Sack s and 30 + 19 kg together make 95 kg.",
+        "Take the known part away from the total: 95 − (30 + 19).",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "s + 30 + 19 = 95, so sack s = 95 − 49 = 46 kg.",
+       "sub": "s = [ ]"
+      },
+      {
+       "stem": "t + 45 + 25 = 88",
+       "options": [
+        "18",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 18,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "t",
+        "fijas": [
+         45,
+         25
+        ],
+        "total": 88,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack t and 45 + 25 kg together make 88 kg.",
+       "pistas": [
+        "Sack t and 45 + 25 kg together make 88 kg.",
+        "Take the known part away from the total: 88 − (45 + 25).",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "t + 45 + 25 = 88, so sack t = 88 − 70 = 18 kg.",
+       "sub": "t = [ ]"
+      },
+      {
+       "stem": "c + 24 + 22 = 133",
+       "options": [
+        "87",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 87,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "c",
+        "fijas": [
+         24,
+         22
+        ],
+        "total": 133,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack c and 24 + 22 kg together make 133 kg.",
+       "pistas": [
+        "Sack c and 24 + 22 kg together make 133 kg.",
+        "Take the known part away from the total: 133 − (24 + 22).",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "c + 24 + 22 = 133, so sack c = 133 − 46 = 87 kg.",
+       "sub": "c = [ ]"
+      },
+      {
+       "stem": "n + 35 + 21 = 101",
+       "options": [
+        "45",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 45,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "n",
+        "fijas": [
+         35,
+         21
+        ],
+        "total": 101,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack n and 35 + 21 kg together make 101 kg.",
+       "pistas": [
+        "Sack n and 35 + 21 kg together make 101 kg.",
+        "Take the known part away from the total: 101 − (35 + 21).",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "n + 35 + 21 = 101, so sack n = 101 − 56 = 45 kg.",
+       "sub": "n = [ ]"
+      },
+      {
+       "stem": "m + 40 + 24 = 120",
+       "options": [
+        "56",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 56,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "m",
+        "fijas": [
+         40,
+         24
+        ],
+        "total": 120,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack m and 40 + 24 kg together make 120 kg.",
+       "pistas": [
+        "Sack m and 40 + 24 kg together make 120 kg.",
+        "Take the known part away from the total: 120 − (40 + 24).",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "m + 40 + 24 = 120, so sack m = 120 − 64 = 56 kg.",
+       "sub": "m = [ ]"
+      }
+     ]
+    },
+    {
+     "id": "MY6-5-J",
+     "skill": "add across zero",
+     "mech": "line",
+     "sello": "jefe",
+     "pistaGrafica": false,
+     "variants": [
+      {
+       "stem": "The great crystal is 36 m below the flag at 9 m. Guess first, then take the lift down.",
+       "options": [
+        "−27",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -27,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 9,
+        "cambio": -36,
+        "final": -27,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": false
+       },
+       "hint": "Start at the flag: 9 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 9 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 36 = 30 + 6. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "9 + (−36) = −27: the gate is at −27 m."
+      },
+      {
+       "stem": "The great crystal is 35 m below the flag at 5 m. Guess first, then take the lift down.",
+       "options": [
+        "−30",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -30,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 5,
+        "cambio": -35,
+        "final": -30,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": false
+       },
+       "hint": "Start at the flag: 5 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 5 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 35 = 30 + 5. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "5 + (−35) = −30: the gate is at −30 m."
+      },
+      {
+       "stem": "The great crystal is 37 m below the flag at 10 m. Guess first, then take the lift down.",
+       "options": [
+        "−27",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -27,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 10,
+        "cambio": -37,
+        "final": -27,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": false
+       },
+       "hint": "Start at the flag: 10 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 10 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 37 = 30 + 7. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "10 + (−37) = −27: the gate is at −27 m."
+      },
+      {
+       "stem": "The great crystal is 34 m below the flag at 7 m. Guess first, then take the lift down.",
+       "options": [
+        "−27",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -27,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 7,
+        "cambio": -34,
+        "final": -27,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": false
+       },
+       "hint": "Start at the flag: 7 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 7 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 34 = 30 + 4. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "7 + (−34) = −27: the gate is at −27 m."
+      },
+      {
+       "stem": "The great crystal is 38 m below the flag at 10 m. Guess first, then take the lift down.",
+       "options": [
+        "−28",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -28,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 10,
+        "cambio": -38,
+        "final": -28,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": false
+       },
+       "hint": "Start at the flag: 10 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 10 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 38 = 30 + 8. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "10 + (−38) = −28: the gate is at −28 m."
+      },
+      {
+       "stem": "The great crystal is 32 m below the flag at 5 m. Guess first, then take the lift down.",
+       "options": [
+        "−27",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": -27,
+       "line": {
+        "piel": "montacargas",
+        "unidad": "m",
+        "min": -30,
+        "max": 10,
+        "inicio": 5,
+        "cambio": -32,
+        "final": -27,
+        "faltante": "final",
+        "modo": "concreto",
+        "bandera": true,
+        "pistaGrafica": false
+       },
+       "hint": "Start at the flag: 5 m. Each press of the 1 lever is 1 m down.",
+       "pistas": [
+        "Start at the flag: 5 m. Each press of the 1 lever is 1 m down.",
+        "Split the trip: 32 = 30 + 2. Use the 10 lever first, then the 1 lever. Crossing 0 m counts like any other mark.",
+        "Example: from −4 m, 13 m down: −14 m, then 3 more, is −17 m."
+       ],
+       "explain": "5 + (−32) = −27: the gate is at −27 m."
       }
      ]
     }
