@@ -244,7 +244,13 @@ window.GAME_UI = {
     fillHelpPick:  'Look at the bar, then tap the answer or press <b>A B C D</b>.',
     fillEmpty:     'Put some weights on the pan first.',
     fillRight:     'Level. The sack goes back and the scale stays level.',
-    fillWrong:     'With {value} the scale is not level: see how much is missing or extra.'
+    fillWrong:     'With {value} the scale is not level: see how much is missing or extra.',
+
+    /* ---------- FORGE, regla ecuacion ----------
+       Armar la oracion numerica con una letra desde una historia. */
+    eqHelp:        'Tap the pieces to build the number sentence, with the letter for what you do not know. Tap a piece in the sentence to take it back.',
+    eqHelpPick:    'Which step gives the letter? Tap it or press <b>A B C D</b>.',
+    eqMalFormada:  'That is not a number sentence yet: it needs one letter, the numbers from the story, and one =.'
   },
 
   /* ---------- COMPANERO DE PANTALLA ----------

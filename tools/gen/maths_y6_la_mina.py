@@ -363,7 +363,8 @@ def check_fill(v):
     F = v["fill"]
     assert F["modo"] == "balanza"
     assert sum(F["fijas"]) + v["solucion"] == F["total"], v["stem"]
-    assert 0 < v["solucion"] <= 10 * F["existencias"]["10"] + F["existencias"]["1"], "no se puede armar con las pesas: " + v["stem"]
+    E = F["existencias"]
+    assert 0 < v["solucion"] <= 100 * E.get("100", 0) + 10 * E["10"] + E["1"], "no se puede armar con las pesas: " + v["stem"]
     assert v["solucion"] not in F["fijas"] and v["solucion"] != F["total"], v["stem"]
     if F["sello"] == "pictorico":
         return v["options"][v["answer"]] == num(v["solucion"]) and len(set(v["options"])) == 4
@@ -427,7 +428,7 @@ def famf(fid, skill, sello, items, pista=True):
     return familia(fid, skill, "fill", sello, items, pista)
 
 
-LETRAS = ["c", "a", "m", "p", "g", "k", "s", "t"]
+LETRAS = ["c", "n", "m", "p", "g", "k", "s", "t"]   # sin "a" ni "i": no se confunden con palabras
 
 
 def sin_llevada():                     # tramo 2: dos cifras, sin llevada
@@ -474,6 +475,210 @@ def jefe3():
 
 n3.tramo([famf("MY6-3-J", "find the unknown in a sum", "jefe",
                [item_fill(LETRAS[i % 8], [f1, f2], t, "concreto", pista=False) for i, (f1, f2, t) in enumerate(unicos(jefe3))], pista=False)])
+
+
+# ---------------------------------------------------------------- forge, regla ecuacion
+def es_num(t):
+    return t.replace(MENOS, "-").lstrip("-").isdigit()
+
+
+def terminos(tokens, letra):
+    """a * letra + b de un lado, o None si esta mal formado (misma regla que el motor)."""
+    a, b, signo, espera = 0, 0, 1, "termino"
+    for t in tokens:
+        if espera == "termino":
+            if t == letra:
+                a += signo
+            elif es_num(t):
+                b += signo * int(t.replace(MENOS, "-"))
+            else:
+                return None
+            espera = "op"
+        else:
+            if t == "+":
+                signo = 1
+            elif t in (MENOS, "-"):
+                signo = -1
+            else:
+                return None
+            espera = "termino"
+    return (a, b) if espera == "op" else None
+
+
+def analizar(tokens, R):
+    if tokens.count("=") != 1:
+        return False, None
+    k = tokens.index("=")
+    I, D = terminos(tokens[:k], R["letra"]), terminos(tokens[k + 1:], R["letra"])
+    if not I or not D or I[0] == D[0]:
+        return False, None
+    valor = (D[1] - I[1]) / (I[0] - D[0])
+    completa = tokens.count(R["letra"]) == 1 and sorted(t for t in tokens if es_num(t)) == sorted(R["usar"])
+    return completa and valor == R["valor"], (int(valor) if valor == int(valor) else None)
+
+
+def check_forge(v):
+    R = v["rule"]
+    assert R["tipo"] == "ecuacion"
+    ok, val = analizar(R["esperada"], R)
+    assert ok, "la oracion esperada no cumple la regla: " + " ".join(R["esperada"])
+    textos = [p["text"] for p in v["pieces"]]
+    if R["sello"] != "pictorico":            # el pictorico no tiene fichas: elige entre cuatro oraciones
+        for t in R["esperada"]:
+            assert textos.count(t) >= R["esperada"].count(t), "faltan fichas para %s" % " ".join(R["esperada"])
+    assert num(R["valor"]) not in R["usar"] and num(R["valor"]) not in textos, "la respuesta no puede ser una ficha"
+    if R["sello"] == "pictorico":
+        buenas = [i for i, o in enumerate(v["options"]) if analizar(o.split(" "), R)[0]]
+        return buenas == [v["answer"]] and len(set(v["options"])) == 4
+    return v["solucion"] == R["valor"]
+
+
+CHECKS["forge"] = check_forge
+
+
+# Encargos del herrero: 12 plantillas originales, todas de peso (la balanza
+# comprueba). {L} letra, {f} parte conocida, {T} total. `primero`: la
+# historia nombra antes la parte conocida (la letra va segunda, E5).
+ENCARGOS = [
+    ("The cart and its load weigh {T} kg. The empty cart weighs {f} kg. {L} is the load.", "load", "cart and load", False),
+    ("A crate of crystals weighs {T} kg. The crate alone weighs {f} kg. {L} is the crystals.", "crystals", "full crate", False),
+    ("The bucket of ore weighs {T} kg. The bucket weighs {f} kg. {L} is the ore.", "ore", "full bucket", False),
+    ("A new wheel and its axle weigh {T} kg. The axle weighs {f} kg. {L} is the wheel.", "wheel", "wheel and axle", False),
+    ("The hammer weighs {T} kg. Its handle weighs {f} kg. {L} is the head.", "head", "whole hammer", False),
+    ("The barrel of water weighs {T} kg. The water weighs {f} kg. {L} is the barrel.", "barrel", "full barrel", False),
+    ("The toolbox weighs {f} kg empty. Full of tools it weighs {T} kg. {L} is the tools.", "tools", "full toolbox", True),
+    ("The sack weighs {f} kg empty. Filled with coal it weighs {T} kg. {L} is the coal.", "coal", "full sack", True),
+    ("The lantern weighs {f} kg without oil and {T} kg with oil. {L} is the oil.", "oil", "full lantern", True),
+    ("The anvil stand weighs {f} kg. With the anvil on top it weighs {T} kg. {L} is the anvil.", "anvil", "anvil and stand", True),
+    ("A rail weighs {f} kg. With its spikes it weighs {T} kg. {L} is the spikes.", "spikes", "rail and spikes", True),
+    ("The basket weighs {f} kg. With the mine lamps inside it weighs {T} kg. {L} is the lamps.", "lamps", "full basket", True),
+]
+
+
+def piezas(tokens_extra, rng_):
+    p = [{"text": t} for t in tokens_extra]
+    rng_.shuffle(p)
+    return p
+
+
+def item_ecuacion(k, letra, f, t, sello, pista=True):
+    plantilla, parte, todo, primero = ENCARGOS[k % len(ENCARGOS)]
+    sol = t - f
+    stem = plantilla.format(T=t, f=f, L=letra)
+    esperada = [num(f), "+", letra, "=", num(t)] if primero else [letra, "+", num(f), "=", num(t)]
+    R = {"tipo": "ecuacion", "letra": letra, "valor": sol, "usar": sorted([num(f), num(t)]), "sello": sello,
+         "mundo": "balanza", "balanza": {"fijas": [f], "total": t, "unidad": "kg"}, "esperada": esperada,
+         "absurdo": {"mayor": "Then the %s would weigh {valor} kg: more than the %s altogether!" % (parte, todo),
+                     "menor": "Then the %s would weigh {suma} kg, not %s." % (todo, kg(t))}}
+    pistas = ["Start with the letter %s for what you do not know." % letra,
+              "Picture the bar: %s in total, %s known, the rest is %s." % (kg(t), kg(f), letra),
+              "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."]
+    explain = "%s + %s = %s, so %s = %s %s %s = %s." % (letra, num(f), num(t), letra, num(t), MENOS, num(f), kg(sol))
+    if sello == "pictorico":
+        frases = [" ".join([letra, "=", num(t), MENOS, num(f)]), " ".join([letra, "=", num(t), "+", num(f)]),
+                  " ".join([letra, "=", num(f), MENOS, num(t)]), " ".join([letra, MENOS, num(f), "=", num(t)])]
+        correcta = frases[0]
+        rng.shuffle(frases)
+        opts, ans = frases, frases.index(correcta)
+        stem = stem + " Which step finds %s?" % letra
+        v = {"stem": stem, "options": opts, "answer": ans, "solucion": sol, "pieces": [], "rule": R,
+             "hint": pistas[0], "pistas": pistas, "explain": explain}
+    else:
+        v = {"stem": stem + " Build the number sentence.", "options": [num(sol), "?"], "answer": 0, "solucion": sol,
+             "pieces": piezas([letra, "+", MENOS, "=", num(f), num(t)], rng), "rule": R,
+             "hint": pistas[0], "pistas": pistas, "explain": explain}
+    return v
+
+
+def famq(fid, skill, sello, items, pista=True):
+    return familia(fid, skill, "forge", sello, items, pista)
+
+
+# ---- Jefe del nivel 2: el encargo del pozo con fichas (Construir)
+def item_ecuacion_lift(a, f, letra="p"):
+    b = f - a
+    R = {"tipo": "ecuacion", "letra": letra, "valor": b, "usar": sorted([num(a), num(f)]), "sello": "concreto",
+         "mundo": "montacargas", "linea": {"inicio": a, "final": f, "unidad": "m", "min": -30, "max": 10},
+         "esperada": [num(a), "+", letra, "=", num(f)],
+         "absurdo": {"mayor": "With that sentence the lift would stop at {suma} m, not at the gallery.",
+                     "menor": "With that sentence the lift would stop at {suma} m, not at the gallery."}}
+    stem = "The mole's gallery is at %s. The lift is at %s. %s is the trip. Build the number sentence." % (met(f), met(a), letra)
+    pistas = ["Start where the lift is: %s." % met(a),
+              "Start + trip = end: the end is %s." % met(f),
+              "Example: from %s to %s: %s + p = %s." % (met(-3), met(-15), num(-3), num(-15))]
+    explain = "%s + %s = %s, so %s = %s." % (num(a), letra, num(f), letra, con_signo(b) + NB + "m")
+    return {"stem": stem, "options": [num(b), "?"], "answer": 0, "solucion": b,
+            "pieces": piezas([num(a), "+", MENOS, letra, "=", num(f)], rng), "rule": R,
+            "hint": pistas[0], "pistas": pistas, "explain": explain}
+
+
+n2.items[-1] = famq("MY6-2-J", "write the number sentence", "jefe",
+                    [item_ecuacion_lift(a, f) for a, f in unicos(lambda: (R(-12, 5), R(-30, -16)), ok=ok_cambio(-30, -16))],
+                    pista=False)
+
+
+# ---- Nivel 4 — The Blacksmith's Workshop: la oracion con letra y el paso inverso
+n4 = tema.nivel(name="THE BLACKSMITH'S WORKSHOP", subtitle="Write the number sentence, then solve it",
+                skill="write and solve a sentence with a letter",
+                briefing=["<p>The smith forges new parts for the mine cart: wheels, rails and lamps.</p>",
+                          "<p>Each order is a story. Write it as a number sentence with a letter, then find the letter. The scale checks your sentence.</p>"])
+n4.tramo([
+    famf("MY6-4-R1", "find the unknown in a sum", "repaso", [item_fill(LETRAS[i % 8], [f], t, "concreto") for i, (f, t) in enumerate(unicos(sin_llevada))]),
+    famf("MY6-4-R2", "find the unknown in a sum", "repaso", [item_fill(LETRAS[(i + 3) % 8], [f], t, "abstracto") for i, (f, t) in enumerate(unicos(con_llevada))]),
+])
+
+
+def pares(lo_t, hi_t, lo_f):
+    def g():
+        t = R(lo_t, hi_t)
+        f = R(lo_f, t - lo_f)
+        return (f, t) if (t - f) % 10 else g()
+    return g
+
+
+def item_fill3(letra, f, t, sello, pista=True):
+    v = item_fill(letra, [f], t, sello, pista=pista)
+    v["fill"]["existencias"] = {"100": 9, "10": 9, "1": 9}
+    return v
+
+
+for t_, (lo, hi, lf), plantillas, pista in ((1, (30, 99, 11), range(0, 6), True),
+                                            (2, (30, 99, 11), range(6, 12), True),
+                                            (3, (300, 999, 110), range(0, 12), False)):
+    tr = unicos(pares(lo, hi, lf), NV * 3)
+    k0 = list(plantillas)
+    n4.tramo([
+        famq("MY6-4-T%dC" % t_, "write the number sentence", "concreto",
+             [item_ecuacion(k0[i % len(k0)], LETRAS[i % 8], f, t, "concreto", pista) for i, (f, t) in enumerate(tr[:NV])], pista),
+        famq("MY6-4-T%dP" % t_, "choose the inverse step", "pictorico",
+             [item_ecuacion(k0[(i + 2) % len(k0)], LETRAS[(i + 1) % 8], f, t, "pictorico", pista) for i, (f, t) in enumerate(tr[NV:2 * NV])], pista),
+        famf("MY6-4-T%dA" % t_, "find the unknown in a sum", "abstracto",
+             [item_fill3(LETRAS[(i + 5) % 8], f, t, "abstracto", pista) for i, (f, t) in enumerate(tr[2 * NV:])], pista),
+    ])
+
+
+def item_ecuacion2(k, letra, f1, f2, t):
+    """Jefe: dos partes conocidas (la carretilla, las herramientas) y la carga."""
+    sol = t - f1 - f2
+    stem = "The cart weighs %s and the tools %s. With the load, it all weighs %s. %s is the load. Build the sentence." % (kg(f1), kg(f2), kg(t), letra)
+    R = {"tipo": "ecuacion", "letra": letra, "valor": sol, "usar": sorted([num(f1), num(f2), num(t)]), "sello": "concreto",
+         "mundo": "balanza", "balanza": {"fijas": [f1, f2], "total": t, "unidad": "kg"},
+         "esperada": [letra, "+", num(f1), "+", num(f2), "=", num(t)],
+         "absurdo": {"mayor": "Then the load would weigh {valor} kg: more than everything together!",
+                     "menor": "Then everything would weigh {suma} kg, not %s." % kg(t)}}
+    pistas = ["The load, the cart and the tools together make %s." % kg(t),
+              "Picture the bar: %s in total, %s and %s known." % (kg(t), kg(f1), kg(f2)),
+              "Example: b + 10 + 5 = 40."]
+    explain = "%s + %s + %s = %s, so %s = %s." % (letra, num(f1), num(f2), num(t), letra, kg(sol))
+    return {"stem": stem, "options": [num(sol), "?"], "answer": 0, "solucion": sol,
+            "pieces": piezas([letra, "+", "+", MENOS, "=", num(f1), num(f2), num(t)], rng), "rule": R,
+            "hint": pistas[0], "pistas": pistas, "explain": explain}
+
+
+n4.tramo([famq("MY6-4-J", "write and solve a sentence with a letter", "jefe",
+               [item_ecuacion2(i, LETRAS[i % 8], f1, f2, t) for i, (f1, f2, t) in
+                enumerate(unicos(lambda: (R(20, 45), R(11, 25), R(90, 150)), ok=lambda x: x[2] - x[0] - x[1] >= 12 and (x[2] - x[0] - x[1]) % 10))],
+               pista=False)])
 
 
 # ---------------------------------------------------------------- validacion propia

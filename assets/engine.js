@@ -1427,7 +1427,7 @@
         };
         if (E && E.pesas) {
           E.L.redimensionar();
-          if (x > 0) E.pesas({ 10: Math.floor(x / 10), 1: x % 10 });
+          if (x > 0) E.pesas({ 100: Math.floor(x / 100), 10: Math.floor(x % 100 / 10), 1: x % 10 });
           timers.push(setTimeout(entregar, motionOff() ? 0 : 700));
         } else entregar();
         return orig;
@@ -1451,6 +1451,249 @@
     };
     return api;
   };
+
+  /* ---------- forge, regla `ecuacion` (etapa 2) ----------
+     Construir una oracion numerica con una letra desde una historia. Se
+     agrega como ENVOLTORIO de SCENES.forge, registrado despues de ella: si
+     la variante declara `rule.tipo === 'ecuacion'` monta esta escena; si no,
+     delega en el forge de siempre (regla `categorias`), que no cambia.
+
+     Variante:
+       pieces: [{ text }]              fichas: numeros, '+', '−', '=', la letra
+       rule: { tipo: 'ecuacion', letra, valor, usar: ['18', '74'],
+               sello: 'concreto'|'pictorico', mundo: 'balanza'|'montacargas',
+               balanza: { fijas, total, unidad } | linea: { inicio, final, unidad, min, max },
+               absurdo: { mayor, menor } }       plantillas con {valor} y {suma}
+       pictorico: options son cuatro oraciones y answer la correcta.
+
+     Regla (la misma que valida el generador): la oracion usa cada numero
+     de `usar` una vez, la letra una vez, un solo '=', y es verdadera con una
+     unica solucion, que debe ser `valor`. El mundo ejecuta el valor que
+     implica la oracion del nino: la balanza con ese peso o el montacargas
+     con ese salto. */
+  function ecuacionTerminos(tokens, letra) {
+    /* Devuelve { a, b } de un lado: a * letra + b, o null si esta mal formado. */
+    var a = 0, b = 0, signo = 1, espera = 'termino';
+    for (var i = 0; i < tokens.length; i++) {
+      var t = tokens[i];
+      if (espera === 'termino') {
+        if (t === letra) a += signo;
+        else if (/^[−-]?\d+$/.test(t)) b += signo * numDe(t);
+        else return null;
+        espera = 'op';
+      } else {
+        if (t === '+') signo = 1; else if (t === '−' || t === '-') signo = -1; else return null;
+        espera = 'termino';
+      }
+    }
+    return espera === 'op' ? { a: a, b: b } : null;
+  }
+  function ecuacionAnalizar(tokens, R) {
+    var k = tokens.indexOf('=');
+    if (k < 1 || tokens.lastIndexOf('=') !== k || k === tokens.length - 1) return { ok: false, valor: null };
+    var I = ecuacionTerminos(tokens.slice(0, k), R.letra), D = ecuacionTerminos(tokens.slice(k + 1), R.letra);
+    if (!I || !D) return { ok: false, valor: null };
+    var coef = I.a - D.a;
+    if (coef === 0) return { ok: false, valor: null };
+    var valor = (D.b - I.b) / coef;
+    var usos = tokens.filter(function (t) { return t === R.letra; }).length;
+    var nums = tokens.filter(function (t) { return /^[−-]?\d+$/.test(t); }).map(String);
+    var usar = (R.usar || []).slice().sort(), usados = nums.slice().sort();
+    var completa = usos === 1 && usar.length === usados.length && usar.every(function (x, i) { return x === usados[i]; });
+    return { ok: completa && valor === R.valor, valor: Math.round(valor) === valor ? valor : null, completa: completa };
+  }
+
+  function escenaEcuacion() {
+    var ctx = null, dead = false, host = null, V = null, R = null;
+    var elegidas = [], fichas = [], cursor = -1, elegido = null, opts = [], timers = [];
+    var previewEl = null, paletaEls = {}, btnMain = null, notaEl = null;
+    var NB = ' ';
+
+    function textos() { return elegidas.map(function (i) { return fichas[i].text; }); }
+    function pintarVista() {
+      if (!previewEl) return;
+      if (!elegidas.length) { previewEl.innerHTML = '<span class="forge__placeholder">&hellip;</span>'; return; }
+      previewEl.innerHTML = elegidas.map(function (pi, slot) {
+        return '<button type="button" class="forge__piece is-chosen" data-slot="' + slot + '"' + (dead ? ' disabled' : '') + '>' + esc(fichas[pi].text) + '</button>';
+      }).join('');
+      if (dead) return;
+      Array.prototype.forEach.call(previewEl.querySelectorAll('.forge__piece'), function (b) {
+        b.addEventListener('click', function () {
+          if (dead) return;
+          var slot = parseInt(b.getAttribute('data-slot'), 10), pi = elegidas[slot];
+          elegidas.splice(slot, 1);
+          if (paletaEls[pi]) { paletaEls[pi].disabled = false; paletaEls[pi].classList.remove('is-used'); }
+          pintarVista(); ctx.say(fmt(UI.scene.sayForgeRemove, { value: fichas[pi].text }));
+        });
+      });
+    }
+    function configurarMundo() {
+      var E = LINEA.E;
+      if (!E || dead) return;
+      if (LINEA.run !== run) { LINEA.run = run; if (E.nuevoNivel) E.nuevoNivel(); }
+      if (E.profundidad && run) E.profundidad(run.gems);
+      if (R.mundo === 'balanza' && E.configurarBalanza) {
+        var B = R.balanza;
+        E.configurarBalanza({ letra: R.letra, fijas: B.fijas, total: B.total, unidad: B.unidad,
+                              figura: R.sello === 'pictorico' ? 'barra' : 'balanza', ver: true, pesas: { 10: 0, 1: 0 } });
+      } else if (R.mundo === 'montacargas' && E.configurar) {
+        var Ln = R.linea;
+        E.configurar({ piel: 'montacargas', unidad: Ln.unidad, min: Ln.min, max: Ln.max, valor: Ln.inicio, fisica: Ln.inicio, soloDecenas: false, ver: true });
+        E.pintar({ inicio: Ln.inicio, anillo: Ln.final });
+      }
+    }
+    function pintarOpciones() { opts.forEach(function (o, i) { o.node.classList.toggle('is-here', i === cursor); }); }
+    function pesasDe(x) { return { 100: Math.floor(x / 100), 10: Math.floor(x % 100 / 10), 1: x % 10 }; }
+
+    return {
+      check: function (estado) { return ecuacionAnalizar(estado.tokens, R).ok; },
+
+      mount: function (container, context) {
+        ctx = context; dead = false; V = ctx.variant; R = V.rule; host = container;
+        fichas = V.pieces || []; elegidas = []; paletaEls = {}; opts = []; cursor = -1; elegido = null;
+        var h = '<div class="scene scene--line scene--ecuacion">' +
+          '<div class="linea__escena" aria-hidden="true"></div>';
+        if (R.sello === 'pictorico') {
+          h += '<div class="linea__opciones linea__opciones--frases" role="group" aria-label="' + esc(UI.scene.linePickAria) + '">';
+          ctx.order.forEach(function (orig, pos) {
+            h += '<button type="button" class="btn linea__opcion" data-orig="' + orig + '">' +
+              '<span class="door__key">' + ctx.keys[pos] + '</span>' + esc(V.options[orig]) + '</button>';
+          });
+          h += '</div>';
+        } else {
+          var orden = fichas.map(function (_, i) { return i; });
+          h += '<div class="forge__preview ecuacion__vista" role="list" aria-label="' + esc(UI.scene.forgePreview) + '"></div>' +
+            '<div class="forge__palette ecuacion__fichas" role="group" aria-label="' + esc(UI.scene.forgePaletteAria) + '">' +
+            orden.map(function (pi) { return '<button type="button" class="forge__piece" data-pi="' + pi + '">' + esc(fichas[pi].text) + '</button>'; }).join('') +
+            '</div>' +
+            '<div class="row mt"><button type="button" class="btn btn--primary linea__ok">' + esc(UI.scene.lineCheck) + '</button></div>';
+        }
+        h += '<p class="linea__nota" aria-live="polite"></p></div>';
+        container.innerHTML = h;
+        var escena = container.querySelector('.linea__escena'), self = this;
+        notaEl = container.querySelector('.linea__nota');
+        btnMain = container.querySelector('.linea__ok');
+        if (R.sello === 'pictorico') {
+          opts = Array.prototype.map.call(container.querySelectorAll('.linea__opcion'), function (n) {
+            return { node: n, orig: parseInt(n.getAttribute('data-orig'), 10) };
+          });
+          opts.forEach(function (o, i) {
+            o.node.addEventListener('click', function () { self.jump(i); });
+            o.node.addEventListener('focus', function () { if (!dead) { cursor = i; pintarOpciones(); } });
+          });
+          if (ctx.help) ctx.help(UI.scene.eqHelpPick, false);
+        } else {
+          previewEl = container.querySelector('.ecuacion__vista');
+          Array.prototype.forEach.call(container.querySelectorAll('.ecuacion__fichas .forge__piece'), function (b) {
+            var pi = parseInt(b.getAttribute('data-pi'), 10);
+            paletaEls[pi] = b;
+            b.addEventListener('click', function () {
+              if (dead || b.disabled) return;
+              elegidas.push(pi); b.disabled = true; b.classList.add('is-used');
+              pintarVista(); ctx.say(fmt(UI.scene.sayForgeAdd, { value: fichas[pi].text }));
+            });
+          });
+          btnMain.addEventListener('click', function () { self.confirm(); });
+          if (ctx.help) ctx.help(UI.scene.eqHelp, false);
+          pintarVista();
+        }
+        lineaEscenario().then(function (E) { if (dead || !E) return; escena.appendChild(LINEA.canvas); E.L.redimensionar(); configurarMundo(); });
+        if (LINEA.E) { escena.appendChild(LINEA.canvas); LINEA.E.L.redimensionar(); configurarMundo(); }
+      },
+
+      setMood: function () {},
+      move: function (delta) {
+        if (dead || R.sello !== 'pictorico') return;
+        cursor = Math.max(0, Math.min(opts.length - 1, (cursor < 0 ? (delta > 0 ? -1 : opts.length) : cursor) + delta));
+        pintarOpciones(); opts[cursor].node.focus();
+      },
+      jump: function (i) {
+        if (dead || R.sello !== 'pictorico' || i < 0 || i >= opts.length) return;
+        cursor = i; pintarOpciones(); this.confirm();
+      },
+
+      confirm: function () {
+        if (dead) return null;
+        var tokens;
+        if (R.sello === 'pictorico') {
+          if (cursor < 0) { ctx.say(UI.scene.sayNeedMove); return null; }
+          elegido = opts[cursor].orig;
+          tokens = String(V.options[elegido]).split(' ');
+        } else {
+          if (!elegidas.length) { ctx.say(UI.scene.sayForgeEmpty); return null; }
+          tokens = textos();
+        }
+        var A = ecuacionAnalizar(tokens, R), ok = A.ok;
+        dead = true;
+        Object.keys(paletaEls).forEach(function (pi) { paletaEls[pi].disabled = true; });
+        if (btnMain) btnMain.disabled = true;
+        opts.forEach(function (o) { o.node.disabled = true; });
+        pintarVista();
+        /* El absurdo: la historia con el valor que da la oracion del nino. */
+        if (!ok && notaEl) {
+          if (A.valor == null) notaEl.textContent = UI.scene.eqMalFormada;
+          else if (R.absurdo) {
+            var suma = R.mundo === 'balanza' ? A.valor + R.balanza.fijas.reduce(function (a, b) { return a + b; }, 0) : A.valor + R.linea.inicio;
+            notaEl.textContent = fmt(A.valor > (R.balanza ? R.balanza.total : 1e9) ? R.absurdo.mayor : R.absurdo.menor, { valor: numTxt(A.valor), suma: numTxt(suma) });
+          }
+        }
+        var orig = R.sello === 'pictorico' ? elegido : (ok ? V.answer : (V.answer === 1 ? 0 : 1));
+        var E = LINEA.E, hecho = false, hud = document.getElementById('hudGems');
+        var entregar = function () {
+          if (hecho) return;
+          hecho = true;
+          var g0 = run ? run.gems : 0;
+          if (ctx) ctx.pick(orig);
+          var cerrado = !!run && run.gems > g0;
+          if (!E) return;
+          if (R.mundo === 'balanza' && E.resultadoBalanza) E.resultadoBalanza({ correcto: ok, valor: A.valor, tramoCerrado: cerrado, hud: hud });
+          else if (E.resultado) E.resultado({ correcto: ok, llego: A.valor == null ? R.linea.inicio : R.linea.inicio + A.valor, debia: R.linea.final, tramoCerrado: cerrado, hud: hud });
+        };
+        if (E && A.valor != null && R.mundo === 'balanza' && E.pesas) {
+          E.pesas(pesasDe(Math.max(0, A.valor)));
+          timers.push(setTimeout(entregar, motionOff() ? 0 : 700));
+        } else if (E && A.valor != null && R.mundo === 'montacargas' && E.viajar) {
+          E.pintar({ inicio: R.linea.inicio, anillo: R.linea.final, salto: { desde: R.linea.inicio, hasta: R.linea.inicio + A.valor, texto: signoTxt(A.valor) + NB + R.linea.unidad } });
+          E.viajar({ desde: R.linea.inicio, hasta: R.linea.inicio + A.valor, alLlegar: entregar });
+          timers.push(setTimeout(entregar, 2600));
+        } else entregar();
+        return orig;
+      },
+
+      markResult: function (answerOrig, chosenOrig) {
+        var bien = answerOrig === chosenOrig;
+        opts.forEach(function (o) {
+          if (o.orig === answerOrig) o.node.classList.add('is-right');
+          if (!bien && o.orig === chosenOrig) o.node.classList.add('is-wrong');
+        });
+        if (previewEl) previewEl.classList.add(bien ? 'is-good' : 'is-bad');
+        ctx.say(bien ? UI.scene.sayForgeGood : UI.scene.sayForgeBad);
+      },
+
+      destroy: function () {
+        dead = true;
+        timers.forEach(function (t) { clearTimeout(t); }); timers = [];
+        previewEl = btnMain = notaEl = host = null; paletaEls = {}; opts = []; ctx = null;
+      }
+    };
+  }
+
+  SCENES.forge = (function (base) {
+    return function () {
+      var viejo = base(), activa = viejo;
+      function es(ctx) { return !!(ctx && ctx.variant && ctx.variant.rule && ctx.variant.rule.tipo === 'ecuacion'); }
+      return {
+        mount: function (c, ctx) { activa = es(ctx) ? escenaEcuacion() : viejo; return activa.mount(c, ctx); },
+        check: function (e) { return activa.check ? activa.check(e) : undefined; },
+        setMood: function (m) { return activa.setMood && activa.setMood(m); },
+        move: function (d) { return activa.move(d); },
+        jump: function (i) { return activa.jump(i); },
+        confirm: function () { return activa.confirm(); },
+        markResult: function (a, b) { return activa.markResult(a, b); },
+        destroy: function () { return activa.destroy(); }
+      };
+    };
+  })(SCENES.forge);
 
   /* El mensaje va al HUD; la REACCION va al heroe de la escena, que es el que
      el nino esta mirando porque es el que mueve. */

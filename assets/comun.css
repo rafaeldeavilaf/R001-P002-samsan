@@ -175,3 +175,30 @@ html[data-capa="comun"] .linea__mando { gap: 12px; }
   html[data-capa="comun"] .linea__palancas { grid-column: 1 / -1; justify-content: center; }
   html[data-capa="comun"] .linea__mando .linea__ok { flex: none; min-width: 140px; }
 }
+
+/* Escena de fichas (forge, regla ecuacion): fichas de 56 px con el kit.
+   Hay dos filas (la oracion y las fichas), asi que el lienzo es mas bajo. */
+html[data-capa="comun"] .scene--ecuacion .linea__escena { width: min(100%, calc((100svh - 450px) * 16 / 9)); }
+html[data-capa="comun"] .scene--ecuacion .forge__preview {
+  min-height: 70px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center;
+  padding: 6px 10px; border: 3px dashed var(--papel-2); border-radius: var(--radio); background: #FFFDF6; margin: 0;
+}
+html[data-capa="comun"] .scene--ecuacion .forge__preview.is-good { border: 3px solid var(--bien); }
+html[data-capa="comun"] .scene--ecuacion .forge__preview.is-bad { border: 3px solid var(--panel-borde); }
+html[data-capa="comun"] .scene--ecuacion .forge__palette { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0; }
+html[data-capa="comun"] .scene--ecuacion .forge__piece {
+  min-width: 56px; min-height: 56px; padding: 0 12px; border-radius: var(--radio);
+  border: 3px solid var(--contorno); background: var(--boton); color: var(--panel-tinta);
+  font-family: var(--fuente); font-size: 1.35rem; font-weight: 900; box-shadow: 0 3px 0 var(--contorno); cursor: pointer;
+}
+html[data-capa="comun"] .scene--ecuacion .forge__piece.is-chosen { background: #FFF3D6; }
+html[data-capa="comun"] .scene--ecuacion .forge__piece:disabled { opacity: .35; cursor: default; }
+html[data-capa="comun"] .scene--ecuacion .forge__preview .forge__piece:disabled { opacity: 1; }
+html[data-capa="comun"] .scene--ecuacion .row { justify-content: center; margin-top: 0; }
+html[data-capa="comun"] .linea__opciones--frases .linea__opcion { font-size: 1.15rem; }
+@media (max-width: 700px) {
+  html[data-capa="comun"] .scene--ecuacion .linea__escena { aspect-ratio: 16 / 11; }
+  html[data-capa="comun"] .linea__opciones--frases { grid-template-columns: 1fr 1fr; }
+  html[data-capa="comun"] .linea__opciones--frases .linea__opcion { font-size: 1rem; white-space: nowrap; gap: 6px; padding: 0 8px; }
+  html[data-capa="comun"] .scene--ecuacion .forge__piece { min-width: 50px; min-height: 52px; font-size: 1.2rem; }
+}

@@ -4387,178 +4387,400 @@ window.QUIZ_DATA = {
     },
     {
      "id": "MY6-2-J",
-     "skill": "find the missing number",
-     "mech": "line",
+     "skill": "write the number sentence",
+     "mech": "forge",
      "sello": "jefe",
      "pistaGrafica": false,
      "variants": [
       {
-       "stem": "The mole is signalling from −22 m and you are at 10 m. Set the jump, then press Check.",
+       "stem": "The mole's gallery is at −29 m. The lift is at −7 m. p is the trip. Build the number sentence.",
        "options": [
-        "−32",
+        "−22",
         "?"
        ],
        "answer": 0,
-       "solucion": -32,
-       "line": {
-        "piel": "montacargas",
-        "unidad": "m",
-        "min": -30,
-        "max": 10,
-        "inicio": 10,
-        "cambio": -32,
-        "final": -22,
-        "faltante": "cambio",
-        "modo": "concreto",
-        "pistaGrafica": false
-       },
-       "hint": "Stretch the jump from 10 m until its tip reaches the ring at −22 m.",
-       "pistas": [
-        "Stretch the jump from 10 m until its tip reaches the ring at −22 m.",
-        "From 10 m to 0 m is 10 m; from 0 m to −22 m is 22 m. Add them.",
-        "Example: from −3 m to −15 m is a jump of −12 m."
+       "solucion": -22,
+       "pieces": [
+        {
+         "text": "−29"
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "−7"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "−"
+        }
        ],
-       "explain": "10 + (−32) = −22: the jump is −32 m."
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": -22,
+        "usar": [
+         "−29",
+         "−7"
+        ],
+        "sello": "concreto",
+        "mundo": "montacargas",
+        "linea": {
+         "inicio": -7,
+         "final": -29,
+         "unidad": "m",
+         "min": -30,
+         "max": 10
+        },
+        "esperada": [
+         "−7",
+         "+",
+         "p",
+         "=",
+         "−29"
+        ],
+        "absurdo": {
+         "mayor": "With that sentence the lift would stop at {suma} m, not at the gallery.",
+         "menor": "With that sentence the lift would stop at {suma} m, not at the gallery."
+        }
+       },
+       "hint": "Start where the lift is: −7 m.",
+       "pistas": [
+        "Start where the lift is: −7 m.",
+        "Start + trip = end: the end is −29 m.",
+        "Example: from −3 m to −15 m: −3 + p = −15."
+       ],
+       "explain": "−7 + p = −29, so p = −22 m."
       },
       {
-       "stem": "The mole is signalling from −26 m and you are at 4 m. Set the jump, then press Check.",
+       "stem": "The mole's gallery is at −22 m. The lift is at −4 m. p is the trip. Build the number sentence.",
        "options": [
-        "−30",
+        "−18",
         "?"
        ],
        "answer": 0,
-       "solucion": -30,
-       "line": {
-        "piel": "montacargas",
-        "unidad": "m",
-        "min": -30,
-        "max": 10,
-        "inicio": 4,
-        "cambio": -30,
-        "final": -26,
-        "faltante": "cambio",
-        "modo": "concreto",
-        "pistaGrafica": false
-       },
-       "hint": "Stretch the jump from 4 m until its tip reaches the ring at −26 m.",
-       "pistas": [
-        "Stretch the jump from 4 m until its tip reaches the ring at −26 m.",
-        "From 4 m to 0 m is 4 m; from 0 m to −26 m is 26 m. Add them.",
-        "Example: from −3 m to −15 m is a jump of −12 m."
+       "solucion": -18,
+       "pieces": [
+        {
+         "text": "="
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "−22"
+        },
+        {
+         "text": "−4"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "+"
+        }
        ],
-       "explain": "4 + (−30) = −26: the jump is −30 m."
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": -18,
+        "usar": [
+         "−22",
+         "−4"
+        ],
+        "sello": "concreto",
+        "mundo": "montacargas",
+        "linea": {
+         "inicio": -4,
+         "final": -22,
+         "unidad": "m",
+         "min": -30,
+         "max": 10
+        },
+        "esperada": [
+         "−4",
+         "+",
+         "p",
+         "=",
+         "−22"
+        ],
+        "absurdo": {
+         "mayor": "With that sentence the lift would stop at {suma} m, not at the gallery.",
+         "menor": "With that sentence the lift would stop at {suma} m, not at the gallery."
+        }
+       },
+       "hint": "Start where the lift is: −4 m.",
+       "pistas": [
+        "Start where the lift is: −4 m.",
+        "Start + trip = end: the end is −22 m.",
+        "Example: from −3 m to −15 m: −3 + p = −15."
+       ],
+       "explain": "−4 + p = −22, so p = −18 m."
       },
       {
-       "stem": "The mole is signalling from −26 m and you are at 3 m. Set the jump, then press Check.",
+       "stem": "The mole's gallery is at −27 m. The lift is at −4 m. p is the trip. Build the number sentence.",
        "options": [
-        "−29",
+        "−23",
         "?"
        ],
        "answer": 0,
-       "solucion": -29,
-       "line": {
-        "piel": "montacargas",
-        "unidad": "m",
-        "min": -30,
-        "max": 10,
-        "inicio": 3,
-        "cambio": -29,
-        "final": -26,
-        "faltante": "cambio",
-        "modo": "concreto",
-        "pistaGrafica": false
-       },
-       "hint": "Stretch the jump from 3 m until its tip reaches the ring at −26 m.",
-       "pistas": [
-        "Stretch the jump from 3 m until its tip reaches the ring at −26 m.",
-        "From 3 m to 0 m is 3 m; from 0 m to −26 m is 26 m. Add them.",
-        "Example: from −3 m to −15 m is a jump of −12 m."
+       "solucion": -23,
+       "pieces": [
+        {
+         "text": "−"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "−27"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "−4"
+        }
        ],
-       "explain": "3 + (−29) = −26: the jump is −29 m."
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": -23,
+        "usar": [
+         "−27",
+         "−4"
+        ],
+        "sello": "concreto",
+        "mundo": "montacargas",
+        "linea": {
+         "inicio": -4,
+         "final": -27,
+         "unidad": "m",
+         "min": -30,
+         "max": 10
+        },
+        "esperada": [
+         "−4",
+         "+",
+         "p",
+         "=",
+         "−27"
+        ],
+        "absurdo": {
+         "mayor": "With that sentence the lift would stop at {suma} m, not at the gallery.",
+         "menor": "With that sentence the lift would stop at {suma} m, not at the gallery."
+        }
+       },
+       "hint": "Start where the lift is: −4 m.",
+       "pistas": [
+        "Start where the lift is: −4 m.",
+        "Start + trip = end: the end is −27 m.",
+        "Example: from −3 m to −15 m: −3 + p = −15."
+       ],
+       "explain": "−4 + p = −27, so p = −23 m."
       },
       {
-       "stem": "The mole is signalling from −26 m and you are at 5 m. Set the jump, then press Check.",
+       "stem": "The mole's gallery is at −23 m. The lift is at 4 m. p is the trip. Build the number sentence.",
        "options": [
-        "−31",
+        "−27",
         "?"
        ],
        "answer": 0,
-       "solucion": -31,
-       "line": {
-        "piel": "montacargas",
-        "unidad": "m",
-        "min": -30,
-        "max": 10,
-        "inicio": 5,
-        "cambio": -31,
-        "final": -26,
-        "faltante": "cambio",
-        "modo": "concreto",
-        "pistaGrafica": false
-       },
-       "hint": "Stretch the jump from 5 m until its tip reaches the ring at −26 m.",
-       "pistas": [
-        "Stretch the jump from 5 m until its tip reaches the ring at −26 m.",
-        "From 5 m to 0 m is 5 m; from 0 m to −26 m is 26 m. Add them.",
-        "Example: from −3 m to −15 m is a jump of −12 m."
+       "solucion": -27,
+       "pieces": [
+        {
+         "text": "−23"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "4"
+        }
        ],
-       "explain": "5 + (−31) = −26: the jump is −31 m."
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": -27,
+        "usar": [
+         "4",
+         "−23"
+        ],
+        "sello": "concreto",
+        "mundo": "montacargas",
+        "linea": {
+         "inicio": 4,
+         "final": -23,
+         "unidad": "m",
+         "min": -30,
+         "max": 10
+        },
+        "esperada": [
+         "4",
+         "+",
+         "p",
+         "=",
+         "−23"
+        ],
+        "absurdo": {
+         "mayor": "With that sentence the lift would stop at {suma} m, not at the gallery.",
+         "menor": "With that sentence the lift would stop at {suma} m, not at the gallery."
+        }
+       },
+       "hint": "Start where the lift is: 4 m.",
+       "pistas": [
+        "Start where the lift is: 4 m.",
+        "Start + trip = end: the end is −23 m.",
+        "Example: from −3 m to −15 m: −3 + p = −15."
+       ],
+       "explain": "4 + p = −23, so p = −27 m."
       },
       {
-       "stem": "The mole is signalling from −29 m and you are at 5 m. Set the jump, then press Check.",
+       "stem": "The mole's gallery is at −16 m. The lift is at −4 m. p is the trip. Build the number sentence.",
        "options": [
-        "−34",
+        "−12",
         "?"
        ],
        "answer": 0,
-       "solucion": -34,
-       "line": {
-        "piel": "montacargas",
-        "unidad": "m",
-        "min": -30,
-        "max": 10,
-        "inicio": 5,
-        "cambio": -34,
-        "final": -29,
-        "faltante": "cambio",
-        "modo": "concreto",
-        "pistaGrafica": false
-       },
-       "hint": "Stretch the jump from 5 m until its tip reaches the ring at −29 m.",
-       "pistas": [
-        "Stretch the jump from 5 m until its tip reaches the ring at −29 m.",
-        "From 5 m to 0 m is 5 m; from 0 m to −29 m is 29 m. Add them.",
-        "Example: from −3 m to −15 m is a jump of −12 m."
+       "solucion": -12,
+       "pieces": [
+        {
+         "text": "p"
+        },
+        {
+         "text": "−4"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "−16"
+        },
+        {
+         "text": "="
+        }
        ],
-       "explain": "5 + (−34) = −29: the jump is −34 m."
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": -12,
+        "usar": [
+         "−16",
+         "−4"
+        ],
+        "sello": "concreto",
+        "mundo": "montacargas",
+        "linea": {
+         "inicio": -4,
+         "final": -16,
+         "unidad": "m",
+         "min": -30,
+         "max": 10
+        },
+        "esperada": [
+         "−4",
+         "+",
+         "p",
+         "=",
+         "−16"
+        ],
+        "absurdo": {
+         "mayor": "With that sentence the lift would stop at {suma} m, not at the gallery.",
+         "menor": "With that sentence the lift would stop at {suma} m, not at the gallery."
+        }
+       },
+       "hint": "Start where the lift is: −4 m.",
+       "pistas": [
+        "Start where the lift is: −4 m.",
+        "Start + trip = end: the end is −16 m.",
+        "Example: from −3 m to −15 m: −3 + p = −15."
+       ],
+       "explain": "−4 + p = −16, so p = −12 m."
       },
       {
-       "stem": "The mole is signalling from −22 m and you are at 8 m. Set the jump, then press Check.",
+       "stem": "The mole's gallery is at −25 m. The lift is at −8 m. p is the trip. Build the number sentence.",
        "options": [
-        "−30",
+        "−17",
         "?"
        ],
        "answer": 0,
-       "solucion": -30,
-       "line": {
-        "piel": "montacargas",
-        "unidad": "m",
-        "min": -30,
-        "max": 10,
-        "inicio": 8,
-        "cambio": -30,
-        "final": -22,
-        "faltante": "cambio",
-        "modo": "concreto",
-        "pistaGrafica": false
-       },
-       "hint": "Stretch the jump from 8 m until its tip reaches the ring at −22 m.",
-       "pistas": [
-        "Stretch the jump from 8 m until its tip reaches the ring at −22 m.",
-        "From 8 m to 0 m is 8 m; from 0 m to −22 m is 22 m. Add them.",
-        "Example: from −3 m to −15 m is a jump of −12 m."
+       "solucion": -17,
+       "pieces": [
+        {
+         "text": "+"
+        },
+        {
+         "text": "−25"
+        },
+        {
+         "text": "−8"
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        }
        ],
-       "explain": "8 + (−30) = −22: the jump is −30 m."
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": -17,
+        "usar": [
+         "−25",
+         "−8"
+        ],
+        "sello": "concreto",
+        "mundo": "montacargas",
+        "linea": {
+         "inicio": -8,
+         "final": -25,
+         "unidad": "m",
+         "min": -30,
+         "max": 10
+        },
+        "esperada": [
+         "−8",
+         "+",
+         "p",
+         "=",
+         "−25"
+        ],
+        "absurdo": {
+         "mayor": "With that sentence the lift would stop at {suma} m, not at the gallery.",
+         "menor": "With that sentence the lift would stop at {suma} m, not at the gallery."
+        }
+       },
+       "hint": "Start where the lift is: −8 m.",
+       "pistas": [
+        "Start where the lift is: −8 m.",
+        "Start + trip = end: the end is −25 m.",
+        "Example: from −3 m to −15 m: −3 + p = −15."
+       ],
+       "explain": "−8 + p = −25, so p = −17 m."
       }
      ]
     }
@@ -5682,7 +5904,7 @@ window.QUIZ_DATA = {
        "explain": "c + 43 = 76, so sack c = 76 − 43 = 33 kg."
       },
       {
-       "stem": "Sack a and 32 kg balance 78 kg. Put weights where the sack was.",
+       "stem": "Sack n and 32 kg balance 78 kg. Put weights where the sack was.",
        "options": [
         "46",
         "?"
@@ -5692,7 +5914,7 @@ window.QUIZ_DATA = {
        "fill": {
         "modo": "balanza",
         "sello": "concreto",
-        "letra": "a",
+        "letra": "n",
         "fijas": [
          32
         ],
@@ -5714,7 +5936,7 @@ window.QUIZ_DATA = {
         "Take the known part away from the total: 78 − 32.",
         "Example: c + 20 = 45, so c = 45 − 20 = 25."
        ],
-       "explain": "a + 32 = 78, so sack a = 78 − 32 = 46 kg."
+       "explain": "n + 32 = 78, so sack n = 78 − 32 = 46 kg."
       },
       {
        "stem": "Sack m and 15 kg balance 98 kg. Put weights where the sack was.",
@@ -6277,7 +6499,7 @@ window.QUIZ_DATA = {
        "sub": "c = [ ]"
       },
       {
-       "stem": "a + 40 = 98",
+       "stem": "n + 40 = 98",
        "options": [
         "58",
         "?"
@@ -6287,7 +6509,7 @@ window.QUIZ_DATA = {
        "fill": {
         "modo": "balanza",
         "sello": "abstracto",
-        "letra": "a",
+        "letra": "n",
         "fijas": [
          40
         ],
@@ -6303,14 +6525,14 @@ window.QUIZ_DATA = {
         },
         "pistaGrafica": true
        },
-       "hint": "Sack a and 40 kg together make 98 kg.",
+       "hint": "Sack n and 40 kg together make 98 kg.",
        "pistas": [
-        "Sack a and 40 kg together make 98 kg.",
+        "Sack n and 40 kg together make 98 kg.",
         "Take the known part away from the total: 98 − 40.",
         "Example: c + 20 = 45, so c = 45 − 20 = 25."
        ],
-       "explain": "a + 40 = 98, so sack a = 98 − 40 = 58 kg.",
-       "sub": "a = [ ]"
+       "explain": "n + 40 = 98, so sack n = 98 − 40 = 58 kg.",
+       "sub": "n = [ ]"
       }
      ]
     },
@@ -6357,7 +6579,7 @@ window.QUIZ_DATA = {
        "explain": "c + 19 = 97, so sack c = 97 − 19 = 78 kg."
       },
       {
-       "stem": "Sack a and 27 kg balance 51 kg. Put weights where the sack was.",
+       "stem": "Sack n and 27 kg balance 51 kg. Put weights where the sack was.",
        "options": [
         "24",
         "?"
@@ -6367,7 +6589,7 @@ window.QUIZ_DATA = {
        "fill": {
         "modo": "balanza",
         "sello": "concreto",
-        "letra": "a",
+        "letra": "n",
         "fijas": [
          27
         ],
@@ -6389,7 +6611,7 @@ window.QUIZ_DATA = {
         "Take the known part away from the total: 51 − 27.",
         "Example: c + 20 = 45, so c = 45 − 20 = 25."
        ],
-       "explain": "a + 27 = 51, so sack a = 51 − 27 = 24 kg."
+       "explain": "n + 27 = 51, so sack n = 51 − 27 = 24 kg."
       },
       {
        "stem": "Sack m and 53 kg balance 80 kg. Put weights where the sack was.",
@@ -6952,7 +7174,7 @@ window.QUIZ_DATA = {
        "sub": "c = [ ]"
       },
       {
-       "stem": "a + 15 = 50",
+       "stem": "n + 15 = 50",
        "options": [
         "35",
         "?"
@@ -6962,7 +7184,7 @@ window.QUIZ_DATA = {
        "fill": {
         "modo": "balanza",
         "sello": "abstracto",
-        "letra": "a",
+        "letra": "n",
         "fijas": [
          15
         ],
@@ -6978,14 +7200,14 @@ window.QUIZ_DATA = {
         },
         "pistaGrafica": false
        },
-       "hint": "Sack a and 15 kg together make 50 kg.",
+       "hint": "Sack n and 15 kg together make 50 kg.",
        "pistas": [
-        "Sack a and 15 kg together make 50 kg.",
+        "Sack n and 15 kg together make 50 kg.",
         "Take the known part away from the total: 50 − 15.",
         "Example: c + 20 = 45, so c = 45 − 20 = 25."
        ],
-       "explain": "a + 15 = 50, so sack a = 50 − 15 = 35 kg.",
-       "sub": "a = [ ]"
+       "explain": "n + 15 = 50, so sack n = 50 − 15 = 35 kg.",
+       "sub": "n = [ ]"
       }
      ]
     },
@@ -7033,7 +7255,7 @@ window.QUIZ_DATA = {
        "explain": "c + 14 + 9 = 72, so sack c = 72 − 23 = 49 kg."
       },
       {
-       "stem": "Sack a and 12 + 5 kg balance 62 kg. Put weights where the sack was.",
+       "stem": "Sack n and 12 + 5 kg balance 62 kg. Put weights where the sack was.",
        "options": [
         "45",
         "?"
@@ -7043,7 +7265,7 @@ window.QUIZ_DATA = {
        "fill": {
         "modo": "balanza",
         "sello": "concreto",
-        "letra": "a",
+        "letra": "n",
         "fijas": [
          12,
          5
@@ -7066,7 +7288,7 @@ window.QUIZ_DATA = {
         "Take the known part away from the total: 62 − (12 + 5).",
         "Example: c + 20 = 45, so c = 45 − 20 = 25."
        ],
-       "explain": "a + 12 + 5 = 62, so sack a = 62 − 17 = 45 kg."
+       "explain": "n + 12 + 5 = 62, so sack n = 62 − 17 = 45 kg."
       },
       {
        "stem": "Sack m and 25 + 8 kg balance 90 kg. Put weights where the sack was.",
@@ -7211,6 +7433,3726 @@ window.QUIZ_DATA = {
         "Example: c + 20 = 45, so c = 45 − 20 = 25."
        ],
        "explain": "k + 19 + 7 = 65, so sack k = 65 − 26 = 39 kg."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "name": "THE BLACKSMITH'S WORKSHOP",
+   "subtitle": "Write the number sentence, then solve it",
+   "skill": "write and solve a sentence with a letter",
+   "briefing": [
+    "<p>The smith forges new parts for the mine cart: wheels, rails and lamps.</p>",
+    "<p>Each order is a story. Write it as a number sentence with a letter, then find the letter. The scale checks your sentence.</p>"
+   ],
+   "sello": true,
+   "tramosItems": [
+    [
+     0,
+     2
+    ],
+    [
+     2,
+     5
+    ],
+    [
+     5,
+     8
+    ],
+    [
+     8,
+     11
+    ],
+    [
+     11,
+     12
+    ]
+   ],
+   "tramos": 5,
+   "questions": [
+    {
+     "id": "MY6-4-R1",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "repaso",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "Sack c and 26 kg balance 78 kg. Put weights where the sack was.",
+       "options": [
+        "52",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 52,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "c",
+        "fijas": [
+         26
+        ],
+        "total": 78,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 78 − 26.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "c + 26 = 78, so sack c = 78 − 26 = 52 kg."
+      },
+      {
+       "stem": "Sack n and 12 kg balance 93 kg. Put weights where the sack was.",
+       "options": [
+        "81",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 81,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "n",
+        "fijas": [
+         12
+        ],
+        "total": 93,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 93 − 12.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "n + 12 = 93, so sack n = 93 − 12 = 81 kg."
+      },
+      {
+       "stem": "Sack m and 46 kg balance 79 kg. Put weights where the sack was.",
+       "options": [
+        "33",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 33,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "m",
+        "fijas": [
+         46
+        ],
+        "total": 79,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 79 − 46.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "m + 46 = 79, so sack m = 79 − 46 = 33 kg."
+      },
+      {
+       "stem": "Sack p and 21 kg balance 94 kg. Put weights where the sack was.",
+       "options": [
+        "73",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 73,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "p",
+        "fijas": [
+         21
+        ],
+        "total": 94,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 94 − 21.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "p + 21 = 94, so sack p = 94 − 21 = 73 kg."
+      },
+      {
+       "stem": "Sack g and 43 kg balance 79 kg. Put weights where the sack was.",
+       "options": [
+        "36",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 36,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "g",
+        "fijas": [
+         43
+        ],
+        "total": 79,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 79 − 43.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "g + 43 = 79, so sack g = 79 − 43 = 36 kg."
+      },
+      {
+       "stem": "Sack k and 72 kg balance 98 kg. Put weights where the sack was.",
+       "options": [
+        "26",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 26,
+       "fill": {
+        "modo": "balanza",
+        "sello": "concreto",
+        "letra": "k",
+        "fijas": [
+         72
+        ],
+        "total": 98,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+       "pistas": [
+        "Use the 10 kg weights first, then the 1 kg weights, until the arm is level.",
+        "Take the known part away from the total: 98 − 72.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 72 = 98, so sack k = 98 − 72 = 26 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-R2",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "repaso",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "p + 28 = 80",
+       "options": [
+        "52",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 52,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "p",
+        "fijas": [
+         28
+        ],
+        "total": 80,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack p and 28 kg together make 80 kg.",
+       "pistas": [
+        "Sack p and 28 kg together make 80 kg.",
+        "Take the known part away from the total: 80 − 28.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "p + 28 = 80, so sack p = 80 − 28 = 52 kg.",
+       "sub": "p = [ ]"
+      },
+      {
+       "stem": "g + 71 = 90",
+       "options": [
+        "19",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 19,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "g",
+        "fijas": [
+         71
+        ],
+        "total": 90,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack g and 71 kg together make 90 kg.",
+       "pistas": [
+        "Sack g and 71 kg together make 90 kg.",
+        "Take the known part away from the total: 90 − 71.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "g + 71 = 90, so sack g = 90 − 71 = 19 kg.",
+       "sub": "g = [ ]"
+      },
+      {
+       "stem": "k + 24 = 53",
+       "options": [
+        "29",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 29,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "k",
+        "fijas": [
+         24
+        ],
+        "total": 53,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack k and 24 kg together make 53 kg.",
+       "pistas": [
+        "Sack k and 24 kg together make 53 kg.",
+        "Take the known part away from the total: 53 − 24.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 24 = 53, so sack k = 53 − 24 = 29 kg.",
+       "sub": "k = [ ]"
+      },
+      {
+       "stem": "s + 29 = 70",
+       "options": [
+        "41",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 41,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "s",
+        "fijas": [
+         29
+        ],
+        "total": 70,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack s and 29 kg together make 70 kg.",
+       "pistas": [
+        "Sack s and 29 kg together make 70 kg.",
+        "Take the known part away from the total: 70 − 29.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "s + 29 = 70, so sack s = 70 − 29 = 41 kg.",
+       "sub": "s = [ ]"
+      },
+      {
+       "stem": "t + 34 = 50",
+       "options": [
+        "16",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 16,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "t",
+        "fijas": [
+         34
+        ],
+        "total": 50,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack t and 34 kg together make 50 kg.",
+       "pistas": [
+        "Sack t and 34 kg together make 50 kg.",
+        "Take the known part away from the total: 50 − 34.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "t + 34 = 50, so sack t = 50 − 34 = 16 kg.",
+       "sub": "t = [ ]"
+      },
+      {
+       "stem": "c + 29 = 66",
+       "options": [
+        "37",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 37,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "c",
+        "fijas": [
+         29
+        ],
+        "total": 66,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack c and 29 kg together make 66 kg.",
+       "pistas": [
+        "Sack c and 29 kg together make 66 kg.",
+        "Take the known part away from the total: 66 − 29.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "c + 29 = 66, so sack c = 66 − 29 = 37 kg.",
+       "sub": "c = [ ]"
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-T1C",
+     "skill": "write the number sentence",
+     "mech": "forge",
+     "sello": "concreto",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "The cart and its load weigh 79 kg. The empty cart weighs 34 kg. c is the load. Build the number sentence.",
+       "options": [
+        "45",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 45,
+       "pieces": [
+        {
+         "text": "79"
+        },
+        {
+         "text": "c"
+        },
+        {
+         "text": "34"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "+"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "c",
+        "valor": 45,
+        "usar": [
+         "34",
+         "79"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          34
+         ],
+         "total": 79,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "c",
+         "+",
+         "34",
+         "=",
+         "79"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than the cart and load altogether!",
+         "menor": "Then the cart and load would weigh {suma} kg, not 79 kg."
+        }
+       },
+       "hint": "Start with the letter c for what you do not know.",
+       "pistas": [
+        "Start with the letter c for what you do not know.",
+        "Picture the bar: 79 kg in total, 34 kg known, the rest is c.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "c + 34 = 79, so c = 79 − 34 = 45 kg."
+      },
+      {
+       "stem": "A crate of crystals weighs 78 kg. The crate alone weighs 20 kg. n is the crystals. Build the number sentence.",
+       "options": [
+        "58",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 58,
+       "pieces": [
+        {
+         "text": "20"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "n"
+        },
+        {
+         "text": "78"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "n",
+        "valor": 58,
+        "usar": [
+         "20",
+         "78"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          20
+         ],
+         "total": 78,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "n",
+         "+",
+         "20",
+         "=",
+         "78"
+        ],
+        "absurdo": {
+         "mayor": "Then the crystals would weigh {valor} kg: more than the full crate altogether!",
+         "menor": "Then the full crate would weigh {suma} kg, not 78 kg."
+        }
+       },
+       "hint": "Start with the letter n for what you do not know.",
+       "pistas": [
+        "Start with the letter n for what you do not know.",
+        "Picture the bar: 78 kg in total, 20 kg known, the rest is n.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "n + 20 = 78, so n = 78 − 20 = 58 kg."
+      },
+      {
+       "stem": "The bucket of ore weighs 65 kg. The bucket weighs 21 kg. m is the ore. Build the number sentence.",
+       "options": [
+        "44",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 44,
+       "pieces": [
+        {
+         "text": "="
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "65"
+        },
+        {
+         "text": "21"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "m"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "m",
+        "valor": 44,
+        "usar": [
+         "21",
+         "65"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          21
+         ],
+         "total": 65,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "m",
+         "+",
+         "21",
+         "=",
+         "65"
+        ],
+        "absurdo": {
+         "mayor": "Then the ore would weigh {valor} kg: more than the full bucket altogether!",
+         "menor": "Then the full bucket would weigh {suma} kg, not 65 kg."
+        }
+       },
+       "hint": "Start with the letter m for what you do not know.",
+       "pistas": [
+        "Start with the letter m for what you do not know.",
+        "Picture the bar: 65 kg in total, 21 kg known, the rest is m.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "m + 21 = 65, so m = 65 − 21 = 44 kg."
+      },
+      {
+       "stem": "A new wheel and its axle weigh 49 kg. The axle weighs 26 kg. p is the wheel. Build the number sentence.",
+       "options": [
+        "23",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 23,
+       "pieces": [
+        {
+         "text": "26"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "49"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 23,
+        "usar": [
+         "26",
+         "49"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          26
+         ],
+         "total": 49,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "p",
+         "+",
+         "26",
+         "=",
+         "49"
+        ],
+        "absurdo": {
+         "mayor": "Then the wheel would weigh {valor} kg: more than the wheel and axle altogether!",
+         "menor": "Then the wheel and axle would weigh {suma} kg, not 49 kg."
+        }
+       },
+       "hint": "Start with the letter p for what you do not know.",
+       "pistas": [
+        "Start with the letter p for what you do not know.",
+        "Picture the bar: 49 kg in total, 26 kg known, the rest is p.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "p + 26 = 49, so p = 49 − 26 = 23 kg."
+      },
+      {
+       "stem": "The hammer weighs 75 kg. Its handle weighs 48 kg. g is the head. Build the number sentence.",
+       "options": [
+        "27",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 27,
+       "pieces": [
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "g"
+        },
+        {
+         "text": "75"
+        },
+        {
+         "text": "48"
+        },
+        {
+         "text": "+"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 27,
+        "usar": [
+         "48",
+         "75"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          48
+         ],
+         "total": 75,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "g",
+         "+",
+         "48",
+         "=",
+         "75"
+        ],
+        "absurdo": {
+         "mayor": "Then the head would weigh {valor} kg: more than the whole hammer altogether!",
+         "menor": "Then the whole hammer would weigh {suma} kg, not 75 kg."
+        }
+       },
+       "hint": "Start with the letter g for what you do not know.",
+       "pistas": [
+        "Start with the letter g for what you do not know.",
+        "Picture the bar: 75 kg in total, 48 kg known, the rest is g.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "g + 48 = 75, so g = 75 − 48 = 27 kg."
+      },
+      {
+       "stem": "The barrel of water weighs 96 kg. The water weighs 12 kg. k is the barrel. Build the number sentence.",
+       "options": [
+        "84",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 84,
+       "pieces": [
+        {
+         "text": "+"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "96"
+        },
+        {
+         "text": "12"
+        },
+        {
+         "text": "k"
+        },
+        {
+         "text": "−"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 84,
+        "usar": [
+         "12",
+         "96"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          12
+         ],
+         "total": 96,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "k",
+         "+",
+         "12",
+         "=",
+         "96"
+        ],
+        "absurdo": {
+         "mayor": "Then the barrel would weigh {valor} kg: more than the full barrel altogether!",
+         "menor": "Then the full barrel would weigh {suma} kg, not 96 kg."
+        }
+       },
+       "hint": "Start with the letter k for what you do not know.",
+       "pistas": [
+        "Start with the letter k for what you do not know.",
+        "Picture the bar: 96 kg in total, 12 kg known, the rest is k.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "k + 12 = 96, so k = 96 − 12 = 84 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-T1P",
+     "skill": "choose the inverse step",
+     "mech": "forge",
+     "sello": "pictorico",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "The bucket of ore weighs 97 kg. The bucket weighs 33 kg. n is the ore. Which step finds n?",
+       "options": [
+        "n − 33 = 97",
+        "n = 97 + 33",
+        "n = 33 − 97",
+        "n = 97 − 33"
+       ],
+       "answer": 3,
+       "solucion": 64,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "n",
+        "valor": 64,
+        "usar": [
+         "33",
+         "97"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          33
+         ],
+         "total": 97,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "n",
+         "+",
+         "33",
+         "=",
+         "97"
+        ],
+        "absurdo": {
+         "mayor": "Then the ore would weigh {valor} kg: more than the full bucket altogether!",
+         "menor": "Then the full bucket would weigh {suma} kg, not 97 kg."
+        }
+       },
+       "hint": "Start with the letter n for what you do not know.",
+       "pistas": [
+        "Start with the letter n for what you do not know.",
+        "Picture the bar: 97 kg in total, 33 kg known, the rest is n.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "n + 33 = 97, so n = 97 − 33 = 64 kg."
+      },
+      {
+       "stem": "A new wheel and its axle weigh 58 kg. The axle weighs 41 kg. m is the wheel. Which step finds m?",
+       "options": [
+        "m = 41 − 58",
+        "m − 41 = 58",
+        "m = 58 + 41",
+        "m = 58 − 41"
+       ],
+       "answer": 3,
+       "solucion": 17,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "m",
+        "valor": 17,
+        "usar": [
+         "41",
+         "58"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          41
+         ],
+         "total": 58,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "m",
+         "+",
+         "41",
+         "=",
+         "58"
+        ],
+        "absurdo": {
+         "mayor": "Then the wheel would weigh {valor} kg: more than the wheel and axle altogether!",
+         "menor": "Then the wheel and axle would weigh {suma} kg, not 58 kg."
+        }
+       },
+       "hint": "Start with the letter m for what you do not know.",
+       "pistas": [
+        "Start with the letter m for what you do not know.",
+        "Picture the bar: 58 kg in total, 41 kg known, the rest is m.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "m + 41 = 58, so m = 58 − 41 = 17 kg."
+      },
+      {
+       "stem": "The hammer weighs 86 kg. Its handle weighs 14 kg. p is the head. Which step finds p?",
+       "options": [
+        "p = 86 − 14",
+        "p − 14 = 86",
+        "p = 14 − 86",
+        "p = 86 + 14"
+       ],
+       "answer": 0,
+       "solucion": 72,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 72,
+        "usar": [
+         "14",
+         "86"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          14
+         ],
+         "total": 86,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "p",
+         "+",
+         "14",
+         "=",
+         "86"
+        ],
+        "absurdo": {
+         "mayor": "Then the head would weigh {valor} kg: more than the whole hammer altogether!",
+         "menor": "Then the whole hammer would weigh {suma} kg, not 86 kg."
+        }
+       },
+       "hint": "Start with the letter p for what you do not know.",
+       "pistas": [
+        "Start with the letter p for what you do not know.",
+        "Picture the bar: 86 kg in total, 14 kg known, the rest is p.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "p + 14 = 86, so p = 86 − 14 = 72 kg."
+      },
+      {
+       "stem": "The barrel of water weighs 36 kg. The water weighs 15 kg. g is the barrel. Which step finds g?",
+       "options": [
+        "g = 36 − 15",
+        "g − 15 = 36",
+        "g = 36 + 15",
+        "g = 15 − 36"
+       ],
+       "answer": 0,
+       "solucion": 21,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 21,
+        "usar": [
+         "15",
+         "36"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          15
+         ],
+         "total": 36,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "g",
+         "+",
+         "15",
+         "=",
+         "36"
+        ],
+        "absurdo": {
+         "mayor": "Then the barrel would weigh {valor} kg: more than the full barrel altogether!",
+         "menor": "Then the full barrel would weigh {suma} kg, not 36 kg."
+        }
+       },
+       "hint": "Start with the letter g for what you do not know.",
+       "pistas": [
+        "Start with the letter g for what you do not know.",
+        "Picture the bar: 36 kg in total, 15 kg known, the rest is g.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "g + 15 = 36, so g = 36 − 15 = 21 kg."
+      },
+      {
+       "stem": "The cart and its load weigh 73 kg. The empty cart weighs 16 kg. k is the load. Which step finds k?",
+       "options": [
+        "k − 16 = 73",
+        "k = 16 − 73",
+        "k = 73 − 16",
+        "k = 73 + 16"
+       ],
+       "answer": 2,
+       "solucion": 57,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 57,
+        "usar": [
+         "16",
+         "73"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          16
+         ],
+         "total": 73,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "k",
+         "+",
+         "16",
+         "=",
+         "73"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than the cart and load altogether!",
+         "menor": "Then the cart and load would weigh {suma} kg, not 73 kg."
+        }
+       },
+       "hint": "Start with the letter k for what you do not know.",
+       "pistas": [
+        "Start with the letter k for what you do not know.",
+        "Picture the bar: 73 kg in total, 16 kg known, the rest is k.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "k + 16 = 73, so k = 73 − 16 = 57 kg."
+      },
+      {
+       "stem": "A crate of crystals weighs 72 kg. The crate alone weighs 16 kg. s is the crystals. Which step finds s?",
+       "options": [
+        "s = 72 − 16",
+        "s − 16 = 72",
+        "s = 72 + 16",
+        "s = 16 − 72"
+       ],
+       "answer": 0,
+       "solucion": 56,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "s",
+        "valor": 56,
+        "usar": [
+         "16",
+         "72"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          16
+         ],
+         "total": 72,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "s",
+         "+",
+         "16",
+         "=",
+         "72"
+        ],
+        "absurdo": {
+         "mayor": "Then the crystals would weigh {valor} kg: more than the full crate altogether!",
+         "menor": "Then the full crate would weigh {suma} kg, not 72 kg."
+        }
+       },
+       "hint": "Start with the letter s for what you do not know.",
+       "pistas": [
+        "Start with the letter s for what you do not know.",
+        "Picture the bar: 72 kg in total, 16 kg known, the rest is s.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "s + 16 = 72, so s = 72 − 16 = 56 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-T1A",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "abstracto",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "k + 16 = 47",
+       "options": [
+        "31",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 31,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "k",
+        "fijas": [
+         16
+        ],
+        "total": 47,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack k and 16 kg together make 47 kg.",
+       "pistas": [
+        "Sack k and 16 kg together make 47 kg.",
+        "Take the known part away from the total: 47 − 16.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 16 = 47, so sack k = 47 − 16 = 31 kg.",
+       "sub": "k = [ ]"
+      },
+      {
+       "stem": "s + 30 = 65",
+       "options": [
+        "35",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 35,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "s",
+        "fijas": [
+         30
+        ],
+        "total": 65,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack s and 30 kg together make 65 kg.",
+       "pistas": [
+        "Sack s and 30 kg together make 65 kg.",
+        "Take the known part away from the total: 65 − 30.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "s + 30 = 65, so sack s = 65 − 30 = 35 kg.",
+       "sub": "s = [ ]"
+      },
+      {
+       "stem": "t + 78 = 89",
+       "options": [
+        "11",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 11,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "t",
+        "fijas": [
+         78
+        ],
+        "total": 89,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack t and 78 kg together make 89 kg.",
+       "pistas": [
+        "Sack t and 78 kg together make 89 kg.",
+        "Take the known part away from the total: 89 − 78.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "t + 78 = 89, so sack t = 89 − 78 = 11 kg.",
+       "sub": "t = [ ]"
+      },
+      {
+       "stem": "c + 30 = 94",
+       "options": [
+        "64",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 64,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "c",
+        "fijas": [
+         30
+        ],
+        "total": 94,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack c and 30 kg together make 94 kg.",
+       "pistas": [
+        "Sack c and 30 kg together make 94 kg.",
+        "Take the known part away from the total: 94 − 30.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "c + 30 = 94, so sack c = 94 − 30 = 64 kg.",
+       "sub": "c = [ ]"
+      },
+      {
+       "stem": "n + 37 = 50",
+       "options": [
+        "13",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 13,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "n",
+        "fijas": [
+         37
+        ],
+        "total": 50,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack n and 37 kg together make 50 kg.",
+       "pistas": [
+        "Sack n and 37 kg together make 50 kg.",
+        "Take the known part away from the total: 50 − 37.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "n + 37 = 50, so sack n = 50 − 37 = 13 kg.",
+       "sub": "n = [ ]"
+      },
+      {
+       "stem": "m + 58 = 74",
+       "options": [
+        "16",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 16,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "m",
+        "fijas": [
+         58
+        ],
+        "total": 74,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack m and 58 kg together make 74 kg.",
+       "pistas": [
+        "Sack m and 58 kg together make 74 kg.",
+        "Take the known part away from the total: 74 − 58.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "m + 58 = 74, so sack m = 74 − 58 = 16 kg.",
+       "sub": "m = [ ]"
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-T2C",
+     "skill": "write the number sentence",
+     "mech": "forge",
+     "sello": "concreto",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "The toolbox weighs 15 kg empty. Full of tools it weighs 51 kg. c is the tools. Build the number sentence.",
+       "options": [
+        "36",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 36,
+       "pieces": [
+        {
+         "text": "−"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "51"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "c"
+        },
+        {
+         "text": "15"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "c",
+        "valor": 36,
+        "usar": [
+         "15",
+         "51"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          15
+         ],
+         "total": 51,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "15",
+         "+",
+         "c",
+         "=",
+         "51"
+        ],
+        "absurdo": {
+         "mayor": "Then the tools would weigh {valor} kg: more than the full toolbox altogether!",
+         "menor": "Then the full toolbox would weigh {suma} kg, not 51 kg."
+        }
+       },
+       "hint": "Start with the letter c for what you do not know.",
+       "pistas": [
+        "Start with the letter c for what you do not know.",
+        "Picture the bar: 51 kg in total, 15 kg known, the rest is c.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "c + 15 = 51, so c = 51 − 15 = 36 kg."
+      },
+      {
+       "stem": "The sack weighs 25 kg empty. Filled with coal it weighs 52 kg. n is the coal. Build the number sentence.",
+       "options": [
+        "27",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 27,
+       "pieces": [
+        {
+         "text": "25"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "52"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "n"
+        },
+        {
+         "text": "+"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "n",
+        "valor": 27,
+        "usar": [
+         "25",
+         "52"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          25
+         ],
+         "total": 52,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "25",
+         "+",
+         "n",
+         "=",
+         "52"
+        ],
+        "absurdo": {
+         "mayor": "Then the coal would weigh {valor} kg: more than the full sack altogether!",
+         "menor": "Then the full sack would weigh {suma} kg, not 52 kg."
+        }
+       },
+       "hint": "Start with the letter n for what you do not know.",
+       "pistas": [
+        "Start with the letter n for what you do not know.",
+        "Picture the bar: 52 kg in total, 25 kg known, the rest is n.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "n + 25 = 52, so n = 52 − 25 = 27 kg."
+      },
+      {
+       "stem": "The lantern weighs 19 kg without oil and 36 kg with oil. m is the oil. Build the number sentence.",
+       "options": [
+        "17",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 17,
+       "pieces": [
+        {
+         "text": "+"
+        },
+        {
+         "text": "19"
+        },
+        {
+         "text": "36"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "m"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "m",
+        "valor": 17,
+        "usar": [
+         "19",
+         "36"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          19
+         ],
+         "total": 36,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "19",
+         "+",
+         "m",
+         "=",
+         "36"
+        ],
+        "absurdo": {
+         "mayor": "Then the oil would weigh {valor} kg: more than the full lantern altogether!",
+         "menor": "Then the full lantern would weigh {suma} kg, not 36 kg."
+        }
+       },
+       "hint": "Start with the letter m for what you do not know.",
+       "pistas": [
+        "Start with the letter m for what you do not know.",
+        "Picture the bar: 36 kg in total, 19 kg known, the rest is m.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "m + 19 = 36, so m = 36 − 19 = 17 kg."
+      },
+      {
+       "stem": "The anvil stand weighs 40 kg. With the anvil on top it weighs 88 kg. p is the anvil. Build the number sentence.",
+       "options": [
+        "48",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 48,
+       "pieces": [
+        {
+         "text": "="
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "88"
+        },
+        {
+         "text": "40"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "+"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 48,
+        "usar": [
+         "40",
+         "88"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          40
+         ],
+         "total": 88,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "40",
+         "+",
+         "p",
+         "=",
+         "88"
+        ],
+        "absurdo": {
+         "mayor": "Then the anvil would weigh {valor} kg: more than the anvil and stand altogether!",
+         "menor": "Then the anvil and stand would weigh {suma} kg, not 88 kg."
+        }
+       },
+       "hint": "Start with the letter p for what you do not know.",
+       "pistas": [
+        "Start with the letter p for what you do not know.",
+        "Picture the bar: 88 kg in total, 40 kg known, the rest is p.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "p + 40 = 88, so p = 88 − 40 = 48 kg."
+      },
+      {
+       "stem": "A rail weighs 18 kg. With its spikes it weighs 87 kg. g is the spikes. Build the number sentence.",
+       "options": [
+        "69",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 69,
+       "pieces": [
+        {
+         "text": "g"
+        },
+        {
+         "text": "87"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "18"
+        },
+        {
+         "text": "="
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 69,
+        "usar": [
+         "18",
+         "87"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          18
+         ],
+         "total": 87,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "18",
+         "+",
+         "g",
+         "=",
+         "87"
+        ],
+        "absurdo": {
+         "mayor": "Then the spikes would weigh {valor} kg: more than the rail and spikes altogether!",
+         "menor": "Then the rail and spikes would weigh {suma} kg, not 87 kg."
+        }
+       },
+       "hint": "Start with the letter g for what you do not know.",
+       "pistas": [
+        "Start with the letter g for what you do not know.",
+        "Picture the bar: 87 kg in total, 18 kg known, the rest is g.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "g + 18 = 87, so g = 87 − 18 = 69 kg."
+      },
+      {
+       "stem": "The basket weighs 47 kg. With the mine lamps inside it weighs 74 kg. k is the lamps. Build the number sentence.",
+       "options": [
+        "27",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 27,
+       "pieces": [
+        {
+         "text": "47"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "k"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "74"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 27,
+        "usar": [
+         "47",
+         "74"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          47
+         ],
+         "total": 74,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "47",
+         "+",
+         "k",
+         "=",
+         "74"
+        ],
+        "absurdo": {
+         "mayor": "Then the lamps would weigh {valor} kg: more than the full basket altogether!",
+         "menor": "Then the full basket would weigh {suma} kg, not 74 kg."
+        }
+       },
+       "hint": "Start with the letter k for what you do not know.",
+       "pistas": [
+        "Start with the letter k for what you do not know.",
+        "Picture the bar: 74 kg in total, 47 kg known, the rest is k.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "k + 47 = 74, so k = 74 − 47 = 27 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-T2P",
+     "skill": "choose the inverse step",
+     "mech": "forge",
+     "sello": "pictorico",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "The lantern weighs 13 kg without oil and 30 kg with oil. n is the oil. Which step finds n?",
+       "options": [
+        "n = 30 − 13",
+        "n = 13 − 30",
+        "n = 30 + 13",
+        "n − 13 = 30"
+       ],
+       "answer": 0,
+       "solucion": 17,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "n",
+        "valor": 17,
+        "usar": [
+         "13",
+         "30"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          13
+         ],
+         "total": 30,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "13",
+         "+",
+         "n",
+         "=",
+         "30"
+        ],
+        "absurdo": {
+         "mayor": "Then the oil would weigh {valor} kg: more than the full lantern altogether!",
+         "menor": "Then the full lantern would weigh {suma} kg, not 30 kg."
+        }
+       },
+       "hint": "Start with the letter n for what you do not know.",
+       "pistas": [
+        "Start with the letter n for what you do not know.",
+        "Picture the bar: 30 kg in total, 13 kg known, the rest is n.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "n + 13 = 30, so n = 30 − 13 = 17 kg."
+      },
+      {
+       "stem": "The anvil stand weighs 29 kg. With the anvil on top it weighs 57 kg. m is the anvil. Which step finds m?",
+       "options": [
+        "m = 57 + 29",
+        "m − 29 = 57",
+        "m = 29 − 57",
+        "m = 57 − 29"
+       ],
+       "answer": 3,
+       "solucion": 28,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "m",
+        "valor": 28,
+        "usar": [
+         "29",
+         "57"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          29
+         ],
+         "total": 57,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "29",
+         "+",
+         "m",
+         "=",
+         "57"
+        ],
+        "absurdo": {
+         "mayor": "Then the anvil would weigh {valor} kg: more than the anvil and stand altogether!",
+         "menor": "Then the anvil and stand would weigh {suma} kg, not 57 kg."
+        }
+       },
+       "hint": "Start with the letter m for what you do not know.",
+       "pistas": [
+        "Start with the letter m for what you do not know.",
+        "Picture the bar: 57 kg in total, 29 kg known, the rest is m.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "m + 29 = 57, so m = 57 − 29 = 28 kg."
+      },
+      {
+       "stem": "A rail weighs 48 kg. With its spikes it weighs 59 kg. p is the spikes. Which step finds p?",
+       "options": [
+        "p = 59 + 48",
+        "p − 48 = 59",
+        "p = 59 − 48",
+        "p = 48 − 59"
+       ],
+       "answer": 2,
+       "solucion": 11,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 11,
+        "usar": [
+         "48",
+         "59"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          48
+         ],
+         "total": 59,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "48",
+         "+",
+         "p",
+         "=",
+         "59"
+        ],
+        "absurdo": {
+         "mayor": "Then the spikes would weigh {valor} kg: more than the rail and spikes altogether!",
+         "menor": "Then the rail and spikes would weigh {suma} kg, not 59 kg."
+        }
+       },
+       "hint": "Start with the letter p for what you do not know.",
+       "pistas": [
+        "Start with the letter p for what you do not know.",
+        "Picture the bar: 59 kg in total, 48 kg known, the rest is p.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "p + 48 = 59, so p = 59 − 48 = 11 kg."
+      },
+      {
+       "stem": "The basket weighs 23 kg. With the mine lamps inside it weighs 74 kg. g is the lamps. Which step finds g?",
+       "options": [
+        "g − 23 = 74",
+        "g = 74 + 23",
+        "g = 23 − 74",
+        "g = 74 − 23"
+       ],
+       "answer": 3,
+       "solucion": 51,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 51,
+        "usar": [
+         "23",
+         "74"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          23
+         ],
+         "total": 74,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "23",
+         "+",
+         "g",
+         "=",
+         "74"
+        ],
+        "absurdo": {
+         "mayor": "Then the lamps would weigh {valor} kg: more than the full basket altogether!",
+         "menor": "Then the full basket would weigh {suma} kg, not 74 kg."
+        }
+       },
+       "hint": "Start with the letter g for what you do not know.",
+       "pistas": [
+        "Start with the letter g for what you do not know.",
+        "Picture the bar: 74 kg in total, 23 kg known, the rest is g.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "g + 23 = 74, so g = 74 − 23 = 51 kg."
+      },
+      {
+       "stem": "The toolbox weighs 70 kg empty. Full of tools it weighs 84 kg. k is the tools. Which step finds k?",
+       "options": [
+        "k = 84 + 70",
+        "k − 70 = 84",
+        "k = 70 − 84",
+        "k = 84 − 70"
+       ],
+       "answer": 3,
+       "solucion": 14,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 14,
+        "usar": [
+         "70",
+         "84"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          70
+         ],
+         "total": 84,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "70",
+         "+",
+         "k",
+         "=",
+         "84"
+        ],
+        "absurdo": {
+         "mayor": "Then the tools would weigh {valor} kg: more than the full toolbox altogether!",
+         "menor": "Then the full toolbox would weigh {suma} kg, not 84 kg."
+        }
+       },
+       "hint": "Start with the letter k for what you do not know.",
+       "pistas": [
+        "Start with the letter k for what you do not know.",
+        "Picture the bar: 84 kg in total, 70 kg known, the rest is k.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "k + 70 = 84, so k = 84 − 70 = 14 kg."
+      },
+      {
+       "stem": "The sack weighs 20 kg empty. Filled with coal it weighs 74 kg. s is the coal. Which step finds s?",
+       "options": [
+        "s = 20 − 74",
+        "s = 74 + 20",
+        "s − 20 = 74",
+        "s = 74 − 20"
+       ],
+       "answer": 3,
+       "solucion": 54,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "s",
+        "valor": 54,
+        "usar": [
+         "20",
+         "74"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          20
+         ],
+         "total": 74,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "20",
+         "+",
+         "s",
+         "=",
+         "74"
+        ],
+        "absurdo": {
+         "mayor": "Then the coal would weigh {valor} kg: more than the full sack altogether!",
+         "menor": "Then the full sack would weigh {suma} kg, not 74 kg."
+        }
+       },
+       "hint": "Start with the letter s for what you do not know.",
+       "pistas": [
+        "Start with the letter s for what you do not know.",
+        "Picture the bar: 74 kg in total, 20 kg known, the rest is s.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "s + 20 = 74, so s = 74 − 20 = 54 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-T2A",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "abstracto",
+     "pistaGrafica": true,
+     "variants": [
+      {
+       "stem": "k + 63 = 98",
+       "options": [
+        "35",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 35,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "k",
+        "fijas": [
+         63
+        ],
+        "total": 98,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack k and 63 kg together make 98 kg.",
+       "pistas": [
+        "Sack k and 63 kg together make 98 kg.",
+        "Take the known part away from the total: 98 − 63.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 63 = 98, so sack k = 98 − 63 = 35 kg.",
+       "sub": "k = [ ]"
+      },
+      {
+       "stem": "s + 42 = 69",
+       "options": [
+        "27",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 27,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "s",
+        "fijas": [
+         42
+        ],
+        "total": 69,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack s and 42 kg together make 69 kg.",
+       "pistas": [
+        "Sack s and 42 kg together make 69 kg.",
+        "Take the known part away from the total: 69 − 42.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "s + 42 = 69, so sack s = 69 − 42 = 27 kg.",
+       "sub": "s = [ ]"
+      },
+      {
+       "stem": "t + 21 = 33",
+       "options": [
+        "12",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 12,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "t",
+        "fijas": [
+         21
+        ],
+        "total": 33,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack t and 21 kg together make 33 kg.",
+       "pistas": [
+        "Sack t and 21 kg together make 33 kg.",
+        "Take the known part away from the total: 33 − 21.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "t + 21 = 33, so sack t = 33 − 21 = 12 kg.",
+       "sub": "t = [ ]"
+      },
+      {
+       "stem": "c + 56 = 80",
+       "options": [
+        "24",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 24,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "c",
+        "fijas": [
+         56
+        ],
+        "total": 80,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack c and 56 kg together make 80 kg.",
+       "pistas": [
+        "Sack c and 56 kg together make 80 kg.",
+        "Take the known part away from the total: 80 − 56.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "c + 56 = 80, so sack c = 80 − 56 = 24 kg.",
+       "sub": "c = [ ]"
+      },
+      {
+       "stem": "n + 27 = 83",
+       "options": [
+        "56",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 56,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "n",
+        "fijas": [
+         27
+        ],
+        "total": 83,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack n and 27 kg together make 83 kg.",
+       "pistas": [
+        "Sack n and 27 kg together make 83 kg.",
+        "Take the known part away from the total: 83 − 27.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "n + 27 = 83, so sack n = 83 − 27 = 56 kg.",
+       "sub": "n = [ ]"
+      },
+      {
+       "stem": "m + 49 = 71",
+       "options": [
+        "22",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 22,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "m",
+        "fijas": [
+         49
+        ],
+        "total": 71,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": true
+       },
+       "hint": "Sack m and 49 kg together make 71 kg.",
+       "pistas": [
+        "Sack m and 49 kg together make 71 kg.",
+        "Take the known part away from the total: 71 − 49.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "m + 49 = 71, so sack m = 71 − 49 = 22 kg.",
+       "sub": "m = [ ]"
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-T3C",
+     "skill": "write the number sentence",
+     "mech": "forge",
+     "sello": "concreto",
+     "pistaGrafica": false,
+     "variants": [
+      {
+       "stem": "The cart and its load weigh 530 kg. The empty cart weighs 142 kg. c is the load. Build the number sentence.",
+       "options": [
+        "388",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 388,
+       "pieces": [
+        {
+         "text": "+"
+        },
+        {
+         "text": "c"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "530"
+        },
+        {
+         "text": "142"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "c",
+        "valor": 388,
+        "usar": [
+         "142",
+         "530"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          142
+         ],
+         "total": 530,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "c",
+         "+",
+         "142",
+         "=",
+         "530"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than the cart and load altogether!",
+         "menor": "Then the cart and load would weigh {suma} kg, not 530 kg."
+        }
+       },
+       "hint": "Start with the letter c for what you do not know.",
+       "pistas": [
+        "Start with the letter c for what you do not know.",
+        "Picture the bar: 530 kg in total, 142 kg known, the rest is c.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "c + 142 = 530, so c = 530 − 142 = 388 kg."
+      },
+      {
+       "stem": "A crate of crystals weighs 459 kg. The crate alone weighs 333 kg. n is the crystals. Build the number sentence.",
+       "options": [
+        "126",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 126,
+       "pieces": [
+        {
+         "text": "="
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "459"
+        },
+        {
+         "text": "333"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "n"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "n",
+        "valor": 126,
+        "usar": [
+         "333",
+         "459"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          333
+         ],
+         "total": 459,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "n",
+         "+",
+         "333",
+         "=",
+         "459"
+        ],
+        "absurdo": {
+         "mayor": "Then the crystals would weigh {valor} kg: more than the full crate altogether!",
+         "menor": "Then the full crate would weigh {suma} kg, not 459 kg."
+        }
+       },
+       "hint": "Start with the letter n for what you do not know.",
+       "pistas": [
+        "Start with the letter n for what you do not know.",
+        "Picture the bar: 459 kg in total, 333 kg known, the rest is n.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "n + 333 = 459, so n = 459 − 333 = 126 kg."
+      },
+      {
+       "stem": "The bucket of ore weighs 590 kg. The bucket weighs 344 kg. m is the ore. Build the number sentence.",
+       "options": [
+        "246",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 246,
+       "pieces": [
+        {
+         "text": "−"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "590"
+        },
+        {
+         "text": "m"
+        },
+        {
+         "text": "344"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "m",
+        "valor": 246,
+        "usar": [
+         "344",
+         "590"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          344
+         ],
+         "total": 590,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "m",
+         "+",
+         "344",
+         "=",
+         "590"
+        ],
+        "absurdo": {
+         "mayor": "Then the ore would weigh {valor} kg: more than the full bucket altogether!",
+         "menor": "Then the full bucket would weigh {suma} kg, not 590 kg."
+        }
+       },
+       "hint": "Start with the letter m for what you do not know.",
+       "pistas": [
+        "Start with the letter m for what you do not know.",
+        "Picture the bar: 590 kg in total, 344 kg known, the rest is m.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "m + 344 = 590, so m = 590 − 344 = 246 kg."
+      },
+      {
+       "stem": "A new wheel and its axle weigh 462 kg. The axle weighs 280 kg. p is the wheel. Build the number sentence.",
+       "options": [
+        "182",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 182,
+       "pieces": [
+        {
+         "text": "462"
+        },
+        {
+         "text": "280"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "="
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 182,
+        "usar": [
+         "280",
+         "462"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          280
+         ],
+         "total": 462,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "p",
+         "+",
+         "280",
+         "=",
+         "462"
+        ],
+        "absurdo": {
+         "mayor": "Then the wheel would weigh {valor} kg: more than the wheel and axle altogether!",
+         "menor": "Then the wheel and axle would weigh {suma} kg, not 462 kg."
+        }
+       },
+       "hint": "Start with the letter p for what you do not know.",
+       "pistas": [
+        "Start with the letter p for what you do not know.",
+        "Picture the bar: 462 kg in total, 280 kg known, the rest is p.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "p + 280 = 462, so p = 462 − 280 = 182 kg."
+      },
+      {
+       "stem": "The hammer weighs 558 kg. Its handle weighs 160 kg. g is the head. Build the number sentence.",
+       "options": [
+        "398",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 398,
+       "pieces": [
+        {
+         "text": "g"
+        },
+        {
+         "text": "160"
+        },
+        {
+         "text": "558"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "="
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 398,
+        "usar": [
+         "160",
+         "558"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          160
+         ],
+         "total": 558,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "g",
+         "+",
+         "160",
+         "=",
+         "558"
+        ],
+        "absurdo": {
+         "mayor": "Then the head would weigh {valor} kg: more than the whole hammer altogether!",
+         "menor": "Then the whole hammer would weigh {suma} kg, not 558 kg."
+        }
+       },
+       "hint": "Start with the letter g for what you do not know.",
+       "pistas": [
+        "Start with the letter g for what you do not know.",
+        "Picture the bar: 558 kg in total, 160 kg known, the rest is g.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "g + 160 = 558, so g = 558 − 160 = 398 kg."
+      },
+      {
+       "stem": "The barrel of water weighs 320 kg. The water weighs 115 kg. k is the barrel. Build the number sentence.",
+       "options": [
+        "205",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 205,
+       "pieces": [
+        {
+         "text": "−"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "115"
+        },
+        {
+         "text": "320"
+        },
+        {
+         "text": "k"
+        },
+        {
+         "text": "="
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 205,
+        "usar": [
+         "115",
+         "320"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          115
+         ],
+         "total": 320,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "k",
+         "+",
+         "115",
+         "=",
+         "320"
+        ],
+        "absurdo": {
+         "mayor": "Then the barrel would weigh {valor} kg: more than the full barrel altogether!",
+         "menor": "Then the full barrel would weigh {suma} kg, not 320 kg."
+        }
+       },
+       "hint": "Start with the letter k for what you do not know.",
+       "pistas": [
+        "Start with the letter k for what you do not know.",
+        "Picture the bar: 320 kg in total, 115 kg known, the rest is k.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "k + 115 = 320, so k = 320 − 115 = 205 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-T3P",
+     "skill": "choose the inverse step",
+     "mech": "forge",
+     "sello": "pictorico",
+     "pistaGrafica": false,
+     "variants": [
+      {
+       "stem": "The bucket of ore weighs 732 kg. The bucket weighs 258 kg. n is the ore. Which step finds n?",
+       "options": [
+        "n − 258 = 732",
+        "n = 258 − 732",
+        "n = 732 + 258",
+        "n = 732 − 258"
+       ],
+       "answer": 3,
+       "solucion": 474,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "n",
+        "valor": 474,
+        "usar": [
+         "258",
+         "732"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          258
+         ],
+         "total": 732,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "n",
+         "+",
+         "258",
+         "=",
+         "732"
+        ],
+        "absurdo": {
+         "mayor": "Then the ore would weigh {valor} kg: more than the full bucket altogether!",
+         "menor": "Then the full bucket would weigh {suma} kg, not 732 kg."
+        }
+       },
+       "hint": "Start with the letter n for what you do not know.",
+       "pistas": [
+        "Start with the letter n for what you do not know.",
+        "Picture the bar: 732 kg in total, 258 kg known, the rest is n.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "n + 258 = 732, so n = 732 − 258 = 474 kg."
+      },
+      {
+       "stem": "A new wheel and its axle weigh 889 kg. The axle weighs 257 kg. m is the wheel. Which step finds m?",
+       "options": [
+        "m − 257 = 889",
+        "m = 257 − 889",
+        "m = 889 + 257",
+        "m = 889 − 257"
+       ],
+       "answer": 3,
+       "solucion": 632,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "m",
+        "valor": 632,
+        "usar": [
+         "257",
+         "889"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          257
+         ],
+         "total": 889,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "m",
+         "+",
+         "257",
+         "=",
+         "889"
+        ],
+        "absurdo": {
+         "mayor": "Then the wheel would weigh {valor} kg: more than the wheel and axle altogether!",
+         "menor": "Then the wheel and axle would weigh {suma} kg, not 889 kg."
+        }
+       },
+       "hint": "Start with the letter m for what you do not know.",
+       "pistas": [
+        "Start with the letter m for what you do not know.",
+        "Picture the bar: 889 kg in total, 257 kg known, the rest is m.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "m + 257 = 889, so m = 889 − 257 = 632 kg."
+      },
+      {
+       "stem": "The hammer weighs 546 kg. Its handle weighs 240 kg. p is the head. Which step finds p?",
+       "options": [
+        "p = 546 + 240",
+        "p = 240 − 546",
+        "p − 240 = 546",
+        "p = 546 − 240"
+       ],
+       "answer": 3,
+       "solucion": 306,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 306,
+        "usar": [
+         "240",
+         "546"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          240
+         ],
+         "total": 546,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "p",
+         "+",
+         "240",
+         "=",
+         "546"
+        ],
+        "absurdo": {
+         "mayor": "Then the head would weigh {valor} kg: more than the whole hammer altogether!",
+         "menor": "Then the whole hammer would weigh {suma} kg, not 546 kg."
+        }
+       },
+       "hint": "Start with the letter p for what you do not know.",
+       "pistas": [
+        "Start with the letter p for what you do not know.",
+        "Picture the bar: 546 kg in total, 240 kg known, the rest is p.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "p + 240 = 546, so p = 546 − 240 = 306 kg."
+      },
+      {
+       "stem": "The barrel of water weighs 635 kg. The water weighs 120 kg. g is the barrel. Which step finds g?",
+       "options": [
+        "g = 635 − 120",
+        "g − 120 = 635",
+        "g = 120 − 635",
+        "g = 635 + 120"
+       ],
+       "answer": 0,
+       "solucion": 515,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 515,
+        "usar": [
+         "120",
+         "635"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          120
+         ],
+         "total": 635,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "g",
+         "+",
+         "120",
+         "=",
+         "635"
+        ],
+        "absurdo": {
+         "mayor": "Then the barrel would weigh {valor} kg: more than the full barrel altogether!",
+         "menor": "Then the full barrel would weigh {suma} kg, not 635 kg."
+        }
+       },
+       "hint": "Start with the letter g for what you do not know.",
+       "pistas": [
+        "Start with the letter g for what you do not know.",
+        "Picture the bar: 635 kg in total, 120 kg known, the rest is g.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "g + 120 = 635, so g = 635 − 120 = 515 kg."
+      },
+      {
+       "stem": "The toolbox weighs 141 kg empty. Full of tools it weighs 343 kg. k is the tools. Which step finds k?",
+       "options": [
+        "k − 141 = 343",
+        "k = 343 − 141",
+        "k = 141 − 343",
+        "k = 343 + 141"
+       ],
+       "answer": 1,
+       "solucion": 202,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 202,
+        "usar": [
+         "141",
+         "343"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          141
+         ],
+         "total": 343,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "141",
+         "+",
+         "k",
+         "=",
+         "343"
+        ],
+        "absurdo": {
+         "mayor": "Then the tools would weigh {valor} kg: more than the full toolbox altogether!",
+         "menor": "Then the full toolbox would weigh {suma} kg, not 343 kg."
+        }
+       },
+       "hint": "Start with the letter k for what you do not know.",
+       "pistas": [
+        "Start with the letter k for what you do not know.",
+        "Picture the bar: 343 kg in total, 141 kg known, the rest is k.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "k + 141 = 343, so k = 343 − 141 = 202 kg."
+      },
+      {
+       "stem": "The sack weighs 171 kg empty. Filled with coal it weighs 379 kg. s is the coal. Which step finds s?",
+       "options": [
+        "s = 379 + 171",
+        "s = 379 − 171",
+        "s = 171 − 379",
+        "s − 171 = 379"
+       ],
+       "answer": 1,
+       "solucion": 208,
+       "pieces": [],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "s",
+        "valor": 208,
+        "usar": [
+         "171",
+         "379"
+        ],
+        "sello": "pictorico",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          171
+         ],
+         "total": 379,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "171",
+         "+",
+         "s",
+         "=",
+         "379"
+        ],
+        "absurdo": {
+         "mayor": "Then the coal would weigh {valor} kg: more than the full sack altogether!",
+         "menor": "Then the full sack would weigh {suma} kg, not 379 kg."
+        }
+       },
+       "hint": "Start with the letter s for what you do not know.",
+       "pistas": [
+        "Start with the letter s for what you do not know.",
+        "Picture the bar: 379 kg in total, 171 kg known, the rest is s.",
+        "Example: 'a box and 12 kg make 40 kg' is b + 12 = 40."
+       ],
+       "explain": "s + 171 = 379, so s = 379 − 171 = 208 kg."
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-T3A",
+     "skill": "find the unknown in a sum",
+     "mech": "fill",
+     "sello": "abstracto",
+     "pistaGrafica": false,
+     "variants": [
+      {
+       "stem": "k + 440 = 706",
+       "options": [
+        "266",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 266,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "k",
+        "fijas": [
+         440
+        ],
+        "total": 706,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack k and 440 kg together make 706 kg.",
+       "pistas": [
+        "Sack k and 440 kg together make 706 kg.",
+        "Take the known part away from the total: 706 − 440.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "k + 440 = 706, so sack k = 706 − 440 = 266 kg.",
+       "sub": "k = [ ]"
+      },
+      {
+       "stem": "s + 117 = 660",
+       "options": [
+        "543",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 543,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "s",
+        "fijas": [
+         117
+        ],
+        "total": 660,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack s and 117 kg together make 660 kg.",
+       "pistas": [
+        "Sack s and 117 kg together make 660 kg.",
+        "Take the known part away from the total: 660 − 117.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "s + 117 = 660, so sack s = 660 − 117 = 543 kg.",
+       "sub": "s = [ ]"
+      },
+      {
+       "stem": "t + 171 = 396",
+       "options": [
+        "225",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 225,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "t",
+        "fijas": [
+         171
+        ],
+        "total": 396,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack t and 171 kg together make 396 kg.",
+       "pistas": [
+        "Sack t and 171 kg together make 396 kg.",
+        "Take the known part away from the total: 396 − 171.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "t + 171 = 396, so sack t = 396 − 171 = 225 kg.",
+       "sub": "t = [ ]"
+      },
+      {
+       "stem": "c + 309 = 915",
+       "options": [
+        "606",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 606,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "c",
+        "fijas": [
+         309
+        ],
+        "total": 915,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack c and 309 kg together make 915 kg.",
+       "pistas": [
+        "Sack c and 309 kg together make 915 kg.",
+        "Take the known part away from the total: 915 − 309.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "c + 309 = 915, so sack c = 915 − 309 = 606 kg.",
+       "sub": "c = [ ]"
+      },
+      {
+       "stem": "n + 596 = 944",
+       "options": [
+        "348",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 348,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "n",
+        "fijas": [
+         596
+        ],
+        "total": 944,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack n and 596 kg together make 944 kg.",
+       "pistas": [
+        "Sack n and 596 kg together make 944 kg.",
+        "Take the known part away from the total: 944 − 596.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "n + 596 = 944, so sack n = 944 − 596 = 348 kg.",
+       "sub": "n = [ ]"
+      },
+      {
+       "stem": "m + 244 = 886",
+       "options": [
+        "642",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 642,
+       "fill": {
+        "modo": "balanza",
+        "sello": "abstracto",
+        "letra": "m",
+        "fijas": [
+         244
+        ],
+        "total": 886,
+        "unidad": "kg",
+        "pesas": [
+         10,
+         1
+        ],
+        "existencias": {
+         "100": 9,
+         "10": 9,
+         "1": 9
+        },
+        "pistaGrafica": false
+       },
+       "hint": "Sack m and 244 kg together make 886 kg.",
+       "pistas": [
+        "Sack m and 244 kg together make 886 kg.",
+        "Take the known part away from the total: 886 − 244.",
+        "Example: c + 20 = 45, so c = 45 − 20 = 25."
+       ],
+       "explain": "m + 244 = 886, so sack m = 886 − 244 = 642 kg.",
+       "sub": "m = [ ]"
+      }
+     ]
+    },
+    {
+     "id": "MY6-4-J",
+     "skill": "write and solve a sentence with a letter",
+     "mech": "forge",
+     "sello": "jefe",
+     "pistaGrafica": false,
+     "variants": [
+      {
+       "stem": "The cart weighs 33 kg and the tools 13 kg. With the load, it all weighs 113 kg. c is the load. Build the sentence.",
+       "options": [
+        "67",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 67,
+       "pieces": [
+        {
+         "text": "+"
+        },
+        {
+         "text": "113"
+        },
+        {
+         "text": "33"
+        },
+        {
+         "text": "c"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "13"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "c",
+        "valor": 67,
+        "usar": [
+         "113",
+         "13",
+         "33"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          33,
+          13
+         ],
+         "total": 113,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "c",
+         "+",
+         "33",
+         "+",
+         "13",
+         "=",
+         "113"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 113 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 113 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 113 kg.",
+        "Picture the bar: 113 kg in total, 33 kg and 13 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "c + 33 + 13 = 113, so c = 67 kg."
+      },
+      {
+       "stem": "The cart weighs 39 kg and the tools 11 kg. With the load, it all weighs 144 kg. n is the load. Build the sentence.",
+       "options": [
+        "94",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 94,
+       "pieces": [
+        {
+         "text": "n"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "144"
+        },
+        {
+         "text": "39"
+        },
+        {
+         "text": "11"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "n",
+        "valor": 94,
+        "usar": [
+         "11",
+         "144",
+         "39"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          39,
+          11
+         ],
+         "total": 144,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "n",
+         "+",
+         "39",
+         "+",
+         "11",
+         "=",
+         "144"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 144 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 144 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 144 kg.",
+        "Picture the bar: 144 kg in total, 39 kg and 11 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "n + 39 + 11 = 144, so n = 94 kg."
+      },
+      {
+       "stem": "The cart weighs 21 kg and the tools 23 kg. With the load, it all weighs 125 kg. m is the load. Build the sentence.",
+       "options": [
+        "81",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 81,
+       "pieces": [
+        {
+         "text": "="
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "125"
+        },
+        {
+         "text": "21"
+        },
+        {
+         "text": "23"
+        },
+        {
+         "text": "m"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "m",
+        "valor": 81,
+        "usar": [
+         "125",
+         "21",
+         "23"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          21,
+          23
+         ],
+         "total": 125,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "m",
+         "+",
+         "21",
+         "+",
+         "23",
+         "=",
+         "125"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 125 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 125 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 125 kg.",
+        "Picture the bar: 125 kg in total, 21 kg and 23 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "m + 21 + 23 = 125, so m = 81 kg."
+      },
+      {
+       "stem": "The cart weighs 43 kg and the tools 21 kg. With the load, it all weighs 149 kg. p is the load. Build the sentence.",
+       "options": [
+        "85",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 85,
+       "pieces": [
+        {
+         "text": "="
+        },
+        {
+         "text": "43"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "p"
+        },
+        {
+         "text": "149"
+        },
+        {
+         "text": "21"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "p",
+        "valor": 85,
+        "usar": [
+         "149",
+         "21",
+         "43"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          43,
+          21
+         ],
+         "total": 149,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "p",
+         "+",
+         "43",
+         "+",
+         "21",
+         "=",
+         "149"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 149 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 149 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 149 kg.",
+        "Picture the bar: 149 kg in total, 43 kg and 21 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "p + 43 + 21 = 149, so p = 85 kg."
+      },
+      {
+       "stem": "The cart weighs 39 kg and the tools 25 kg. With the load, it all weighs 135 kg. g is the load. Build the sentence.",
+       "options": [
+        "71",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 71,
+       "pieces": [
+        {
+         "text": "−"
+        },
+        {
+         "text": "25"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "39"
+        },
+        {
+         "text": "135"
+        },
+        {
+         "text": "g"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "+"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "g",
+        "valor": 71,
+        "usar": [
+         "135",
+         "25",
+         "39"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          39,
+          25
+         ],
+         "total": 135,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "g",
+         "+",
+         "39",
+         "+",
+         "25",
+         "=",
+         "135"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 135 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 135 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 135 kg.",
+        "Picture the bar: 135 kg in total, 39 kg and 25 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "g + 39 + 25 = 135, so g = 71 kg."
+      },
+      {
+       "stem": "The cart weighs 22 kg and the tools 14 kg. With the load, it all weighs 112 kg. k is the load. Build the sentence.",
+       "options": [
+        "76",
+        "?"
+       ],
+       "answer": 0,
+       "solucion": 76,
+       "pieces": [
+        {
+         "text": "+"
+        },
+        {
+         "text": "="
+        },
+        {
+         "text": "−"
+        },
+        {
+         "text": "k"
+        },
+        {
+         "text": "+"
+        },
+        {
+         "text": "14"
+        },
+        {
+         "text": "22"
+        },
+        {
+         "text": "112"
+        }
+       ],
+       "rule": {
+        "tipo": "ecuacion",
+        "letra": "k",
+        "valor": 76,
+        "usar": [
+         "112",
+         "14",
+         "22"
+        ],
+        "sello": "concreto",
+        "mundo": "balanza",
+        "balanza": {
+         "fijas": [
+          22,
+          14
+         ],
+         "total": 112,
+         "unidad": "kg"
+        },
+        "esperada": [
+         "k",
+         "+",
+         "22",
+         "+",
+         "14",
+         "=",
+         "112"
+        ],
+        "absurdo": {
+         "mayor": "Then the load would weigh {valor} kg: more than everything together!",
+         "menor": "Then everything would weigh {suma} kg, not 112 kg."
+        }
+       },
+       "hint": "The load, the cart and the tools together make 112 kg.",
+       "pistas": [
+        "The load, the cart and the tools together make 112 kg.",
+        "Picture the bar: 112 kg in total, 22 kg and 14 kg known.",
+        "Example: b + 10 + 5 = 40."
+       ],
+       "explain": "k + 22 + 14 = 112, so k = 76 kg."
       }
      ]
     }

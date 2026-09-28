@@ -719,7 +719,11 @@
           bal.fijas.forEach(function (f) { var w = 26 * s; bloque(xi + w / 2, L0.y, w, 18 * s, '#8C8C9C', I.colores.tinta, I.num(f), L, 0.75); xi += w + 3 * u; });
           if (bal.saco) bloque(xi + 14 * s, L0.y, 26 * s, 22 * s, '#D19A5E', I.colores.tinta, bal.letra, L, 0.9);
           else {
-            var n10 = bal.pesas[10] || 0, n1 = bal.pesas[1] || 0, fila = L0.y;
+            var n100 = bal.pesas[100] || 0, n10 = bal.pesas[10] || 0, n1 = bal.pesas[1] || 0, fila = L0.y;
+            if (n100) {                                        // pesas de 100: bloques grandes con su numero
+              for (var c = 0; c < n100; c++) bloque(xi + 9 * s + (c % 3) * 19 * s, fila - Math.floor(c / 3) * 13 * s, 17 * s, 12 * s, '#3B3B4E', I.colores.tinta, c === 0 ? '100' : null, L, 0.6);
+              fila -= Math.ceil(n100 / 3) * 13 * s;
+            }
             for (var k = 0; k < n10; k++) { ctx.fillStyle = '#5B5B6E'; ctx.strokeStyle = I.colores.tinta; ctx.lineWidth = 1.5 * u;
               ctx.fillRect(xi + (k % 5) * 7 * s, fila - 14 * s - Math.floor(k / 5) * 15 * s, 6 * s, 14 * s);
               ctx.strokeRect(xi + (k % 5) * 7 * s, fila - 14 * s - Math.floor(k / 5) * 15 * s, 6 * s, 14 * s); }

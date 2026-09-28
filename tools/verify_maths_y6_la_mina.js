@@ -97,6 +97,7 @@ function responder(w, v, x, modo) {
   const d = w.document, host = d.getElementById('qScene');
   const pulsar = (el) => (modo === 'tactil' ? toque(w, el) : clic(w, el));
   if (v.fill) return responderBalanza(w, v, x, modo, host, pulsar);
+  if (v.rule && v.rule.tipo === 'ecuacion') return responderEcuacion(w, v, x, modo, host, pulsar);
   const L = v.line;
   if (L.modo === 'concreto') {
     if (L.bandera) {                                        // primero la bandera
@@ -158,8 +159,39 @@ function responderBalanza(w, v, x, modo, host, pulsar) {
   return null;
 }
 
+/* Oracion con fichas: `x` es la solucion (arma la esperada) o una lista de fichas. */
+function responderEcuacion(w, v, x, modo, host, pulsar) {
+  const R = v.rule;
+  if (R.sello === 'pictorico') {
+    const btns = Array.from(host.querySelectorAll('.linea__opcion'));
+    const objetivo = Array.isArray(x) ? x.join(' ') : v.options[v.answer];
+    const i = btns.findIndex(b => b.textContent.replace(/^[A-E]/, '').trim() === objetivo);
+    if (i < 0) return 'no hay opcion ' + objetivo;
+    if (modo === 'teclado') tecla(w, 'ABCD'[i]); else pulsar(btns[i]);
+    return null;
+  }
+  const tokens = Array.isArray(x) ? x : R.esperada;
+  for (const t of tokens) {
+    const b = Array.from(host.querySelectorAll('.ecuacion__fichas .forge__piece')).find(n => !n.disabled && n.textContent === t);
+    if (!b) return 'no hay ficha libre ' + t;
+    if (modo === 'teclado') b.dispatchEvent(new w.MouseEvent('click', { bubbles: true, detail: 0 }));   // Enter sobre el boton
+    else pulsar(b);
+  }
+  if (modo === 'teclado') tecla(w, 'Enter'); else pulsar(host.querySelector('.linea__ok'));
+  return null;
+}
+
 /* Una incorrecta que la escena puede recibir (dentro del instrumento). */
 function incorrecta(v) {
+  if (v.rule && v.rule.tipo === 'ecuacion') {
+    const R = v.rule, M = '\u2212';
+    if (R.sello === 'pictorico') return v.options.find((t, i) => i !== v.answer).split(' ');
+    if (R.mundo === 'montacargas') return [R.usar.find(t => t !== R.esperada[4]) || R.esperada[0], M, R.letra, '=', R.esperada[4]];
+    const total = R.esperada[R.esperada.length - 1], partes = R.usar.filter(t => t !== total);
+    const out = [R.letra, '=', total];
+    partes.forEach(t => { out.push('+', t); });
+    return out;                                          // la letra como suma de todo: E4
+  }
   if (v.fill) {
     if (v.fill.sello === 'pictorico') return parseInt(v.options.find((t, i) => i !== v.answer).replace(MENOS, '-'), 10);
     return v.solucion % 10 < 9 ? v.solucion + 1 : v.solucion - 1;
@@ -197,10 +229,16 @@ section('1. Datos generados');
     check('nivel ' + lv.id + ': orden ' + inicio + ', 3 sellos, jefe',
       orden === inicio + ',concreto,pictorico,abstracto,concreto,pictorico,abstracto,concreto,pictorico,abstracto,jefe', orden);
     lv.questions.forEach(f => f.variants.forEach(v => {
+      if (v.rule && v.rule.tipo === 'ecuacion') {
+        check(f.id + ': la solucion es el valor de la letra', v.solucion === v.rule.valor, v.stem);
+        check(f.id + ': la respuesta no es una ficha', !(v.pieces || []).some(p => p.text === num(v.solucion)), v.stem);
+        return;
+      }
       if (v.fill) {
         const F = v.fill;
         check(f.id + ': incognita + fijas = total', v.solucion + F.fijas.reduce((a, b) => a + b, 0) === F.total, v.stem);
-        check(f.id + ': se puede armar con 9 de 10 y 9 de 1', v.solucion > 0 && v.solucion <= 99);
+        const X = F.existencias, tope = 100 * (X['100'] || 0) + 10 * X['10'] + X['1'];
+        check(f.id + ': se puede armar con las pesas que hay', v.solucion > 0 && v.solucion <= tope, v.solucion + ' > ' + tope);
         if (F.sello === 'pictorico') check(f.id + ': incluye E4 (sumar en vez de restar)', v.options.includes(num(F.total + F.fijas.reduce((a, b) => a + b, 0))), v.stem);
         return;
       }
