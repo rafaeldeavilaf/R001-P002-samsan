@@ -1221,6 +1221,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
   /* Cabeza de la mascota de PixelLab (assets/img/mascota-*.png): centro en x
      y fila de la frente, donde se apoya el ala de un sombrero. */
   var CABEZA = { frente: { cx: 21.5, frente: 11 }, espalda: { cx: 15, frente: 11 } };
+  var HEBILLA = { x: 24, y: 43 };
 
   /* ---------- Mapa: el pozo y tres huecos laterales ---------- */
   function mapa() {
@@ -1449,9 +1450,11 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       M.capas.superficie(L, { superficie: SURF, cielo: ['#5FA8F5', '#A9D8FF', '#FFDDB0'], sol: { x: 520, y: 58, factor: 0.12 } });
       M.capas.niebla(L, { color: '120,104,190', alfa: 0.09, velo: 0.1, desde: SURF + 60, hasta: WH, bandas: 5 });
       M.capas.imagen(L, 30, pared(solid));
-      L.capa('mundo', 35, function (bx, camI) {                   // cuerda
-        var R = M.PAL.cuerda;
-        for (var y = 59; y < 608; y++) {
+      /* Cuerda: baja de la polea y termina en el arnes del explorador (su
+         cinturon). Cuelga de ella; no hace falta que la agarre. */
+      L.capa('mundo', 35, function (bx, camI) {
+        var R = M.PAL.cuerda, fin = Math.round(cinturon());
+        for (var y = 59; y < fin; y++) {
           var sy = y - camI; if (sy < -2 || sy > L.H + 2) continue;
           var t = (y + Math.floor(y / 3)) % 3;
           bx.fillStyle = t === 0 ? R[0] : R[1]; bx.fillRect(ROPE_X - 1, sy, 1, 1);
@@ -1460,7 +1463,9 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       });
       M.capas.imagen(L, 40, terreno(solid, oros, op.tiles || null));
       M.capas.imagen(L, 45, props(fuentes, IMG));
-      var decorado = [['carretilla', 150, SURF], ['cofre', 226, 384]].filter(function (d) { return IMG[d[0]]; });
+      /* La carretilla de PixelLab viene en tres cuartos (rieles en diagonal) y en
+         un mundo de lado parece flotar: queda fuera hasta tener una de perfil. */
+      var decorado = [['cofre', 226, 384]].filter(function (d) { return IMG[d[0]]; });
       L.capa('mundo', 46, function (bx, camI) {
         decorado.forEach(function (d) {
           var im = IMG[d[0]], y = d[2] - im.height - camI;
@@ -1514,11 +1519,30 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         return {
           A: A, B: B, B2: M.sprites.espejo(B), C: A,
           fantasma: M.sprites.silueta(A, [127, 227, 240]),
-          ax: Math.round(base.width / 2) + (A.izq || 0), cy: 38 + arriba,   // la cuerda pasa por el centro; cinturon a 38 px
-          lampara: { x: casco ? 9 : 0, y: -38 - arriba + (casco ? 6 : 4) } // lampara del casco, respecto al cinturon
+          // Hebilla del cinturon medida en el PNG (x 24, fila 43): ahi se engancha la cuerda.
+          ax: HEBILLA.x + (A.izq || 0), cy: HEBILLA.y + arriba,
+          lampara: { x: casco ? 6 : 0, y: -HEBILLA.y - arriba + (casco ? 6 : 4) } // lampara del casco, respecto al cinturon
         };
       }
       var SPR = juego(op.piel);
+      /* Altura del cinturon en el mundo, con el mismo rebote con que se dibuja. */
+      function cinturon() { return yOf(exp.posAnim) + exp.anim.rebote(L.time, L.opts.smooth); }
+      /* Mosqueton de metal en la hebilla, con el ultimo tramo de cuerda que
+         entra en el: 9 x 15 px, contorneado para leerse sobre la ropa. */
+      var MOSQUETON = (function () {
+        var b = new M.Buf(9, 15), R = M.PAL.cuerda;
+        for (var y = 1; y < 7; y++) { b.set(4, y, y % 3 === 0 ? R[0] : R[1]); b.set(5, y, y % 3 === 1 ? R[0] : R[2]); }
+        var anillo = ['.XXXXX.', 'XHHHHSX', 'XH...SX', 'XH...SX', 'XS...SX', '.XSSSX.'];
+        anillo.forEach(function (row, j) {
+          row.split('').forEach(function (c, i) {
+            if (c === 'X') b.set(1 + i, 7 + j, '#8C8C9C');
+            else if (c === 'H') b.set(1 + i, 7 + j, '#E8E8F4');
+            else if (c === 'S') b.set(1 + i, 7 + j, '#5B5B6E');
+          });
+        });
+        M.silhouetteOutline(b, M.PAL.contorno);
+        return b.canvas();
+      })();
       exp.fijarPiel = function (tono) { SPR = juego(tono); };
       exp.sprites = function () { return SPR; };
       exp.celebrar = function () { exp.anim.celebrar(); };
@@ -1574,6 +1598,10 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         L.realzar(img, M.sprites.dibujar(bx, img, ROPE_X - SPR.ax, pies, a.sq, a.rebote(L.time, L.opts.smooth)));
         var ti = topo.anim.parpadeo > 0 ? topo.imgB : topo.img;
         L.realzar(ti, M.sprites.dibujar(bx, ti, topo.x - ti.width / 2, topo.pies - camI, 0, topo.anim.rebote(L.time + 1.3, L.opts.smooth)));
+        // Mosqueton del arnes, delante del cinturon, con el ultimo tramo de cuerda.
+        var mx = ROPE_X - Math.floor(MOSQUETON.width / 2), my = Math.round(cinturon()) - camI - MOSQUETON.height + 5;
+        bx.drawImage(MOSQUETON, mx, my);
+        L.realzar(MOSQUETON, { x: mx, y: my, w: MOSQUETON.width, h: MOSQUETON.height });
       });
       M.capas.primerPlano(L, { color: '#0C0812', desde: SURF + 30 });
 
