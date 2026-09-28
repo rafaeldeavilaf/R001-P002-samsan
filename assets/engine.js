@@ -850,6 +850,323 @@
     };
   };
 
+  /* ---------- SCENES.line — Mover en la recta (etapa 2) ----------
+     Verbo: mover un instrumento sobre una escala y detenerse. Se dibuja en
+     el mundo del bioma de la materia (window.SAMSAN_BIOMAS[meta.bioma]),
+     que da un `escenario` con la piel del instrumento (montacargas,
+     termometro). El motor no sabe de minas ni de temperaturas.
+
+     Variante en data.js (ademas de stem/options/answer del contrato):
+       solucion: numero que el nino debe fijar (el dato que falta)
+       line: { piel, unidad, min, max, inicio, cambio, final,
+               faltante: 'final'|'cambio'|'inicio',
+               modo: 'concreto'|'pictorico'|'abstracto',
+               bandera (estimacion a la decena), valor (arranque; el primer
+               item llega medio resuelto), pistaGrafica }
+
+     Sello de tres pasos: concreto (se mueve el instrumento), pictorico (se
+     ve la figura y se toca la respuesta entre cuatro), abstracto (se
+     escribe el numero con el teclado en pantalla).
+
+     check(estado) -> true si estado.valor es la solucion. Es la misma regla
+     que valida el generador (tools/gen/). Error visible: el mundo muestra a
+     donde llevo la respuesta, el contorno punteado de donde debia llegar y
+     un corchete con la diferencia. */
+  var LINEA = { canvas: null, promesa: null, E: null };
+  function lineaEscenario() {
+    if (LINEA.promesa) return LINEA.promesa;
+    var B = window.SAMSAN_BIOMAS && DATA.meta && window.SAMSAN_BIOMAS[DATA.meta.bioma];
+    LINEA.canvas = document.createElement('canvas');
+    LINEA.canvas.className = 'linea__lienzo';
+    if (!B || !B.escenario) { LINEA.promesa = Promise.resolve(null); return LINEA.promesa; }
+    LINEA.promesa = B.escenario(LINEA.canvas).then(function (E) {
+      LINEA.E = E;
+      if (motionOff()) { E.L.opts.smooth = false; E.L.opts.particles = false; }
+      E.L.iniciar();
+      return E;
+    }, function () { return null; });
+    return LINEA.promesa;
+  }
+  function numDe(t) { return parseInt(String(t).replace(/−/g, '-').replace(/[^0-9-]/g, ''), 10); }
+  function numTxt(n) { return n < 0 ? '−' + Math.abs(n) : String(n); }
+  function signoTxt(n) { return n > 0 ? '+' + n : numTxt(n); }
+
+  SCENES.line = function () {
+    var ctx = null, dead = false, host = null, V = null, Lv = null;
+    var fase = 'mover', valor = 0, bandera = null, tecleo = '', cursor = -1, elegido = null;
+    var btnUp = null, btnDown = null, btnMain = null, nowEl = null, notaEl = null, cajaEl = null, opts = [];
+    var timers = [], onKey = null;
+    var NB = ' ';
+
+    function unidad(n) { return numTxt(n) + NB + Lv.unidad; }
+    function paso() { return fase === 'bandera' ? 10 : 1; }
+    /* Lo que el mundo muestra para un valor del nino. */
+    function llegada(x) {
+      return Lv.faltante === 'final' ? x : Lv.faltante === 'cambio' ? Lv.inicio + x : x + Lv.cambio;
+    }
+    function inicioDe(x) { return Lv.faltante === 'inicio' ? x : Lv.inicio; }
+
+    /* Marcas fijas del instrumento segun modo y dato que falta. */
+    function pinta() {
+      var P = {}, c = Lv.cambio, u = NB + Lv.unidad;
+      if (Lv.modo === 'pictorico') {
+        if (Lv.faltante === 'final')  { P.inicio = Lv.inicio; P.salto = { desde: Lv.inicio, hasta: Lv.final, texto: signoTxt(c) + u }; P.pregunta = Lv.final; }
+        if (Lv.faltante === 'cambio') { P.inicio = Lv.inicio; P.anillo = Lv.final; P.salto = { desde: Lv.inicio, hasta: Lv.final, texto: '?' }; }
+        if (Lv.faltante === 'inicio') { P.anillo = Lv.final; P.salto = { desde: Lv.inicio, hasta: Lv.final, texto: signoTxt(c) + u }; P.pregunta = Lv.inicio; }
+        return P;
+      }
+      if (Lv.faltante === 'final')  { P.inicio = Lv.inicio; }
+      if (Lv.faltante === 'cambio') { P.inicio = Lv.inicio; P.anillo = Lv.final; P.salto = { desde: Lv.inicio, hasta: Lv.inicio + valor, texto: signoTxt(valor) + u }; }
+      if (Lv.faltante === 'inicio') { P.inicio = valor; P.anillo = Lv.final; P.salto = { desde: valor, hasta: valor + c, texto: signoTxt(c) + u }; }
+      return P;
+    }
+    function sync() {
+      if (LINEA.E && !dead) {
+        var st = LINEA.E.estado;
+        st.valor = valor;
+        if (Lv.modo === 'concreto' && fase !== 'hecho') st.fisica = Lv.faltante === 'cambio' ? Lv.inicio : valor;
+        st.bandera = bandera;
+        LINEA.E.pintar(pinta());
+      }
+      if (nowEl) nowEl.textContent = fase === 'bandera' ? fmt(UI.scene.lineFlagNow, { value: unidad(bandera) })
+        : Lv.faltante === 'cambio' ? fmt(UI.scene.lineJumpNow, { value: signoTxt(valor) + NB + Lv.unidad })
+        : fmt(UI.scene.lineNow, { value: unidad(valor) });
+      if (btnUp) {
+        var lo = fase === 'bandera' ? Lv.min : (Lv.faltante === 'cambio' ? Lv.min - Lv.inicio : Lv.min);
+        var hi = fase === 'bandera' ? Lv.max : (Lv.faltante === 'cambio' ? Lv.max - Lv.inicio : Lv.max);
+        var x = fase === 'bandera' ? bandera : valor;
+        btnUp.disabled = dead || x + paso() > hi;
+        btnDown.disabled = dead || x - paso() < lo;
+      }
+      if (cajaEl) cajaEl.textContent = tecleo === '' ? ' ' : tecleo.replace(/-/g, '−');
+    }
+    function configurarMundo() {
+      if (!LINEA.E || dead) return;
+      var fis = Lv.modo === 'concreto' ? (Lv.faltante === 'cambio' ? Lv.inicio : valor)
+        : Lv.modo === 'pictorico' ? (Lv.faltante === 'inicio' ? Lv.final : Lv.inicio) : Lv.inicio;
+      LINEA.E.configurar({ piel: Lv.piel, unidad: Lv.unidad, min: Lv.min, max: Lv.max, valor: valor, fisica: fis,
+                           soloDecenas: Lv.pistaGrafica === false, ver: Lv.modo !== 'abstracto' });
+      sync();
+    }
+
+    function mover(delta) {
+      if (dead || Lv.modo !== 'concreto') return;
+      if (fase === 'bandera') {
+        var nb = Math.max(Lv.min, Math.min(Lv.max, bandera + delta * 10));
+        if (nb === bandera) return;
+        bandera = nb; sync(); ctx.say(fmt(UI.scene.sayLineFlag, { value: unidad(bandera) }));
+        return;
+      }
+      var lo = Lv.faltante === 'cambio' ? Lv.min - Lv.inicio : Lv.min;
+      var hi = Lv.faltante === 'cambio' ? Lv.max - Lv.inicio : Lv.max;
+      var nv = Math.max(lo, Math.min(hi, valor + delta));
+      if (nv === valor) return;
+      valor = nv; sync();
+      ctx.say(Lv.faltante === 'cambio' ? signoTxt(valor) + NB + Lv.unidad : unidad(valor));
+    }
+    /* Tocar y mantener repite con calma; el teclado no repite (H1). */
+    function mantener(btn, delta) {
+      var t1 = 0, t2 = 0, usado = false;
+      var parar = function () { clearTimeout(t1); clearInterval(t2); };
+      btn.addEventListener('pointerdown', function (e) {
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+        usado = true; mover(delta); parar();
+        t1 = setTimeout(function () { t2 = setInterval(function () { mover(delta); }, 220); }, 450);
+        timers.push(t1);
+      });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) { btn.addEventListener(ev, parar); });
+      btn.addEventListener('click', function (e) { if (e.detail === 0 || !usado) mover(delta); usado = false; });
+      timers.push(function () { parar(); });
+    }
+    function pintarOpciones() {
+      opts.forEach(function (o, i) { o.node.classList.toggle('is-here', i === cursor); });
+    }
+
+    var api = {
+      /* La misma regla que valida el generador. */
+      check: function (estado) { return estado.valor === V.solucion; },
+
+      mount: function (container, context) {
+        ctx = context; dead = false; V = ctx.variant; Lv = V.line; host = container;
+        fase = Lv.modo === 'concreto' && Lv.bandera ? 'bandera' : 'mover';
+        valor = Lv.modo === 'concreto' ? (Lv.valor != null ? Lv.valor : (Lv.faltante === 'cambio' ? 0 : Lv.faltante === 'final' ? Lv.inicio : 0)) : 0;
+        bandera = fase === 'bandera' ? Math.round(Lv.inicio / 10) * 10 : null;
+        tecleo = ''; cursor = -1; elegido = null; opts = [];
+
+        var h = '<div class="scene scene--line scene--line-' + Lv.modo + '">' +
+          '<div class="linea__escena" aria-hidden="true"></div>';
+        if (Lv.modo === 'concreto') {
+          h += '<div class="linea__mando">' +
+            '<button type="button" class="btn linea__flecha" data-d="1" aria-label="' + esc(UI.scene.lineUp) + '">&#9650;</button>' +
+            '<button type="button" class="btn linea__flecha" data-d="-1" aria-label="' + esc(UI.scene.lineDown) + '">&#9660;</button>' +
+            '<span class="linea__ahora" aria-live="off"></span>' +
+            '<button type="button" class="btn btn--primary linea__ok"></button>' +
+          '</div>';
+        } else if (Lv.modo === 'pictorico') {
+          h += '<div class="linea__opciones" role="group" aria-label="' + esc(UI.scene.linePickAria) + '">';
+          ctx.order.forEach(function (orig, pos) {
+            h += '<button type="button" class="btn linea__opcion" data-orig="' + orig + '">' +
+              '<span class="door__key">' + ctx.keys[pos] + '</span>' + esc(V.options[orig]) + '</button>';
+          });
+          h += '</div>';
+        } else {
+          h += '<div class="linea__teclado">' +
+            '<div class="linea__caja" role="textbox" aria-readonly="true" aria-label="' + esc(UI.scene.lineTypeAria) + '"></div>' +
+            '<div class="linea__teclas" role="group" aria-label="' + esc(UI.scene.keypadAria) + '">' +
+            ['7', '8', '9', '4', '5', '6', '1', '2', '3', '-', '0', 'back'].map(function (k) {
+              var t = k === '-' ? '−' : k === 'back' ? '&#9003;' : k;
+              var aria = k === '-' ? UI.scene.keyMinus : k === 'back' ? UI.scene.keyBack : k;
+              return '<button type="button" class="btn linea__tecla" data-k="' + k + '" aria-label="' + esc(aria) + '">' + t + '</button>';
+            }).join('') +
+            '</div>' +
+            '<button type="button" class="btn btn--primary linea__ok">' + esc(UI.scene.lineCheck) + '</button>' +
+          '</div>';
+        }
+        h += '<p class="linea__nota" aria-live="polite"></p></div>';
+        container.innerHTML = h;
+
+        var escena = container.querySelector('.linea__escena');
+        notaEl = container.querySelector('.linea__nota');
+        btnMain = container.querySelector('.linea__ok');
+        var self = this;
+        if (Lv.modo === 'concreto') {
+          btnUp = container.querySelector('[data-d="1"]'); btnDown = container.querySelector('[data-d="-1"]');
+          nowEl = container.querySelector('.linea__ahora');
+          mantener(btnUp, 1); mantener(btnDown, -1);
+          btnMain.textContent = fase === 'bandera' ? UI.scene.lineFlag : UI.scene.lineCheck;
+          if (ctx.help) ctx.help(fase === 'bandera' ? UI.scene.lineHelpFlag : UI.scene.lineHelp, false);
+        } else if (Lv.modo === 'pictorico') {
+          opts = Array.prototype.map.call(container.querySelectorAll('.linea__opcion'), function (n) {
+            return { node: n, orig: parseInt(n.getAttribute('data-orig'), 10) };
+          });
+          opts.forEach(function (o, i) {
+            o.node.addEventListener('click', function () { self.jump(i); });
+            o.node.addEventListener('focus', function () { if (!dead) { cursor = i; pintarOpciones(); } });
+          });
+          if (ctx.help) ctx.help(UI.scene.lineHelpPick, false);
+        } else {
+          cajaEl = container.querySelector('.linea__caja');
+          Array.prototype.forEach.call(container.querySelectorAll('.linea__tecla'), function (b) {
+            b.addEventListener('click', function () { self.teclear(b.getAttribute('data-k')); });
+          });
+          /* Teclado fisico: en captura, antes del atajo A-D / 1-5 del motor. */
+          onKey = function (e) {
+            if (dead || e.ctrlKey || e.metaKey || e.altKey) return;
+            var k = e.key;
+            if (/^[0-9]$/.test(k) || k === '-' || k === '−' || k === 'Backspace' || k === 'Delete') {
+              e.preventDefault(); e.stopPropagation();
+              self.teclear(k === 'Backspace' || k === 'Delete' ? 'back' : (k === '−' ? '-' : k));
+            }
+          };
+          window.addEventListener('keydown', onKey, true);
+          if (ctx.help) ctx.help(UI.scene.lineHelpType, false);
+        }
+        if (btnMain) btnMain.addEventListener('click', function () { self.confirm(); });
+
+        lineaEscenario().then(function (E) {
+          if (dead || !E) return;
+          escena.appendChild(LINEA.canvas);
+          E.L.redimensionar();
+          configurarMundo();
+        });
+        if (LINEA.E) { escena.appendChild(LINEA.canvas); LINEA.E.L.redimensionar(); configurarMundo(); }
+        sync();
+      },
+
+      teclear: function (k) {
+        if (dead || Lv.modo !== 'abstracto') return;
+        if (k === 'back') tecleo = tecleo.slice(0, -1);
+        else if (k === '-') tecleo = tecleo.charAt(0) === '-' ? tecleo.slice(1) : '-' + tecleo;
+        else if (tecleo.replace('-', '').length < 4) tecleo += k;
+        sync();
+        ctx.say(tecleo === '' ? UI.scene.sayLineEmpty : tecleo.replace(/-/g, '−'));
+      },
+
+      setMood: function () { /* el heroe es el explorador del mundo */ },
+
+      move: function (delta) {
+        if (dead) return;
+        if (Lv.modo === 'concreto') { mover(-delta); return; }     // flecha arriba = sube
+        if (Lv.modo === 'pictorico') {
+          cursor = Math.max(0, Math.min(opts.length - 1, (cursor < 0 ? (delta > 0 ? -1 : opts.length) : cursor) + delta));
+          pintarOpciones(); opts[cursor].node.focus();
+        }
+      },
+
+      jump: function (i) {
+        if (dead || Lv.modo !== 'pictorico' || i < 0 || i >= opts.length) return;
+        cursor = i; pintarOpciones();
+        this.confirm();
+      },
+
+      confirm: function () {
+        if (dead) return null;
+        if (Lv.modo === 'concreto' && fase === 'bandera') {
+          fase = 'mover';
+          btnMain.textContent = UI.scene.lineCheck;
+          if (ctx.help) ctx.help(UI.scene.lineHelp, false);
+          sync();
+          ctx.say(fmt(UI.scene.sayLineFlagDone, { value: unidad(bandera) }));
+          return null;
+        }
+        var x;
+        if (Lv.modo === 'pictorico') {
+          if (cursor < 0) { ctx.say(UI.scene.sayNeedMove); return null; }
+          elegido = opts[cursor].orig;
+          x = numDe(V.options[elegido]);
+        } else if (Lv.modo === 'abstracto') {
+          if (tecleo === '' || tecleo === '-') { ctx.say(UI.scene.sayLineEmpty); return null; }
+          x = numDe(tecleo);
+        } else x = valor;
+        valor = x;
+        var ok = this.check({ valor: x });
+        dead = true; fase = 'hecho';
+        [btnUp, btnDown, btnMain].forEach(function (b) { if (b) b.disabled = true; });
+        opts.forEach(function (o) { o.node.disabled = true; });
+        if (host) Array.prototype.forEach.call(host.querySelectorAll('.linea__tecla'), function (b) { b.disabled = true; });
+        /* El mundo lleva la respuesta a su sitio: la plataforma viaja. */
+        var sc = host && host.querySelector('.scene--line');
+        if (sc) sc.classList.add('is-revelada');
+        if (LINEA.E) {
+          LINEA.E.L.redimensionar();
+          var st = LINEA.E.estado;
+          st.fisica = llegada(x); st.ver = true;
+          LINEA.E.pintar({ inicio: inicioDe(x), anillo: Lv.faltante !== 'final' ? Lv.final : null,
+            salto: { desde: inicioDe(x), hasta: llegada(x), texto: signoTxt(llegada(x) - inicioDe(x)) + NB + Lv.unidad } });
+        }
+        if (bandera != null && notaEl) {
+          notaEl.textContent = fmt(UI.scene.lineFlagGap, { flag: unidad(bandera), value: unidad(llegada(x)) });
+        }
+        var orig = Lv.modo === 'pictorico' ? elegido : (ok ? V.answer : (V.answer === 1 ? 0 : 1));
+        ctx.pick(orig);
+        return orig;
+      },
+
+      markResult: function (answerOrig, chosenOrig) {
+        var bien = answerOrig === chosenOrig;
+        opts.forEach(function (o) {
+          if (o.orig === answerOrig) o.node.classList.add('is-right');
+          if (!bien && o.orig === chosenOrig) o.node.classList.add('is-wrong');
+        });
+        if (LINEA.E) {
+          if (bien) LINEA.E.celebrar(document.getElementById('hudGems'));
+          else LINEA.E.estado.error = { llego: llegada(valor), debia: Lv.final };
+        }
+        ctx.say(bien ? UI.scene.sayLineRight : fmt(UI.scene.sayLineWrong, { value: unidad(llegada(valor)), target: unidad(Lv.final) }));
+      },
+
+      destroy: function () {
+        dead = true;
+        if (onKey) { window.removeEventListener('keydown', onKey, true); onKey = null; }
+        timers.forEach(function (t) { if (typeof t === 'function') t(); else clearTimeout(t); });
+        timers = [];
+        if (LINEA.E) { LINEA.E.estado.error = null; }
+        btnUp = btnDown = btnMain = nowEl = notaEl = cajaEl = host = null; opts = []; ctx = null;
+      }
+    };
+    return api;
+  };
+
   /* El mensaje va al HUD; la REACCION va al heroe de la escena, que es el que
      el nino esta mirando porque es el que mueve. */
   function setMate(mood, msg, cls) {
@@ -1062,6 +1379,36 @@
     return false;
   };
   Runner.prototype.progress = function () { return this.cleared / this.total; };
+
+  /* ---------- RunnerSello (etapa 2) ----------
+     Para niveles con `sello: true` (temas de la base). Los items van en el
+     orden del generador: repaso, tres tramos de sello (concreto, pictorico,
+     abstracto) y jefe. Al fallar, la familia se queda al frente y vuelve
+     enseguida con OTRA variante (la garantia anti-repeticion de current()
+     sigue valiendo). La gema llega al cerrar cada tramo declarado en
+     `tramosItems`, sin importar cuantos intentos costo (RC-02). */
+  function RunnerSello(level) {
+    Runner.call(this, level);
+    this.queue = level.questions.map(function (q, i) { return i; });
+    this.bordes = (level.tramosItems || []).map(function (t) { return t[1]; });
+    this.tramos = this.bordes.length || this.tramos;
+  }
+  RunnerSello.prototype = Object.create(Runner.prototype);
+  RunnerSello.prototype.resolve = function (correct) {
+    var fi = this.queue[0];
+    this.attempts++;
+    if (!correct) { this.combo = 0; return false; }
+    this.queue.shift();
+    this.cleared++;
+    this.combo++;
+    if (this.combo > this.bestCombo) this.bestCombo = this.combo;
+    this.xp += 100 + Math.min(this.combo, 8) * 20;
+    this.hitSkills[this.level.questions[fi].skill] = true;
+    this.answered[fi] = true;
+    var hechos = this.bordes.filter(function (b) { return this.cleared >= b; }, this).length;
+    if (hechos > this.gems) { this.gems = hechos; return true; }
+    return false;
+  };
 
   /* Pie del sitio (RC de creditos): mismo texto que la portada y legal.html.
      El texto vive en ui.js (`credits`); aqui solo se maqueta. */
@@ -1558,7 +1905,7 @@
 
   function startLevel(idx) {
     var lv = DATA.levels[idx];
-    run = new Runner(lv);
+    run = lv.sello ? new RunnerSello(lv) : new Runner(lv);
     q = null;
     el('hudLvl').textContent = fmt(UI.play.levelTag, { n: lv.id });
     el('qScene').innerHTML = '';

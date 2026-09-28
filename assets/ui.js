@@ -203,7 +203,33 @@ window.GAME_UI = {
     sayForgeRemove: 'Removed: {value}.',
     sayForgeEmpty:  'Add at least one piece before confirming.',
     sayForgeGood:   'That satisfies the rule.',
-    sayForgeBad:    'Not yet — check the rule and try again.'
+    sayForgeBad:    'Not yet — check the rule and try again.',
+
+    /* ---------- LINE (mech: "line") ----------
+       Mover en la recta: sube o baja el instrumento y comprueba. Tono
+       neutro en el error: describe y senala, no juzga. */
+    lineUp:        'Up one mark',
+    lineDown:      'Down one mark',
+    lineNow:       'Now: {value}',
+    lineJumpNow:   'Jump: {value}',
+    lineFlagNow:   'Your flag: {value}',
+    lineCheck:     'CHECK',
+    lineFlag:      'PLANT FLAG',
+    lineHelp:      '<kbd>&uarr; &darr;</kbd> move &nbsp;·&nbsp; <b>Enter</b> check',
+    lineHelpFlag:  'First guess: plant your flag where you think it will land. <kbd>&uarr; &darr;</kbd> move it 10 at a time.',
+    lineHelpPick:  'Look at the picture, then tap the answer or press <b>A B C D</b>.',
+    lineHelpType:  'Type the number with the keys (<b>&minus;</b> for below zero), then press <b>Check</b>.',
+    linePickAria:  'Answers',
+    lineTypeAria:  'Your answer',
+    keypadAria:    'Number keys',
+    keyMinus:      'minus',
+    keyBack:       'delete',
+    lineFlagGap:   'Your flag: {flag}. The answer: {value}.',
+    sayLineFlag:   'Flag at {value}.',
+    sayLineFlagDone: 'Flag planted at {value}. Now move.',
+    sayLineEmpty:  'Type a number first.',
+    sayLineRight:  'It lands in the right place.',
+    sayLineWrong:  'It lands at {value}. The dotted outline shows {target}.'
   },
 
   /* ---------- COMPANERO DE PANTALLA ----------

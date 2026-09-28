@@ -24,9 +24,9 @@ Publicar es hacer push a `main`. `.github/workflows/verificar-y-publicar.yml` re
 
 ## Arquitectura
 
-La estructura de abajo es el objetivo de la etapa 2. Hasta entonces, los juegos viven en `subjects/<slug>/` con un generador por materia en `tools/gen_<slug>.py`.
+Los temas de la base siguen la estructura de abajo desde la etapa 2 (el primero es `temas/maths/y6-la-mina/`). Los juegos viejos siguen en `subjects/<slug>/`, registrados en `subjects.js` con un generador por materia en `tools/gen_<slug>.py`, hasta migrarlos en la etapa 3.
 
-- `assets/` — motor compartido (`engine.js`, `engine.css`, `ui.js`, `props.js`), fuentes locales en `assets/fonts/` y arte compartido en `assets/img/`.
+- `assets/` — motor compartido (`engine.js`, `engine.css`, `ui.js`, `props.js`), capa común de los temas (`comun.css`, que viste el shell con `kit.css`), capa del mundo en `assets/mundo/` (incluidos los instrumentos por código en `instrumentos.js`), fuentes locales en `assets/fonts/` y arte compartido en `assets/img/`.
 - `materias.js` — registro de materias (biomas) y sus temas. Un tema nuevo es una entrada aquí.
 - `temas/<materia>/<tema>/data.js` — contenido de un tema. **Nunca se escribe a mano**; sale de su generador, que valida con `assert`.
 - `temas/<materia>/img/` — arte del bioma de esa materia.
@@ -45,7 +45,7 @@ Contrato en `engine.js`: `SCENES[mech]()` devuelve `mount`, `move`, `jump`, `con
 |---|---|---|---|
 | `doors` | elegir | opciones | existe; solo como recurso ocasional |
 | `forge` | Construir | reglas `categorias` y `ecuacion`, modo `pasos` | `categorias` existe; `ecuacion` y `pasos` en etapa 2 |
-| `line` | Mover en la recta | vertical u horizontal, elemento faltante, bandera de estimación, piel del instrumento | etapa 2 |
+| `line` | Mover en la recta | vertical u horizontal, elemento faltante, bandera de estimación, piel del instrumento, sello (concreto, pictórico, abstracto con teclado) | vertical con piel `montacargas` existe; horizontal y `recta` en etapa 3 |
 | `fill` | Llenar | modos `conteo` y `balanza` | etapa 2 |
 | `place` | Ordenar y Asignar | modos `secuencia` y `destinos` | etapa 3 |
 

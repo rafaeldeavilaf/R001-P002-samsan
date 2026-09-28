@@ -418,7 +418,8 @@
         var moviendo = Math.abs(exp.pos - exp.posAnim) > 0.06;
         exp.anim.actualizar(dt, moviendo, suave, function () { part.polvo(POZO_X - 20, exp.piso()); part.polvo(POZO_X + 20, exp.piso()); });
         topo.anim.actualizar(dt, false, suave);
-        if (op.camaraFija == null) L.seguir(exp.piso() - 30);
+        /* `enfoque` (opcional) encuadra otra cosa que el explorador, p. ej. todo un salto. */
+        if (op.camaraFija == null) L.seguir(exp.enfoque ? exp.enfoque() : exp.piso() - 30);
       });
       L.capa('mundo', 60, function (bx, camI) {
         var a = exp.anim, img = SPR.codigo ? SPR[(a.alegria > 0 ? 'C' : 'A') + (a.parpadeo > 0 ? 'b' : '')] : SPR[a.alegria > 0 ? 'C' : 'A'];
@@ -445,6 +446,127 @@
       };
       return { L: L, luz: luz, particulas: part, explorador: exp, topo: topo, yOf: yOf, mapa: mapaInfo,
                plataforma: function () { return PLATAFORMA; }, PLAT_Y: PLAT_Y, constantes: this.constantes };
+    },
+
+    /* ---------- Escenario de la escena `line` (etapa 2) ----------
+       El motor pide un escenario al bioma de la materia y solo toca su
+       estado; aqui se decide como se ve cada piel del instrumento:
+         montacargas -> la plataforma es el valor; regla junto al pozo.
+         termometro  -> panel de pared con tubo y liquido, junto al pozo
+                        (dentro de la franja que se ve en un telefono).
+       estado = { valor, fisica, bandera, error: { llego, debia }, ver,
+                  revelar }. `fisica` es lo que el mundo muestra (la
+       plataforma o el liquido); `valor`, lo que el nino manipula. */
+    escenario: function (canvas) {
+      var M = window.SAMSAN_MUNDO, I = M.inst, BI = BIOMAS.caverna;
+      return BI.cargar().then(function () {
+        var L = M.crearLienzo(canvas, { quietoSiReducido: false });
+        var cav = BI.crear(L, { pos: -12 });
+        var exp = cav.explorador, ctx = L.ctx, K = BI.constantes, RULER_X = 362, TERMO_X = 372;
+        var cfg = null, st = { valor: 0, fisica: 0, bandera: null, error: null, ver: true, revelar: false };
+        var liquido = 0;
+        /* Camara del montacargas: si caben, encuadra juntos la plataforma
+           (con el explorador encima), la salida, el destino y el error; si
+           no caben, sigue a la plataforma. */
+        exp.enfoque = function () {
+          if (!cfg || cfg.piel !== 'montacargas') return exp.piso() - 30;
+          var P = cfg.pinta || {}, vals = [exp.posAnim];
+          [P.inicio, P.anillo, P.pregunta, st.bandera, st.error && st.error.debia].forEach(function (v) { if (v != null) vals.push(M.clamp(v, K.DMIN, K.DMAX)); });
+          if (P.salto) vals.push(P.salto.desde, M.clamp(P.salto.hasta, K.DMIN, K.DMAX));
+          var arriba = Math.min.apply(null, vals.map(yOf)) - 86, abajo = Math.max.apply(null, vals.map(yOf)) + 24;
+          if (abajo - arriba > L.H - 10) return exp.piso() - 30;
+          return (arriba + abajo) / 2 + L.H * 0.02;
+        };
+        L.alActualizar(function (dt) {
+          if (!cfg) return;
+          if (cfg.piel === 'montacargas') exp.pos = M.clamp(st.fisica, K.DMIN, K.DMAX);
+          var obj = M.clamp(st.fisica, cfg.min, cfg.max);
+          liquido = L.opts.smooth ? liquido + (obj - liquido) * Math.min(1, dt * 7) : obj;
+          if (Math.abs(obj - liquido) < 0.01) liquido = obj;
+        });
+
+        /* Geometria del instrumento en px de pantalla: yDe(v), x de marcas. */
+        function geo() {
+          var s = L.s, cam = L.cam.y, u = I.u(L);
+          if (cfg.piel === 'montacargas') {
+            return { yDe: function (v) { return (yOf(v) - cam) * s; }, xRegla: RULER_X * s, xSalto: (POZO_X - PLAT.ancho / 2 - 14) * s,
+                     xBandera: RULER_X * s - 16 * u, fisicaVis: exp.posAnim };   // a la izquierda del marcador, sin taparse
+          }
+          var fs = Math.max(14 * L.dpr, 6.5 * s);
+          ctx.font = '900 ' + fs + 'px Nunito, ui-rounded, "Segoe UI", system-ui, sans-serif';
+          var w = Math.max(84 * s, 46 * u + ctx.measureText('−20 ' + cfg.unidad).width + 18 * u);
+          var g = { x: TERMO_X * s, y: 8 * u, w: w, h: L.canvas.height - 16 * u, min: cfg.min, max: cfg.max,
+                    unidad: cfg.unidad, soloDecenas: cfg.soloDecenas };
+          var T = I.termoGeo(L, g);
+          return { termo: g, yDe: T.yDe, xBandera: T.x - T.tubo / 2 - 2 * u, xSalto: T.x - T.tubo / 2 - 8 * u,
+                   xRegla: g.x + g.w, xMarca: T.x + 14 * u, xTubo: T.x, fisicaVis: liquido };
+        }
+
+        L.capa('alta', 50, function () {
+          if (!cfg || !st.ver) return;
+          var G = geo(), u = I.u(L), s = L.s;
+          if (G.termo) I.termometro(ctx, L, G.termo, liquido);
+          else I.regla(ctx, L, { x: G.xRegla, yDe: G.yDe, min: cfg.min, max: cfg.max, unidad: cfg.unidad, cadaEtiqueta: 5, soloDecenas: cfg.soloDecenas });
+          var P = cfg.pinta || {};
+          if (P.inicio != null) I.bandera(ctx, G.xBandera, G.yDe(P.inicio) + 9 * u * 1.7, u * 1.7);
+          if (P.anillo != null) I.anillo(ctx, G.xBandera - 14 * u, G.yDe(P.anillo), u);
+          if (P.salto) I.salto(ctx, L, G.xSalto, G.yDe(P.salto.desde), G.yDe(M.clamp(P.salto.hasta, cfg.min, cfg.max)), P.salto.texto, { punteado: P.salto.punteado });
+          if (P.pregunta != null) I.pregunta(ctx, L, G.xSalto - 30 * s, G.yDe(P.pregunta), 'right');
+          if (st.bandera != null) I.estimacion(ctx, G.xBandera + 4 * u, G.yDe(st.bandera) + 10.5 * u * 1.5, u * 1.5);
+          var yv = G.yDe(M.clamp(G.fisicaVis, cfg.min, cfg.max));
+          I.marcador(ctx, G.termo ? G.xMarca : G.xRegla, yv, u);
+        });
+        /* Error visible: contorno punteado donde debia llegar y corchete con
+           la diferencia. Nunca una silueta de persona. */
+        L.capa('alta', 60, function () {
+          if (!cfg || !st.ver || !st.error) return;
+          var G = geo(), u = I.u(L), s = L.s, E = st.error;
+          var pulso = L.opts.smooth ? 0.7 + 0.3 * Math.sin(L.time * 4) : 1;
+          var yd = G.yDe(M.clamp(E.debia, cfg.min, cfg.max)), yl = G.yDe(M.clamp(E.llego, cfg.min, cfg.max));
+          ctx.save(); ctx.globalAlpha = pulso;
+          ctx.strokeStyle = I.colores.cian; ctx.lineWidth = Math.max(2 * L.dpr, 1.4 * s); ctx.setLineDash([4 * u, 3 * u]);
+          if (cfg.piel === 'montacargas') {
+            var x0 = (POZO_X - PLAT.ancho / 2) * s, w = PLAT.ancho * s;
+            ctx.strokeRect(x0, yd - PLAT.baranda * s, w, (PLAT.baranda + PLAT.piso) * s);
+            ctx.beginPath(); ctx.moveTo(x0, yd); ctx.lineTo(x0 + w, yd); ctx.stroke();
+          } else {
+            ctx.strokeStyle = '#0B5563'; ctx.lineWidth = Math.max(2.5 * L.dpr, 1.8 * s);
+            ctx.beginPath(); ctx.moveTo(G.termo.x + 4 * u, yd); ctx.lineTo(G.termo.x + G.termo.w - 4 * u, yd); ctx.stroke();
+          }
+          ctx.restore();
+          var dif = E.debia - E.llego;
+          if (dif) I.corchete(ctx, L, (G.termo ? G.termo.x - 3 * u : G.xRegla - 20 * u), yl, yd, I.conSigno(dif) + ' ' + cfg.unidad);
+        });
+
+        cav.L = L;
+        return {
+          L: L, cav: cav, estado: st,
+          /* Configura el instrumento para una variante. `pinta` dice que
+             marcas fijas se ven (bandera, anillo, salto, pregunta). */
+          configurar: function (c) {
+            cfg = c;
+            st.bandera = null; st.error = null; st.ver = c.ver !== false; st.revelar = false;
+            st.valor = c.valor; st.fisica = c.fisica;
+            liquido = M.clamp(c.fisica, c.min, c.max);
+            if (c.piel === 'montacargas') { exp.pos = exp.posAnim = M.clamp(c.fisica, K.DMIN, K.DMAX); L.fijarCam(yOf(exp.pos) - 30 - L.H * 0.52); }
+            else { exp.pos = exp.posAnim = -12; L.fijarCam(yOf(-12) - 30 - L.H * 0.52); }
+            if (!L.corriendo && L.iniciado) L.dibujar();
+          },
+          /* La primera vez tras configurar, la camara salta al encuadre (sin paneo). */
+          pintar: function (p) {
+            if (!cfg) return;
+            var primera = !cfg.pinta; cfg.pinta = p;
+            if (primera && cfg.piel === 'montacargas') L.fijarCam(exp.enfoque() - L.H * 0.52);
+          },
+          celebrar: function (hud, alLlegar) {
+            var yb = cfg && cfg.piel === 'montacargas' ? yOf(exp.pos) - 50 : yOf(exp.pos) - 70;
+            exp.celebrar();
+            cav.particulas.estallido(POZO_X, yb);
+            if (hud) cav.particulas.gemaVuela(POZO_X, yb, hud, alLlegar || function () {});
+          },
+          dibujar: function () { L.dibujar(); }
+        };
+      });
     }
   };
 })(window.SAMSAN_BIOMAS = window.SAMSAN_BIOMAS || {});

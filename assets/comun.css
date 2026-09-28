@@ -1,0 +1,160 @@
+/* ============================================================
+   SAMSAN — COMUN.CSS
+   Capa comun (etapa 2): el shell del motor (assets/engine.js) con el
+   kit de la etapa 1 (assets/kit.css) en las paginas de tema de la
+   base. Solo aplica bajo <html data-capa="comun">, que pone
+   tools/build.py en los temas; los juegos viejos no cambian.
+
+   Reglas que no se rompen (CLAUDE.md, docs/direccion-grafica.md):
+   - Paneles con texto siempre claros, contraste AA, en tema claro y
+     oscuro. Nunito para todo lo que el nino lee; sin fuente pixelada.
+   - Botones de 64 px o mas. Ningun significado solo por color.
+   - Nada mide aciertos frente al nino: sin XP ni combo a la vista.
+   - La escena cabe en el alto de un portatil (1366 x 768).
+   ============================================================ */
+
+html[data-capa="comun"] {
+  /* Las variables del motor, traducidas al papel del kit. */
+  --ink: #2A211A; --ink-dim: #5C4A3B; --line: #2A211A;
+  --bg-0: #EADCC0; --bg-1: #F7EFDD; --bg-2: #FFFDF6; --bg-3: #FFF3D6;
+  --good: #2F6B3A; --good-dark: #D8F0C8; --bad: #9A3B2C; --bad-dark: #F8DCD4;
+  --warn: #8A5A00; --accent: #1D5E70; --accent-2: #6E4E22;
+  --px: 3px; --font-ui: var(--fuente); --font-read: var(--fuente);
+}
+html[data-capa="comun"] body {
+  background: var(--pagina); background-image: none; color: var(--tinta);
+  font-family: var(--fuente); font-size: 1.05rem; padding-bottom: 24px;
+}
+html[data-capa="comun"] body::after { display: none; }            /* sin lineas de CRT */
+html[data-capa="comun"] .wrap { max-width: 1060px; padding: 0 16px; }
+html[data-capa="comun"] h1, html[data-capa="comun"] h2, html[data-capa="comun"] h3,
+html[data-capa="comun"] .ui, html[data-capa="comun"] .btn, html[data-capa="comun"] .tag,
+html[data-capa="comun"] .hud, html[data-capa="comun"] .tile { font-family: var(--fuente); letter-spacing: 0; }
+
+/* ---------- Cabecera y pie: sobre la pagina ---------- */
+html[data-capa="comun"] .site-head { padding: 12px 0 0; gap: 12px; }
+html[data-capa="comun"] .site-head h1 { font-size: 1.35rem; font-weight: 900; letter-spacing: .04em; line-height: 1.1; color: var(--tinta); }
+html[data-capa="comun"] .site-head p { color: var(--suave); font-size: .95rem; margin-top: 2px; }
+html[data-capa="comun"] #heroSprite .avatar { width: 40px; height: 40px; }
+html[data-capa="comun"] .site-foot { color: var(--suave); text-align: center; font-size: .92rem; }
+html[data-capa="comun"] .site-foot a { color: var(--enlace); font-weight: 700; }
+html[data-capa="comun"] .text-dim { color: var(--suave); }
+html[data-capa="comun"] #scrMap > .text-dim { color: var(--suave); }
+
+/* ---------- Paneles de papel ---------- */
+html[data-capa="comun"] .pixel-box {
+  background: var(--panel); color: var(--panel-tinta);
+  border: 3px solid var(--panel-borde); border-radius: var(--radio);
+  box-shadow: 5px 5px 0 var(--sombra);
+}
+html[data-capa="comun"] .pixel-box .text-dim { color: var(--panel-suave); }
+
+/* ---------- Botones del kit ---------- */
+html[data-capa="comun"] .btn {
+  min-height: 64px; min-width: 64px; padding: 0 18px; border-radius: var(--radio);
+  border: 3px solid var(--contorno); background: var(--boton); color: var(--panel-tinta);
+  font-size: 1.1rem; font-weight: 900; box-shadow: 0 4px 0 var(--contorno);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+html[data-capa="comun"] .btn:hover { background: #FFF3D6; }
+html[data-capa="comun"] .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--contorno); }
+html[data-capa="comun"] .btn:focus-visible { outline: 3px solid var(--foco); outline-offset: 3px; }
+html[data-capa="comun"] .btn--primary { background: var(--primario); color: var(--panel-tinta); border-color: var(--contorno); }
+html[data-capa="comun"] .btn--primary:hover { background: #F7C85A; }
+html[data-capa="comun"] .btn--ghost { background: var(--boton); }
+/* Botones secundarios de la partida: mas bajos, no compiten con el juego. */
+html[data-capa="comun"] .stage > .row .btn, html[data-capa="comun"] .hud .btn { min-height: 48px; font-size: 1rem; box-shadow: 0 3px 0 var(--contorno); }
+
+/* ---------- HUD: nivel, camino de tramos y gemas. Sin XP ni combo ---------- */
+html[data-capa="comun"] .hud { margin: 10px 0; padding: 8px 12px; font-size: 1rem; font-weight: 800; }
+html[data-capa="comun"] .hud__stat { color: var(--panel-suave); }
+html[data-capa="comun"] .hud__stat b { color: var(--panel-tinta); font-weight: 900; }
+html[data-capa="comun"] .hud__stat:has(#hudXP), html[data-capa="comun"] .hud__stat:has(#hudCombo),
+html[data-capa="comun"] .hud__stat:has(#mapXP) { display: none; }
+html[data-capa="comun"] .mate { min-width: 0; }
+html[data-capa="comun"] .mate__msg { font-size: 1rem; font-weight: 900; color: var(--panel-tinta); }
+html[data-capa="comun"] .mate__msg.is-good { color: var(--bien); }
+html[data-capa="comun"] .mate__msg.is-bad { color: var(--panel-tinta); }       /* neutro: no juzga */
+html[data-capa="comun"] .bar { background: var(--papel-3); border: 2px solid var(--panel-borde); border-radius: 999px; }
+html[data-capa="comun"] .bar.path { height: 18px; gap: 2px; padding: 2px; }
+html[data-capa="comun"] .bar.path i { background: #FFFDF6; border-radius: 999px; }
+html[data-capa="comun"] .bar.path i.on { background: var(--bien); }
+html[data-capa="comun"] .bar.path i.now { background: var(--primario); }
+html[data-capa="comun"] .combo { font-family: var(--fuente); font-weight: 900; font-size: 1.2rem; color: var(--panel-tinta);
+  background: var(--panel); border: 3px solid var(--panel-borde); border-radius: 999px; padding: 6px 16px; text-shadow: none; }
+html[data-capa="comun"] .combo:empty { display: none; }
+
+/* ---------- Mapa de niveles ---------- */
+html[data-capa="comun"] .levels { gap: 12px; margin-top: 14px; }
+html[data-capa="comun"] .level-card { border-radius: var(--radio); }
+html[data-capa="comun"] .level-card__num { font-family: var(--fuente); font-weight: 900; font-size: 1.4rem; border-radius: 50%;
+  border: 3px solid var(--contorno); background: var(--primario); color: var(--panel-tinta); }
+html[data-capa="comun"] .level-card.is-done { border-color: var(--bien); }
+html[data-capa="comun"] .level-card.is-done .level-card__num { background: var(--siguiente); color: var(--panel-tinta); border-color: var(--contorno); }
+html[data-capa="comun"] .level-card.is-done .level-card__num::after { content: ' \2714\FE0E'; font-size: .8rem; }
+html[data-capa="comun"] .level-card.is-locked { opacity: .6; }
+html[data-capa="comun"] .level-card__name { font-family: var(--fuente); font-weight: 900; font-size: 1.15rem; }
+html[data-capa="comun"] .level-card__sub { color: var(--panel-suave); }
+html[data-capa="comun"] .gems { font-family: var(--fuente); color: #2F7F9E; font-weight: 900; }
+html[data-capa="comun"] .gems .off { color: var(--papel-2); }
+
+/* ---------- Partida ---------- */
+html[data-capa="comun"] .stage { margin-top: 10px; padding: 14px 16px; }
+html[data-capa="comun"] .q-tag { font-family: var(--fuente); font-weight: 800; font-size: .85rem; color: #6E4E22;
+  background: transparent; border: 0; padding: 0; margin: 0 0 2px; text-transform: none; }
+html[data-capa="comun"] .q-stem { font-size: 1.25rem; font-weight: 900; line-height: 1.35; margin-bottom: 4px; }
+html[data-capa="comun"] .q-sub { color: var(--panel-suave); font-size: 1rem; margin-bottom: 8px; }
+html[data-capa="comun"] .scene__help { color: var(--panel-suave); font-size: .95rem; margin: 6px 0 0; }
+html[data-capa="comun"] .scene__help b, html[data-capa="comun"] .scene__help kbd { color: var(--panel-tinta); font-family: var(--fuente); }
+html[data-capa="comun"] .hint { border-left: 5px solid #C98A1C; background: #FFF3D6; color: var(--panel-tinta); border-radius: 0 8px 8px 0; }
+html[data-capa="comun"] .feedback { margin-top: 10px; padding: 12px 16px; }
+html[data-capa="comun"] .feedback__title { font-family: var(--fuente); font-weight: 900; font-size: 1.1rem; margin-bottom: 4px; }
+html[data-capa="comun"] .feedback--good { border-color: var(--bien); }
+html[data-capa="comun"] .feedback--good .feedback__title { color: var(--bien); }
+html[data-capa="comun"] .feedback--bad { border-color: var(--panel-borde); }
+html[data-capa="comun"] .feedback--bad .feedback__title { color: var(--panel-tinta); }
+html[data-capa="comun"] .feedback__body code { font-family: var(--fuente); font-weight: 900; background: var(--papel-3); border: 0; border-radius: 4px; }
+html[data-capa="comun"] .feedback__body p[style] { color: var(--panel-suave) !important; }
+
+/* Escena line con el kit: el lienzo cabe en el alto de un portatil. */
+html[data-capa="comun"] .scene--line { gap: 8px; }
+html[data-capa="comun"] .linea__escena { width: min(100%, calc((100svh - 330px) * 16 / 9)); margin: 0 auto;
+  border: 3px solid var(--contorno); border-radius: var(--radio); }
+html[data-capa="comun"] .linea__ahora { color: var(--panel-tinta); font-size: 1.3rem; }
+html[data-capa="comun"] .linea__nota { color: var(--panel-tinta); font-weight: 700; }
+html[data-capa="comun"] .linea__mando, html[data-capa="comun"] .linea__teclado { justify-content: center; }
+html[data-capa="comun"] .linea__opcion .door__key { font-family: var(--fuente); font-size: .9rem; width: 28px; height: 28px;
+  display: inline-grid; place-items: center; border: 2px solid var(--contorno); border-radius: 6px; background: var(--papel-3); color: var(--panel-tinta); }
+html[data-capa="comun"] .linea__opcion.is-here { outline: 3px solid var(--foco); outline-offset: 3px; }
+html[data-capa="comun"] .linea__opcion.is-right { background: #D8F0C8; color: var(--panel-tinta); border-color: var(--bien); }
+html[data-capa="comun"] .linea__opcion.is-wrong { background: #F3E3D6; color: var(--panel-tinta); border-color: var(--panel-borde); }
+html[data-capa="comun"] .linea__caja { border: 3px solid var(--contorno); border-radius: var(--radio); background: #FFFDF6; }
+html[data-capa="comun"] .linea__tecla { min-height: 52px; font-size: 1.3rem; }
+html[data-capa="comun"] .linea__teclas { grid-template-columns: repeat(3, 64px); }
+
+/* ---------- Briefing y victoria ---------- */
+html[data-capa="comun"] .brief { padding: 18px 20px; margin-top: 12px; }
+html[data-capa="comun"] .brief h2 { color: var(--panel-tinta); font-size: 1.4rem; font-weight: 900; }
+html[data-capa="comun"] .victory h2 { color: var(--panel-tinta); font-size: 1.5rem; font-weight: 900; }
+html[data-capa="comun"] .victory__stats, html[data-capa="comun"] .score-best + .victory__stats { display: none; }
+
+/* ---------- Telefono ---------- */
+@media (max-width: 700px) {
+  html[data-capa="comun"] .wrap { padding: 0 10px; }
+  html[data-capa="comun"] .site-head { padding-top: 8px; }
+  html[data-capa="comun"] .site-head p { display: none; }
+  html[data-capa="comun"] #heroSprite .avatar { width: 30px; height: 30px; }
+  html[data-capa="comun"] .hud { margin: 8px 0; padding: 6px 10px; gap: 6px; }
+  html[data-capa="comun"] .stage { padding: 10px 10px; }
+  html[data-capa="comun"] .q-stem { font-size: 1.1rem; }
+  html[data-capa="comun"] .linea__escena { width: 100%; aspect-ratio: 1 / 1; }
+  html[data-capa="comun"] .linea__mando .linea__ok { flex: 1 1 auto; margin-left: 0; }
+}
+
+/* Opciones ya respondidas: legibles (la correcta con marca, la elegida con otra). */
+html[data-capa="comun"] .linea__opcion:disabled { opacity: .55; }
+html[data-capa="comun"] .linea__opcion.is-right:disabled, html[data-capa="comun"] .linea__opcion.is-wrong:disabled { opacity: 1; }
+/* Abstracto: formato del cuaderno. El mundo aparece al responder, con la
+   respuesta llevada al instrumento (acierto o error visible). */
+html[data-capa="comun"] .scene--line-abstracto .linea__escena { display: none; }
+html[data-capa="comun"] .scene--line-abstracto.is-revelada .linea__escena { display: block; }

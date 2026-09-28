@@ -10,8 +10,10 @@ autocontenido por juego, y genera las páginas del sitio con el kit nuevo
 (index.html), las notas legales (legal.html) y, solo en local, la vitrina
 del bioma Caverna (_local/vitrina-caverna.html).
 
-Qué se publica lo decide `subjects.js`: solo los juegos con `publicar: true`
-van a la raíz, que es lo único que Actions sube a GitHub Pages. Los demás se
+Qué se publica lo decide el registro: `materias.js` para los temas de la
+base (temas/<materia>/<tema>/data.js) y `subjects.js` para los juegos viejos
+hasta su migración en la etapa 3. Solo lo que tiene `publicar: true` va a la
+raíz, que es lo único que Actions sube a GitHub Pages. Los demás se
 construyen en `_local/` (ignorado por git) para jugarlos y probarlos en este
 equipo sin publicarlos.
 
@@ -56,7 +58,7 @@ FAVICON = ("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' "
 PORTADA = {
     "descripcion": "SAMSAN: un juego educativo gratuito, un mundo de biomas para aprender jugando.",
     "lema": "Un mundo de biomas para aprender jugando.",
-    "escena": "Escena decorativa: un explorador sube y baja por la cuerda de una mina iluminada por antorchas y cristales, junto a un topo minero.",
+    "escena": "Escena decorativa: un explorador viaja de pie en el montacargas de una mina iluminada por antorchas y cristales, junto a un topo minero.",
     "obra_titulo": "El mundo está en construcción",
     "obra_texto": [
         "Estamos construyendo la primera zona del mundo. Cada tema del colegio "
@@ -151,20 +153,43 @@ def load_registry():
     return subs
 
 
-def check_mechs(subjects, engine):
+def load_materias():
+    """materias.js: materia (bioma) -> temas. Devuelve una lista plana de temas
+    con su materia, en el formato que usa el build."""
+    src = read("materias.js")
+    m = re.search(r"window\.MATERIAS\s*=\s*(\[.*\]);", src, re.S)
+    if not m:
+        fail("no puedo leer materias.js")
+    js = re.sub(r"//.*", "", m.group(1))
+    js = re.sub(r"([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)\s*:", r'\1"\2":', js)
+    js = re.sub(r",(\s*[}\]])", r"\1", js)
+    temas = []
+    for mat in json.loads(js):
+        if not os.path.exists(os.path.join(ROOT, "temas", mat["slug"], "bioma.js")):
+            fail("materias.js: la materia '%s' no tiene temas/%s/bioma.js." % (mat["slug"], mat["slug"]))
+        for t in mat.get("temas", []):
+            if not isinstance(t.get("publicar"), bool):
+                fail("materias.js: el tema '%s' debe declarar `publicar: true` o `publicar: false`." % t.get("slug"))
+            temas.append(dict(t, materia=mat["slug"], bioma=mat["bioma"], accent=mat.get("accent", mat["slug"]),
+                              pagina=mat["slug"] + "-" + t["slug"], datos=("temas", mat["slug"], t["slug"], "data.js")))
+    return temas
+
+
+def check_mechs(subjects, engine, temas=()):
     """Regla 7: una mecanica declarada en datos sin escena es error de build."""
     scenes = set(re.findall(r"\bSCENES\.([A-Za-z_]\w*)\s*=\s*function", engine))
     if not scenes:
         fail("no encuentro ninguna escena `SCENES.<nombre> = function` en engine.js.")
     errores = []
-    for sub in subjects:
-        data = read("subjects", sub["slug"], "data.js")
+    fuentes = [("subjects", sub["slug"], "data.js") for sub in subjects] + [t["datos"] for t in temas]
+    for partes in fuentes:
+        data = read(*partes)
         usados = {}
         for mech in re.findall(r"""["']?\bmech["']?\s*:\s*["']([^"']*)["']""", data):
             usados[mech] = usados.get(mech, 0) + 1
         for mech, n in sorted(usados.items()):
             if mech not in scenes:
-                errores.append("  subjects/%s/data.js declara mech \"%s\" (%d veces)" % (sub["slug"], mech, n))
+                errores.append("  %s declara mech \"%s\" (%d veces)" % ("/".join(partes), mech, n))
     if errores:
         fail("hay mecanicas sin escena en SCENES (regla 7 de CLAUDE.md):\n" + "\n".join(errores) +
              "\n  Escenas que existen en assets/engine.js: " + ", ".join(sorted(scenes)) +
@@ -275,19 +300,39 @@ def build_game(sub, css, ui, props, engine, brand, credits):
     return page
 
 
-def mundo_scripts():
-    """Paletas, capa del mundo, arte procesado y bioma Caverna, en orden."""
+def build_tema(t, css, ui, props, engine, brand):
+    """Un tema de la base: motor, capa del mundo, bioma de su materia y datos."""
+    data = read(*t["datos"])
+    title = brand + " — " + t["nombre"]
+    desc = t["blurb"].replace('"', "&quot;")
+    # Capa comun: el shell del motor con el kit de la etapa 1 (sin repetir
+    # las fuentes, que ya vienen en engine.css) y assets/comun.css.
+    kit = re.sub(r"@font-face\s*\{[^}]*\}\s*", "", read("assets", "kit.css"))
+    css = css + "\n" + kit + "\n" + read("assets", "comun.css")
+    page = head(title, desc, css, t.get("accent", "maths"), "en").replace("<html ", '<html data-capa="comun" ', 1)
+    page += '<div id="app"></div>\n'
+    page += '<script>\n' + ui + '\n</script>\n'
+    page += '<script>\n' + props + '\n</script>\n'
+    page += mundo_scripts(t["materia"])
+    page += '<script>\n' + data + '\n</script>\n'
+    page += '<script>\n' + engine + '\n</script>\n'
+    page += '</body>\n</html>\n'
+    return page
+
+
+def mundo_scripts(materia="maths"):
+    """Paletas, capa del mundo, arte procesado y el bioma de la materia, en orden."""
     paletas = json.loads(read("assets", "paletas.json"))
     partes = ["window.SAMSAN_PALETAS = " + json.dumps({"contorno": paletas["contorno"], "rampas": paletas["rampas"]}) + ";",
               "window.SAMSAN_IMG = " + json.dumps(imagenes()) + ";"]
     for f in MUNDO:
         partes.append(read("assets", "mundo", f))
-    partes.append(read("temas", "maths", "bioma.js"))
+    partes.append(read("temas", materia, "bioma.js"))
     return "".join("<script>\n" + p + "\n</script>\n" for p in partes)
 
 
 # Orden de carga de la capa del mundo.
-MUNDO = ["base.js", "lienzo.js", "luz.js", "particulas.js", "capas.js", "sprites.js"]
+MUNDO = ["base.js", "lienzo.js", "luz.js", "particulas.js", "capas.js", "sprites.js", "instrumentos.js"]
 
 
 def imagenes():
@@ -392,13 +437,15 @@ def main():
     credits = credits_from_ui(ui)
 
     subjects = load_registry()
-    check_mechs(subjects, engine)
+    temas = load_materias()
+    check_mechs(subjects, engine, temas)
 
     built = []
     publicados = []
-    for sub in subjects:
-        page = build_game(sub, css, ui, props, engine, brand, credits)
-        name = sub["slug"] + ".html"
+    paginas = [(s_["slug"], s_, build_game(s_, css, ui, props, engine, brand, credits)) for s_ in subjects]
+    paginas += [(t["pagina"], dict(t, slug=t["pagina"], topic=t["nombre"]), build_tema(t, css, ui, props, engine, brand)) for t in temas]
+    for slug, sub, page in paginas:
+        name = slug + ".html"
         if sub["publicar"]:
             publicados.append(sub)
             rel = name
