@@ -173,6 +173,8 @@ Para ahorrar tokens: sin agentes múltiples, y capturas solo cuando Rafael las p
 
 La ficha de juego de La Mina queda en espera.
 
+**Arte del parque (28 sep 2026):** el mismo pixel art moderno ya aprobado, con una paleta nueva de parque (pasto, toldos y luces de feria) y su propia prueba de grises. PixelLab hace frutas, canasta, bichos, puestos y fondo; todo pasa por `tools/arte/procesar.py`. Los instrumentos (marco de 10, puntos, números y la operación) siguen dibujados por código. El arte se hace solo si el boceto pasa la prueba de Rafael.
+
 Pendiente en la etapa 2: Rafael (y si puede el jugador menor) juega el boceto 3 minutos. Si pasa, siguen las rondas 3 y 4, el parque con sus puestos y un minijuego para el jugador mayor. Nada se sube ni se publica hasta que Rafael lo pida. La fase H (dos jugadores) queda para la etapa 3.
 
 ## 8. Preguntas abiertas
