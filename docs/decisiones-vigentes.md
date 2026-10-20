@@ -1,6 +1,6 @@
 ---
 estado: vigente
-actualizado: 2026-09-28
+actualizado: 2026-10-20
 descripcion: Estado real, decisiones y plan por etapas de SAMSAN. Gana sobre cualquier otro documento. Lo leen el proyecto de Claude (integración de GitHub) y Claude Code.
 ---
 
@@ -173,9 +173,15 @@ Para ahorrar tokens: sin agentes múltiples, y capturas solo cuando Rafael las p
 
 La ficha de juego de La Mina queda en espera.
 
+**Segundo puesto (20 oct 2026):** para el jugador menor (Year 2), «La Pista de la R», en el área de Español.
+- Carga el motor de un carrito con una o dos piezas R y salta el hueco de la palabra: rr entre vocales, r suave entre vocales y R al inicio con turbo.
+- Ficha en `docs/temas/espanol-y2-la-r.md`.
+- Boceto gris en `prototipos/espanol-y2-pista-r/pista.js`, con rondas 1 y 2, **pendiente de la prueba de Rafael**. Para armarlo se agregaron un bioma mínimo de Español sin arte (`temas/espanol/bioma.js`), `P.voz` (solo voces locales en español; sin ellas no habla y el juego sigue) y los sonidos `motor-corto` y `motor-largo` en `prototipos/comun/proto-comun.js`.
+- Se abrió por decisión de Rafael antes de la prueba de «Atrapa la canasta», que sigue pendiente.
+
 **Arte del parque (28 sep 2026):** el mismo pixel art moderno ya aprobado, con una paleta nueva de parque (pasto, toldos y luces de feria) y su propia prueba de grises. PixelLab hace frutas, canasta, bichos, puestos y fondo; todo pasa por `tools/arte/procesar.py`. Los instrumentos (marco de 10, puntos, números y la operación) siguen dibujados por código. El arte se hace solo si el boceto pasa la prueba de Rafael.
 
-Pendiente en la etapa 2: Rafael (y si puede el jugador menor) juega el boceto 3 minutos. Si pasa, siguen las rondas 3 y 4, el parque con sus puestos y un minijuego para el jugador mayor. Nada se sube ni se publica hasta que Rafael lo pida. La fase H (dos jugadores) queda para la etapa 3.
+Pendiente en la etapa 2: Rafael (y si puede el jugador menor) juega cada boceto 3 minutos: «Atrapa la canasta» y «La Pista de la R». Si pasa, siguen las rondas 3 y 4, el parque con sus puestos y un minijuego para el jugador mayor. Nada se sube ni se publica hasta que Rafael lo pida. La fase H (dos jugadores) queda para la etapa 3.
 
 ## 8. Preguntas abiertas
 

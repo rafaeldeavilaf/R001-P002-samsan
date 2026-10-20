@@ -1,8 +1,9 @@
 /* ============================================================
    SAMSAN — LO COMUN DE LOS BOCETOS (solo local, _local/proto-*.html)
    Pantalla inicial con el explorador de PixelLab en el mundo y sus 12
-   tonos de piel, sonidos cortos, la gema grande en el centro al
-   completar un reto y una secuencia de retos con "play again".
+   tonos de piel, sonidos cortos, voz local en español, la gema grande
+   en el centro al completar un reto y una secuencia de retos con
+   "play again".
    Los textos viven aqui y en cada boceto: no es el motor
    (assets/engine.js no se toca hasta que un boceto pasa la prueba).
    ============================================================ */
@@ -35,7 +36,75 @@
     else if (tipo === 'mal') { tono(220, 0, 0.12, 'square', 0.04); tono(196, 0.1, 0.16, 'square', 0.04); }
     else if (tipo === 'veta') { tono(660, 0, 0.1); tono(880, 0.08, 0.14); }
     else if (tipo === 'gema') { [523, 659, 784, 1047].forEach(function (f, i) { tono(f, i * 0.09, 0.2, 'square', 0.05); }); }
+    else if (tipo === 'motor-corto') motor(0.32, 95, 125, 34, 0.07);     // "trr" breve: una pieza R
+    else if (tipo === 'motor-largo') motor(1.0, 70, 150, 22, 0.09);      // rugido de ~1 s: dos piezas R
   };
+
+  /* Motor: diente de sierra filtrado con tremolo cuadrado (el "trr").
+     o -> filtro -> tremolo (LFO) -> envolvente -> salida. */
+  function motor(dur, f0, f1, trem, vol) {
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended' && ac.resume) ac.resume();
+      var t = ac.currentTime, o = ac.createOscillator(), fil = ac.createBiquadFilter(), tr = ac.createGain(),
+          env = ac.createGain(), lfo = ac.createOscillator(), prof = ac.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(f0, t);
+      o.frequency.linearRampToValueAtTime(f1, t + dur * 0.6);
+      o.frequency.linearRampToValueAtTime(f1 * 0.85, t + dur);
+      fil.type = 'lowpass'; fil.frequency.value = 900;
+      tr.gain.value = 0.55; lfo.type = 'square'; lfo.frequency.value = trem; prof.gain.value = 0.45;
+      lfo.connect(prof); prof.connect(tr.gain);
+      env.gain.setValueAtTime(0.0001, t);
+      env.gain.exponentialRampToValueAtTime(vol, t + 0.03);
+      env.gain.setValueAtTime(vol, t + dur * 0.75);
+      env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(fil); fil.connect(tr); tr.connect(env); env.connect(ac.destination);
+      o.start(t); lfo.start(t); o.stop(t + dur + 0.02); lfo.stop(t + dur + 0.02);
+    } catch (e) { /* sin audio */ }
+  }
+
+  /* ---------- Voz: solo voces locales en español (regla 2) ----------
+     SpeechSynthesis con localService true y lang "es...". Las voces en
+     linea del navegador (localService false) mandan el texto a un
+     servidor: nunca se usan. Sin voz local, P.voz no hace nada y el
+     juego sigue con los dibujos. */
+  var voz = null;
+  function buscarVoz() {
+    try {
+      if (!window.speechSynthesis) return null;
+      var vs = window.speechSynthesis.getVoices() || [], es = [];
+      for (var i = 0; i < vs.length; i++) if (vs[i].localService === true && /^es/i.test(vs[i].lang || '')) es.push(vs[i]);
+      var pref = ['es-CO', 'es-419', 'es-MX', 'es-US', 'es-ES'];
+      es.sort(function (a, b) {
+        var ia = pref.indexOf((a.lang || '').replace('_', '-')), ib = pref.indexOf((b.lang || '').replace('_', '-'));
+        return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+      });
+      voz = es[0] || null;
+    } catch (e) { voz = null; }
+    return voz;
+  }
+  try {
+    if (window.speechSynthesis) {
+      buscarVoz();
+      if (window.speechSynthesis.addEventListener) window.speechSynthesis.addEventListener('voiceschanged', buscarVoz);
+      else window.speechSynthesis.onvoiceschanged = buscarVoz;
+    }
+  } catch (e) { /* sin voz */ }
+  /* Devuelve true si hablo. */
+  P.voz = function (texto) {
+    try {
+      if (!voz) buscarVoz();
+      if (!voz || !window.SpeechSynthesisUtterance) return false;
+      window.speechSynthesis.cancel();
+      var u = new window.SpeechSynthesisUtterance(texto);
+      u.voice = voz; u.lang = voz.lang; u.rate = 0.85; u.pitch = 1.05;
+      window.speechSynthesis.speak(u);
+      return true;
+    } catch (e) { return false; }
+  };
+  /* La voz elegida ({ nombre, lang }) o null. */
+  P.vozLocal = function () { if (!voz) buscarVoz(); return voz ? { nombre: voz.name, lang: voz.lang } : null; };
 
   /* ---------- Gema grande en el centro: se lee que paso ---------- */
   P.gemaCentro = function (host, texto, alTerminar) {
