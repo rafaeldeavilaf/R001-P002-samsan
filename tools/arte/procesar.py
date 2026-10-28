@@ -11,15 +11,23 @@ Ningún PNG entra al juego sin pasar por aquí (docs/direccion-grafica.md §7):
   5. contorno de 1 px #1E1426 alrededor de la silueta. Si el PNG ya trae un
      contorno oscuro (el prompt lo pide), se recolorea en vez de duplicarlo.
 
+El PNG se lee desde la biblioteca de arte R001-P003 (privada), nunca desde
+una copia en SAMSAN. La ruta es la del campo `archivos` de catalogo.json. Al
+terminar, el destino queda anotado en `usado_en` de la pieza (ver biblioteca.py)
+y hay que hacer commit en la biblioteca.
+
 Uso:
-  python3 tools/arte/procesar.py arte/crudo/antorcha.png --bioma caverna --destino temas/maths/img
-  python3 tools/arte/procesar.py arte/crudo/mascota-base.png --bioma mascota --destino assets/img --alto 44
+  python3 tools/arte/procesar.py mundo/lote-objetos-1/objects/wall_torch_with_wooden_handle/rotations/wall_torch_with_wooden_handle.png \
+      --bioma caverna --destino temas/maths/img --nombre antorcha.png
+  python3 tools/arte/procesar.py personajes/explorador-v2/Idle/rotations/south.png \
+      --bioma mascota --destino assets/img --nombre mascota-base.png
 """
 import argparse, os, sys
 from collections import deque
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from paletas import Paleta, CONTORNO, RAMPAS, luminancia, ROOT  # noqa: E402
+import biblioteca  # noqa: E402
 
 try:
     from PIL import Image
@@ -192,26 +200,46 @@ def procesar(ruta, bioma="comun", alto=None, bisel=True, contorno=True, divisor=
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("png")
+    ap.add_argument("png", help="ruta del PNG dentro de la biblioteca, como en `archivos` de catalogo.json")
     ap.add_argument("--bioma", default="comun", help="paleta de assets/paletas.json (caverna, mascota, comun)")
     ap.add_argument("--destino", default="assets/img", help="carpeta de salida, relativa al repo")
-    ap.add_argument("--nombre", help="nombre del archivo de salida (por defecto, el mismo)")
+    ap.add_argument("--nombre", help="nombre del archivo de salida; obligatorio al leer de la biblioteca")
     ap.add_argument("--alto", type=int, help="alto final en px (reduce con vecino más cercano)")
     ap.add_argument("--divisor", type=int, default=1, help="reduce 1/N por bloques (2 = mitad), mejor que --alto para pixel art")
     ap.add_argument("--escala", help="escala p/q por bloques, p. ej. 3/4 o 2/3")
     ap.add_argument("--quitar-abajo", type=float, default=0.0, help="fracción de alto que se quita abajo antes de procesar (0 a 1)")
     ap.add_argument("--sin-bisel", action="store_true")
     ap.add_argument("--sin-contorno", action="store_true")
+    ap.add_argument("--biblioteca", help="ruta de R001-P003 si no está junto a SAMSAN (o variable SAMSAN_BIBLIOTECA)")
+    ap.add_argument("--sin-catalogo", action="store_true",
+                    help="solo para pruebas: procesa un PNG cualquiera sin buscarlo ni anotarlo en el catálogo")
     a = ap.parse_args()
     escala = tuple(int(v) for v in a.escala.split("/")) if a.escala else None
-    out, info = procesar(a.png, a.bioma, a.alto, not a.sin_bisel, not a.sin_contorno, a.divisor, escala, a.quitar_abajo)
+
+    origen, bib, rel = a.png, None, None
+    if not a.sin_catalogo:
+        if not a.nombre:
+            ap.error("--nombre es obligatorio: en la biblioteca los PNG conservan el nombre de PixelLab (south.png, wall_torch_...).")
+        try:
+            bib = biblioteca.ubicar(a.biblioteca)
+            origen, rel = biblioteca.resolver(a.png, bib)
+            biblioteca.pieza_de(biblioteca.cargar(bib), rel)   # falla antes de procesar si no hay entrada
+        except biblioteca.ErrorBiblioteca as e:
+            sys.exit("ERROR: %s" % e)
+
+    out, info = procesar(origen, a.bioma, a.alto, not a.sin_bisel, not a.sin_contorno, a.divisor, escala, a.quitar_abajo)
     dest = os.path.join(ROOT, a.destino)
     os.makedirs(dest, exist_ok=True)
-    ruta = os.path.join(dest, a.nombre or os.path.basename(a.png))
+    ruta = os.path.join(dest, a.nombre or os.path.basename(origen))
     out.save(ruta, optimize=True)
+    destino_rel = os.path.relpath(ruta, ROOT).replace(os.sep, "/")
     print("OK -> %s  %dx%d, %d colores, fondo quitado: %d px, contorno previo: %s" % (
-        os.path.relpath(ruta, ROOT), info["tamano"][0], info["tamano"][1], info["colores"],
+        destino_rel, info["tamano"][0], info["tamano"][1], info["colores"],
         info["fondo_quitado"], "sí" if info["ya_contorneado"] else "no"))
+    if bib:
+        _, msg = biblioteca.registrar_uso(bib, rel, destino_rel)
+        print("Catálogo -> " + msg)
+        print(biblioteca.recordatorio(bib))
 
 
 if __name__ == "__main__":

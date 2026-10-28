@@ -11,7 +11,7 @@ Sigue los pasos en orden. No saltes los pasos 4 y 5: sin ellos se vuelve a const
 
 ## 1. Partir de la ficha
 
-Si existe `docs/temas/<materia>-<tema>.md`, léela completa y úsala como contrato. Si no existe, escríbela primero con el formato de `docs/temas/maths-y6-la-mina.md` y pídele a Rafael que la apruebe antes de escribir código.
+Si existe `docs/temas/<materia>-<tema>.md`, léela completa y úsala como contrato. Si no existe, escríbela primero con el formato de `docs/temas/maths-y6-la-mina.md` y pídele a Rafael que la apruebe antes de escribir código. La ficha termina con la lista de arte del paso 7, que se llena cuando el boceto pasa la prueba.
 
 Del material del colegio solo salen objetivos de aprendizaje. No copies enunciados, ejercicios, contextos, nombres ni respuestas. Las fotos de tareas nunca entran al repo; si traen respuestas de un niño, pueden estar mal y nunca se usan como correctas.
 
@@ -80,9 +80,34 @@ Si ninguna escena sirve, no inventes una en silencio: detente y explícale a Raf
 
 ## 7. Mundo y arte
 
-La zona vive en el bioma de su materia. Contextos, personajes y textos originales, escritos en el generador, nunca en el motor.
+La zona vive en el bioma de su materia. Contextos, personajes y textos originales, escritos en el generador, nunca en el motor. Instrumentos pedagógicos siempre por código.
 
-Si la materia no tiene bioma, sigue `docs/direccion-grafica.md`: define su paleta, pide a Rafael las generaciones de PixelLab de la tabla, pasa cada PNG por `tools/arte/procesar.py`, deriva los tiles con `tools/arte/tiles.py` y corre `tools/arte/prueba_grises.py`. Instrumentos pedagógicos siempre por código.
+El original de todo sprite vive en la biblioteca privada R001-P003 (`../R001-P003-biblioteca-arte`, con su `README.md` y `catalogo.json`). A SAMSAN, que es público, solo llega la copia procesada por `tools/arte/`.
+
+### Lista de arte (en la ficha, antes de generar)
+
+Solo cuando el boceto pasó la prueba de Rafael. Agrega a la ficha una sección "Lista de arte" con una fila por pieza:
+
+| Pieza | Dónde se usa | Decisión | Herramienta | Tamaño | Prompt | Referencia de estilo |
+|---|---|---|---|---|---|---|
+| Vela | prop del fondo, `temas/espanol/img/vela.png` | reutilizar `pl-019` | — | — | — | — |
+| Compañero de la Jungla | base y zona, `temas/science/img/companero.png` | nueva | Create Character v3, 8 direcciones | 64 × 64 | prompt específico + prompt base | `pl-003` (vista south) |
+
+1. **Reutiliza primero.** Busca en `catalogo.json` por nombre, prompt y categoría. Sirve una pieza en estado `crudo` o `procesado`; una `reemplazado` solo si la fila explica por qué; una `descartado`, nunca. Reutilizar escribe el id (`pl-0NN` o `cod-0NN`) y deja vacías herramienta, tamaño y prompt.
+2. **Una pieza nueva lleva todo.** Herramienta y opciones de PixelLab, tamaño, y el prompt completo en inglés: el prompt específico seguido del prompt base de `docs/direccion-grafica.md` §8 copiado literal. Ningún nombre de juego, persona ni colegio en el prompt. La referencia de estilo es un id del catálogo, por defecto `pl-003` (vista south).
+3. **Cuenta las generaciones.** Suma las piezas nuevas y compáralas con las que le quedan al plan de PixelLab. Si no alcanzan, dilo y propone cuáles se dibujan por código.
+4. **Compuerta:** Rafael aprueba la lista antes de gastar generaciones.
+
+### De la lista al juego
+
+1. Rafael genera cada pieza nueva en la web de PixelLab y descarga la exportación completa (zip con `metadata.json`), nunca solo el PNG.
+2. Se importa en la biblioteca, desde su raíz, y se sube allí:
+   `python3 herramientas/importar.py <zip> --carpeta <personajes|mundo|interfaz|efectos>/<nombre> --herramienta "<herramienta>" --nombre "<nombre en español>" --referencia "<id>"`
+3. Se procesa desde SAMSAN, con la ruta tal como figura en `archivos` del catálogo:
+   `python3 tools/arte/procesar.py <ruta en la biblioteca> --bioma <bioma> --destino temas/<materia>/img --nombre <archivo.png>`
+   Las texturas grises pasan por `tools/arte/tiles.py`. Cada corrida anota el destino en `usado_en` y pasa la pieza a `procesado`: hay que hacer commit en la biblioteca además del de SAMSAN.
+4. Si la materia no tiene bioma, define también su paleta en `docs/direccion-grafica.md` y `assets/paletas.json`, y corre `tools/arte/prueba_grises.py`.
+5. Nunca se copia a SAMSAN un PNG crudo, una exportación ni un `metadata.json`.
 
 ## 8. Generador
 
@@ -107,6 +132,7 @@ Corre la definición de terminado de `CLAUDE.md`. Escribe `tools/verify_<materia
 Resume a Rafael en español, sin tecnicismos innecesarios:
 
 - niveles construidos y verbo de cada uno;
+- piezas de arte usadas, con su id del catálogo, y generaciones gastadas;
 - horas usadas contra la estimación de la ficha;
 - lo que no se pudo hacer y por qué;
 - las tres señales para observar al niño: vuelve solo dos veces en siete días, dónde deja de jugar, y si puede inventar un reto parecido y resolverlo.

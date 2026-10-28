@@ -1,6 +1,6 @@
 ---
 estado: vigente
-actualizado: 2026-09-28
+actualizado: 2026-10-28
 descripcion: Dirección gráfica de SAMSAN (pixel art moderno). Capas de render, luz, movimiento, paletas, pipeline, reglas de legibilidad y lista de generaciones de PixelLab con sus prompts.
 ---
 
@@ -86,6 +86,8 @@ El mundo se dibuja en Canvas; los paneles, textos y botones siguen en HTML encim
 
 Todo PNG generado pasa por `tools/arte/` antes de entrar al juego. Nadie mete un PNG crudo.
 
+0. **Origen.** El original vive en la biblioteca privada R001-P003 (`../R001-P003-biblioteca-arte`), con su exportación de PixelLab y su ficha en `catalogo.json`. `procesar.py` y `tiles.py` leen desde ahí (o desde `--biblioteca` o la variable `SAMSAN_BIBLIOTECA`), rechazan un PNG sin entrada en el catálogo y anotan cada destino en `usado_en`. Actions no ve la biblioteca: el procesado se hace en el equipo de Rafael y SAMSAN solo versiona la copia procesada.
+
 1. `procesar.py` — quita fondo, recorta, cuantiza a la paleta del bioma, aplica contorno y bisel, y guarda en `assets/img/` (compartido) o `temas/<materia>/img/` (del bioma).
 2. `tiles.py` — convierte una textura gris de 64 × 64 en tiles de 32 × 32 con variantes, les aplica la rampa del bioma, redondea las esquinas expuestas y agrega el borde de luz arriba y el oscuro en los otros lados.
 3. `prueba_grises.py` — toma capturas de cada bioma con Playwright, las pasa a grises y comprueba contraste AA de los paneles. Actions lo corre.
@@ -95,44 +97,46 @@ Todo PNG generado pasa por `tools/arte/` antes de entrar al juego. Nadie mete un
 
 ## 8. Generaciones de PixelLab
 
-Plan de prueba, 40 generaciones. Se planean 30 (las 24 originales, 3 compañeros por la temática de constructor y 3 piezas de base) y quedan 10 de reserva para reintentos. El costo en generaciones cambia según el tamaño: después de la primera (la mascota), revisar cuánto bajó el contador y ajustar esta lista antes de seguir. Se generan a mano en la web de PixelLab, nunca por API, y nunca se sube una foto de una persona. Cada PNG se descarga apenas sale, con el nombre de la tabla.
+Plan de prueba, 40 generaciones. Se planean 30 (las 24 originales, 3 compañeros por la temática de constructor y 3 piezas de base) y quedan 10 de reserva para reintentos. El costo en generaciones cambia según el tamaño: después de la primera (la mascota), revisar cuánto bajó el contador y ajustar esta lista antes de seguir. Se generan a mano en la web de PixelLab, nunca por API, y nunca se sube una foto de una persona. Cada generación se descarga apenas sale como exportación completa (zip con `metadata.json`) y se importa a la biblioteca R001-P003 con `herramientas/importar.py`; nada crudo se guarda en SAMSAN. Antes de generar, la lista de arte de la ficha del tema (skill `nuevo-tema`, paso 7) busca en el catálogo qué se puede reutilizar.
 
-**Prompt base**, se agrega a todos: `modern hi-bit pixel art, side view, clean readable silhouette, 1px dark outline, hue-shifted palette with purple shadows and warm highlights, flat even lighting, transparent background, no text`.
+**Prompt base**, se agrega a todos y se copia literal en cada fila nueva de la lista de arte: `modern hi-bit pixel art, side view, clean readable silhouette, 1px dark outline, hue-shifted palette with purple shadows and warm highlights, flat even lighting, transparent background, no text`.
 
-La primera generación (la mascota base) es la referencia de estilo; en las demás se usa como imagen de referencia si la herramienta lo permite.
+La primera generación (la mascota base, hoy `pl-003` vista south) es la referencia de estilo; en las demás se usa como imagen de referencia si la herramienta lo permite.
 
-Estado al 27 sep 2026: hechos la mascota (Character Creator v3, 8 direcciones: se usan frente, espalda y perfil) y 16 objetos en un solo lote de Create Object (20 generaciones, estilo parejo). PixelLab no cambia la pose de un personaje sin sus herramientas de animación pagas: las filas 2 y 3 (feliz, piensa) se descartan y esas poses se hacen por código. El ladrillo del lote salió vacío y se dibuja por código. El 28 sep se regeneraron el explorador (neutro y sonriente, pelo a media longitud, sin sombrero; se usa la vista "south" como `mascota-base.png`) y el cofre (Create Object Pro de perfil estricto, con la mascota como referencia de estilo), 2 generaciones más.
+En la tabla, **Archivo** es el nombre de la copia procesada en SAMSAN (el `--nombre` de `procesar.py`) y **Pieza** es el id del original en `catalogo.json` de la biblioteca.
 
-| # | Etapa | Herramienta | Archivo | Prompt específico |
-|---|---|---|---|---|
-| 1 | 1 | Character Creator, 64 × 64 | `mascota-base.png` | small cheerful cave explorer kid, big round head, teal vest over cream shirt, backpack, boots, no hat, standing idle, gender neutral |
-| 2 | 1 | Character Creator | `mascota-feliz.png` | same explorer jumping with arms up, happy |
-| 3 | 1 | Character Creator | `mascota-piensa.png` | same explorer, hand on chin, thinking |
-| 4 | 1 | Object Creator | `sombrero-minero.png` | miner helmet with small head lamp, fits a small round head |
-| 5 | 1 | Object Creator | `textura-roca.png` | seamless cave rock texture of rounded stone chunks with cracks, grayscale, 64x64 |
-| 6 | 1 | Object Creator | `antorcha.png` | wall torch with wooden handle, flame |
-| 7 | 1 | Object Creator | `cofre.png` | small wooden treasure chest, closed |
-| 8 | 1 | Object Creator | `gema.png` | faceted gem, single object |
-| 9 | 1 | Object Creator | `carretilla.png` | small mine cart on rails |
-| 10 | 1 | Object Creator | `farol.png` | hanging oil lantern |
-| 10b | 1 | Character Creator, 64 × 64 | `companero-topo.png` | small friendly mole miner with tiny helmet and head lamp, standing idle, side view |
-| 11 | 3 | Object Creator | `textura-jungla.png` | seamless jungle soil and moss texture, grayscale, 64x64 |
-| 12 | 3 | Object Creator | `sombrero-constructor.png` | builder hard hat, fits a small round head |
-| 13 | 3 | Object Creator | `casa-arbol.png` | small wooden treehouse with ladder, daytime |
-| 14 | 3 | Object Creator | `ladrillo.png` | single clay brick, front view |
-| 15 | 3 | Object Creator | `textura-biblioteca.png` | seamless old stone library wall texture, grayscale, 64x64 |
-| 16 | 3 | Object Creator | `sombrero-archivista.png` | hooded cloak hood, fits a small round head |
-| 17 | 3 | Object Creator | `estante.png` | tall bookshelf with old books |
-| 18 | 3 | Object Creator | `vela.png` | candle on brass holder |
-| 18b | 3 | Character Creator | `companero-jungla.png` | compañero de la Jungla; se define con la ficha del tema de Year 2 |
-| 18c | 3 | Character Creator | `companero-biblioteca.png` | compañero de la Biblioteca; se define al migrar Español |
-| 19 | Inglés | Object Creator | `textura-escenario.png` | seamless wooden stage floor texture, grayscale, 64x64 |
-| 20 | Inglés | Object Creator | `sombrero-teatro.png` | feathered theatre hat, fits a small round head |
-| 21 | 4 | Object Creator | `sombrero-premio-1.png` | explorer wide brim hat |
-| 22 | 4 | Object Creator | `sombrero-premio-2.png` | crown made of crystals |
-| 23 | 4 | Object Creator | `sombrero-premio-3.png` | pirate tricorn hat |
-| 24 | 4 | Object Creator | `portal-bioma.png` | stone archway portal with glowing runes |
-| 25–27 | 4 | Object Creator | `base-*.png` | piezas de la base propia (casa, taller, jardín); se definen al planear la etapa 4 |
+El 28 oct 2026 los originales pasaron de `arte/crudo/` (archivado fuera del repo) a la biblioteca R001-P003, verificados por MD5. Estado al 27 sep 2026: hechos la mascota (Character Creator v3, 8 direcciones: se usan frente, espalda y perfil) y 16 objetos en un solo lote de Create Object (20 generaciones, estilo parejo). PixelLab no cambia la pose de un personaje sin sus herramientas de animación pagas: las filas 2 y 3 (feliz, piensa) se descartan y esas poses se hacen por código. El ladrillo del lote salió vacío y se dibuja por código. El 28 sep se regeneraron el explorador (neutro y sonriente, pelo a media longitud, sin sombrero; se usa la vista "south" como `mascota-base.png`) y el cofre (Create Object Pro de perfil estricto, con la mascota como referencia de estilo), 2 generaciones más.
+
+| # | Etapa | Herramienta | Archivo | Prompt específico | Pieza |
+|---|---|---|---|---|---|
+| 1 | 1 | Character Creator, 64 × 64 | `mascota-base.png` | small cheerful cave explorer kid, big round head, teal vest over cream shirt, backpack, boots, no hat, standing idle, gender neutral | `pl-003` (vista south) |
+| 2 | 1 | Character Creator | `mascota-feliz.png` | same explorer jumping with arms up, happy | descartada |
+| 3 | 1 | Character Creator | `mascota-piensa.png` | same explorer, hand on chin, thinking | descartada |
+| 4 | 1 | Object Creator | `sombrero-minero.png` | miner helmet with small head lamp, fits a small round head | `pl-008` |
+| 5 | 1 | Object Creator | `textura-roca.png` | seamless cave rock texture of rounded stone chunks with cracks, grayscale, 64x64 | no se generó; roca por código |
+| 6 | 1 | Object Creator | `antorcha.png` | wall torch with wooden handle, flame | `pl-004` |
+| 7 | 1 | Object Creator | `cofre.png` | small wooden treasure chest, closed | `pl-020` (reemplaza a `pl-009`) |
+| 8 | 1 | Object Creator | `gema.png` | faceted gem, single object | `pl-012` |
+| 9 | 1 | Object Creator | `carretilla.png` | small mine cart on rails | `pl-005` |
+| 10 | 1 | Object Creator | `farol.png` | hanging oil lantern | `pl-011` |
+| 10b | 1 | Character Creator, 64 × 64 | `companero-topo.png` | small friendly mole miner with tiny helmet and head lamp, standing idle, side view | `pl-002` (vista south-east) |
+| 11 | 3 | Object Creator | `textura-jungla.png` | seamless jungle soil and moss texture, grayscale, 64x64 | pendiente |
+| 12 | 3 | Object Creator | `sombrero-constructor.png` | builder hard hat, fits a small round head | `pl-007` |
+| 13 | 3 | Object Creator | `casa-arbol.png` | small wooden treehouse with ladder, daytime | `pl-006` |
+| 14 | 3 | Object Creator | `ladrillo.png` | single clay brick, front view | `pl-013`, descartada (vacía) |
+| 15 | 3 | Object Creator | `textura-biblioteca.png` | seamless old stone library wall texture, grayscale, 64x64 | pendiente |
+| 16 | 3 | Object Creator | `sombrero-archivista.png` | hooded cloak hood, fits a small round head | `pl-015` |
+| 17 | 3 | Object Creator | `estante.png` | tall bookshelf with old books | `pl-010` |
+| 18 | 3 | Object Creator | `vela.png` | candle on brass holder | `pl-019` |
+| 18b | 3 | Character Creator | `companero-jungla.png` | compañero de la Jungla; se define con la ficha del tema de Year 2 | pendiente |
+| 18c | 3 | Character Creator | `companero-biblioteca.png` | compañero de la Biblioteca; se define al migrar Español | pendiente |
+| 19 | Inglés | Object Creator | `textura-escenario.png` | seamless wooden stage floor texture, grayscale, 64x64 | pendiente |
+| 20 | Inglés | Object Creator | `sombrero-teatro.png` | feathered theatre hat, fits a small round head | pendiente |
+| 21 | 4 | Object Creator | `sombrero-premio-1.png` | explorer wide brim hat | `pl-016` |
+| 22 | 4 | Object Creator | `sombrero-premio-2.png` | crown made of crystals | `pl-017` |
+| 23 | 4 | Object Creator | `sombrero-premio-3.png` | pirate tricorn hat | `pl-018` |
+| 24 | 4 | Object Creator | `portal-bioma.png` | stone archway portal with glowing runes | `pl-014` |
+| 25–27 | 4 | Object Creator | `base-*.png` | piezas de la base propia (casa, taller, jardín); se definen al planear la etapa 4 | pendiente |
 
 Las filas marcadas "Inglés" se generan cuando el colegio ponga el primer tema de Inglés. Science recibe su textura, sombrero (gafas de laboratorio) y props cuando llegue su primer tema, con la reserva.
 

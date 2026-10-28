@@ -1,6 +1,6 @@
 ---
 estado: vigente
-actualizado: 2026-10-20
+actualizado: 2026-10-28
 descripcion: Estado real, decisiones y plan por etapas de SAMSAN. Gana sobre cualquier otro documento. Lo leen el proyecto de Claude (integración de GitHub) y Claude Code.
 ---
 
@@ -67,6 +67,8 @@ El sitio anterior (`Cycle_test`) está apagado y su repo quedó privado el 27 de
 Pixel art moderno, no retro. Detalle completo en `docs/direccion-grafica.md`. Lienzo de 640 × 360, tiles de 32 px, mascota de unos 48 px. El mundo se dibuja en Canvas con luz dinámica, resplandor, partículas, cinco capas de parallax, cámara suave y tono de color por bioma; los textos y paneles, en HTML nítido encima. Instrumentos pedagógicos, tiles, luz y movimiento por código; mascota, sombreros, props y texturas base por PixelLab en poses quietas (plan de prueba, 24 generaciones planeadas de 40). Paneles de texto siempre claros.
 
 Referencia aprobada el 27 de septiembre de 2026: `docs/referencia/muestra-estilo.html`. Es el piso de calidad de todo lo gráfico.
+
+**Decisión del 28 oct 2026: el arte original vive en la biblioteca R001-P003.** Repositorio privado con cada exportación de PixelLab, su `metadata.json` y su ficha en `catalogo.json`. `tools/arte/` lee desde ahí y anota cada destino en `usado_en`; SAMSAN solo versiona la copia procesada. `arte/crudo/` se verificó por MD5 contra la biblioteca (63 PNG y 5 `metadata.json`) y se archivó fuera del repo. Cada ficha de tema lleva una lista de arte (reutilizar un id del catálogo o pedir una pieza nueva con herramienta, tamaño y prompt) que Rafael aprueba antes de gastar generaciones (skill `nuevo-tema`, paso 7).
 
 ## 5. Primer tema
 

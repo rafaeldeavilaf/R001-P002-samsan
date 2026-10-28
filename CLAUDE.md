@@ -13,7 +13,7 @@ python3 tools/gen/<materia>_<tema>.py  # regenera los datos de un tema con valid
 python3 tools/build.py                 # inlina motor, datos e imágenes en los .html de la raíz
 node tools/harness.js                  # regresión completa; debe salir con código 0
 node tools/verify_<materia>_<tema>.js  # verificación propia de un tema
-python3 tools/arte/procesar.py <png>   # pasa un PNG generado por el pipeline de arte
+python3 tools/arte/procesar.py <ruta en R001-P003> --nombre <png>  # procesa un original de la biblioteca de arte y anota usado_en
 python3 tools/arte/prueba_grises.py    # capturas en grises y contraste de paneles
 python3 tools/arte/prueba_pipeline.py  # prueba procesar.py y tiles.py con PNG sintéticos
 node tools/verify_mundo.js             # lógica de la capa del mundo (assets/mundo/)
@@ -34,10 +34,10 @@ Los temas de la base siguen la estructura de abajo desde la etapa 2 (el primero 
 - `temas/<materia>/img/` — arte del bioma de esa materia.
 - `tools/gen/<materia>_<tema>.py` — generador de un tema, apoyado en `tools/gen/samsan_gen.py` (familias, variantes, sello de tres pasos, distractores, validaciones comunes).
 - `prototipos/` — bocetos grises para que Rafael juegue un reto antes de construirlo: `comun/` (inicio, gema, sonido) y `<materia>-<tema>/<nombre>.js`, con el nivel escrito a mano. Se construyen solo en `_local/` y nunca se publican. **Un boceto no entra a `temas/` sin pasar la prueba de Rafael** (método en `docs/decisiones-vigentes.md`). `maths-plantilla/gris.js` es el punto de partida.
-- `tools/arte/` — pipeline de arte. Ningún PNG entra al juego sin pasar por aquí. Sus dependencias de Python van en `requirements.txt`.
+- `tools/arte/` — pipeline de arte. Ningún PNG entra al juego sin pasar por aquí. Lee los originales desde la biblioteca privada R001-P003 (`../R001-P003-biblioteca-arte`, o `--biblioteca` / `SAMSAN_BIBLIOTECA`), que guarda cada exportación de PixelLab con su `metadata.json` y su ficha en `catalogo.json`; `biblioteca.py` exige que el PNG tenga ficha y anota el destino en `usado_en`. Las piezas nuevas entran a la biblioteca con su `herramientas/importar.py`. A este repo, que es público, nunca llega un PNG crudo ni una exportación. Sus dependencias de Python van en `requirements.txt`.
 - `docs/decisiones-vigentes.md` — fuente única de verdad.
 - `docs/referencia/` — documentos en estado `referencia` (sistema de diseño viejo, niveles y jefes, plan de ambientes, errores típicos de inglés, muestra de estilo aprobada).
-- `docs/direccion-grafica.md` — reglas gráficas, paletas, pipeline y lista de generaciones de PixelLab.
+- `docs/direccion-grafica.md` — reglas gráficas, paletas, pipeline, prompt base y lista de generaciones de PixelLab con el id de cada pieza en la biblioteca.
 - `docs/temas/<materia>-<tema>.md` — ficha de cada tema: objetivos, errores típicos, niveles, contratos.
 - Cada documento de `docs/` abre con `estado:` (`vigente`, `referencia` o `reemplazado`) y `actualizado:`. Actions falla si falta.
 

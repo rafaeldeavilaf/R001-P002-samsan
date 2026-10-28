@@ -7,12 +7,12 @@ No necesita arte real: fabrica una imagen de prueba en una carpeta temporal y
 comprueba que la salida cumpla las reglas de docs/direccion-grafica.md.
 Sale con código 0 si todo pasa.
 """
-import os, sys, tempfile, random
+import os, sys, tempfile, random, json, datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image  # noqa: E402
 from paletas import Paleta, RAMPAS, CONTORNO, BIOMAS  # noqa: E402
-import procesar, tiles  # noqa: E402
+import procesar, tiles, biblioteca  # noqa: E402
 
 ok, fallos = 0, []
 
@@ -108,6 +108,53 @@ check("sin bordes en lados no expuestos: el interior es la textura tal cual",
       all(cell(0, 0, x, y)[:3] == R[paso(tp[x, y])] for y in range(32) for x in range(32)))
 check("dos tiles vecinos rodeados continúan la textura al píxel",
       all(cell(0, 0, 31, y)[:3] == R[paso(tp[31, y])] and cell(1, 0, 0, y)[:3] == R[paso(tp[32, y])] for y in range(32)))
+
+print("\n5. biblioteca.py: lectura desde R001-P003 y registro en catalogo.json")
+# Actions no ve la biblioteca privada: se arma una falsa con la misma forma.
+bib = os.path.join(tmp, "biblioteca")
+os.makedirs(os.path.join(bib, "personajes", "falso", "Idle", "rotations"))
+os.makedirs(os.path.join(bib, "mundo", "suelto"))
+Image.new("RGBA", (8, 8), (90, 160, 200, 255)).save(os.path.join(bib, "personajes", "falso", "Idle", "rotations", "south.png"))
+Image.new("RGBA", (8, 8), (90, 160, 200, 255)).save(os.path.join(bib, "personajes", "falso", "Idle", "rotations", "east.png"))
+Image.new("RGBA", (8, 8), (200, 90, 40, 255)).save(os.path.join(bib, "mundo", "suelto", "sin-ficha.png"))
+cat0 = {"biblioteca": "prueba", "actualizado": "2026-01-01", "piezas": [{
+    "id": "pl-901", "nombre": "Falso", "archivos": [
+        "personajes/falso/Idle/rotations/east.png", "personajes/falso/Idle/rotations/south.png"],
+    "estado": "crudo", "usado_en": []}]}
+biblioteca.guardar(bib, cat0)
+check("guardar conserva el formato (indent 2, UTF-8, salto final)",
+      open(os.path.join(bib, "catalogo.json"), encoding="utf-8").read() == json.dumps(cat0, ensure_ascii=False, indent=2) + "\n")
+check("ubica la biblioteca por ruta explícita", biblioteca.ubicar(bib) == os.path.abspath(bib))
+try:
+    biblioteca.ubicar(os.path.join(tmp, "no-existe"))
+    check("una ruta sin catalogo.json se rechaza", False)
+except biblioteca.ErrorBiblioteca:
+    check("una ruta sin catalogo.json se rechaza", True)
+abs_, rel = biblioteca.resolver("personajes/falso/Idle/rotations/south.png", bib)
+check("resuelve la ruta del catálogo", rel == "personajes/falso/Idle/rotations/south.png" and os.path.isfile(abs_), rel)
+check("resuelve también una ruta absoluta", biblioteca.resolver(abs_, bib)[1] == rel)
+try:
+    biblioteca.resolver(ruta, bib)                                   # objeto.png del caso 1, fuera de la biblioteca
+    check("un PNG fuera de la biblioteca se rechaza", False)
+except biblioteca.ErrorBiblioteca:
+    check("un PNG fuera de la biblioteca se rechaza", True)
+try:
+    biblioteca.pieza_de(biblioteca.cargar(bib), "mundo/suelto/sin-ficha.png")
+    check("un PNG sin entrada en el catálogo se rechaza", False)
+except biblioteca.ErrorBiblioteca:
+    check("un PNG sin entrada en el catálogo se rechaza", True)
+hoy = datetime.date(2026, 10, 28)
+pid, _ = biblioteca.registrar_uso(bib, rel, "assets/img/falso.png", hoy)
+c1 = biblioteca.cargar(bib)
+p1 = c1["piezas"][0]
+check("anota el destino con la vista en usado_en", p1["usado_en"] == ["R001-P002 assets/img/falso.png (vista south)"], p1["usado_en"])
+check("pasa la pieza de crudo a procesado", p1["estado"] == "procesado", p1["estado"])
+check("actualiza la fecha del catálogo", c1["actualizado"] == "2026-10-28", c1["actualizado"])
+biblioteca.registrar_uso(bib, rel, "assets/img/falso.png", hoy)
+check("procesar dos veces al mismo destino no duplica", len(biblioteca.cargar(bib)["piezas"][0]["usado_en"]) == 1)
+biblioteca.registrar_uso(bib, "personajes/falso/Idle/rotations/east.png", "temas/maths/img/falso-lado.png", hoy)
+check("un segundo destino se agrega aparte",
+      biblioteca.cargar(bib)["piezas"][0]["usado_en"][-1] == "R001-P002 temas/maths/img/falso-lado.png (vista east)")
 
 print("\nRESULTADO\n%d comprobaciones pasadas, %d fallidas." % (ok, len(fallos)))
 if fallos:

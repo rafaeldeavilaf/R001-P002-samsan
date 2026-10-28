@@ -15,13 +15,17 @@ TILES — convierte una textura gris de 64 x 64 en la hoja de tiles de un bioma.
 Salida: una hoja PNG de 16 columnas (máscara) x 4 filas (variante), 512 x 128.
 El bioma la lee en el navegador y pinta cada celda del mapa con su máscara.
 
+La textura se lee desde la biblioteca de arte R001-P003, igual que en
+procesar.py, y la hoja resultante queda anotada en `usado_en` de su pieza.
+
 Uso:
-  python3 tools/arte/tiles.py arte/crudo/textura-roca.png --rampa roca --salida temas/maths/img/tiles-roca.png
+  python3 tools/arte/tiles.py mundo/<carpeta>/<textura>.png --rampa roca --salida temas/maths/img/tiles-roca.png
 """
 import argparse, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from paletas import RAMPAS, ROOT  # noqa: E402
+import biblioteca  # noqa: E402
 
 try:
     from PIL import Image
@@ -114,15 +118,31 @@ def generar(textura, rampa_nombre):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("textura")
+    ap.add_argument("textura", help="ruta de la textura dentro de la biblioteca, como en `archivos` de catalogo.json")
     ap.add_argument("--rampa", default="roca")
     ap.add_argument("--salida", required=True, help="PNG de salida, relativo al repo")
+    ap.add_argument("--biblioteca", help="ruta de R001-P003 si no está junto a SAMSAN (o variable SAMSAN_BIBLIOTECA)")
+    ap.add_argument("--sin-catalogo", action="store_true",
+                    help="solo para pruebas: usa una textura cualquiera sin buscarla ni anotarla en el catálogo")
     a = ap.parse_args()
-    hoja = generar(a.textura, a.rampa)
+    origen, bib, rel = a.textura, None, None
+    if not a.sin_catalogo:
+        try:
+            bib = biblioteca.ubicar(a.biblioteca)
+            origen, rel = biblioteca.resolver(a.textura, bib)
+            biblioteca.pieza_de(biblioteca.cargar(bib), rel)
+        except biblioteca.ErrorBiblioteca as e:
+            sys.exit("ERROR: %s" % e)
+    hoja = generar(origen, a.rampa)
     ruta = os.path.join(ROOT, a.salida)
     os.makedirs(os.path.dirname(ruta), exist_ok=True)
     hoja.save(ruta, optimize=True)
-    print("OK -> %s  %dx%d (16 máscaras x 4 variantes)" % (os.path.relpath(ruta, ROOT), hoja.size[0], hoja.size[1]))
+    destino_rel = os.path.relpath(ruta, ROOT).replace(os.sep, "/")
+    print("OK -> %s  %dx%d (16 máscaras x 4 variantes)" % (destino_rel, hoja.size[0], hoja.size[1]))
+    if bib:
+        _, msg = biblioteca.registrar_uso(bib, rel, destino_rel)
+        print("Catálogo -> " + msg)
+        print(biblioteca.recordatorio(bib))
 
 
 if __name__ == "__main__":
