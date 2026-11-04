@@ -65,9 +65,8 @@
     var root = $('#proto');
     var tarjetas = '';
     JUEGOS.forEach(function (j) {
-      var t = TEXTOS[j.id] || { titulo: j.titulo, sub: j.texto }, va = 0;
-      try { va = parseInt(localStorage.getItem('samsan:proto-repaso-' + j.id), 10) || 0; } catch (e) { va = 0; }
-      var sub = va > 0 ? 'Go on: round ' + (va + 1) + ' of ' + j.rondas : t.sub;
+      var t = TEXTOS[j.id] || { titulo: j.titulo, sub: j.texto }, va = j.hechas ? j.hechas().length : 0;
+      var sub = va > 0 ? 'Gems: ' + va + ' of ' + j.rondas : t.sub;
       tarjetas += '<button type="button" class="mj-tarjeta" data-juego="' + esc(j.id) + '" aria-label="Play ' + esc(t.titulo) + '">' +
         (ICONOS[j.id] || '') + '<span><b>' + esc(t.titulo) + '</b><small>' + esc(sub) + '</small></span><span class="mj-ir">PLAY &#9654;</span></button>';
     });

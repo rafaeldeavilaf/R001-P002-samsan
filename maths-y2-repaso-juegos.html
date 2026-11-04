@@ -2793,6 +2793,20 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     '.rp-voz{min-width:48px;min-height:48px;padding:0;font-size:1rem}',
     '.rp-voz svg{width:26px;height:26px;display:block;margin:auto}',
     '.rp-menu{min-height:48px;padding:0 14px;font-size:1rem}',
+    /* submenu de niveles */
+    '.rp-lista{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}',
+    '.rp-nivel{display:flex;align-items:center;gap:12px;width:100%;min-height:72px;padding:8px 12px;border:3px solid #1E1426;border-radius:12px;background:#FFFDF6;color:#1E1426;font:inherit;text-align:left;cursor:pointer;box-shadow:0 4px 0 #1E1426}',
+    '.rp-nivel:active{transform:translateY(2px);box-shadow:0 2px 0 #1E1426}',
+    '.rp-nivel:focus-visible{outline:4px solid #2F9BB8;outline-offset:3px}',
+    '.rp-nivel__n{flex:0 0 auto;display:grid;place-items:center;width:46px;height:46px;border:3px solid #1E1426;border-radius:50%;background:#7FE3F0;font-size:1.4rem;font-weight:900}',
+    '.rp-nivel.is-hecha .rp-nivel__n{background:#D8F0C8}',
+    '.rp-nivel__t{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}',
+    '.rp-nivel__t strong{font-size:1.15rem;font-weight:900}.rp-nivel__t small{font-size:.9rem;font-weight:700;color:#3D3128;line-height:1.25}',
+    '.rp-nivel__e{flex:0 0 auto;font-size:1.2rem;font-weight:900}',
+    '.rp-nivel__e em{font-style:normal;display:inline-block;padding:4px 10px;border:2px solid #1E1426;border-radius:8px;background:#F2B53A;font-size:.95rem;white-space:nowrap}',
+    '.rp-nivel.is-sig{background:#FFF4D6;border-color:#1E1426;box-shadow:0 4px 0 #1E1426,0 0 0 4px #F2B53A}',
+    '@media (max-width:600px){.rp-lista{grid-template-columns:1fr}.rp-nivel{min-height:64px;gap:10px;padding:8px 10px}.rp-nivel__t small{font-size:.85rem}.rp-nivel__e em{font-size:.85rem;padding:3px 7px}}',
+    '@media (max-height:500px) and (orientation:landscape){.rp-lista{grid-template-columns:repeat(2,1fr);gap:8px}.rp-nivel{min-height:56px;padding:6px 10px}.rp-nivel__n{width:38px;height:38px;font-size:1.15rem}.rp-nivel__t small{display:none}}',
     /* Barra fija abajo: HINT, DONE y NEXT siempre a la vista (telefono y portatil). */
     '.rp .rp-pie .k-mensaje{flex:1 1 100%;margin:0 0 6px;min-height:0}',
     '.rp-pie .k-mensaje:empty{display:none}',
@@ -3237,24 +3251,72 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     function root() { return $('#proto'); }
 
     /* Atajo para probar: la direccion termina en #r3 (ronda 3) o #r3i2 (ronda 3, reto 2). */
-    /* Progreso: la ronda en la que va el nino (sin aciertos ni intentos: regla 4). */
-    var CLAVE = 'samsan:proto-repaso-' + (o.id || 'juego');
-    function guardar(n) { try { if (n > 0 && n < o.rondas.length) localStorage.setItem(CLAVE, String(n)); else localStorage.removeItem(CLAVE); } catch (e) { /* sin almacenamiento */ } }
-    function guardada() { try { var n = parseInt(localStorage.getItem(CLAVE), 10); return n > 0 && n < o.rondas.length ? n : 0; } catch (e) { return 0; } }
+    /* Progreso: que rondas se terminaron, nada mas (sin aciertos ni intentos: regla 4).
+       Se guarda en este navegador; nada sale de el (regla 3). */
+    var CLAVE = 'samsan:proto-repaso-' + (o.id || 'juego'), CLAVE_H = CLAVE + '-hechas';
+    function hechas() {
+      var h = [];
+      try {
+        var t = localStorage.getItem(CLAVE_H);
+        if (t) h = t.split(',').map(Number).filter(function (n) { return n >= 0 && n < o.rondas.length; });
+        else {   /* progreso viejo: el numero de la ronda en la que iba */
+          var v = parseInt(localStorage.getItem(CLAVE), 10);
+          for (var k = 0; v > 0 && k < v && k < o.rondas.length; k++) h.push(k);
+        }
+      } catch (e) { /* sin almacenamiento */ }
+      return h;
+    }
+    function marcarHecha(n) {
+      var h = hechas();
+      if (h.indexOf(n) < 0) h.push(n);
+      h.sort(function (a, b) { return a - b; });
+      try { localStorage.setItem(CLAVE_H, h.join(',')); localStorage.removeItem(CLAVE); } catch (e) { /* sin almacenamiento */ }
+      return h;
+    }
     function empezar(atajo) {
-      gemas = 0; ri = 0; ii = 0;
-      if (!atajo && !(location.hash && !window.SAMSAN_MENU)) { ri = guardada(); gemas = ri; }
+      ri = 0; ii = 0; gemas = hechas().length;
       var m = /^#r(\d+)(?:i(\d+))?$/.exec(typeof atajo === 'string' ? atajo : (window.SAMSAN_MENU ? '' : location.hash || ''));
       if (m && +m[1] >= 1 && +m[1] <= o.rondas.length) {
         ri = +m[1] - 1;
         if (m[2] !== undefined && +m[2] < o.rondas[ri].items.length) { ii = +m[2]; pantallaItem(); return; }
+        introRonda(); return;
       }
-      introRonda();
+      niveles();
+    }
+
+    /* Submenu de niveles: las rondas en orden, todas abiertas. La siguiente sin terminar
+       dice Start here; las terminadas muestran su gema. El nino o el padre eligen. */
+    function niveles() {
+      cortar();
+      var h = hechas(), sig = -1;
+      for (var k = 0; k < o.rondas.length; k++) if (h.indexOf(k) < 0) { sig = k; break; }
+      gemas = h.length;
+      var lista = o.rondas.map(function (r, k) {
+        var hecha = h.indexOf(k) >= 0, esSig = k === sig;
+        return '<li><button type="button" class="rp-nivel' + (hecha ? ' is-hecha' : '') + (esSig ? ' is-sig' : '') + '" data-ronda="' + k + '" aria-label="Round ' + (k + 1) + ': ' + esc(r.nombre) + (hecha ? ', done' : '') + '">' +
+          '<b class="rp-nivel__n">' + (k + 1) + '</b>' +
+          '<span class="rp-nivel__t"><strong>' + esc(r.nombre) + '</strong><small>' + esc(r.texto) + '</small></span>' +
+          '<span class="rp-nivel__e">' + (hecha ? P.gemaSVG(30) : esSig ? '<em>Start here &#9654;</em>' : '&#9654;') + '</span></button></li>';
+      }).join('');
+      root().innerHTML = marcoMundo(
+        '<section class="k-panel rp rp-niveles" id="rp">' +
+          '<div class="rp-cab"><div><p class="k-rotulo">' + esc(o.rotulo || '') + '</p><h2>' + esc(o.titulo) + '</h2></div>' +
+            '<div class="rp-der"><span class="rp-gemas" aria-label="Gems">' + P.gemaSVG(22) + '<b>' + gemas + '</b></span>' +
+            (window.SAMSAN_MENU ? '<button type="button" class="k-boton rp-menu" id="rp-juegos" aria-label="Back to the games">&#9664; GAMES</button>' : '') + '</div></div>' +
+          '<p class="rp-consigna">Pick a round. Start with 1.</p>' +
+          '<ol class="rp-lista">' + lista + '</ol>' +
+        '</section>');
+      Array.prototype.forEach.call(root().querySelectorAll('.rp-nivel'), function (b) {
+        b.addEventListener('click', function () { P.sonido('paso'); ri = +b.getAttribute('data-ronda'); ii = 0; introRonda(); });
+      });
+      var bj = $('#rp-juegos');
+      if (bj) bj.addEventListener('click', function () { P.sonido('paso'); salir(); });
+      P.vozEn('Pick a round.');
     }
 
     function introRonda() {
       var r = o.rondas[ri];
-      guardar(ri);
+      gemas = hechas().length;
       root().innerHTML = marcoMundo(
         '<section class="k-panel rp rp-intro" id="rp"><p class="k-rotulo">Round ' + (ri + 1) + ' of ' + o.rondas.length + '</p>' +
         '<h2>' + esc(r.nombre) + '</h2><div class="rp-pj" id="rp-pj"></div><p class="rp-consigna">' + esc(r.texto) + '</p>' +
@@ -3334,15 +3396,14 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     }
 
     function finRonda() {
-      gemas++;
       var ultima = ri + 1 >= o.rondas.length;
-      guardar(ultima ? 0 : ri + 1);
+      gemas = marcarHecha(ri).length;
       /* Pantalla de ronda hecha: la gema se ve grande y el nino decide cuando seguir. */
       root().innerHTML = marcoMundo(
         '<section class="k-panel rp rp-intro rp-hecha" id="rp"><p class="k-rotulo">Round ' + (ri + 1) + ' of ' + o.rondas.length + '</p>' +
         '<h2>Round done!</h2><div class="rp-gema-grande">' + P.gemaSVG(96) + '</div>' +
-        '<p class="rp-consigna">+1 gem. You have ' + gemas + '.</p><div class="rp-pj" id="rp-pj"></div>' +
-        '<div class="k-botones"><button type="button" class="k-boton k-boton--primario" id="rp-seguir">' + (ultima ? 'FINISH' : 'NEXT ROUND') + ' &#9654;</button>' + botonMenu() + '</div></section>');
+        '<p class="rp-consigna">You have ' + gemas + ' of ' + o.rondas.length + ' gems.</p><div class="rp-pj" id="rp-pj"></div>' +
+        '<div class="k-botones"><button type="button" class="k-boton k-boton--primario" id="rp-seguir">' + (ultima ? 'FINISH' : 'NEXT ROUND') + ' &#9654;</button>' + botonNiveles() + '</div></section>');
       personajes($('#rp-pj'));
       atarMenu();
       P.sonido('gema');
@@ -3354,23 +3415,25 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         if (ri >= o.rondas.length) {
           P.final({ rotulo: o.finRotulo || 'Done', titulo: o.finTitulo, texto: o.finTexto, gemas: gemas, otra: function () { empezar('#r1'); } });
           var bs = document.querySelector('.proto-final .k-botones');
-          if (bs && window.SAMSAN_MENU) { bs.insertAdjacentHTML('beforeend', botonMenu()); atarMenu(); }
+          if (bs) { bs.insertAdjacentHTML('beforeend', botonNiveles()); atarMenu(); }
         } else introRonda();
       });
     }
 
-    /* MENU: vuelve a la pantalla principal (solo dentro del menu de juegos). */
-    function botonMenu() { return window.SAMSAN_MENU ? '<button type="button" class="k-boton rp-menu" id="rp-menu" aria-label="Back to the games">MENU</button>' : ''; }
-    function salir() {
+    /* MENU (dentro de una ronda) y LEVELS (al terminarla) vuelven al submenu de niveles.
+       Desde el submenu, GAMES vuelve a la pantalla principal (solo en el menu de juegos). */
+    function botonMenu() { return '<button type="button" class="k-boton rp-menu" id="rp-menu" aria-label="Back to the rounds">MENU</button>'; }
+    function botonNiveles() { return '<button type="button" class="k-boton rp-menu" id="rp-menu" aria-label="Back to the rounds">LEVELS</button>'; }
+    function cortar() {
       if (ladder) ladder.parar(); ladder = null;
       if (montado) { try { montado.destruir(); } catch (e) { /* nada */ } montado = null; }
       try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) { /* nada */ }
-      if (P.irMenu) P.irMenu();
     }
-    function atarMenu() { var b = $('#rp-menu'); if (b) b.addEventListener('click', function () { P.sonido('paso'); salir(); }); }
+    function salir() { cortar(); if (P.irMenu) P.irMenu(); }
+    function atarMenu() { var b = $('#rp-menu'); if (b) b.addEventListener('click', function () { P.sonido('paso'); niveles(); }); }
 
     if (window.SAMSAN_MENU) {
-      (P.juegosMenu = P.juegosMenu || []).push({ id: o.id, titulo: o.titulo, texto: o.texto, icono: o.icono, rondas: o.rondas.length, empezar: empezar, salir: salir });
+      (P.juegosMenu = P.juegosMenu || []).push({ id: o.id, titulo: o.titulo, texto: o.texto, icono: o.icono, rondas: o.rondas.length, empezar: empezar, salir: salir, hechas: hechas });
       return;
     }
     P.inicio({ rotulo: o.rotulo, titulo: o.titulo, texto: o.texto, alJugar: function () { empezar(); } });
@@ -5480,9 +5543,8 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     var root = $('#proto');
     var tarjetas = '';
     JUEGOS.forEach(function (j) {
-      var t = TEXTOS[j.id] || { titulo: j.titulo, sub: j.texto }, va = 0;
-      try { va = parseInt(localStorage.getItem('samsan:proto-repaso-' + j.id), 10) || 0; } catch (e) { va = 0; }
-      var sub = va > 0 ? 'Go on: round ' + (va + 1) + ' of ' + j.rondas : t.sub;
+      var t = TEXTOS[j.id] || { titulo: j.titulo, sub: j.texto }, va = j.hechas ? j.hechas().length : 0;
+      var sub = va > 0 ? 'Gems: ' + va + ' of ' + j.rondas : t.sub;
       tarjetas += '<button type="button" class="mj-tarjeta" data-juego="' + esc(j.id) + '" aria-label="Play ' + esc(t.titulo) + '">' +
         (ICONOS[j.id] || '') + '<span><b>' + esc(t.titulo) + '</b><small>' + esc(sub) + '</small></span><span class="mj-ir">PLAY &#9654;</span></button>';
     });

@@ -45,6 +45,23 @@ function visible(el) { return el && !el.hidden; }
 async function empezar(J) {
   await dormir(150);
   $(J, '#play').click(); await dormir(100);
+  /* submenu de niveles: las rondas en orden, todas abiertas; la 1 dice Start here */
+  const nv = $$(J, '.rp-nivel');
+  ok(nv.length >= 5 && nv.every((b, k) => +b.getAttribute('data-ronda') === k), 'niveles: deben verse las rondas en orden');
+  ok(nv.every(b => !b.disabled) && !!$(J, '.rp-nivel[data-ronda="0"].is-sig'), 'niveles: todas abiertas y la 1 con Start here');
+  ok(!$(J, '.rp-nivel.is-hecha'), 'niveles: al empezar ninguna ronda esta hecha');
+  $(J, '.rp-nivel[data-ronda="0"]').click(); await dormir(30);
+}
+/* Al final: LEVELS vuelve al submenu y todas las rondas muestran su gema. */
+async function nivelesAlFinal(J, n, nom) {
+  const b = $(J, '.proto-final #rp-menu');
+  ok(!!b && /LEVELS/.test(b.textContent), nom + ': la pantalla final debe tener LEVELS');
+  if (!b) return;
+  b.click(); await dormir(30);
+  ok($$(J, '.rp-nivel.is-hecha').length === n, nom + ': en el submenu deben verse las ' + n + ' rondas hechas, hay ' + $$(J, '.rp-nivel.is-hecha').length);
+  ok(!$(J, '.rp-nivel.is-sig'), nom + ': sin rondas pendientes no hay Start here');
+  $(J, '.rp-nivel[data-ronda="2"]').click(); await dormir(30);
+  ok(/Round 3 of/.test($(J, '#rp').textContent) && !!$(J, '#rp-go'), nom + ': elegir la ronda 3 debe abrirla');
 }
 async function irARonda(J, ri) {
   /* recorre las rondas hasta la ronda `ri` solo para poder probarla: no, se juega cada una en orden. */
@@ -54,6 +71,7 @@ async function finDeRonda(J, ri) {
   ok(!!$(J, '.rp-hecha') && !!$(J, '.rp-gema-grande .proto-gema__svg'), 'ronda ' + (ri + 1) + ': falta la pantalla de ronda hecha con la gema');
   const b = $(J, '#rp-seguir');
   ok(!!b, 'ronda ' + (ri + 1) + ': falta el boton para seguir');
+  ok(!!$(J, '.rp-hecha #rp-menu') && /LEVELS/.test($(J, '.rp-hecha #rp-menu').textContent), 'ronda ' + (ri + 1) + ': falta el boton LEVELS');
   if (b) b.click();
   await dormir(30);
 }
@@ -160,6 +178,7 @@ async function verificarRecta() {
   }
   ok(!!$(J, '.proto-final'), 'recta: falta la pantalla final');
   ok(J.d.querySelectorAll('.proto-final__gemas .proto-gema__svg').length === R.rondas.length, 'recta: debe haber una gema por ronda, hay ' + J.d.querySelectorAll('.proto-final__gemas .proto-gema__svg').length);
+  await nivelesAlFinal(J, R.rondas.length, 'recta');
   cerrar(J, REL);
 }
 
@@ -359,7 +378,7 @@ async function verificarAbaco() {
   const rel = 'maths-y2-abaco-taller.html';
   if (!fs.existsSync(path.join(ROOT, '_local', 'proto-maths-y2-abaco-taller.html'))) { console.log('  (abaco: aun no existe, se omite)'); return; }
   const mod = require('./verify_abaco_y2.js');
-  await mod({ cargar, $, $$, tecla, visible, dormir, ok, empezar, escribirNumero, cerrar, finDeRonda });
+  await mod({ cargar, $, $$, tecla, visible, dormir, ok, empezar, escribirNumero, cerrar, finDeRonda, nivelesAlFinal });
 }
 
 /* ========================= MENU (una sola app) ========================= */
@@ -377,12 +396,18 @@ async function verificarMenu() {
   ok($$(J, '#pieles .k-piel').length === 0, 'menu: el selector de piel esta oculto por ahora');
   for (const id of ['recta', 'abaco']) {
     $(J, '.mj-tarjeta[data-juego="' + id + '"]').click(); await dormir(40);
-    ok(!!$(J, '#rp-go'), 'menu: ' + id + ' debe abrir la ronda 1');
+    ok($$(J, '.rp-nivel').length === 5 && !!$(J, '#rp-juegos'), 'menu: ' + id + ' debe abrir el submenu de 5 rondas con GAMES');
+    /* elegir libremente: la ronda 4 */
+    $(J, '.rp-nivel[data-ronda="3"]').click(); await dormir(40);
+    ok(!!$(J, '#rp-go') && /Round 4 of 5/.test($(J, '#rp').textContent), 'menu: ' + id + ' debe abrir la ronda elegida (4)');
     ok(!!$(J, '#rp-menu'), 'menu: ' + id + ' debe tener boton MENU en la ronda');
     $(J, '#rp-go').click(); await dormir(40);
     ok(!!$(J, '#rp[data-tipo]') && !!$(J, '#rp-menu') && !!$(J, '#rp-oir'), 'menu: ' + id + ' debe mostrar el reto con MENU y el boton de oir otra vez');
+    ok(+$(J, '#rp').getAttribute('data-ronda') === 3, 'menu: ' + id + ' el reto debe ser de la ronda 4');
     $(J, '#rp-menu').click(); await dormir(40);
-    ok($$(J, '.mj-tarjeta').length === 2, 'menu: MENU debe volver a la pantalla principal desde ' + id);
+    ok($$(J, '.rp-nivel').length === 5, 'menu: MENU en la ronda debe volver al submenu de ' + id);
+    $(J, '#rp-juegos').click(); await dormir(40);
+    ok($$(J, '.mj-tarjeta').length === 2, 'menu: GAMES debe volver a la pantalla principal desde ' + id);
   }
   cerrar(J, REL);
 }

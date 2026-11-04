@@ -320,5 +320,6 @@ module.exports = async function verificarAbaco(H) {
   }
   ok(!!$(J, '.proto-final'), 'abaco: falta la pantalla final');
   ok(J.d.querySelectorAll('.proto-final__gemas .proto-gema__svg').length === A.rondas.length, 'abaco: debe haber una gema por ronda');
+  await H.nivelesAlFinal(J, A.rondas.length, 'abaco');
   cerrar(J, REL);
 };
