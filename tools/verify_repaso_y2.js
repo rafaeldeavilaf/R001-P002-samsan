@@ -193,43 +193,40 @@ async function resolver(J, R, it, id, ri, ii) {
   const nivel = () => +($(J, '#rp-caja').getAttribute('data-nivel') || 0);
 
   if (it.t === 'ubicar') {
-    /* 1. toque equivocado: no gana, deja el fantasma y sube la pista */
-    const cerca = it.n + 10 <= 100 ? it.n + 10 : it.n - 10;
-    ajustarUbicar(J, cerca); $(J, '#rp-ok').click();
-    ok(!visible(sig()), id + ': OK en un lugar equivocado no debe ganar');
-    ok(mensajeMal(), id + ': falta el mensaje neutro del error');
-    ok(nivel() === 1, id + ': el fallo debe subir la pista al peldano 1, esta en ' + nivel());
-    ok(!!$(J, '.rp-num.is-clave[data-n="' + cerca + '"]'), id + ': al fallar debe marcarse en la recta el numero donde quedo la bandera');
-    ok(!$(J, '.rp-ban.is-fantasma'), id + ': al fallar no debe mostrarse la respuesta');
+    const dec = Math.floor(it.n / 10) * 10;
+    const fase = () => $(J, '.rp-recta').getAttribute('data-fase');
+    ok(fase() === 'decena', id + ': debe empezar en el paso de la decena');
+    ok(!$(J, '[data-m="1"]') && !!$(J, '[data-m="10"]'), id + ': en el paso de la decena solo hay saltos de 10');
+    /* 1. decena equivocada: roca, mensaje, pista */
+    const lejos = dec >= 50 ? dec - 30 : dec + 30;
+    ajustarUbicar(J, lejos); $(J, '#rp-ok').click();
+    ok(!visible(sig()) && fase() === 'decena', id + ': cavar en otra decena no debe avanzar');
+    ok(mensajeMal() && nivel() === 1, id + ': falta el mensaje del error o la pista');
+    ok(!!$(J, '.rp-num.is-clave[data-n="' + lejos + '"]'), id + ': debe marcarse donde quedo el explorador');
     await dormir(760);
-    ok(!!$(J, '.rp-obj[data-obj="roca"]'), id + ': al cavar en el lugar equivocado debe salir una roca');
-    /* 2. pista: HINT sube 2 y 3 */
-    $(J, '#rp-hint').click(); ok(nivel() === 2, id + ': HINT debe subir al 2');
-    $(J, '#rp-hint').click(); ok(nivel() === 3, id + ': HINT debe subir al 3');
-    /* 3. solucion: con toque simulado (pointer) en el primer reto, botones en el resto, teclado en el 3.o */
+    ok(!!$(J, '.rp-obj[data-obj="roca"]'), id + ': cavar en el lugar equivocado debe sacar una roca');
+    $(J, '#rp-hint').click(); ok(nivel() === 2 && !!$(J, '.rp-llave'), id + ': el peldano 2 debe mostrar la parte de la recta');
+    /* 2. decena correcta (o la siguiente): zoom */
+    ajustarUbicar(J, ii % 2 ? dec + 10 : dec); $(J, '#rp-ok').click();
+    ok(fase() === 'unidad', id + ': la decena correcta debe hacer zoom');
+    ok($$(J, '.rp-recta .rp-num').length >= 11, id + ': en el zoom deben verse los 11 numeros de la decena');
+    ok(!!$(J, '[data-m="1"]') && !$(J, '[data-m="10"]'), id + ': en el zoom se camina de 1 en 1');
+    /* 3. numero equivocado y luego el correcto (toque simulado, teclado o botones) */
+    const casi = it.n === dec ? dec + 1 : it.n - 1;
+    ajustarUbicar(J, casi); $(J, '#rp-ok').click();
+    ok(!visible(sig()) && mensajeMal(), id + ': cavar en ' + casi + ' no debe ganar');
     if (ii === 0) {
       const v = $(J, '.rp-v'); v.getBoundingClientRect = () => ({ left: 0, width: 1000, top: 0, height: 200 });
-      v.dispatchEvent(new J.w.MouseEvent('pointerdown', { clientX: it.n * 10, bubbles: true }));
+      v.dispatchEvent(new J.w.MouseEvent('pointerdown', { clientX: (it.n - dec) * 100, bubbles: true }));
       J.w.dispatchEvent(new J.w.MouseEvent('pointerup', { bubbles: true }));
-      ok(+$(J, '.rp-recta').getAttribute('data-val') === it.n, id + ': el toque debe poner la bandera en ' + it.n);
+      ok(+$(J, '.rp-recta').getAttribute('data-val') === it.n, id + ': el toque debe llevar al explorador a ' + it.n);
+      $(J, '#rp-ok').click();
     } else if (ii === 2) {
-      let val = +$(J, '.rp-recta').getAttribute('data-val'), guard = 0;
-      while (val !== it.n && guard++ < 40) {
-        const dif = it.n - val, paso = Math.abs(dif) >= 10 ? 10 : 1;
-        tecla(J, dif > 0 ? 'ArrowRight' : 'ArrowLeft', { shiftKey: paso === 10 });
-        val = +$(J, '.rp-recta').getAttribute('data-val');
-      }
+      let val = +$(J, '.rp-recta').getAttribute('data-val'), g = 0;
+      while (val !== it.n && g++ < 20) { tecla(J, it.n > val ? 'ArrowRight' : 'ArrowLeft'); val = +$(J, '.rp-recta').getAttribute('data-val'); }
       tecla(J, 'Enter');
-    } else {
-      let val = +$(J, '.rp-recta').getAttribute('data-val'), guard = 0;
-      while (val !== it.n && guard++ < 40) {
-        const dif = it.n - val, paso = Math.abs(dif) >= 10 ? 10 : 1;
-        $(J, '[data-m="' + (dif > 0 ? paso : -paso) + '"]').click();
-        val = +$(J, '.rp-recta').getAttribute('data-val');
-      }
-    }
-    if (ii !== 2) $(J, '#rp-ok').click();
-    ok(visible(sig()), id + ': colocar la bandera en ' + it.n + ' debe ganar');
+    } else { ajustarUbicar(J, it.n); $(J, '#rp-ok').click(); }
+    ok(visible(sig()), id + ': cavar en ' + it.n + ' debe ganar');
     await dormir(760);
     ok(!!$(J, '.rp-obj[data-obj="estrella"]'), id + ': al cavar en el lugar correcto debe salir la estrella');
     return;
@@ -341,9 +338,9 @@ async function resolver(J, R, it, id, ri, ii) {
 }
 function ajustarUbicar(J, objetivo) {
   let val = +$(J, '.rp-recta').getAttribute('data-val'), guard = 0;
+  const paso = $(J, '[data-m="10"]') ? 10 : 1;
   while (val !== objetivo && guard++ < 40) {
-    const dif = objetivo - val, paso = Math.abs(dif) >= 10 ? 10 : 1;
-    $(J, '[data-m="' + (dif > 0 ? paso : -paso) + '"]').click();
+    $(J, '[data-m="' + (objetivo > val ? paso : -paso) + '"]').click();
     val = +$(J, '.rp-recta').getAttribute('data-val');
   }
 }
@@ -362,7 +359,11 @@ async function verificarMenu() {
   if (!fs.existsSync(path.join(ROOT, REL))) { ok(false, 'menu: falta ' + REL); return; }
   const J = cargar(REL);
   await dormir(250);
-  ok($$(J, '.mj-tarjeta').length === 2, 'menu: deben verse las dos tarjetas de juego');
+  ok(!!$(J, '.mj-bienvenida #play') && !!$(J, '.mj-titulo'), 'menu: falta la pantalla de bienvenida con START');
+  ok($$(J, '.mj-tarjeta').length === 0, 'menu: la bienvenida va antes de las tarjetas');
+  $(J, '#mj-escena').click(); await dormir(40);
+  ok($$(J, '.mj-tarjeta').length === 2, 'menu: tocar la escena de bienvenida debe abrir las tarjetas de juego');
+  ok(!$(J, '#mundo'), 'menu: el menu no debe tener la escena grande');
   ok(!!$(J, '.mj-tarjeta[data-juego="recta"]') && !!$(J, '.mj-tarjeta[data-juego="abaco"]'), 'menu: faltan las tarjetas recta y abaco');
   ok($$(J, '#pieles .k-piel').length >= 6, 'menu: faltan los tonos de piel del explorador');
   for (const id of ['recta', 'abaco']) {

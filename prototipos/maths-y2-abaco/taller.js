@@ -441,10 +441,14 @@
     function ajustar() {
       var ref = (host.closest && host.closest('#rp-cuerpo')) || host;
       var ancho = ref.clientWidth || 0, movil = ancho > 0 && ancho < 600, s;
-      if (movil) s = Math.max(2, Math.min(3, Math.floor(ancho / 132 * 10) / 10));   /* telefono: al ancho de la pantalla */
+      var altoV = window.innerHeight || 0;
+      if (altoV && altoV < 500 && (window.innerWidth || 0) > altoV) s = Math.max(1.6, Math.min(2, Math.floor((altoV - 120) / 134 * 10) / 10));   /* telefono en horizontal */
+      else if (movil) s = Math.max(2, Math.min(3, Math.floor(ancho / 132 * 10) / 10));   /* telefono: al ancho de la pantalla */
       else {
         s = Math.max(2, Math.min(3, Math.floor((ancho - (o.reserva || 0)) / 132) || 2));
         if ((window.innerHeight || 0) < 880) s = 2;        /* en un portatil (768 de alto) todo cabe sin bajar */
+        var alto = window.innerHeight || 0;
+        if (alto && alto < 500) s = Math.max(1.6, Math.min(2, Math.floor((alto - 120) / 134 * 10) / 10));   /* telefono en horizontal */
       }
       el.style.setProperty('--s', String(s));
     }
@@ -519,7 +523,7 @@
     }
     var decir0 = E.decir;
     E.decir = function (id, texto, ms) {
-      if (texto && (window.innerWidth || 1000) < 600) decir0(id === 'topo' ? 'ex' : 'topo', '');
+      if (texto && ((window.innerWidth || 1000) < 600 || (window.innerHeight || 1000) < 500)) decir0(id === 'topo' ? 'ex' : 'topo', '');
       decir0(id, texto, ms);
     };
     E.bien = function (texto) {

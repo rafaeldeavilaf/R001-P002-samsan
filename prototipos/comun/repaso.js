@@ -34,6 +34,36 @@
     '.rp-tec{scroll-margin-bottom:var(--rp-barra,180px)}',
     '@media (max-width:600px) and (max-height:760px){.rp-tec{gap:6px}.rp-tec output{min-height:44px;font-size:1.4rem;padding:4px}.rp-tec__k{gap:6px}.rp-tec__k .k-boton{min-height:46px}}',
     '.rp-pie{position:sticky;bottom:0;z-index:20;margin:10px -12px -12px;padding:8px 12px;background:var(--panel,#F7EFDD);border-top:3px solid #1E1426;border-radius:0 0 10px 10px}',
+    /* Telefono en horizontal: poca altura. Sin encabezado, todo compacto, la barra fija abajo. */
+    '@media (max-height:500px) and (orientation:landscape){' +
+      '.k-pagina{padding:4px 8px 16px}.k-pagina > header{display:none}' +
+      '.rp-mundo{padding:4px 6px;border-radius:10px}.rp-mundo::before,.rp-mundo::after{display:none}.rp-mundo > .k-panel{padding:8px 12px}' +
+      '.rp-cab .k-rotulo{display:none}.rp-cab{align-items:center}.rp-cab h2{font-size:1rem}.rp-pips{margin:2px 0 0}' +
+      '.rp-oir span{display:none}.rp-voz{min-width:44px;min-height:44px}.rp-menu{min-height:44px}' +
+      '.rp-consigna{font-size:1.05rem;margin:2px 0}.rp-eq{font-size:1.2rem;min-height:1.8em}' +
+      '.rp-pie{margin:6px -12px -8px;padding:6px 12px;flex-wrap:nowrap;align-items:center;gap:8px}.rp-pie .k-boton{min-height:46px;padding:0 12px;font-size:1rem}.rp .rp-pie .k-mensaje{flex:1 1 auto;margin:0;font-size:.9rem;line-height:1.2;min-width:0}#rp-extra{display:contents}.rp-reset span{display:none}' +
+      '.rp-caja{margin-top:4px;padding:4px 10px;font-size:.9rem}.rp-recta{zoom:.78}.rp-ctl{margin-top:2px}.rp-ctl .k-boton{min-height:44px}' +
+      '.ab-escena-lado{flex:1 1 200px!important;max-width:300px!important}.ab-flechas .ab-fl{min-width:60px!important;min-height:46px!important;font-size:1.4rem!important}.ab-fl-rod{min-width:52px;font-size:.9rem}' +
+      '.es{height:84px!important;margin:2px 0 4px}.es-actor img{height:48px!important}' +
+      '.es-actor.dice-izq-movil .es-dice{bottom:auto;top:0;left:auto;right:100%;transform:none;margin:0 8px 0 0;animation:none}.es-actor.dice-izq-movil .es-dice::after{display:none}' +
+      /* leer, descomponer y cuaderno: escena, cuenta y teclado a la izquierda; abaco a la derecha */
+      '#rp-cuerpo:has(> #ab-escena + .rp-eq){display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:start}' +
+      '#rp-cuerpo:has(> #ab-escena + .rp-eq) > .rp-consigna{grid-column:1 / -1}' +
+      '#rp-cuerpo:has(> #ab-escena + .rp-eq) > #ab-escena,#rp-cuerpo:has(> #ab-escena + .rp-eq) > .rp-eq{grid-column:1}' +
+      '#rp-cuerpo:has(> #ab-escena + .rp-eq) > .ab-par{display:contents}' +
+      '#rp-cuerpo:has(> #ab-escena + .rp-eq) .ab-col{grid-column:2;grid-row:2 / span 3}' +
+      '#rp-cuerpo:has(> #ab-escena + .rp-eq) #rp-tz{grid-column:1;max-width:none}' +
+      '#rp-cuerpo:has(> #ab-escena + .rp-eq) .rp-tec{grid-template-columns:auto 1fr;max-width:none;margin-top:2px}' +
+      '#rp-cuerpo:has(> #ab-escena + .rp-eq) .rp-tec__k{grid-template-columns:repeat(6,1fr)}' +
+      '#rp-cuerpo:has(> .rp-eq + .ab-par > .ab-escena-lado){display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;align-items:center}' +
+      '#rp-cuerpo:has(> .rp-eq + .ab-par > .ab-escena-lado) > .rp-consigna{grid-column:1 / -1}#rp-cuerpo:has(> .rp-eq + .ab-par > .ab-escena-lado) > .rp-eq{grid-column:1;grid-row:2}#rp-cuerpo:has(> .rp-eq + .ab-par > .ab-escena-lado) > .ab-par{display:contents}' +
+      '#rp-cuerpo:has(> .rp-eq + .ab-par > .ab-escena-lado) .ab-escena-lado{grid-column:1;grid-row:3;max-width:none!important;align-self:start}#rp-cuerpo:has(> .rp-eq + .ab-par > .ab-escena-lado) .ab-col{grid-column:2;grid-row:2 / span 2}' +
+      '.rp-pie .k-boton{flex:0 0 auto}' +
+      /* teclado de 6 columnas: 1 a 5 arriba, 6 a 0 abajo */
+      '#rp-cuerpo .rp-tec__k [data-k="1"]{order:1}#rp-cuerpo .rp-tec__k [data-k="2"]{order:2}#rp-cuerpo .rp-tec__k [data-k="3"]{order:3}#rp-cuerpo .rp-tec__k [data-k="4"]{order:4}#rp-cuerpo .rp-tec__k [data-k="5"]{order:5}#rp-cuerpo .rp-tec__k [data-k="del"]{order:6}#rp-cuerpo .rp-tec__k [data-k="6"]{order:7}#rp-cuerpo .rp-tec__k [data-k="7"]{order:8}#rp-cuerpo .rp-tec__k [data-k="8"]{order:9}#rp-cuerpo .rp-tec__k [data-k="9"]{order:10}#rp-cuerpo .rp-tec__k [data-k="0"]{order:11}#rp-cuerpo .rp-tec__k [data-k="ok"]{order:12}' +
+      '.rp-pj{min-height:56px}.rp-pj img{height:54px}' +
+      '#rp-cuerpo .rp-tec{grid-template-columns:auto 1fr;max-width:none;margin-top:4px}#rp-cuerpo .rp-tec__k{grid-template-columns:repeat(6,1fr)}.rp-tec__k .k-boton{min-height:44px}.rp-tec output{min-height:44px;font-size:1.3rem;min-width:90px}' +
+    '}',
     '@media (max-width:600px){' +
       '.k-pagina{padding:8px 8px 24px}.k-pagina > header .k-titulo{font-size:1.3rem;margin:0}.k-pagina > header .k-lema{display:none}' +
       '.rp-mundo{padding:6px 4px;border-radius:10px}.rp-mundo > .k-panel{padding:10px}' +
@@ -135,6 +165,7 @@
   }
   P.marcoMundo = marcoMundo;
   /* Explorador y topo para las pantallas de ronda. */
+  P.personajes = function (host) { personajes(host); };
   function personajes(host) {
     if (!host) return;
     var topo = ((window.SAMSAN_IMG || {}).caverna || {})['companero-topo'];
@@ -528,6 +559,13 @@
       });
       montado = o.montar(item, ctx, r);
       decirConsigna();
+      /* telefono en horizontal: la zona de juego arriba de la pantalla (el encabezado queda encima) */
+      try {
+        if ((window.innerHeight || 999) < 500 && window.innerWidth > window.innerHeight) {
+          var cs = $('#rp-cuerpo .rp-consigna');
+          if (cs) setTimeout(function () { window.scrollTo(0, Math.max(0, cs.getBoundingClientRect().top + window.scrollY - 6)); }, 60);
+        }
+      } catch (e) { /* nada */ }
     }
 
     function finRonda() {

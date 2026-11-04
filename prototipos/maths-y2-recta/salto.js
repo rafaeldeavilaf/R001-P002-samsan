@@ -180,11 +180,13 @@
     '.rp-arco.is-fantasma{border-style:dashed;border-color:#2F9BB8}',
     '.rp-arco.is-fantasma span{color:#1D4E6B}',
     '.rp-llave{position:absolute;top:128px;height:8px;border:3px solid #2F9BB8;border-top:0;border-radius:0 0 8px 8px;background:rgba(127,227,240,.35)}',
-    '.rp-llave span{position:absolute;left:50%;top:-1.9em;transform:translateX(-50%);font-weight:900;font-size:.9rem;background:#D8F6FA;border:2px solid #2F9BB8;border-radius:6px;padding:0 6px;white-space:nowrap}',
+    '.rp-llave span{position:absolute;left:50%;top:-112px;transform:translateX(-50%);font-weight:900;font-size:.9rem;background:#D8F6FA;border:2px solid #2F9BB8;border-radius:6px;padding:0 6px;white-space:nowrap}',
     '.rp-puerta{position:absolute;bottom:60px;width:0;z-index:2}',
     '.rp-puerta i{position:absolute;left:-14px;bottom:0;width:28px;height:42px;border:3px solid #1E1426;border-radius:6px 6px 0 0;background:repeating-linear-gradient(90deg,#8A5A34 0 5px,#B78450 5px 10px)}',
     '.rp-puerta.is-abierta i{opacity:.35;border-style:dashed}',
     '.rp-ex{position:absolute;bottom:60px;width:0;z-index:3;transition:left .26s ease-out}',
+    '.rp-ex::after{content:"";position:absolute;left:-2px;top:-2px;width:4px;height:30px;background:#7FE3F0;box-shadow:0 0 0 1px #1E1426;z-index:-1}',
+    '.rp-ex::before{content:"";position:absolute;left:-8px;top:16px;border:8px solid transparent;border-top-color:#7FE3F0;z-index:-1;filter:drop-shadow(0 1px 0 #1E1426)}',
     '.rp-ex__in{position:absolute;left:-30px;bottom:-4px;width:60px;height:60px;display:flex;align-items:flex-end;justify-content:center}',
     '.rp-ex__in img{width:auto;height:60px;image-rendering:pixelated;display:block}',
     '.rp-ex__fig{width:26px;height:50px;border:3px solid #1E1426;border-radius:12px 12px 4px 4px;background:#2F9BB8}',
@@ -198,6 +200,7 @@
     '.rp-recta.is-cueva .rp-arco{border-color:#FFD34D}',
     '.rp-recta.is-cueva .rp-arco.is-fantasma{border-color:#7FE3F0}',
     '.rp-recta.is-cueva .rp-ban__m{background:#D19A5E}',
+    '.rp-recta.is-cueva .rp-tick{background:#E8ECF2;box-shadow:0 0 0 1px #1E1426}',
     '.rp-objs{position:absolute;inset:0;pointer-events:none;z-index:4}',
     '.rp-obj{position:absolute;bottom:60px;transform:translateX(-50%);animation:rp-sale .5s ease-out}',
     '.rp-obj.is-estrella{bottom:64px;margin-left:22px}',
@@ -291,8 +294,12 @@
       /* numeros clave en recta vacia o resaltados */
       if (vacia || d.claves) {
         var claves = (d.claves || []).slice();
-        Array.prototype.forEach.call(est.querySelectorAll('.rp-num.is-clave'), function (n) { n.parentNode.removeChild(n); });
+        Array.prototype.forEach.call(est.querySelectorAll('.rp-num.is-clave'), function (n) {
+          if (n.getAttribute('data-propio')) n.classList.remove('is-clave'); else n.parentNode.removeChild(n);
+        });
         claves.forEach(function (x) {
+          var ya = est.querySelector('.rp-num[data-n="' + x + '"]');
+          if (ya) { ya.classList.add('is-clave'); ya.setAttribute('data-propio', '1'); return; }
           var s = document.createElement('span'); s.className = 'rp-num is-clave'; s.style.left = pct(x); s.textContent = x; s.setAttribute('data-n', x); est.appendChild(s);
         });
       }
@@ -366,82 +373,109 @@
   function dirLabel(d) { return d > 0 ? 'right' : 'left'; }
 
   /* --- 1. Ubicar ----------------------------------------------- */
+  /* «Gem hunt» en dos pasos: primero la decena en la recta 0-100 (solo hay decenas
+     rotuladas), luego zoom a esa decena con sus 11 numeros y el numero exacto.
+     Asi se ve siempre donde esta parado el explorador (flecha bajo los pies). */
   function montarUbicar(it, ctx) {
-    var n = it.n, val = 50, listo = false, nivelPista = 0, leido = null;
-    ctx.host.innerHTML = '<p class="rp-consigna">A star is on <b>' + n + '</b>. Take the explorer there and dig!</p>';
-    var recta = Recta(ctx.host, { lo: 0, hi: 100, cueva: true });
+    var n = it.n, dec = Math.floor(n / 10) * 10, fase = 'decena', val = 50, listo = false, nivelPista = 0, leido = null, lo = 0, hi = 100;
+    ctx.host.innerHTML = '<p class="rp-consigna" id="rp-ub-txt"></p><div id="rp-ub-recta"></div>';
+    var zona = $('#rp-ub-recta'), recta = null;
     cargarExplorador();
     var botones = document.createElement('div');
     botones.className = 'rp-ctl';
-    botones.innerHTML =
-      '<button type="button" class="k-boton" data-m="-10" aria-label="Walk left ten">' + MENOS + '10</button>' +
-      '<button type="button" class="k-boton" data-m="-1" aria-label="Walk left one">' + MENOS + '1</button>' +
-      '<button type="button" class="k-boton" data-m="1" aria-label="Walk right one">+1</button>' +
-      '<button type="button" class="k-boton" data-m="10" aria-label="Walk right ten">+10</button>' +
-      '<button type="button" class="k-boton k-boton--primario" id="rp-ok" aria-label="Dig here">DIG &#9935;</button>';
     ctx.host.appendChild(botones);
 
+    function textos() {
+      $('#rp-ub-txt').innerHTML = fase === 'decena'
+        ? 'A star is on <b>' + n + '</b>. First go to its ten. Then dig!'
+        : 'Now find <b>' + n + '</b>. Count from ' + dec + '. Then dig!';
+    }
+    function armarRecta() {
+      if (recta) recta.destruir();
+      recta = Recta(zona, { lo: lo, hi: hi, cueva: true });
+      recta.el.setAttribute('data-fase', fase);
+      recta.v.addEventListener('pointerdown', function (e) { arrastrando = true; sigue(e); });
+      recta.v.addEventListener('pointermove', sigue);
+    }
+    function armarBotones() {
+      var p = fase === 'decena' ? 10 : 1;
+      botones.innerHTML =
+        '<button type="button" class="k-boton" data-m="-' + p + '" aria-label="Walk left ' + p + '">&#9664; ' + MENOS + p + '</button>' +
+        '<button type="button" class="k-boton" data-m="' + p + '" aria-label="Walk right ' + p + '">+' + p + ' &#9654;</button>' +
+        '<button type="button" class="k-boton k-boton--primario" id="rp-ok" aria-label="Dig here">DIG &#9935;</button>';
+      Array.prototype.forEach.call(botones.querySelectorAll('[data-m]'), function (b) { b.addEventListener('click', function () { nudge(+b.getAttribute('data-m')); }); });
+      $('#rp-ok').addEventListener('click', confirmar);
+    }
     function pintar(extra) {
       var d = { banderas: [] };
       d.claves = leido != null && leido === val ? [val] : [];
-      if (nivelPista >= 2) {
-        var a = Math.floor(n / 10) * 10;
-        d.llaves = [{ a: a, b: a + 10, txt: a + ' to ' + (a + 10) }];
-      }
+      if (nivelPista >= 2 && fase === 'decena') d.llaves = [{ a: dec, b: dec + 10, txt: dec + ' to ' + (dec + 10) }];
       if (extra) for (var k in extra) d[k] = extra[k];
       recta.pintar(d);
       recta.mover(val, true);
       recta.el.setAttribute('data-val', String(val));
       recta.el.setAttribute('data-n', String(n));
     }
-    function nudge(m) { if (listo) return; val = Math.max(0, Math.min(100, val + m)); ctx.accion(); pintar(); }
-    Array.prototype.forEach.call(botones.querySelectorAll('[data-m]'), function (b) { b.addEventListener('click', function () { nudge(+b.getAttribute('data-m')); }); });
+    function nudge(m) { if (listo) return; val = Math.max(lo, Math.min(hi, val + m)); ctx.accion(); pintar(); }
     function confirmar() {
       if (listo) return;
+      if (fase === 'decena') {
+        if (val === dec || val === dec + 10) {
+          /* zoom a la decena: ahora todos los numeros estan rotulados */
+          fase = 'unidad'; lo = dec; hi = dec + 10; leido = null;
+          armarRecta(); armarBotones(); textos(); pintar(); recta.celebrar();
+          ctx.mensaje('Yes! ' + n + ' is between ' + dec + ' and ' + (dec + 10) + '. Now find ' + n + '.', 'bien');
+          P.vozEn('Yes! Now find ' + n + '.');
+          return;
+        }
+        var aqui = val;
+        leido = val; pintar();
+        recta.cavar(function () { recta.objeto(aqui, 'roca'); });
+        ctx.fallo('Not here! ' + n + ' is between ' + dec + ' and ' + (dec + 10) + '. Go ' + (val > n ? 'left' : 'right') + '.');
+        return;
+      }
       if (val === n) {
-        listo = true; val = n; pintar({ llaves: [] });
-        recta.mover(n, false);
+        listo = true; pintar({ llaves: [] });
         recta.cavar(function () { recta.objeto(n, 'estrella'); recta.premio(n); recta.celebrar(); });
         P.vozEn('Yes! ' + n);
         ctx.listo('Yes! You found the star on ' + n + '!');
       } else {
-        var aqui = val;
+        var aqui2 = val;
         leido = val; pintar();
-        recta.cavar(function () { recta.objeto(aqui, 'roca'); });
+        recta.cavar(function () { recta.objeto(aqui2, 'roca'); });
         ctx.fallo('Not here! You are on ' + val + '. Go ' + (val > n ? 'left' : 'right') + '.');
       }
     }
-    $('#rp-ok').addEventListener('click', confirmar);
-    /* Arrastrar con raton o dedo sobre la recta. */
+    /* Arrastrar o tocar la recta: en la decena salta de 10 en 10; en el zoom, de 1 en 1. */
     var arrastrando = false;
     function sigue(e) {
       if (!arrastrando || listo) return;
       var x = recta.valorEn(e.clientX);
       if (x == null) return;
-      val = Math.max(0, Math.min(100, Math.round(x)));
+      var paso = fase === 'decena' ? 10 : 1;
+      val = Math.max(lo, Math.min(hi, Math.round(x / paso) * paso));
       ctx.accion(); pintar();
     }
     function suelta() { arrastrando = false; }
-    recta.v.addEventListener('pointerdown', function (e) { arrastrando = true; sigue(e); });
-    recta.v.addEventListener('pointermove', sigue);
     window.addEventListener('pointerup', suelta);
     function tecla(e) {
-      if (e.key === 'ArrowLeft') nudge(e.shiftKey ? -10 : -1);
-      else if (e.key === 'ArrowRight') nudge(e.shiftKey ? 10 : 1);
+      var p = fase === 'decena' ? 10 : 1;
+      if (e.key === 'ArrowLeft') nudge(-p);
+      else if (e.key === 'ArrowRight') nudge(p);
       else if (e.key === 'Enter' && document.activeElement && document.activeElement.id !== 'rp-sig') { e.preventDefault(); confirmar(); }
     }
     document.addEventListener('keydown', tecla);
 
-    var dec = Math.floor(n / 10) * 10, ej = dec === 60 ? 34 : 64;
+    var ej = dec === 60 ? 34 : 64, ejd = Math.floor(ej / 10) * 10;
     ctx.peldanos([
-      { texto: 'Look at the tens: 10, 20, 30... Find ' + (Math.floor(n / 10) * 10) + ' first.', visual: function () { nivelPista = 1; pintar(); } },
-      { texto: n + ' is between ' + dec + ' and ' + (dec + 10) + '. Look at the blue part.', visual: function () { nivelPista = 2; pintar(); } },
-      { texto: 'Example: ' + ej + ' is after ' + (Math.floor(ej / 10) * 10) + ' and before ' + (Math.floor(ej / 10) * 10 + 10) + '.',
-        visual: function () { nivelPista = 3; pintar({ banderas: [{ v: ej, txt: ej, fantasma: true }] }); } }
+      { texto: 'Look at the tens: 10, 20, 30... ' + n + ' is after ' + dec + '.', visual: function () { nivelPista = 1; pintar(); } },
+      { texto: fase === 'decena' ? 'Look at the blue part. Walk there.' : 'Count from ' + dec + ': ' + (dec + 1) + ', ' + (dec + 2) + ', ' + (dec + 3) + '...', visual: function () { nivelPista = 2; pintar(); } },
+      { texto: 'Example: ' + ej + '. Go to ' + ejd + '. Then count ' + (ejd + 1) + ', ' + (ejd + 2) + ', ' + (ejd + 3) + ', ' + ej + '.', visual: function () { nivelPista = 3; pintar(); } }
     ]);
+    armarRecta(); armarBotones(); textos();
     ctx.mensaje('Walk with the buttons, or tap the line.', '');
     pintar();
-    return { destruir: function () { document.removeEventListener('keydown', tecla); window.removeEventListener('pointerup', suelta); recta.destruir(); } };
+    return { destruir: function () { document.removeEventListener('keydown', tecla); window.removeEventListener('pointerup', suelta); if (recta) recta.destruir(); } };
   }
 
   /* --- 2 a 5. Saltar, seguir, puente y botas -------------------- */
