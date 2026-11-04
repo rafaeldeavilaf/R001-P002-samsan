@@ -205,11 +205,12 @@ Una sola aplicación (decisión de Rafael, 4 nov 2026): el menú incluye los dos
 
 **Inicio, búsqueda en dos pasos y horizontal (4 nov 2026, tras la prueba de Rafael en su teléfono).** Al abrir sale una pantalla de bienvenida con el explorador centrado y un botón START ▶ (tocar la escena también arranca); el menú es un panel con las dos tarjetas, sin la mina de fondo que no respondía al toque. «Gem hunt» se juega en dos pasos: primero la recta de 0 a 100 de diez en diez (−10, +10 y DIG en la decena correcta, o en la siguiente si la estrella está justo ahí) y después un acercamiento a esa decena con sus 11 números rotulados, −1 y +1, donde se pide el número exacto. Así el niño sabe en qué número está parado. En todas las rondas de la recta una flecha ▼ bajo los pies del explorador marca su número. En horizontal (alto menor de 500 px) se oculta el encabezado, la escena se achica, el ábaco baja a escala 1,6 a 2 y se pone a la derecha de la escena, la cuenta y el teclado, que pasa a dos filas (1 a 5 y 6 a 0); al abrir cada reto la pantalla se desplaza a la consigna. Probado en 667 × 375 y 915 × 412. El vertical sigue siendo el formato principal.
 
+**Ajuste al material del colegio (4 nov 2026, tarde).** Rafael pidió comparar los juegos con los documentos del colegio. Recta: la ficha del colegio ubica números en una recta de 0 a 100 con solo las decenas escritas, así que en el acercamiento de «Gem hunt» solo se ven las decenas de los extremos y el niño cuenta, con el número del explorador en su globo y la voz contando cada paso. Ábaco: la guía de decenas y unidades y el cuaderno usan un ábaco de dos varillas, T y U, así que la ronda 4 («Tens and units») pasó a ese ábaco con tres retos nuevos: leer (Tens, Units, Number), construir tocando cada varilla y separar (`58 = 50 + 8`). La ronda 5 dejó de cruzar la decena, como los ejemplos del afiche. Con esto se cierra la pregunta abierta sobre el modelo del ábaco del salón.
+
 Verificación: `node tools/verify_repaso_y2.js` (corre también `tools/verify_abaco_y2.js` y prueba el menú). Nada se sube hasta que Rafael lo pida. Horas de la serie: unas 1,3 h de reloj el 4 nov (12:10 a 13:30) entre la primera versión, el pixel art, el conteo tocando, el menú, el inglés simple y la prueba del agente; los estimados aprobados sumaban 27 h de desarrollo (11,5 + 8 + 3,5 + 4) y no incluyen pasar los juegos a la base, que no se hizo.
 
 ## 8. Preguntas abiertas
 
-- ¿El ábaco del salón tiene 10 varillas de 10 cuentas (supuesto de «Abacus workshop»)? Rafael lo confirma con la herramienta del colegio.
 - La temática del mundo se decidió el 27 sep 2026: constructor de mundo con base propia y compañeros por bioma (ver §3).
 
 ## 9. Documentos reemplazados

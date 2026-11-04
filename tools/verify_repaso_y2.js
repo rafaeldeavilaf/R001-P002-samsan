@@ -209,7 +209,16 @@ async function resolver(J, R, it, id, ri, ii) {
     /* 2. decena correcta (o la siguiente): zoom */
     ajustarUbicar(J, ii % 2 ? dec + 10 : dec); $(J, '#rp-ok').click();
     ok(fase() === 'unidad', id + ': la decena correcta debe hacer zoom');
-    ok($$(J, '.rp-recta .rp-num').length >= 11, id + ': en el zoom deben verse los 11 numeros de la decena');
+    const vistos = () => $$(J, '.rp-recta .rp-num').filter(x => !x.classList.contains('is-esconde') || x.classList.contains('is-clave')).map(x => +x.getAttribute('data-n')).sort((p, q) => p - q);
+    ok(vistos().join() === [dec, dec + 10].join(), id + ': en el zoom solo se ven ' + dec + ' y ' + (dec + 10) + ', se ven ' + vistos().join());
+    ok(nivel() === 0, id + ': el zoom empieza su propia escalera de pistas');
+    ok($(J, '.rp-bub').textContent === String(+$(J, '.rp-recta').getAttribute('data-val')), id + ': el globo debe decir el numero del explorador');
+    $(J, '[data-m="1"]').click(); ok($(J, '.rp-bub').textContent === String(+$(J, '.rp-recta').getAttribute('data-val')), id + ': el globo debe seguir al explorador');
+    $(J, '[data-m="-1"]').click();
+    if (ii === 1) {
+      $(J, '#rp-hint').click(); $(J, '#rp-hint').click(); ok(vistos().indexOf(dec + 5) >= 0, id + ': la pista 2 muestra la mitad');
+      $(J, '#rp-hint').click(); ok($$(J, '.rp-recta .rp-num:not(.is-esconde)').length >= 11, id + ': la pista 3 muestra los 11 numeros');
+    }
     ok(!!$(J, '[data-m="1"]') && !$(J, '[data-m="10"]'), id + ': en el zoom se camina de 1 en 1');
     /* 3. numero equivocado y luego el correcto (toque simulado, teclado o botones) */
     const casi = it.n === dec ? dec + 1 : it.n - 1;

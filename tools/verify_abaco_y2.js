@@ -23,7 +23,7 @@ module.exports = async function verificarAbaco(H) {
   ok(!!A, 'abaco: no expone SAMSAN_ABACO');
   if (!A) return;
 
-  const PROHIBIDOS = [12, 18, 23, 24, 28, 36]; /* numeros de los ejemplos del colegio */
+  const PROHIBIDOS = [12, 14, 18, 19, 21, 23, 24, 25, 28, 34, 36]; /* numeros de los ejemplos del colegio */
   const vistos = {};
   let cruzan = 0;
 
@@ -37,6 +37,7 @@ module.exports = async function verificarAbaco(H) {
       const firma = JSON.stringify([it.t, it.n, it.dec, it.uni, it.ini, it.k, it.expr, it.parte]);
       ok(!vistos[firma], 'abaco: reto repetido ' + id); vistos[firma] = 1;
       ok(typeof it.voz === 'string' && it.voz.length > 0, id + ': sin consigna para la voz');
+      if (/^tu/.test(it.t)) ok(it.n >= 10 && it.n <= 99 && Math.floor(it.n / 10) <= 9, id + ': n fuera del abaco T y U');
       if (it.t === 'construir' || it.t === 'leer' || it.t === 'descomp') ok(it.n >= 1 && it.n <= 99, id + ': n fuera de 1-99');
       if (it.t === 'construir' && it.simple) ok(it.n >= 1 && it.n <= 10, id + ': simple debe caber en una varilla');
       if (it.t === 'comp') {
@@ -58,7 +59,7 @@ module.exports = async function verificarAbaco(H) {
       [it.n, it.dec, it.uni, it.ini, it.resp].forEach(v => { if (v != null) ok(PROHIBIDOS.indexOf(v) < 0, id + ': usa un numero de los ejemplos del colegio (' + v + ')'); });
     });
   });
-  ok(cruzan >= 3, 'abaco: al menos 3 retos de la ronda 5 deben cruzar una decena, hay ' + cruzan);
+  ok(cruzan === 0, 'abaco: la ronda 5 no cruza decenas (como el afiche del colegio), hay ' + cruzan);
   /* modelo */
   ok(A.canon(47).join() === '10,10,10,10,7,0,0,0,0,0', 'abaco: canon(47) mal: ' + A.canon(47).join());
   ok(A.esCanon(A.canon(63)) && !A.esCanon([3, 10, 0, 0, 0, 0, 0, 0, 0, 0]), 'abaco: esCanon mal');
@@ -240,6 +241,59 @@ module.exports = async function verificarAbaco(H) {
       ok(igual(estado(), A.canon(parseInt(it.expr, 10))), id + ': el abaco de la pista debe mostrar ' + parseInt(it.expr, 10));
       if (ii % 2 === 0) { tecla(J, '9'); tecla(J, 'Backspace'); }
       escribirNumero(J, it.resp);
+      return;
+    }
+    if (/^tu/.test(it.t)) {
+      const T = Math.floor(it.n / 10), U = it.n % 10;
+      const tu = () => $(J, '.tu'), est = () => ({ t: +tu().getAttribute('data-t'), u: +tu().getAttribute('data-u') });
+      ok(!!tu() && !!$(J, '.tu-rot[data-col="t"]') && !!$(J, '.tu-rot[data-col="u"]'), id + ': faltan las varillas T y U con su rotulo');
+      ok(/tens/.test($(J, '.tu-rot[data-col="t"]').textContent) && /units/.test($(J, '.tu-rot[data-col="u"]').textContent), id + ': los rotulos deben decir tens y units');
+      if (it.t === 'tuHacer') {
+        ok(est().t === 0 && est().u === 0, id + ': el abaco debe empezar vacio');
+        $(J, '#rp-ok').click();
+        ok(!visible(sig()) && mal() && nivel() === 1, id + ': DONE vacio no debe ganar y debe subir la pista');
+        /* al reves: U cuentas en T y T en U */
+        for (let k = 0; k < U; k++) $(J, '[data-tu="t+"]').click();
+        for (let k = 0; k < T; k++) $(J, '[data-tu="u+"]').click();
+        $(J, '#rp-ok').click();
+        ok(!visible(sig()), id + ': el numero al reves no debe ganar');
+        if (T !== U) ok(/Swap/.test($(J, '#rp-msg').textContent), id + ': al reves debe decir Swap');
+        ok(nivel() === 2 && $$(J, '.tu-fan').length === T + U, id + ': la pista 2 debe mostrar las cuentas fantasma');
+        $(J, '#rp-reset').click(); ok(est().t === 0 && est().u === 0, id + ': START OVER debe vaciar el abaco');
+        $(J, '[data-tu="u-"]').click(); ok(mal(), id + ': quitar de una varilla vacia debe avisar');
+        /* solucion: tocar la varilla T (toque) y + en U; una de mas y menos */
+        for (let k = 0; k < T; k++) $(J, '.tu-col[data-col="t"]').click();
+        for (let k = 0; k < U + 1; k++) $(J, '[data-tu="u+"]').click();
+        $(J, '[data-tu="u-"]').click();
+        ok(est().t === T && est().u === U, id + ': el abaco debe quedar en ' + T + ' y ' + U);
+        ok($(J, '[data-cnt="t"]').textContent === String(T), id + ': el contador de T debe decir ' + T);
+        $(J, '#rp-ok').click();
+        ok(/= ?/.test($(J, '#tu-eq').textContent) && $(J, '#tu-eq').textContent.indexOf(String(T * 10)) >= 0, id + ': al ganar debe verse ' + it.n + ' = ' + (T * 10) + ' + ' + U);
+        return;
+      }
+      ok(est().t === T && est().u === U, id + ': el abaco debe mostrar ' + T + ' y ' + U);
+      ok(!!$(J, '[data-k="ok"]'), id + ': debe estar el teclado');
+      /* contar tocando: la ultima cuenta de T dice T*10 */
+      $(J, '.tu-b[data-col="t"][data-i="' + (T - 1) + '"]').click();
+      ok($(J, '.tu-b[data-col="t"][data-i="' + (T - 1) + '"]').textContent === String(T * 10), id + ': tocar la cuenta ' + T + ' de T debe decir ' + (T * 10));
+      if (it.t === 'tuLeer') {
+        escribirNumero(J, U === T ? T + 1 : U);
+        ok(!visible(sig()) && mal(), id + ': decenas equivocadas no deben ganar');
+        escribirNumero(J, ii % 2 ? T * 10 : T);
+        ok($(J, '#tu-r0').textContent === String(T), id + ': la casilla Tens debe decir ' + T);
+        escribirNumero(J, U === 9 ? 8 : U + 1); ok(!visible(sig()), id + ': unidades equivocadas no deben ganar');
+        escribirNumero(J, U);
+        const inv = U * 10 + T;
+        if (inv !== it.n) { escribirNumero(J, inv); ok(!visible(sig()) && /Tens first/.test($(J, '#rp-msg').textContent), id + ': el numero invertido debe decir Tens first'); }
+        escribirNumero(J, it.n);
+        return;
+      }
+      escribirNumero(J, T === 1 ? 2 : 1);
+      ok(!visible(sig()) && mal(), id + ': decenas equivocadas no deben ganar');
+      escribirNumero(J, T);
+      ok($(J, '#ab-s1').textContent === String(T * 10), id + ': la casilla de decenas debe mostrar ' + (T * 10));
+      escribirNumero(J, U === 9 ? 8 : U + 1); ok(!visible(sig()), id + ': unidades equivocadas no deben ganar');
+      escribirNumero(J, U);
       return;
     }
     ok(false, id + ': tipo sin verificador ' + it.t);

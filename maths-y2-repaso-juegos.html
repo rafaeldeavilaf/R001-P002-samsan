@@ -3550,6 +3550,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     '.rp-tick.m10{height:20px;width:6px;margin-left:-3px;background:#A0643A;box-shadow:0 0 0 2px #1E1426}',
     '.rp-num{position:absolute;top:168px;transform:translateX(-50%);font-weight:800;font-size:.85rem;color:#2A211A}',
     '.rp-num.m10{font-size:1rem;font-weight:900}',
+    '.rp-num.is-esconde:not(.is-clave){visibility:hidden}',
     '.rp-num.is-clave{background:#FFD34D;border:2px solid #1E1426;border-radius:6px;padding:0 5px;font-size:1rem;font-weight:900;top:166px}',
     '.rp-ban{position:absolute;bottom:60px;width:0;z-index:2;transition:left .12s}',
     '.rp-ban__m{position:absolute;left:-2px;bottom:0;width:4px;height:50px;background:#6B3D22;box-shadow:0 0 0 1px #1E1426}',
@@ -3583,6 +3584,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     '.rp-recta.is-cueva .rp-arco.is-fantasma{border-color:#7FE3F0}',
     '.rp-recta.is-cueva .rp-ban__m{background:#D19A5E}',
     '.rp-recta.is-cueva .rp-tick{background:#E8ECF2;box-shadow:0 0 0 1px #1E1426}',
+    '.rp-recta.is-cueva .rp-tick.m5{height:18px;width:6px;margin-left:-3px}',
     '.rp-objs{position:absolute;inset:0;pointer-events:none;z-index:4}',
     '.rp-obj{position:absolute;bottom:60px;transform:translateX(-50%);animation:rp-sale .5s ease-out}',
     '.rp-obj.is-estrella{bottom:64px;margin-left:22px}',
@@ -3692,6 +3694,13 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       var txt = c[2] != null ? c[2] : ((c[1] > c[0] ? '+' : MENOS) + dist);
       return '<div class="rp-arco' + (fant ? ' is-fantasma' : '') + '" style="left:' + pct(x0) + ';width:' + (dist / span * 100).toFixed(3) + '%;height:' + alto.toFixed(0) + 'px"><span>' + esc(txt) + '</span></div>';
     }
+    /* Deja visibles solo los numeros de la lista (null = todos). Los resaltados siempre se ven. */
+    function soloNums(lista) {
+      Array.prototype.forEach.call(est.querySelectorAll('.rp-num'), function (s) {
+        var x = +s.getAttribute('data-n');
+        s.classList.toggle('is-esconde', !!lista && lista.indexOf(x) < 0);
+      });
+    }
     function mover(x, oculto) {
       ex.style.left = pct(x);
       ex.setAttribute('data-pos', String(x));
@@ -3726,7 +3735,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       if (P.chispas) P.chispas(v, Math.round((v.clientWidth || 600) * (x - lo) / span), 70);
     }
     function celebrar() { exIn.classList.remove('is-feliz'); void exIn.offsetWidth; exIn.classList.add('is-feliz'); }
-    return { el: el, v: v, pintar: pintar, mover: mover, salto: salto, choque: choque, valorEn: valorEn, ex: ex,
+    return { el: el, v: v, pintar: pintar, soloNums: soloNums, mover: mover, salto: salto, choque: choque, valorEn: valorEn, ex: ex,
              cavar: cavar, objeto: objeto, premio: premio, celebrar: celebrar,
              ocultarPersonaje: function (si) { ex.style.display = si ? 'none' : ''; },
              destruir: function () { if (el.parentNode) el.parentNode.removeChild(el); } };
@@ -3770,7 +3779,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     function textos() {
       $('#rp-ub-txt').innerHTML = fase === 'decena'
         ? 'A star is on <b>' + n + '</b>. First go to its ten. Then dig!'
-        : 'Now find <b>' + n + '</b>. Count from ' + dec + '. Then dig!';
+        : 'Now find <b>' + n + '</b>. Start on ' + dec + ' and count. Then dig!';
     }
     function armarRecta() {
       if (recta) recta.destruir();
@@ -3794,20 +3803,28 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       if (nivelPista >= 2 && fase === 'decena') d.llaves = [{ a: dec, b: dec + 10, txt: dec + ' to ' + (dec + 10) }];
       if (extra) for (var k in extra) d[k] = extra[k];
       recta.pintar(d);
-      recta.mover(val, true);
+      /* en el zoom: decenas siempre, la mitad con la pista 2, todos los numeros con la pista 3 */
+      if (fase === 'unidad') recta.soloNums(nivelPista >= 3 ? null : nivelPista >= 2 ? [dec, dec + 5, dec + 10] : [dec, dec + 10]);
+      recta.mover(val, fase === 'decena');
       recta.el.setAttribute('data-val', String(val));
       recta.el.setAttribute('data-n', String(n));
     }
-    function nudge(m) { if (listo) return; val = Math.max(lo, Math.min(hi, val + m)); ctx.accion(); pintar(); }
+    function nudge(m) {
+      if (listo) return;
+      var antes = val; val = Math.max(lo, Math.min(hi, val + m)); ctx.accion(); pintar();
+      if (fase === 'unidad' && val !== antes) P.vozEn(String(val));   /* la voz cuenta cada paso, como el dedo en clase */
+    }
     function confirmar() {
       if (listo) return;
       if (fase === 'decena') {
         if (val === dec || val === dec + 10) {
           /* zoom a la decena: ahora todos los numeros estan rotulados */
-          fase = 'unidad'; lo = dec; hi = dec + 10; leido = null;
+          /* zoom a la decena: como en la ficha del colegio, solo se ven las decenas; el nino cuenta */
+          fase = 'unidad'; lo = dec; hi = dec + 10; leido = null; nivelPista = 0; val = dec;
           armarRecta(); armarBotones(); textos(); pintar(); recta.celebrar();
-          ctx.mensaje('Yes! ' + n + ' is between ' + dec + ' and ' + (dec + 10) + '. Now find ' + n + '.', 'bien');
-          P.vozEn('Yes! Now find ' + n + '.');
+          ctx.peldanos(peldanosUnidad());
+          ctx.mensaje('Yes! ' + n + ' is between ' + dec + ' and ' + (dec + 10) + '. Now count to ' + n + '.', 'bien');
+          P.vozEn('Yes! ' + n + ' is between ' + dec + ' and ' + (dec + 10) + '.');
           return;
         }
         var aqui = val;
@@ -3849,6 +3866,14 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     document.addEventListener('keydown', tecla);
 
     var ej = dec === 60 ? 34 : 64, ejd = Math.floor(ej / 10) * 10;
+    function peldanosUnidad() {
+      var cuenta = []; for (var c = dec + 1; c <= n; c++) cuenta.push(c);
+      return [
+        { texto: 'Start on ' + dec + '. Tap +1 and count: ' + (dec + 1) + ', ' + (dec + 2) + '...', visual: function () { nivelPista = 1; pintar(); } },
+        { texto: 'The tall mark is ' + (dec + 5) + ', the middle. ' + n + (n % 10 > 5 ? ' is after it.' : n % 10 < 5 ? ' is before it.' : ' is the middle.'), visual: function () { nivelPista = 2; pintar(); } },
+        { texto: 'Count with me: ' + dec + ', ' + cuenta.join(', ') + '.', visual: function () { nivelPista = 3; pintar(); } }
+      ];
+    }
     ctx.peldanos([
       { texto: 'Look at the tens: 10, 20, 30... ' + n + ' is after ' + dec + '.', visual: function () { nivelPista = 1; pintar(); } },
       { texto: fase === 'decena' ? 'Look at the blue part. Walk there.' : 'Count from ' + dec + ': ' + (dec + 1) + ', ' + (dec + 2) + ', ' + (dec + 3) + '...', visual: function () { nivelPista = 2; pintar(); } },
@@ -4217,9 +4242,10 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
      1 Conocer   Tocar la parte que se nombra y mover cuentas al espacio de conteo
      2 Construir Llenar varillas enteras (decenas) y luego cuentas sueltas (unidades)
      3 Leer      Contar varillas llenas y cuentas sueltas, y escribir el numero
-     4 Separar   Componer y descomponer: 50 + 2 = 52 y 63 = 60 + 3
-     5 Sumar     Mover cuentas para sumar y quitar, cruzando una decena; paginas de cuaderno
-   Modelo del abaco (supuesto declarado): 10 varillas de 10 cuentas.
+     4 T y U     Abaco de dos varillas (decenas T, unidades U), como el cuaderno del colegio: leer, construir y separar
+     5 Sumar     Mover cuentas para sumar y quitar dentro de la misma decena, como el afiche del colegio; paginas de cuaderno
+   Modelo del abaco: 10 varillas de 10 cuentas (afiche del colegio), y en la ronda 4 el de dos
+   varillas T y U (guia "Tens and Units on the Abacus" y cuaderno del colegio).
    Una varilla llena vale una decena; las cuentas sueltas de la siguiente son las unidades.
    El abaco es un instrumento pedagogico: se dibuja por codigo (regla 9), en pixel art
    con la paleta del juego, y las cuentas se deslizan animadas.
@@ -4289,27 +4315,29 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         { t: 'leer', n: 31, demo: true, guia: true }, { t: 'leer', n: 52, guia: true }, { t: 'leer', n: 40, guia: true },
         { t: 'leer', n: 68 }, { t: 'leer', n: 85 }] },
 
-    { id: 'separar', nombre: 'Take it apart',
-      texto: 'Split the number. Tens first, then units.',
-      ejemplo: 'Example: 58 = 50 + 8. 5 full rods is 50. 8 beads is 8.',
+    /* Ronda 4: el abaco del cuaderno del colegio, con una varilla de decenas (T) y una de unidades (U).
+       Cada cuenta de T vale 10; cada cuenta de U vale 1. */
+    { id: 'separar', nombre: 'Tens and units',
+      texto: 'This abacus has two rods. T is tens. U is units.',
+      ejemplo: 'Example: 5 beads on T and 2 beads on U. 5 tens and 2 units. 52 = 50 + 2.',
       items: [
-        { t: 'comp', dec: 50, uni: 2 },
-        { t: 'descomp', n: 63 },
-        { t: 'comp', dec: 70, uni: 8 },
-        { t: 'descomp', n: 47 },
-        { t: 'descomp', n: 91 }] },
+        { t: 'tuLeer', n: 27, guia: true },
+        { t: 'tuHacer', n: 43 },
+        { t: 'tuSeparar', n: 58 },
+        { t: 'tuLeer', n: 61 },
+        { t: 'tuHacer', n: 35 }] },
 
     { id: 'sumar', nombre: 'Add and take away',
       texto: 'Add: move beads to the right. Take away: move beads to the left.',
-      ejemplo: 'Example: 29 + 3. Add 1 bead. The rod is full: 30. Add 2 more: 32.',
-      ejemploMenos: 'Example: 42 ' + MENOS + ' 5. Take away 2 beads: 40. Take 3 more from the full rod: 37.',
+      ejemplo: 'Example: 21 + 4. 2 full rods stay. Move 4 more beads: 25.',
+      ejemploMenos: 'Example: 46 ' + MENOS + ' 3. 4 full rods stay. Move 3 beads back: 43.',
       items: [
         { t: 'mover', ini: 41, k: 6 },
-        { t: 'mover', ini: 38, k: 5 },
+        { t: 'mover', ini: 32, k: 5 },
         { t: 'mover', ini: 57, k: -4 },
-        { t: 'mover', ini: 62, k: -5 },
-        { t: 'cuaderno', expr: '45 + 7', resp: 52, ej: 'Example: 27 + 6. Add 3: the rod is full, 30. Add 3 more: 33.' },
-        { t: 'cuaderno', expr: '71 ' + MENOS + ' 6', resp: 65, ej: 'Example: 53 ' + MENOS + ' 5. Take away 3: 50. Take away 2 more: 48.' }] }
+        { t: 'mover', ini: 69, k: -6 },
+        { t: 'cuaderno', expr: '33 + 5', resp: 38, ej: 'Example: 52 + 4. The tens stay: 50. The units: 2 + 4 = 6. So 56.' },
+        { t: 'cuaderno', expr: '78 ' + MENOS + ' 6', resp: 72, ej: 'Example: 87 ' + MENOS + ' 5. The tens stay: 80. The units: 7 ' + MENOS + ' 5 = 2. So 82.' }] }
   ];
 
   /* Texto de la consigna (tambien se dice en voz alta). */
@@ -4321,6 +4349,9 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     if (it.t === 'descomp') return 'How many tens? How many units?';
     if (it.t === 'mover') return it.k > 0 ? 'Add ' + it.k + ' beads.' : 'Take away ' + (-it.k) + ' beads.';
     if (it.t === 'cuaderno') return 'Do the sum.';
+    if (it.t === 'tuLeer') return 'How many tens? How many units? What number?';
+    if (it.t === 'tuHacer') return 'Show ' + it.n + ' on the abacus.';
+    if (it.t === 'tuSeparar') return it.n + ' = ? + ?';
     return '';
   }
   RONDAS.forEach(function (r) {
@@ -4855,7 +4886,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       }
     }
     var p1 = simple ? 'Tap a bead. It moves to the right. Count the beads.'
-      : mover ? (it.k > 0 ? 'Add: move beads to the right. Fill the rod. Then use the next rod.' : 'Take away: move beads to the left. Start with the last rod.')
+      : mover ? (it.k > 0 ? 'Add: move beads to the right, on the rod with the units.' : 'Take away: move beads to the left, on the rod with the units.')
       : 'A full rod is 10. Fill full rods first. Then add the units.';
     var p2 = mover ? 'Look at the marked rods. Change only those rods.'
       : simple ? 'Look at the label. Move that many beads.' : 'Look at the labels. 10 is a full rod. The other number is the units.';
@@ -5054,6 +5085,265 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     return { destruir: function () { cont.parar(); if (tec) tec.destruir(); ab.destruir(); if (E) E.destruir(); } };
   }
 
+
+  /* ====================== ABACO DE DECENAS Y UNIDADES (T y U) ======================
+     Dos varillas verticales sobre una base con rotulos, como el del cuaderno del colegio.
+     T a la izquierda (cuentas rojas, cada una vale 10) y U a la derecha (azules, valen 1).
+     El significado nunca va solo por color: cada varilla lleva su letra y su nombre.
+     activo: tocar la varilla agrega una cuenta; los botones − y + quitan y agregan. */
+  var cssTU = document.createElement('style');
+  cssTU.textContent = [
+    '.tu{position:relative;width:250px;height:262px;margin:6px auto 0;user-select:none;touch-action:manipulation}',
+    '.tu-top,.tu-base,.tu-lado{position:absolute;background:#A0643A;border:3px solid #1E1426;box-shadow:inset 0 3px 0 #C98A55,inset 0 -3px 0 #6B3D22}',
+    '.tu-top{left:0;right:0;top:0;height:14px}.tu-base{left:0;right:0;bottom:0;height:50px}.tu-lado{top:0;bottom:0;width:14px}.tu-lado.l{left:0}.tu-lado.r{right:0}',
+    '.tu-col{position:absolute;top:17px;bottom:53px;width:105px;cursor:default}.tu-col[data-col="t"]{left:17px}.tu-col[data-col="u"]{right:17px}',
+    '.tu.is-activo .tu-col{cursor:pointer}',
+    '.tu-vara{position:absolute;left:50%;top:0;bottom:0;width:8px;margin-left:-4px;background:#E8ECF2;border:2px solid #1E1426;box-sizing:border-box}',
+    '.tu-b{position:absolute;left:50%;width:66px;height:20px;margin-left:-33px;padding:0;border:3px solid #1E1426;border-radius:10px;font:900 .8rem/1 Nunito,system-ui,sans-serif;color:#FFFDF6;text-shadow:0 1px 0 #1E1426;cursor:pointer;transition:transform .12s}',
+    '.tu-b[data-col="t"]{background:#C8382F;box-shadow:inset 0 4px 0 #EE6A55,inset 0 -4px 0 #7A1E1E}',
+    '.tu-b[data-col="u"]{background:#2F6FD0;box-shadow:inset 0 4px 0 #7FB2F0,inset 0 -4px 0 #1C3F80}',
+    '.tu-b.is-contada{outline:3px solid #FFD34D;outline-offset:1px}',
+    '.tu-b.is-nueva{animation:tu-pop .18s ease-out}',
+    '@keyframes tu-pop{from{transform:translateY(-14px)}to{transform:none}}',
+    '.tu-fan{position:absolute;left:50%;width:66px;height:20px;margin-left:-33px;border:3px dashed #1E1426;border-radius:10px;box-sizing:border-box;opacity:.55}',
+    '.tu-rot{position:absolute;bottom:9px;width:96px;margin-left:-48px;padding:3px 0;background:#FFFDF6;border:2px solid #1E1426;border-radius:4px;text-align:center;font-weight:900;font-size:.95rem;color:#1E1426;line-height:1.1}',
+    '.tu-rot b{display:inline-block;min-width:1.2em;margin-right:4px;padding:0 3px;border-radius:3px;color:#FFFDF6}',
+    '.tu-rot[data-col="t"]{left:69px}.tu-rot[data-col="u"]{right:21px;margin-left:0}',
+    '.tu-rot[data-col="t"] b{background:#C8382F}.tu-rot[data-col="u"] b{background:#2F6FD0}',
+    '.tu.is-mal{animation:tu-no .35s}',
+    '@keyframes tu-no{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}',
+    '.tu-ctl{display:flex;justify-content:center;gap:18px;margin:8px auto 0}',
+    '.tu-ctl > div{display:flex;gap:6px;align-items:center}',
+    '.tu-ctl .k-boton{min-width:52px;min-height:48px;padding:0 10px;font-size:1.3rem}',
+    '.tu-cnt{min-width:30px;text-align:center;font-weight:900;font-size:1.3rem}',
+    '.tu-eq{gap:6px 14px;align-items:flex-end}',
+    '.tu-par{display:inline-flex;flex-direction:column;align-items:center;gap:2px}.tu-par small{font-size:.9rem;font-weight:900}',
+    '.tu-dig{display:inline-flex;gap:2px}.tu-dig i{font-style:normal;display:inline-flex;flex-direction:column;align-items:center;line-height:1}',
+    '.tu-dig small{font-size:.7rem;font-weight:900;margin-top:2px}',
+    '@media (max-height:500px) and (orientation:landscape){.tu{zoom:.8}.tu-ctl{gap:10px;margin-top:4px}.tu-ctl .k-boton{min-width:44px;min-height:44px;font-size:1.1rem}.tu-cnt{min-width:22px}}',
+    '@media (prefers-reduced-motion:reduce){.tu-b,.tu.is-mal{animation:none!important;transition:none}}'
+  ].join('\n');
+  document.head.appendChild(cssTU);
+
+  var MAX_TU = 9;
+  function AbacoTU(host, o) {
+    var t = o.t || 0, u = o.u || 0, activo = !!o.activo, contadas = { t: 0, u: 0 }, fantasma = null;
+    var el = document.createElement('div');
+    el.className = 'tu' + (activo ? ' is-activo' : '');
+    el.setAttribute('role', 'group'); el.setAttribute('aria-label', 'Abacus with a tens rod and a units rod');
+    el.innerHTML = '<div class="tu-lado l"></div><div class="tu-lado r"></div><div class="tu-top"></div><div class="tu-base"></div>' +
+      '<div class="tu-col" data-col="t"><div class="tu-vara"></div></div><div class="tu-col" data-col="u"><div class="tu-vara"></div></div>' +
+      '<div class="tu-rot" data-col="t"><b>T</b>tens</div><div class="tu-rot" data-col="u"><b>U</b>units</div>';
+    host.appendChild(el);
+    var ctl = null;
+    if (activo) {
+      ctl = document.createElement('div'); ctl.className = 'tu-ctl';
+      ctl.innerHTML = ['t', 'u'].map(function (c) {
+        var nom = c === 't' ? 'tens' : 'units';
+        return '<div><button type="button" class="k-boton" data-tu="' + c + '-" aria-label="Take away one bead from ' + nom + '">' + MENOS + '</button>' +
+          '<span class="tu-cnt" data-cnt="' + c + '">0</span>' +
+          '<button type="button" class="k-boton" data-tu="' + c + '+" aria-label="Add one bead to ' + nom + '">+</button></div>';
+      }).join('');
+      host.appendChild(ctl);
+      Array.prototype.forEach.call(ctl.querySelectorAll('[data-tu]'), function (b) {
+        b.addEventListener('click', function () { var k = b.getAttribute('data-tu'); cambiar(k[0], k[1] === '+' ? 1 : -1); });
+      });
+    }
+    Array.prototype.forEach.call(el.querySelectorAll('.tu-col'), function (c) {
+      c.addEventListener('click', function (e) {
+        var col = c.getAttribute('data-col');
+        var b = e.target.closest ? e.target.closest('.tu-b') : null;
+        if (b && o.alTocarCuenta) { o.alTocarCuenta(col, +b.getAttribute('data-i')); return; }
+        if (activo) cambiar(col, 1);
+        else if (o.alTocarCuenta) o.alTocarCuenta(col, null);
+      });
+    });
+    function cambiar(col, d) {
+      var v = col === 't' ? t : u, nv = Math.max(0, Math.min(MAX_TU, v + d));
+      if (nv === v) { if (o.alAviso) o.alAviso(d > 0 ? 'This rod has 9 beads. That is the most.' : 'No beads to take away.'); sacudir(); return; }
+      if (col === 't') t = nv; else u = nv;
+      pintar(d > 0 ? col : null);
+      if (o.alCambiar) o.alCambiar(t, u, col);
+    }
+    function pintar(nueva) {
+      ['t', 'u'].forEach(function (col) {
+        var c = el.querySelector('.tu-col[data-col="' + col + '"]'), n = col === 't' ? t : u, h = '<div class="tu-vara"></div>';
+        var f = fantasma ? fantasma[col] : 0;
+        for (var j = 0; j < f; j++) h += '<i class="tu-fan" style="bottom:' + (2 + j * 21) + 'px"></i>';
+        for (var i = 0; i < n; i++) {
+          var lab = i < contadas[col] ? String(col === 't' ? (i + 1) * 10 : i + 1) : '';
+          h += '<button type="button" class="tu-b' + (lab ? ' is-contada' : '') + (nueva === col && i === n - 1 ? ' is-nueva' : '') + '" data-col="' + col + '" data-i="' + i + '" style="bottom:' + (2 + i * 21) + 'px" aria-label="' + (col === 't' ? 'Ten' : 'Unit') + ' bead ' + (i + 1) + '" tabindex="-1">' + lab + '</button>';
+        }
+        c.innerHTML = h;
+        if (ctl) ctl.querySelector('[data-cnt="' + col + '"]').textContent = String(n);
+      });
+      el.setAttribute('data-t', String(t)); el.setAttribute('data-u', String(u));
+    }
+    function sacudir() { el.classList.remove('is-mal'); void el.offsetWidth; el.classList.add('is-mal'); }
+    pintar(null);
+    return {
+      el: el, estado: function () { return { t: t, u: u }; },
+      contar: function (col, k) { contadas[col] = Math.max(0, Math.min(col === 't' ? t : u, k)); pintar(null); },
+      contadas: function () { return { t: contadas.t, u: contadas.u }; },
+      fantasma: function (f) { fantasma = f; pintar(null); },
+      bloquear: function () { activo = false; el.classList.remove('is-activo'); if (ctl) { ctl.hidden = true; ctl.style.display = 'none'; } },
+      reiniciar: function () { t = 0; u = 0; pintar(null); },
+      sacudir: sacudir,
+      destruir: function () { el.remove(); if (ctl) ctl.remove(); }
+    };
+  }
+  window.SAMSAN_ABACO_TU = AbacoTU;
+
+  /* Numero con sus cifras rotuladas T y U (pista 1). */
+  function cifrasTU(n, rotular) {
+    var s = String(n);
+    if (!rotular || s.length < 2) return esc(s);
+    return '<b class="tu-dig"><i>' + s[0] + '<small>T</small></i><i>' + s[1] + '<small>U</small></i></b>';
+  }
+
+  /* Conteo tocando en el abaco T y U: cada toque en una cuenta cuenta hasta ella. */
+  function contarTU(ab, E) {
+    return function (col, i) {
+      if (i == null) return;
+      ab.contar(col, i + 1);
+      var v = col === 't' ? (i + 1) * 10 : i + 1;
+      if (E) E.decir('topo', String(v));
+      P.vozEn(col === 't' ? (i + 1) + (i ? ' tens' : ' ten') : String(i + 1));
+    };
+  }
+
+  /* ====================== RETO: LEER EL ABACO T y U (Tens, Units, Number) ====================== */
+  function montarTULeer(it, ctx, ronda) {
+    var T = Math.floor(it.n / 10), U = it.n % 10, paso = 0, listo = false, nivel = 0, tec = null;
+    ctx.host.innerHTML = '<p class="rp-consigna">' + esc(consigna(it)) + '</p><div id="ab-escena"></div>' +
+      '<div class="rp-eq tu-eq"><b class="tu-par"><small>Tens</small><span class="is-hueco" id="tu-r0">?</span></b><b class="tu-par"><small>Units</small><span class="is-hueco" id="tu-r1">?</span></b><em>&#8594;</em><b class="tu-par"><small>Number</small><span class="is-hueco" id="tu-r2">?</span></b></div>' +
+      '<div class="ab-par"><div class="ab-col"><div id="ab-tu"></div></div><div id="rp-tz"></div></div>';
+    var E = tienda({ pide: 'What number?' });
+    if (E) E.decir('topo', 'Count with me!');
+    var ab = AbacoTU($('#ab-tu'), { t: T, u: U, activo: false });
+    var tocar = contarTU(ab, E);
+    ab.el.addEventListener('click', function (e) {
+      ctx.accion();
+      var b = e.target.closest ? e.target.closest('.tu-b') : null;
+      if (b) tocar(b.getAttribute('data-col'), +b.getAttribute('data-i'));
+    });
+    function activo() { for (var k = 0; k < 3; k++) $('#tu-r' + k).classList.toggle('ab-eq-activo', k === paso && !listo); }
+    function texto() { return ['Type the tens. Count the beads on T.', 'Now type the units. Count the beads on U.', 'Now type the number.'][paso]; }
+    tec = P.teclado($('#rp-tz'), {
+      max: 2, alTecla: function () { ctx.accion(); },
+      alEnviar: function (n) {
+        if (listo) return;
+        var esperado = [T, U, it.n][paso], ok = n === esperado || (paso === 0 && n === T * 10 && T > 0);
+        if (ok) {
+          var c = $('#tu-r' + paso); c.textContent = String(esperado); c.className = 'is-bien';
+          if (paso === 0 && n === T * 10 && T !== 1) P.vozEn(T + ' tens is ' + n);
+          tec.limpiar(); paso++;
+          if (paso === 3) { listo = true; tec.destruir(); activo(); if (E) E.bien('Thank you!'); ctx.listo('Yes! ' + T + ' tens and ' + U + ' units is ' + it.n + '.'); return; }
+          activo(); ctx.mensaje('Yes! ' + texto(), 'bien');
+        } else {
+          tec.limpiar(); ab.sacudir(); if (E) E.mal('Look again!');
+          if (paso === 2 && n === U * 10 + T) ctx.fallo('Tens first! ' + T + ' tens, then ' + U + ' units.');
+          else ctx.fallo(paso === 0 ? 'Not yet. Count the red beads on T.' : paso === 1 ? 'Not yet. Count the blue beads on U.' : 'Not yet. ' + T + ' tens and ' + U + ' units.');
+        }
+      }
+    });
+    function ayuda() { if (nivel >= 2) { ab.contar('t', T); ab.contar('u', U); } }
+    ctx.peldanos([
+      { texto: 'T is tens. U is units. Count the beads on each rod.', visual: function () { nivel = 1; } },
+      { texto: 'Look: each bead on T is 10. Each bead on U is 1.', visual: function () { nivel = 2; ayuda(); } },
+      { texto: (ronda && ronda.ejemplo) || '', visual: function () { nivel = 3; ayuda(); } }
+    ]);
+    activo();
+    if (it.guia) { nivel = 2; ayuda(); ctx.mensaje('Tap the beads to count. Then type the tens.', ''); }
+    else ctx.mensaje('Tap the beads to count. ' + texto(), '');
+    return { destruir: function () { if (tec) tec.destruir(); ab.destruir(); if (E) E.destruir(); } };
+  }
+
+  /* ====================== RETO: CONSTRUIR EN EL ABACO T y U ====================== */
+  function montarTUHacer(it, ctx, ronda) {
+    var T = Math.floor(it.n / 10), U = it.n % 10, listo = false, nivel = 0;
+    ctx.host.innerHTML = '<p class="rp-consigna">' + esc(consigna(it)) + '</p><div id="ab-escena"></div>' +
+      '<div class="rp-eq" id="tu-eq"></div><div class="ab-par"><div class="ab-col"><div id="ab-tu"></div></div></div>';
+    var E = tienda({ pide: it.n + ', please!' });
+    function eq(fin) {
+      $('#tu-eq').innerHTML = '<span class="is-base">' + cifrasTU(it.n, nivel >= 1 || fin) + '</span><em>=</em>' +
+        (fin ? '<span class="is-bien">' + (T * 10) + '</span><em>+</em><span class="is-bien">' + U + '</span>' : '<span class="is-hueco">?</span><em>+</em><span class="is-hueco">?</span>');
+    }
+    ctx.extra.innerHTML = '<button type="button" class="k-boton k-boton--primario" id="rp-ok">DONE</button><button type="button" class="k-boton rp-reset" id="rp-reset" aria-label="Start over">&#8634;<span> START OVER</span></button>';
+    var ab = AbacoTU($('#ab-tu'), { t: 0, u: 0, activo: true, alAviso: function (t) { ctx.mensaje(t, 'mal'); },
+      alCambiar: function (t, u, col) { ctx.accion(); if (E) E.decir('topo', col === 't' ? t + (t === 1 ? ' ten' : ' tens') : u + (u === 1 ? ' unit' : ' units')); P.vozEn(String(col === 't' ? t * 10 : u)); } });
+    $('#rp-reset').addEventListener('click', function () { if (!listo) { ab.reiniciar(); ctx.accion(); } });
+    $('#rp-ok').addEventListener('click', function () {
+      if (listo) return;
+      var e = ab.estado();
+      if (e.t === T && e.u === U) {
+        listo = true; ab.bloquear(); eq(true);
+        Array.prototype.forEach.call(ctx.extra.querySelectorAll('#rp-ok, #rp-reset'), function (x) { x.hidden = true; x.style.display = 'none'; });
+        if (E) E.bien('Thank you!');
+        ctx.listo('Yes! ' + it.n + ' = ' + (T * 10) + ' + ' + U + '.');
+        return;
+      }
+      ab.sacudir(); if (E) E.mal('Not yet!');
+      if (e.t === 0 && e.u === 0) ctx.fallo('Tap the rods to put beads on them. T is tens. U is units.');
+      else if (e.t === U && e.u === T && T !== U) ctx.fallo('Swap them! ' + T + ' beads on T and ' + U + ' beads on U.');
+      else if (e.t !== T) ctx.fallo('Look at T. You have ' + e.t + (e.t === 1 ? ' ten' : ' tens') + '. ' + it.n + ' has ' + T + (T === 1 ? ' ten.' : ' tens.'));
+      else ctx.fallo('T is right! Look at U. You have ' + e.u + (e.u === 1 ? ' unit' : ' units') + '. ' + it.n + ' has ' + U + '.');
+    });
+    ctx.peldanos([
+      { texto: 'Look at ' + it.n + '. ' + T + ' is the tens. ' + U + ' is the units.', visual: function () { nivel = 1; eq(false); } },
+      { texto: 'Put ' + T + ' beads on T. Put ' + U + ' beads on U.', visual: function () { nivel = 2; eq(false); ab.fantasma({ t: T, u: U }); } },
+      { texto: (ronda && ronda.ejemplo) || '', visual: function () { nivel = 3; eq(false); ab.fantasma({ t: T, u: U }); } }
+    ]);
+    eq(false);
+    ctx.mensaje('Tap a rod or + to add a bead. Then tap DONE.', '');
+    return { destruir: function () { ab.destruir(); if (E) E.destruir(); } };
+  }
+
+  /* ====================== RETO: SEPARAR CON EL ABACO T y U (n = decenas + unidades) ====================== */
+  function montarTUSeparar(it, ctx, ronda) {
+    var T = Math.floor(it.n / 10), U = it.n % 10, dec = T * 10, paso = 0, listo = false, nivel = 0, tec = null;
+    ctx.host.innerHTML = '<p class="rp-consigna">' + esc(consigna(it)) + '</p><div id="ab-escena"></div>' +
+      '<div class="rp-eq"><span class="is-base">' + it.n + '</span><em>=</em><span class="is-hueco" id="ab-s1">?</span><em>+</em><span class="is-hueco" id="ab-s2">?</span></div>' +
+      '<div class="ab-par"><div class="ab-col"><div id="ab-tu"></div></div><div id="rp-tz"></div></div>';
+    var E = tienda({ pide: 'Tens and units?' });
+    if (E) E.decir('topo', 'Count with me!');
+    var ab = AbacoTU($('#ab-tu'), { t: T, u: U, activo: false });
+    var tocar = contarTU(ab, E);
+    ab.el.addEventListener('click', function (e) {
+      ctx.accion();
+      var b = e.target.closest ? e.target.closest('.tu-b') : null;
+      if (b) tocar(b.getAttribute('data-col'), +b.getAttribute('data-i'));
+    });
+    function activo() { $('#ab-s1').classList.toggle('ab-eq-activo', paso === 0 && !listo); $('#ab-s2').classList.toggle('ab-eq-activo', paso === 1 && !listo); }
+    tec = P.teclado($('#rp-tz'), {
+      max: 2, alTecla: function () { ctx.accion(); },
+      alEnviar: function (n) {
+        if (listo) return;
+        var esperado = paso === 0 ? dec : U, comoDecenas = paso === 0 && n === T && T > 1;
+        if (n === esperado || comoDecenas) {
+          var c = $(paso === 0 ? '#ab-s1' : '#ab-s2'); c.textContent = String(esperado); c.className = 'is-bien';
+          tec.limpiar(); paso++;
+          if (paso === 2) { listo = true; tec.destruir(); activo(); if (E) E.bien('Thank you!'); ctx.listo('Yes! ' + it.n + ' = ' + dec + ' + ' + U + '.'); return; }
+          activo();
+          if (comoDecenas) { ctx.mensaje('Yes! ' + T + ' tens = ' + dec + '. Now type the units.', 'bien'); P.vozEn(T + ' tens is ' + dec); }
+          else ctx.mensaje('Yes! Now type the units. Count the beads on U.', 'bien');
+        } else {
+          tec.limpiar(); ab.sacudir(); if (E) E.mal('Look again!');
+          ctx.fallo(paso === 0 ? 'Not yet. Each bead on T is 10. Count: 10, 20, 30...' : 'Not yet. Count the beads on U.');
+        }
+      }
+    });
+    function ayuda() { if (nivel >= 2) { ab.contar('t', T); ab.contar('u', U); } }
+    ctx.peldanos([
+      { texto: 'The tens are on T. The units are on U.', visual: function () { nivel = 1; } },
+      { texto: 'Each bead on T is 10. Look: 10, 20, 30...', visual: function () { nivel = 2; ayuda(); } },
+      { texto: (ronda && ronda.ejemplo) || '', visual: function () { nivel = 3; ayuda(); } }
+    ]);
+    activo();
+    ctx.mensaje('Type the tens. Then tap OK.', '');
+    return { destruir: function () { if (tec) tec.destruir(); ab.destruir(); if (E) E.destruir(); } };
+  }
+
   /* ====================== RETO: CUADERNO (cuenta escrita) ====================== */
   function montarCuaderno(it, ctx, ronda) {
     var tok = it.expr.split(' '), ini = parseInt(tok[0], 10), listo = false, nivel = 0;
@@ -5101,6 +5391,9 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       if (item.t === 'leer') return montarLeer(item, ctx, ronda);
       if (item.t === 'descomp') return montarDescomp(item, ctx, ronda);
       if (item.t === 'cuaderno') return montarCuaderno(item, ctx, ronda);
+      if (item.t === 'tuLeer') return montarTULeer(item, ctx, ronda);
+      if (item.t === 'tuHacer') return montarTUHacer(item, ctx, ronda);
+      if (item.t === 'tuSeparar') return montarTUSeparar(item, ctx, ronda);
       return montarConstruir(item, ctx, ronda);
     }
   });

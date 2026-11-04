@@ -36,7 +36,7 @@ Regla 8: de los documentos del colegio solo salen objetivos. Los números, los p
 | La matemática es la mecánica | Cada salto es el signo y el tamaño de la operación; no hay respuesta que se pueda adivinar con cuatro botones |
 | Juego de referencia | Rocket League (planear la trayectoria con recursos limitados) |
 
-Cinco rondas: ubicar, saltar, decenas, puerta y botas del topo. En «Gem hunt» (ubicar) el niño va primero a la decena con −10 y +10 y cava; luego la recta se acerca a esa decena, con sus 11 números rotulados, y se mueve de uno en uno hasta el número exacto. Una flecha bajo los pies del explorador marca siempre su número. Dos páginas de cuaderno por ronda, salvo la primera. Cada reto tiene escalera de pistas de tres peldaños (acción mínima, figura, ejemplo resuelto), que sube con cada fallo, con 20 s sin acción o con el botón HINT. Sin derrota: chocar o quedarse sin botas devuelve al inicio.
+Cinco rondas: ubicar, saltar, decenas, puerta y botas del topo. En «Gem hunt» (ubicar) el niño va primero a la decena con −10 y +10 y cava; luego la recta se acerca a esa decena y se mueve de uno en uno hasta el número exacto. Como en la ficha del colegio, solo se ven escritas las decenas de los extremos; una marca más alta señala la mitad. El globo del explorador dice el número donde está y la voz cuenta cada paso. La pista 2 escribe la mitad y la pista 3 escribe los 11 números. Una flecha bajo los pies del explorador marca siempre su posición. Dos páginas de cuaderno por ronda, salvo la primera. Cada reto tiene escalera de pistas de tres peldaños (acción mínima, figura, ejemplo resuelto), que sube con cada fallo, con 20 s sin acción o con el botón HINT. Sin derrota: chocar o quedarse sin botas devuelve al inicio.
 
 ## 4. Validación
 

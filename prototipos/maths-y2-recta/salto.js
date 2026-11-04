@@ -168,6 +168,7 @@
     '.rp-tick.m10{height:20px;width:6px;margin-left:-3px;background:#A0643A;box-shadow:0 0 0 2px #1E1426}',
     '.rp-num{position:absolute;top:168px;transform:translateX(-50%);font-weight:800;font-size:.85rem;color:#2A211A}',
     '.rp-num.m10{font-size:1rem;font-weight:900}',
+    '.rp-num.is-esconde:not(.is-clave){visibility:hidden}',
     '.rp-num.is-clave{background:#FFD34D;border:2px solid #1E1426;border-radius:6px;padding:0 5px;font-size:1rem;font-weight:900;top:166px}',
     '.rp-ban{position:absolute;bottom:60px;width:0;z-index:2;transition:left .12s}',
     '.rp-ban__m{position:absolute;left:-2px;bottom:0;width:4px;height:50px;background:#6B3D22;box-shadow:0 0 0 1px #1E1426}',
@@ -201,6 +202,7 @@
     '.rp-recta.is-cueva .rp-arco.is-fantasma{border-color:#7FE3F0}',
     '.rp-recta.is-cueva .rp-ban__m{background:#D19A5E}',
     '.rp-recta.is-cueva .rp-tick{background:#E8ECF2;box-shadow:0 0 0 1px #1E1426}',
+    '.rp-recta.is-cueva .rp-tick.m5{height:18px;width:6px;margin-left:-3px}',
     '.rp-objs{position:absolute;inset:0;pointer-events:none;z-index:4}',
     '.rp-obj{position:absolute;bottom:60px;transform:translateX(-50%);animation:rp-sale .5s ease-out}',
     '.rp-obj.is-estrella{bottom:64px;margin-left:22px}',
@@ -310,6 +312,13 @@
       var txt = c[2] != null ? c[2] : ((c[1] > c[0] ? '+' : MENOS) + dist);
       return '<div class="rp-arco' + (fant ? ' is-fantasma' : '') + '" style="left:' + pct(x0) + ';width:' + (dist / span * 100).toFixed(3) + '%;height:' + alto.toFixed(0) + 'px"><span>' + esc(txt) + '</span></div>';
     }
+    /* Deja visibles solo los numeros de la lista (null = todos). Los resaltados siempre se ven. */
+    function soloNums(lista) {
+      Array.prototype.forEach.call(est.querySelectorAll('.rp-num'), function (s) {
+        var x = +s.getAttribute('data-n');
+        s.classList.toggle('is-esconde', !!lista && lista.indexOf(x) < 0);
+      });
+    }
     function mover(x, oculto) {
       ex.style.left = pct(x);
       ex.setAttribute('data-pos', String(x));
@@ -344,7 +353,7 @@
       if (P.chispas) P.chispas(v, Math.round((v.clientWidth || 600) * (x - lo) / span), 70);
     }
     function celebrar() { exIn.classList.remove('is-feliz'); void exIn.offsetWidth; exIn.classList.add('is-feliz'); }
-    return { el: el, v: v, pintar: pintar, mover: mover, salto: salto, choque: choque, valorEn: valorEn, ex: ex,
+    return { el: el, v: v, pintar: pintar, soloNums: soloNums, mover: mover, salto: salto, choque: choque, valorEn: valorEn, ex: ex,
              cavar: cavar, objeto: objeto, premio: premio, celebrar: celebrar,
              ocultarPersonaje: function (si) { ex.style.display = si ? 'none' : ''; },
              destruir: function () { if (el.parentNode) el.parentNode.removeChild(el); } };
@@ -388,7 +397,7 @@
     function textos() {
       $('#rp-ub-txt').innerHTML = fase === 'decena'
         ? 'A star is on <b>' + n + '</b>. First go to its ten. Then dig!'
-        : 'Now find <b>' + n + '</b>. Count from ' + dec + '. Then dig!';
+        : 'Now find <b>' + n + '</b>. Start on ' + dec + ' and count. Then dig!';
     }
     function armarRecta() {
       if (recta) recta.destruir();
@@ -412,20 +421,28 @@
       if (nivelPista >= 2 && fase === 'decena') d.llaves = [{ a: dec, b: dec + 10, txt: dec + ' to ' + (dec + 10) }];
       if (extra) for (var k in extra) d[k] = extra[k];
       recta.pintar(d);
-      recta.mover(val, true);
+      /* en el zoom: decenas siempre, la mitad con la pista 2, todos los numeros con la pista 3 */
+      if (fase === 'unidad') recta.soloNums(nivelPista >= 3 ? null : nivelPista >= 2 ? [dec, dec + 5, dec + 10] : [dec, dec + 10]);
+      recta.mover(val, fase === 'decena');
       recta.el.setAttribute('data-val', String(val));
       recta.el.setAttribute('data-n', String(n));
     }
-    function nudge(m) { if (listo) return; val = Math.max(lo, Math.min(hi, val + m)); ctx.accion(); pintar(); }
+    function nudge(m) {
+      if (listo) return;
+      var antes = val; val = Math.max(lo, Math.min(hi, val + m)); ctx.accion(); pintar();
+      if (fase === 'unidad' && val !== antes) P.vozEn(String(val));   /* la voz cuenta cada paso, como el dedo en clase */
+    }
     function confirmar() {
       if (listo) return;
       if (fase === 'decena') {
         if (val === dec || val === dec + 10) {
           /* zoom a la decena: ahora todos los numeros estan rotulados */
-          fase = 'unidad'; lo = dec; hi = dec + 10; leido = null;
+          /* zoom a la decena: como en la ficha del colegio, solo se ven las decenas; el nino cuenta */
+          fase = 'unidad'; lo = dec; hi = dec + 10; leido = null; nivelPista = 0; val = dec;
           armarRecta(); armarBotones(); textos(); pintar(); recta.celebrar();
-          ctx.mensaje('Yes! ' + n + ' is between ' + dec + ' and ' + (dec + 10) + '. Now find ' + n + '.', 'bien');
-          P.vozEn('Yes! Now find ' + n + '.');
+          ctx.peldanos(peldanosUnidad());
+          ctx.mensaje('Yes! ' + n + ' is between ' + dec + ' and ' + (dec + 10) + '. Now count to ' + n + '.', 'bien');
+          P.vozEn('Yes! ' + n + ' is between ' + dec + ' and ' + (dec + 10) + '.');
           return;
         }
         var aqui = val;
@@ -467,6 +484,14 @@
     document.addEventListener('keydown', tecla);
 
     var ej = dec === 60 ? 34 : 64, ejd = Math.floor(ej / 10) * 10;
+    function peldanosUnidad() {
+      var cuenta = []; for (var c = dec + 1; c <= n; c++) cuenta.push(c);
+      return [
+        { texto: 'Start on ' + dec + '. Tap +1 and count: ' + (dec + 1) + ', ' + (dec + 2) + '...', visual: function () { nivelPista = 1; pintar(); } },
+        { texto: 'The tall mark is ' + (dec + 5) + ', the middle. ' + n + (n % 10 > 5 ? ' is after it.' : n % 10 < 5 ? ' is before it.' : ' is the middle.'), visual: function () { nivelPista = 2; pintar(); } },
+        { texto: 'Count with me: ' + dec + ', ' + cuenta.join(', ') + '.', visual: function () { nivelPista = 3; pintar(); } }
+      ];
+    }
     ctx.peldanos([
       { texto: 'Look at the tens: 10, 20, 30... ' + n + ' is after ' + dec + '.', visual: function () { nivelPista = 1; pintar(); } },
       { texto: fase === 'decena' ? 'Look at the blue part. Walk there.' : 'Count from ' + dec + ': ' + (dec + 1) + ', ' + (dec + 2) + ', ' + (dec + 3) + '...', visual: function () { nivelPista = 2; pintar(); } },

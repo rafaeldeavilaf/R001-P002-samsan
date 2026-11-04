@@ -11,17 +11,20 @@ jugador: menor (Year 2, 6 a 7 años)
 
 Regla 8: de los documentos del colegio solo salen objetivos. Los números del juego son propios y evitan los de los ejemplos del colegio (la verificación lo comprueba). No se copió ningún texto ni ejercicio.
 
-## 1. Supuesto declarado
+## 1. Modelos de ábaco (confirmados con el material del colegio, 4 nov 2026)
 
-El ábaco es de varillas horizontales, 10 varillas de 10 cuentas. Una varilla llena vale una decena; las cuentas sueltas de la varilla siguiente son las unidades. Las cuentas empiezan en la posición inicial (izquierda) y se mueven al espacio de conteo (derecha). **Pendiente de confirmar por Rafael** con la herramienta del colegio: si el ábaco del salón es otro (por ejemplo, dos varillas), cambia el modelo de `canon()` y de `Abaco()` en `taller.js`.
+El colegio usa dos ábacos y el juego también.
+
+- **Ábaco de 10 varillas de 10 cuentas** (afiche del ábaco): una varilla llena vale una decena y las cuentas sueltas de la varilla siguiente son las unidades. Las cuentas empiezan en la posición inicial (izquierda) y se mueven al espacio de conteo (derecha). Rondas 1, 2, 3 y 5.
+- **Ábaco de dos varillas, T (decenas) y U (unidades)** (guía de decenas y unidades y notas del cuaderno): cada cuenta de T vale 10 y cada cuenta de U vale 1, hasta 9 por varilla. Ronda 4. Se dibuja por código en `AbacoTU()` de `taller.js`, con cuentas rojas en T y azules en U, y cada varilla rotulada con su letra y su nombre para no depender del color.
 
 ## 2. Objetivos de aprendizaje
 
 1. Nombrar las partes: marco, varillas, cuentas, posición inicial y espacio de conteo.
 2. Construir un número llenando varillas enteras (decenas) y luego cuentas sueltas (unidades).
 3. Leer el número que muestra un ábaco.
-4. Componer y descomponer: `50 + 2 = 52` y `63 = 60 + 3`.
-5. Sumar y quitar moviendo cuentas, incluso cuando se llena una varilla o hay que bajar de decena.
+4. Leer, construir y separar en el ábaco T y U: contar las cuentas de T y de U, escribir Tens, Units y Number, y `58 = 50 + 8`.
+5. Sumar y quitar moviendo cuentas dentro de la misma decena, como los ejemplos del colegio (sin cruzar la decena; eso se practica en la recta numérica).
 
 ## 3. Errores típicos
 
