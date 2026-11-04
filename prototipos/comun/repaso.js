@@ -39,7 +39,7 @@
       '.k-pagina{padding:4px 8px 16px}.k-pagina > header{display:none}' +
       '.rp-mundo{padding:4px 6px;border-radius:10px}.rp-mundo::before,.rp-mundo::after{display:none}.rp-mundo > .k-panel{padding:8px 12px}' +
       '.rp-cab .k-rotulo{display:none}.rp-cab{align-items:center}.rp-cab h2{font-size:1rem}.rp-pips{margin:2px 0 0}' +
-      '.rp-oir span{display:none}.rp-voz{min-width:44px;min-height:44px}.rp-menu{min-height:44px}' +
+      '.rp-oir{padding:0 10px;font-size:.9rem;min-height:44px}.rp-voz{min-width:44px;min-height:44px}.rp-menu{min-height:44px}' +
       '.rp-consigna{font-size:1.05rem;margin:2px 0}.rp-eq{font-size:1.2rem;min-height:1.8em}' +
       '.rp-pie{margin:6px -12px -8px;padding:6px 12px;flex-wrap:nowrap;align-items:center;gap:8px}.rp-pie .k-boton{min-height:46px;padding:0 12px;font-size:1rem}.rp .rp-pie .k-mensaje{flex:1 1 auto;margin:0;font-size:.9rem;line-height:1.2;min-width:0}#rp-extra{display:contents}.rp-reset span{display:none}' +
       '.rp-caja{margin-top:4px;padding:4px 10px;font-size:.9rem}.rp-recta{zoom:.78}.rp-ctl{margin-top:2px}.rp-ctl .k-boton{min-height:44px}' +
@@ -70,7 +70,7 @@
       '.rp-cab .k-rotulo{display:none}.rp-cab{align-items:center}.rp-pips{margin:4px 0 0}' +
       '.es-actor.dice-izq-movil .es-dice{bottom:auto;top:0;left:auto;right:100%;transform:none;margin:0 8px 0 0;animation:none}.es-actor.dice-izq-movil .es-dice::after{display:none}' +
       '.rp-pie{flex-wrap:wrap}' +
-      '.rp-cab h2{font-size:1.05rem}.rp-der{gap:6px;flex-wrap:wrap}.rp-oir span{display:none}.rp-voz{min-width:44px;min-height:44px}.rp-menu{min-height:44px;padding:0 10px;font-size:.9rem}' +
+      '.rp-cab h2{font-size:1.05rem}.rp-der{gap:6px;flex-wrap:wrap}.rp-oir{padding:0 8px;font-size:.9rem;min-height:44px}.rp-voz{min-width:44px;min-height:44px}.rp-menu{min-height:44px;padding:0 10px;font-size:.9rem}' +
       '.rp-consigna{font-size:1.15rem;margin:4px 0}.rp-pie{margin:8px -10px -10px;padding:8px 10px}.rp-pie .k-boton{min-height:52px}' +
       '.es{height:84px!important;margin:4px 0 6px}.es-actor img{height:48px!important}.es-luz{top:6px}' +
     '}',
