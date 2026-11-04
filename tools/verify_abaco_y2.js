@@ -275,7 +275,10 @@ module.exports = async function verificarAbaco(H) {
       ok(!!$(J, '[data-k="ok"]'), id + ': debe estar el teclado');
       /* contar tocando: la ultima cuenta de T dice T*10 */
       $(J, '.tu-b[data-col="t"][data-i="' + (T - 1) + '"]').click();
-      ok($(J, '.tu-b[data-col="t"][data-i="' + (T - 1) + '"]').textContent === String(T * 10), id + ': tocar la cuenta ' + T + ' de T debe decir ' + (T * 10));
+      ok($$(J, '.tu-b[data-col="t"]').every(b => b.textContent === '10'), id + ': cada cuenta contada de T debe decir 10 (lo que vale)');
+      ok($(J, '[data-tot="t"]').textContent === T + (T === 1 ? ' ten = ' : ' tens = ') + T * 10, id + ': el total de T debe decir ' + T + ' tens = ' + T * 10 + ', dice ' + $(J, '[data-tot="t"]').textContent);
+      $(J, '.tu-b[data-col="u"][data-i="' + (U - 1) + '"]') && $(J, '.tu-b[data-col="u"][data-i="' + (U - 1) + '"]').click();
+      if (U > 0) ok($$(J, '.tu-b[data-col="u"]').every(b => b.textContent === '1') && $(J, '[data-tot="u"]').textContent === U + (U === 1 ? ' unit = ' : ' units = ') + U, id + ': las unidades contadas deben decir 1 y el total ' + U);
       if (it.t === 'tuLeer') {
         escribirNumero(J, U === T ? T + 1 : U);
         ok(!visible(sig()) && mal(), id + ': decenas equivocadas no deben ganar');

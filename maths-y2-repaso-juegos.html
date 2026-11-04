@@ -5113,6 +5113,10 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     '.tu.is-mal{animation:tu-no .35s}',
     '@keyframes tu-no{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}',
     '.tu-ctl{display:flex;justify-content:center;gap:18px;margin:8px auto 0}',
+    '.tu-tot{display:flex;justify-content:center;gap:10px;margin:6px auto 0;min-height:30px}',
+    '.tu-tot[hidden]{display:none}',
+    '.tu-tot span{padding:2px 10px;border:2px solid #1E1426;border-radius:6px;background:#FFFDF6;color:#1E1426;font-weight:900;font-size:1rem}',
+    '.tu-tot span[data-tot="t"]{border-left:8px solid #C8382F}.tu-tot span[data-tot="u"]{border-left:8px solid #2F6FD0}',
     '.tu-ctl > div{display:flex;gap:6px;align-items:center}',
     '.tu-ctl .k-boton{min-width:52px;min-height:48px;padding:0 10px;font-size:1.3rem}',
     '.tu-cnt{min-width:30px;text-align:center;font-weight:900;font-size:1.3rem}',
@@ -5120,7 +5124,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     '.tu-par{display:inline-flex;flex-direction:column;align-items:center;gap:2px}.tu-par small{font-size:.9rem;font-weight:900}',
     '.tu-dig{display:inline-flex;gap:2px}.tu-dig i{font-style:normal;display:inline-flex;flex-direction:column;align-items:center;line-height:1}',
     '.tu-dig small{font-size:.7rem;font-weight:900;margin-top:2px}',
-    '@media (max-height:500px) and (orientation:landscape){.tu{zoom:.8}.tu-ctl{gap:10px;margin-top:4px}.tu-ctl .k-boton{min-width:44px;min-height:44px;font-size:1.1rem}.tu-cnt{min-width:22px}}',
+    '@media (max-height:500px) and (orientation:landscape){.tu{zoom:.8}.tu-tot{zoom:.8;gap:6px;margin-top:4px}.tu-tot span{padding:2px 6px;font-size:.9rem;white-space:nowrap}.tu-ctl{gap:10px;margin-top:4px}.tu-ctl .k-boton{min-width:44px;min-height:44px;font-size:1.1rem}.tu-cnt{min-width:22px}}',
     '@media (prefers-reduced-motion:reduce){.tu-b,.tu.is-mal{animation:none!important;transition:none}}'
   ].join('\n');
   document.head.appendChild(cssTU);
@@ -5135,6 +5139,9 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       '<div class="tu-col" data-col="t"><div class="tu-vara"></div></div><div class="tu-col" data-col="u"><div class="tu-vara"></div></div>' +
       '<div class="tu-rot" data-col="t"><b>T</b>tens</div><div class="tu-rot" data-col="u"><b>U</b>units</div>';
     host.appendChild(el);
+    var tot = document.createElement('div'); tot.className = 'tu-tot'; tot.hidden = true;
+    tot.innerHTML = '<span data-tot="t" hidden></span><span data-tot="u" hidden></span>';
+    host.appendChild(tot);
     var ctl = null;
     if (activo) {
       ctl = document.createElement('div'); ctl.className = 'tu-ctl';
@@ -5171,12 +5178,17 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         var f = fantasma ? fantasma[col] : 0;
         for (var j = 0; j < f; j++) h += '<i class="tu-fan" style="bottom:' + (2 + j * 21) + 'px"></i>';
         for (var i = 0; i < n; i++) {
-          var lab = i < contadas[col] ? String(col === 't' ? (i + 1) * 10 : i + 1) : '';
+          var lab = i < contadas[col] ? (col === 't' ? '10' : '1') : '';   /* cada cuenta muestra lo que vale */
           h += '<button type="button" class="tu-b' + (lab ? ' is-contada' : '') + (nueva === col && i === n - 1 ? ' is-nueva' : '') + '" data-col="' + col + '" data-i="' + i + '" style="bottom:' + (2 + i * 21) + 'px" aria-label="' + (col === 't' ? 'Ten' : 'Unit') + ' bead ' + (i + 1) + '" tabindex="-1">' + lab + '</button>';
         }
         c.innerHTML = h;
         if (ctl) ctl.querySelector('[data-cnt="' + col + '"]').textContent = String(n);
+        /* total contado, aparte, debajo de la varilla: "2 tens = 20" */
+        var k = contadas[col], chip = tot.querySelector('[data-tot="' + col + '"]');
+        chip.textContent = k ? (col === 't' ? k + (k === 1 ? ' ten = ' : ' tens = ') + k * 10 : k + (k === 1 ? ' unit = ' : ' units = ') + k) : '';
+        chip.hidden = !k;
       });
+      tot.hidden = !(contadas.t || contadas.u);
       el.setAttribute('data-t', String(t)); el.setAttribute('data-u', String(u));
     }
     function sacudir() { el.classList.remove('is-mal'); void el.offsetWidth; el.classList.add('is-mal'); }
@@ -5189,7 +5201,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       bloquear: function () { activo = false; el.classList.remove('is-activo'); if (ctl) { ctl.hidden = true; ctl.style.display = 'none'; } },
       reiniciar: function () { t = 0; u = 0; pintar(null); },
       sacudir: sacudir,
-      destruir: function () { el.remove(); if (ctl) ctl.remove(); }
+      destruir: function () { el.remove(); tot.remove(); if (ctl) ctl.remove(); }
     };
   }
   window.SAMSAN_ABACO_TU = AbacoTU;
