@@ -1174,7 +1174,18 @@ async function main() {
   check('ningun juego no publicable queda en la raiz (lo unico que se sube)',
         unpublished.every(x => !fs.existsSync(path.join(ROOT, x.slug + '.html'))));
   const rootHtml = fs.readdirSync(ROOT).filter(f => /\.html$/.test(f)).sort();
-  check('la raiz publica solo portada y legal.html', rootHtml.join(',') === 'index.html,legal.html', rootHtml.join(','));
+  /* Excepcion declarada (decisiones-vigentes §6): un boceto con `// publicar: true` en su cabecera tambien se publica en la raiz,
+     como <carpeta>-<nombre>.html. Nada mas entra a la raiz. */
+  const protoPublicados = [];
+  fs.readdirSync(path.join(ROOT, 'prototipos')).forEach(dir => {
+    const full = path.join(ROOT, 'prototipos', dir);
+    if (!fs.statSync(full).isDirectory() || dir === 'comun') return;
+    fs.readdirSync(full).filter(f => /\.js$/.test(f)).forEach(f => {
+      if (/^\s*\/[\/*]\s*publicar:\s*true\s*(?:\*\/)?\s*$/m.test(fs.readFileSync(path.join(full, f), 'utf8'))) protoPublicados.push(dir + '-' + f.replace(/\.js$/, '') + '.html');
+    });
+  });
+  const raizEsperada = ['index.html', 'legal.html'].concat(protoPublicados).sort();
+  check('la raiz publica solo portada, legal.html y los bocetos con publicar: true', rootHtml.join(',') === raizEsperada.join(','), rootHtml.join(',') + ' / esperado ' + raizEsperada.join(','));
   const h2s = Array.from(lDoc.querySelectorAll('main h2')).map(h => h.textContent);
   check('legal.html tiene las cuatro secciones',
         h2s.length === 4 && /Uso educativo/.test(h2s[0]) && /afiliaci/.test(h2s[1]) &&

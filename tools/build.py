@@ -413,6 +413,14 @@ def build_vitrina(kit, ui, brand, credits):
 
 PROTO = "prototipos"
 TITULO_RE = re.compile(r"^\s*/[/*]\s*titulo:\s*(.+?)\s*(?:\*/)?\s*$", re.M)
+# Banderas opcionales en la cabecera de un boceto (decision del 4 nov 2026):
+#   // publicar: true   ademas de _local/, escribe <carpeta>-<nombre>.html en la raiz
+#                      (Actions lo publica). Solo con la prueba de Rafael aprobada.
+#   // usa: repaso      incluye prototipos/comun/repaso.js (pistas, teclado, rondas, voz en ingles).
+PUBLICAR_RE = re.compile(r"^\s*/[/*]\s*publicar:\s*true\s*(?:\*/)?\s*$", re.M)
+USA_RE = re.compile(r"^\s*/[/*]\s*usa:\s*repaso\s*(?:\*/)?\s*$", re.M)
+# `// incluye: carpeta/archivo.js otra/archivo.js` mete esos bocetos en la misma pagina (menu de juegos).
+INCLUYE_RE = re.compile(r"^\s*//\s*incluye:\s*(.+?)\s*$", re.M)
 
 
 def bocetos():
@@ -448,6 +456,16 @@ def build_proto(kit, ui, brand, credits, carpeta, nombre, materia):
     page += '<script>\n' + ui + '\n</script>\n'
     page += mundo_scripts(materia)
     page += '<script>\n' + read(PROTO, "comun", "proto-comun.js") + '\n</script>\n'
+    if USA_RE.search(js):
+        page += '<script>\n' + read(PROTO, "comun", "repaso.js") + '\n</script>\n'
+    inc = INCLUYE_RE.search(js)
+    if inc:
+        page += '<script>window.SAMSAN_MENU = true;</script>\n'
+        for ruta in inc.group(1).split():
+            partes = ruta.split("/")
+            if len(partes) != 2 or not partes[1].endswith(".js"):
+                fail("%s/%s: `incluye` espera carpeta/archivo.js, no %s" % (carpeta, nombre, ruta))
+            page += '<script>\n' + read(PROTO, partes[0], partes[1]) + '\n</script>\n'
     page += '<script>\n' + js + '\n</script>\n'
     page += '</body>\n</html>\n'
     return page
@@ -514,8 +532,11 @@ def main():
     hechos = []
     for carpeta, nombre, materia in bocetos():
         rel = LOCAL + "/proto-" + carpeta + "-" + nombre + ".html"
-        built.append((rel, write(rel, build_proto(kit, ui, brand, credits, carpeta, nombre, materia))))
+        pagina = build_proto(kit, ui, brand, credits, carpeta, nombre, materia)
+        built.append((rel, write(rel, pagina)))
         hechos.append(rel)
+        if PUBLICAR_RE.search(read(PROTO, carpeta, nombre + ".js")):
+            built.append((carpeta + "-" + nombre + ".html", write(carpeta + "-" + nombre + ".html", pagina)))
     write(LOCAL + "/prototipos.json", json.dumps(hechos, indent=1) + "\n")
 
     for rel, _ in built:

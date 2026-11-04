@@ -30,8 +30,9 @@ async function probar(rel) {
   });
   const w = dom.window;
   await new Promise(r => setTimeout(r, 200));
-  const play = w.document.querySelector('#play');
-  if (!play) errores.push('no hay boton PLAY (#play)');
+  /* entrada: PLAY de un boceto, o la primera tarjeta de un menu de juegos */
+  const play = w.document.querySelector('#play') || w.document.querySelector('.mj-tarjeta');
+  if (!play) errores.push('no hay boton PLAY (#play) ni tarjeta de juego (.mj-tarjeta)');
   else { play.click(); await new Promise(r => setTimeout(r, 200)); }
   w.close();
   return errores;

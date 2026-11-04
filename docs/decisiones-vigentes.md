@@ -1,6 +1,6 @@
 ---
 estado: vigente
-actualizado: 2026-10-28
+actualizado: 2026-11-04
 descripcion: Estado real, decisiones y plan por etapas de SAMSAN. Gana sobre cualquier otro documento. Lo leen el proyecto de Claude (integración de GitHub) y Claude Code.
 ---
 
@@ -80,6 +80,7 @@ Referencia aprobada el 27 de septiembre de 2026: `docs/referencia/muestra-estilo
 
 - Repo público `rafaeldeavilaf/R001-P002-samsan`, con carpeta local del mismo nombre, separado de R001-P001 (Underworks, privado, que nombra a los niños), con historial limpio desde el primer commit (27 sep 2026). Sitio en https://rafaeldeavilaf.github.io/R001-P002-samsan/. El sitio anterior (`Cycle_test`) está apagado. Los commits de este repo usan como autor el crédito y el correo noreply de GitHub. Publicación por GitHub Actions: cada push regenera datos, construye, corre pruebas, anonimato y prueba de grises, y solo publica si todo pasa.
 - Lista de nombres a vigilar fuera del repo: `.anonimato.local` (ignorado) y secreto `ANONIMATO_NOMBRES`. Solo nombres completos y apodos exactos; nunca fragmentos cortos que choquen con "SAMSAN".
+- **Excepción de publicación para bocetos (4 nov 2026).** Un boceto de `prototipos/` se publica solo si su cabecera declara `// publicar: true`. `tools/build.py` escribe además `<carpeta>-<nombre>.html` en la raíz (Actions ya copia los `.html` de la raíz a Pages), y `tools/harness.js` espera exactamente portada, `legal.html` y esos bocetos. La cabecera `// usa: repaso` incrusta `prototipos/comun/repaso.js` (voz en inglés con voces locales, escalera de pistas, teclado numérico, secuencia de rondas). Es aditivo: los bocetos sin esas cabeceras siguen construyéndose solo en `_local/`. Se abrió para la serie de repaso Year 2 porque los exámenes no esperan a la etapa 3; deja deuda técnica (niveles escritos a mano).
 - USD 0 al mes.
 
 ## 7. Plan por etapas
@@ -185,9 +186,26 @@ La ficha de juego de La Mina queda en espera.
 
 Pendiente en la etapa 2: Rafael (y si puede el jugador menor) juega cada boceto 3 minutos: «Atrapa la canasta» y «La Pista de la R». Si pasa, siguen las rondas 3 y 4, el parque con sus puestos y un minijuego para el jugador mayor. Nada se sube ni se publica hasta que Rafael lo pida. La fase H (dos jugadores) queda para la etapa 3.
 
+**Serie de repaso Year 2 (4 nov 2026).** Dos juegos de repaso para la evaluación de Maths del 5 nov 2026 (suma y resta con la recta numérica; valor posicional con el ábaco), con mecánicas de acción, pistas en tres peldaños y voz en inglés con voces locales. Construidos sobre `prototipos/comun/repaso.js`, publicados por la excepción de §6 y sin arte nuevo de PixelLab (se reutilizan `pl-002`, `pl-003` y `pl-012`, esta última procesada el 4 nov 2026 a `temas/maths/img/gema.png`; su `usado_en` quedó anotado en la biblioteca). Tras la prueba de Rafael del 4 nov 2026 se rehizo la ronda 1 del ábaco (una parte por reto, se toca en el ábaco) y los dos juegos pasaron a pixel art por código: ábaco con cuentas animadas, recta en forma de riel y marco de pizarra de la Caverna con el explorador y el topo:
+
+| Juego | Boceto | Ficha | Estado |
+|---|---|---|---|
+| Menú «Year 2 Maths games» (lo único publicado) | `prototipos/maths-y2-repaso/juegos.js` → `maths-y2-repaso-juegos.html` | — | Pantalla principal con la Caverna, el explorador y una tarjeta por juego; botón MENU dentro de cada juego |
+| «Hop along the number line» | `prototipos/maths-y2-recta/salto.js` | `docs/temas/maths-y2-recta-numerica.md` | Verificado (BFS, jsdom). **Pendiente de la prueba de Rafael** |
+| «Abacus workshop» | `prototipos/maths-y2-abaco/taller.js` | `docs/temas/maths-y2-abaco.md` | Verificado (jsdom). Supone 10 varillas de 10 cuentas; **pendiente de confirmar y de la prueba de Rafael** |
+
+Una sola aplicación (decisión de Rafael, 4 nov 2026): el menú incluye los dos juegos con la cabecera `// incluye: carpeta/archivo.js ...`, que `build.py` resuelve marcando la página con `window.SAMSAN_MENU`; cada juego se registra en `P.juegosMenu` en vez de arrancar solo. Los juegos sueltos siguen construyéndose en `_local/` para probarlos, pero ya no se publican. Idioma: inglés para niños que están aprendiendo inglés (frases cortas, presente, siempre las mismas palabras, voz en cada consigna y botón para oírla otra vez). En el ábaco, leer y descomponer se hacen contando con toques (varillas llenas 10, 20, 30 y luego cada unidad), con una demostración animada en el primer reto; cada toque responde con ✓ o ✗ y color, y un DONE equivocado marca con ✗ las varillas que no cuadran.
+
+**Prueba con un agente independiente (4 nov 2026).** Un agente jugó los dos juegos con el perfil de un niño de 6 a 7 años que aprende inglés. Se corrigió lo que encontró: el teclado de «seguir» quedaba fuera de la pantalla (ahora se desplaza a la vista); la bandera fantasma regalaba la respuesta al fallar (ahora se marca el número donde quedó la bandera); en el ábaco, del lado de conteo cada toque devuelve una sola cuenta; mensajes y ejemplos por tipo y sentido de cada reto; "boots" pasó a "hops"; la puerta del diez muestra la suma completa; el progreso por juego se guarda (la ronda, nunca aciertos ni intentos) y la tarjeta del menú dice en qué ronda va; cada ronda cierra con una pantalla de gema y un botón para seguir; el botón de oír otra vez dice AGAIN. Quedan abiertos: cuentas de 20 × 24 px en teléfono (el juego se piensa para portátil o tableta), rótulos que tapan cuentas en la ronda de partes y la pantalla final sencilla.
+
+**Escenas vivas (4 nov 2026, tras la observación de Rafael de que "no parece un juego").** `P.escena` (en `prototipos/comun/repaso.js`) dibuja por código una franja de caverna con linternas y cristales, personajes con animaciones (caminar, saltar, asentir, negar, cavar, celebrar), burbujas de diálogo claras y gemas con chispas. En la recta, la recta es el riel de la mina: en «Gem hunt» el niño lleva al explorador al número y pulsa DIG; si acierta sale la gema, si no sale una roca y se marca dónde está. En los saltos, cada llegada da una gema. En el ábaco, el topo atiende la tienda de cuentas detrás del mostrador y el explorador llega como cliente a pedir; el topo asiente o niega, y al acertar el cliente paga con una gema y se va. La deuda: esta escena vive en el boceto y debe pasar a `assets/mundo/` en la etapa 3. Segunda prueba del agente niño (mismo día): «se siente como juego» 5/10 en cada juego y «puede jugar solo» 4/10. Se corrigió: el botón azul de la pista resolvía el reto (ahora solo en el peldaño 3 y calculado desde donde está el explorador), «How many tens?» acepta 6 o 60, la recompensa por reto es una estrella (la gema es solo de la ronda), la búsqueda exige el número exacto, el total se esconde al abrir el teclado, en la ronda 1 del ábaco cada toque mueve una sola cuenta, la suma final se limpia de saltos que se anulan y el mensaje de respuesta siempre queda a la vista. Quedan abiertos: la escena es una franja pequeña, las páginas de cuaderno no tienen personaje, en 1366 × 768 «Read it» obliga a bajar un poco para ver OK, y en teléfono las burbujas se montan y DONE queda abajo.
+
+Verificación: `node tools/verify_repaso_y2.js` (corre también `tools/verify_abaco_y2.js` y prueba el menú). Nada se sube hasta que Rafael lo pida. Horas de la serie: unas 1,3 h de reloj el 4 nov (12:10 a 13:30) entre la primera versión, el pixel art, el conteo tocando, el menú, el inglés simple y la prueba del agente; los estimados aprobados sumaban 27 h de desarrollo (11,5 + 8 + 3,5 + 4) y no incluyen pasar los juegos a la base, que no se hizo.
+
 ## 8. Preguntas abiertas
 
-- Ninguna. La temática del mundo se decidió el 27 sep 2026: constructor de mundo con base propia y compañeros por bioma (ver §3).
+- ¿El ábaco del salón tiene 10 varillas de 10 cuentas (supuesto de «Abacus workshop»)? Rafael lo confirma con la herramienta del colegio.
+- La temática del mundo se decidió el 27 sep 2026: constructor de mundo con base propia y compañeros por bioma (ver §3).
 
 ## 9. Documentos reemplazados
 
