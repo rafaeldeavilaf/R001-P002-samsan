@@ -133,7 +133,13 @@
     '.ab-filas{position:absolute;left:calc(6px * var(--s));top:calc(7px * var(--s));width:calc(120px * var(--s));height:calc(120px * var(--s))}',
     '.ab:not(.is-lienzo) .ab-filas{background:#F7EFDD}',
     '.ab-fila{position:relative;height:calc(12px * var(--s));display:flex;align-items:center}',
-    '.ab:focus .ab-fila.is-sel{box-shadow:inset 0 0 0 3px #2F9BB8}',
+    '.ab:focus .ab-fila.is-sel,.ab.con-flechas .ab-fila.is-sel{box-shadow:inset 0 0 0 3px #2F9BB8;border-radius:4px}',
+    '.ab.con-flechas .ab-fila.is-sel::before{content:"";position:absolute;left:calc(-6px * var(--s));top:50%;margin-top:-7px;border:7px solid transparent;border-left-color:#7FE3F0;z-index:4}',
+    '.ab-flechas{display:flex;align-items:center;justify-content:center;gap:10px;margin:0}',
+    '#rp-extra .ab-flechas{margin-right:6px}',
+    '@media (max-width:600px){#rp-extra{display:contents}#rp-extra .ab-flechas{flex:1 1 100%;order:-1;margin:0}#rp-extra .ab-flechas .ab-fl{flex:1;min-height:56px}#rp-reset{order:-1;margin-right:14px}#rp-ok{flex:1}.rp-reset span{display:none}.rp-pie .k-mensaje{order:-2}}',
+    '.ab-flechas .ab-fl{min-width:84px;min-height:60px;font-size:1.8rem;padding:0 10px}',
+    '.ab-fl-rod{min-width:72px;text-align:center;font-weight:900;font-size:1.05rem}',
     '.ab-fila.is-cambia{box-shadow:inset 0 0 0 3px #1D4E6B,0 0 0 2px #7FE3F0;border-radius:4px}',
     '.ab-b{position:relative;z-index:1;flex:0 0 8.3333%;height:100%;box-sizing:border-box;border:0;padding:0;margin:0;background:transparent;cursor:pointer;touch-action:manipulation}',
     '.ab:not(.is-lienzo) .ab-b{height:80%;border:2px solid #1E1426;border-radius:40%;background:#C8382F}',
@@ -266,7 +272,7 @@
      Encima del lienzo hay botones transparentes (uno por cuenta) para el toque y las pruebas. */
   function xDe(p, u) { return p <= u ? 6 + (p - 1) * 10 : 26 + (p - 1) * 10; }
   function Abaco(host, o) {
-    var c = (o.estado || []).slice(), sel = 0, activo = !!o.activo, tags = {}, cambia = {}, brillo = { parte: null, tono: null }, filasOk = {}, marcas = {};
+    var c = (o.estado || []).slice(), sel = o.sel || 0, activo = !!o.activo, tags = {}, cambia = {}, brillo = { parte: null, tono: null }, filasOk = {}, marcas = {};
     while (c.length < FILAS) c.push(0);
     var el = document.createElement('div');
     el.className = 'ab' + (activo ? '' : ' is-estatico');
@@ -341,6 +347,8 @@
       el.setAttribute('data-c', c.join(','));
       el.setAttribute('data-total', String(total(c)));
       el.setAttribute('aria-label', 'Abacus with ' + total(c) + ' beads in the counting space');
+      el.setAttribute('data-sel', String(sel));
+      if (typeof pintarFlechas === 'function') pintarFlechas();
       animar();
     }
     function avisar() { pintar(); P.sonido('paso'); if (o.alCambiar) o.alCambiar(c.slice()); }
@@ -355,9 +363,46 @@
     el.addEventListener('click', function (e) {
       var t = e.target, b = t.closest ? t.closest('.ab-b') : null;
       if (o.alTocarParte) { o.alTocarParte(parteDe(t, b, e)); return; }
-      if (!b || !el.contains(b)) return;
+      if (!b || !el.contains(b)) {
+        var fila = t.closest ? t.closest('.ab-fila') : null;      /* tocar la varilla (no una cuenta) la elige para las flechas */
+        if (fila && activo) { sel = +fila.getAttribute('data-f'); pintar(); verFila(); }
+        return;
+      }
       tocar(+b.getAttribute('data-f'), +b.getAttribute('data-p'));
     });
+    /* Flechas grandes: mueven una cuenta en la varilla elegida (para dedos pequenos en el telefono). */
+    var flechas = null;
+    function una(d) {
+      if (!activo) return;
+      var antes = c[sel];
+      c[sel] = Math.max(0, Math.min(CUENTAS, c[sel] + d));
+      if (c[sel] === antes) {
+        el.classList.remove('is-mal'); void el.offsetWidth; el.classList.add('is-mal');
+        if (o.alAviso) o.alAviso(d < 0 ? 'Rod ' + (sel + 1) + ' is empty. Tap another rod.' : 'Rod ' + (sel + 1) + ' is full. Tap the next rod.');
+        return;
+      }
+      avisar();
+      verFila();
+    }
+    /* La varilla elegida se ve siempre (no queda debajo de la barra fija). */
+    function verFila() { var fl = filas.querySelector('.ab-fila[data-f="' + sel + '"]'); if (fl && P.aLaVista) P.aLaVista(fl); }
+    function pintarFlechas() {
+      if (!flechas) return;
+      flechas.querySelector('.ab-fl-rod').textContent = 'Rod ' + (sel + 1);
+      flechas.setAttribute('data-sel', String(sel));
+    }
+    if (activo && o.flechas !== false) {
+      flechas = document.createElement('div');
+      flechas.className = 'ab-flechas';
+      flechas.innerHTML = '<button type="button" class="k-boton ab-fl" data-fl="-1" aria-label="Move one bead back">&#9664;</button>' +
+        '<span class="ab-fl-rod" aria-live="polite"></span>' +
+        '<button type="button" class="k-boton ab-fl" data-fl="1" aria-label="Move one bead to the counting space">&#9654;</button>';
+      if (o.flechasEn) o.flechasEn.insertBefore(flechas, o.flechasEn.firstChild); else host.appendChild(flechas);
+      Array.prototype.forEach.call(flechas.querySelectorAll('[data-fl]'), function (bt) {
+        bt.addEventListener('click', function () { una(+bt.getAttribute('data-fl')); });
+      });
+      el.classList.add('con-flechas');
+    }
     /* Que parte se toco: cuenta, varilla, marco o lado (inicial o de conteo). */
     function parteDe(t, b, e) {
       var fila = t.closest ? t.closest('.ab-fila') : null, lado = null;
@@ -395,8 +440,12 @@
     function escala() { return +(getComputedStyle(el).getPropertyValue('--s') || 2) || 2; }
     function ajustar() {
       var ref = (host.closest && host.closest('#rp-cuerpo')) || host;
-      var w = (ref.clientWidth || 0) - (o.reserva || 0), s = Math.max(2, Math.min(3, Math.floor(w / 132) || 2));
-      if ((window.innerHeight || 0) < 880) s = 2;          /* en un portatil (768 de alto) todo cabe sin bajar */
+      var ancho = ref.clientWidth || 0, movil = ancho > 0 && ancho < 600, s;
+      if (movil) s = Math.max(2, Math.min(3, Math.floor(ancho / 132 * 10) / 10));   /* telefono: al ancho de la pantalla */
+      else {
+        s = Math.max(2, Math.min(3, Math.floor((ancho - (o.reserva || 0)) / 132) || 2));
+        if ((window.innerHeight || 0) < 880) s = 2;        /* en un portatil (768 de alto) todo cabe sin bajar */
+      }
       el.style.setProperty('--s', String(s));
     }
     ajustar();
@@ -406,7 +455,7 @@
     return {
       el: el, filas: filas,
       leer: function () { return c.slice(); },
-      poner: function (e) { c = e.slice(); while (c.length < FILAS) c.push(0); sel = 0; avisar(); },
+      poner: function (e) { c = e.slice(); while (c.length < FILAS) c.push(0); sel = o.sel || 0; avisar(); },
       activar: function (si) { activo = !!si; el.classList.toggle('is-estatico', !activo); el.tabIndex = activo ? 0 : -1; pintar(); },
       etiquetar: function (t) { tags = t || {}; pintar(); },
       marcar: function (lista) { cambia = {}; (lista || []).forEach(function (f) { cambia[f] = true; }); pintar(); },
@@ -434,7 +483,7 @@
         setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 1600);
       },
       sacudir: function () { el.classList.remove('is-mal'); void el.offsetWidth; el.classList.add('is-mal'); },
-      destruir: function () { vivo = false; if (ro) ro.disconnect(); if (raf && window.cancelAnimationFrame) window.cancelAnimationFrame(raf); if (el.parentNode) el.parentNode.removeChild(el); }
+      destruir: function () { vivo = false; if (flechas && flechas.parentNode) flechas.parentNode.removeChild(flechas); if (ro) ro.disconnect(); if (raf && window.cancelAnimationFrame) window.cancelAnimationFrame(raf); if (el.parentNode) el.parentNode.removeChild(el); }
     };
   }
 
@@ -461,13 +510,18 @@
     E.actor('topo', { img: 'topo', x: 18, abajo: 28, diceLado: true });
     if (o.topoDice) E.decir('topo', o.topoDice);
     if (o.pide) {
-      E.actor('ex', { img: 'ex', x: 108, frente: true, sinTransicion: true });
+      E.actor('ex', { img: 'ex', x: 108, frente: true, sinTransicion: true, diceIzq: true });
       setTimeout(function () {
         var d = E.el.querySelector('[data-actor="ex"]'); if (d) d.style.transition = '';
         E.mover('ex', 76, function () { E.decir('ex', o.pide); });
       }, 60);
       E.el.querySelector('[data-actor="ex"]').setAttribute('data-pide', o.pide);
     }
+    var decir0 = E.decir;
+    E.decir = function (id, texto, ms) {
+      if (texto && (window.innerWidth || 1000) < 600) decir0(id === 'topo' ? 'ex' : 'topo', '');
+      decir0(id, texto, ms);
+    };
     E.bien = function (texto) {
       E.animar('topo', 'asiente');
       if (o.pide) { E.animar('ex', 'feliz'); E.decir('ex', texto || 'Thank you!'); E.premio(76); setTimeout(function () { E.decir('ex', ''); E.mover('ex', 112); }, 1800); }
@@ -542,12 +596,15 @@
       : it.t === 'comp' ? it.dec + ' + ' + it.uni + ', please!' : simple ? 'I want ' + it.n + ' beads!' : 'I want ' + it.n + ', please!';
     var E = tienda({ pide: pide });
     function etiquetasPista() { return nivel >= 2 && !mover ? etiquetasDe(meta) : {}; }
-    var ab = Abaco($('#ab-ab'), { estado: inicio, activo: true, deAUno: simple, alCambiar: function (c) {
+    ctx.extra.innerHTML = '<button type="button" class="k-boton k-boton--primario" id="rp-ok">DONE</button><button type="button" class="k-boton rp-reset" id="rp-reset" aria-label="Start over">&#8634;<span> START OVER</span></button>';
+    var selIni = 0;
+    if (mover && it.k < 0) { for (var q0 = FILAS - 1; q0 >= 0; q0--) if (inicio[q0] > 0) { selIni = q0; break; } }
+    else { for (var q1 = 0; q1 < FILAS; q1++) if (inicio[q1] < CUENTAS) { selIni = q1; break; } }
+    var ab = Abaco($('#ab-ab'), { estado: inicio, activo: true, deAUno: simple, sel: selIni, flechasEn: ctx.extra, alAviso: function (t) { ctx.mensaje(t, 'mal'); }, alCambiar: function (c) {
       ctx.accion();
       if (marcado) { marcado = false; ab.etiquetar(etiquetasPista()); }
       if (simple) { ab.etiquetar(c[0] ? { 0: { txt: String(c[0]), tono: 'bien' } } : {}); P.vozEn(String(c[0])); }
     } });
-    ctx.extra.innerHTML = '<button type="button" class="k-boton k-boton--primario" id="rp-ok">DONE</button><button type="button" class="k-boton" id="rp-reset">START OVER</button>';
     $('#rp-reset').addEventListener('click', function () { if (!listo) { ab.poner(inicio); ctx.accion(); ctx.mensaje('', ''); } });
     $('#rp-ok').addEventListener('click', function () {
       if (listo) return;
@@ -557,6 +614,7 @@
         var tg = etiquetasDe(meta); Object.keys(tg).forEach(function (f) { tg[f] = { txt: tg[f], tono: 'bien' }; }); ab.etiquetar(tg);
         var r = $('#ab-r'); if (r) { r.textContent = it.n; r.className = 'is-bien'; }
         if (E) E.bien('Thank you!');
+        Array.prototype.forEach.call(ctx.extra.querySelectorAll('.ab-flechas, #rp-ok, #rp-reset'), function (x) { x.hidden = true; x.style.display = 'none'; });
         ctx.listo('Yes! ' + it.n + '!');
         return;
       }

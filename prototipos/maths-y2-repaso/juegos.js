@@ -26,6 +26,7 @@
     '.mj-tarjeta svg{flex:0 0 auto;width:72px;height:56px;display:block}',
     '.mj-tarjeta b{display:block;font-size:1.25rem;font-weight:900;line-height:1.2}',
     '.mj-tarjeta small{display:block;font-size:.95rem;font-weight:700;color:#3B2F25}',
+    '@media (max-width:600px){.mj-panel .k-piel{width:44px;height:44px}.k-juego{display:flex;flex-direction:column}.mj-panel{order:-1;margin:0 0 10px!important}.mj-tarjeta svg{width:56px;height:44px}}',
     '.mj-tarjeta .mj-ir{margin-left:auto;padding:6px 12px;border:3px solid #1E1426;border-radius:10px;background:#F2B73A;font-weight:900;font-size:1rem;white-space:nowrap}'
   ].join('');
   document.head.appendChild(css);

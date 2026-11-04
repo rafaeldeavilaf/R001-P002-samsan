@@ -157,6 +157,14 @@ module.exports = async function verificarAbaco(H) {
           for (let k = 0; k < Math.abs(d); k++) teclaAb(d > 0 ? 'ArrowRight' : 'ArrowLeft');
           teclaAb('ArrowDown');
         }
+      } else if (ii === 2 || ri === 4) {            /* flechas: tocar la varilla la elige; cada flecha mueve una cuenta */
+        ok(!!$(J, '.ab-flechas [data-fl="1"]') && !!$(J, '.ab-flechas [data-fl="-1"]'), id + ': faltan las flechas');
+        for (let f = 0; f < 10; f++) {
+          const d = meta[f] - estado()[f]; if (!d) continue;
+          $(J, '.ab-fila[data-f="' + f + '"] .ab-hueco').click();
+          ok(+$(J, '.ab').getAttribute('data-sel') === f, id + ': tocar la varilla ' + f + ' debe elegirla');
+          for (let k = 0; k < Math.abs(d); k++) $(J, '.ab-flechas [data-fl="' + (d > 0 ? 1 : -1) + '"]').click();
+        }
       } else llevarA(meta);
       ok(igual(estado(), meta), id + ': el abaco debe quedar en ' + it.n + ', esta en ' + estado().join());
       $(J, '#rp-ok').click();

@@ -28,6 +28,22 @@
     '.rp-voz{min-width:48px;min-height:48px;padding:0;font-size:1rem}',
     '.rp-voz svg{width:26px;height:26px;display:block;margin:auto}',
     '.rp-menu{min-height:48px;padding:0 14px;font-size:1rem}',
+    /* Barra fija abajo: HINT, DONE y NEXT siempre a la vista (telefono y portatil). */
+    '.rp .rp-pie .k-mensaje{flex:1 1 100%;margin:0 0 6px;min-height:0}',
+    '.rp-pie .k-mensaje:empty{display:none}',
+    '.rp-tec{scroll-margin-bottom:var(--rp-barra,180px)}',
+    '@media (max-width:600px) and (max-height:760px){.rp-tec{gap:6px}.rp-tec output{min-height:44px;font-size:1.4rem;padding:4px}.rp-tec__k{gap:6px}.rp-tec__k .k-boton{min-height:46px}}',
+    '.rp-pie{position:sticky;bottom:0;z-index:20;margin:10px -12px -12px;padding:8px 12px;background:var(--panel,#F7EFDD);border-top:3px solid #1E1426;border-radius:0 0 10px 10px}',
+    '@media (max-width:600px){' +
+      '.k-pagina{padding:8px 8px 24px}.k-pagina > header .k-titulo{font-size:1.3rem;margin:0}.k-pagina > header .k-lema{display:none}' +
+      '.rp-mundo{padding:6px 4px;border-radius:10px}.rp-mundo > .k-panel{padding:10px}' +
+      '.rp-cab .k-rotulo{display:none}.rp-cab{align-items:center}.rp-pips{margin:4px 0 0}' +
+      '.es-actor.dice-izq-movil .es-dice{bottom:auto;top:0;left:auto;right:100%;transform:none;margin:0 8px 0 0;animation:none}.es-actor.dice-izq-movil .es-dice::after{display:none}' +
+      '.rp-pie{flex-wrap:wrap}' +
+      '.rp-cab h2{font-size:1.05rem}.rp-der{gap:6px;flex-wrap:wrap}.rp-oir span{display:none}.rp-voz{min-width:44px;min-height:44px}.rp-menu{min-height:44px;padding:0 10px;font-size:.9rem}' +
+      '.rp-consigna{font-size:1.15rem;margin:4px 0}.rp-pie{margin:8px -10px -10px;padding:8px 10px}.rp-pie .k-boton{min-height:52px}' +
+      '.es{height:84px!important;margin:4px 0 6px}.es-actor img{height:48px!important}.es-luz{top:6px}' +
+    '}',
     '.rp-oir{display:inline-flex;align-items:center;gap:4px;padding:0 10px;font-size:.85rem;font-weight:900}',
     '.rp-oir svg{margin:0}',
     '.rp-gema-grande{display:flex;justify-content:center;margin:6px 0}',
@@ -232,7 +248,7 @@
       el: el,
       actor: function (id, a) {
         var d = document.createElement('div');
-        d.className = 'es-actor' + (a.frente ? ' is-frente' : '') + (a.diceLado ? ' dice-lado' : ''); d.setAttribute('data-actor', id);
+        d.className = 'es-actor' + (a.frente ? ' is-frente' : '') + (a.diceLado ? ' dice-lado' : '') + (a.diceIzq ? ' dice-izq-movil' : ''); d.setAttribute('data-actor', id);
         d.style.left = (a.x != null ? a.x : 50) + '%'; d.style.bottom = (a.abajo != null ? a.abajo : 14) + 'px';
         if (a.sinTransicion) d.style.transition = 'none';
         el.appendChild(d); actores[id] = d;
@@ -322,6 +338,20 @@
       (on ? '<path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>' : '<path d="M16 9l5 6M21 9l-5 6"/>') + '</svg>';
   };
 
+  /* Pone un elemento a la vista, por encima de la barra fija de abajo (telefono). */
+  P.aLaVista = function (el) {
+    if (!el) return;
+    setTimeout(function () {
+      try {
+        var barra = document.querySelector('.rp-pie'), hb = barra ? barra.offsetHeight : 0, h = window.innerHeight || 0;
+        document.documentElement.style.setProperty('--rp-barra', (hb + 12) + 'px');
+        el.style.scrollMarginBottom = (hb + 12) + 'px';
+        var r = el.getBoundingClientRect();
+        if (h && (r.bottom > h - hb || r.top < 0)) el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      } catch (e) { /* nada */ }
+    }, 80);
+  };
+
   /* ---------- Escalera de pistas ----------
      o.caja       elemento donde se escribe la pista
      o.peldanos   [{ texto, visual() }, ...] (tres): accion minima, figura, ejemplo resuelto parecido
@@ -369,6 +399,7 @@
     });
     host.innerHTML = '<div class="rp-tec"><output aria-live="polite" id="rp-tec-v">&nbsp;</output><div class="rp-tec__k">' + teclas + '</div></div>';
     var out = host.querySelector('#rp-tec-v');
+    P.aLaVista(host.querySelector('.rp-tec'));
     function pintar() { out.innerHTML = val === '' ? '&nbsp;' : esc(val); out.setAttribute('data-val', val); }
     function tecla(k) {
       if (!vivo) return;
@@ -455,9 +486,8 @@
             '<button type="button" class="k-boton rp-voz" id="rp-voz" aria-label="Voice on or off" aria-pressed="' + P.vozActiva() + '">' + ICONO_VOZ(P.vozActiva()) + '</button>' + botonMenu() + '</div></div>' +
           pips() +
           '<div id="rp-cuerpo"></div>' +
-          '<p class="k-mensaje" id="rp-msg" aria-live="polite"></p>' +
           '<div class="rp-caja" id="rp-caja" hidden></div>' +
-          '<div class="k-botones rp-pie"><button type="button" class="k-boton rp-hint" id="rp-hint">HINT</button><span id="rp-extra" class="k-botones"></span>' +
+          '<div class="k-botones rp-pie"><p class="k-mensaje" id="rp-msg" aria-live="polite"></p><button type="button" class="k-boton rp-hint" id="rp-hint">HINT</button><span id="rp-extra" class="k-botones"></span>' +
             '<button type="button" class="k-boton k-boton--siguiente" id="rp-sig" hidden>NEXT &#9654;</button></div>' +
         '</section>');
       var msg = $('#rp-msg'), sig = $('#rp-sig');

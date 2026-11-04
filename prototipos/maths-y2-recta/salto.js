@@ -159,7 +159,7 @@
   var css = document.createElement('style');
   css.textContent = [
     '.rp-recta{margin:6px 0 0}',
-    '.rp-v{position:relative;height:200px;margin:0 5%;user-select:none;touch-action:none}',
+    '.rp-v{position:relative;height:200px;margin:0 5%;user-select:none;touch-action:pan-y}',
     '.rp-linea{position:absolute;left:-3%;right:-3%;top:138px;height:10px;background:linear-gradient(#1E1426 0 2px,#E8ECF2 2px 4px,#9AA1AE 4px 6px,#5B5B6E 6px 8px,#1E1426 8px)}',
     '.rp-linea::before,.rp-linea::after{content:"";position:absolute;top:-4px;width:8px;height:18px;background:#6B3D22;border:2px solid #1E1426;box-sizing:border-box}',
     '.rp-linea::before{left:0}.rp-linea::after{right:0}',
@@ -213,6 +213,7 @@
     '@keyframes rp-choque{0%,100%{transform:translateX(0)}25%{transform:translateX(-12px)}75%{transform:translateX(10px)}}',
     '.rp-ctl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}',
     '.rp-ctl .k-boton{min-width:72px;font-size:1.3rem}',
+    '@media (max-width:600px){.rp-ctl.is-muchos .k-boton{flex:0 0 calc(20% - 5px);min-width:0;font-size:1rem;padding:0 2px}#rp-eq{flex-wrap:nowrap;overflow-x:auto;min-height:2.4em}.rp-ctl{gap:6px}.rp-ctl .k-boton{min-width:56px;min-height:52px;font-size:1.1rem;padding:0 6px}.rp-v{height:196px}}',
     '.rp-ctl .k-boton.is-pista{outline:4px solid #2F9BB8;outline-offset:2px;background:#D8F6FA}',
     '.rp-botas{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:6px;min-height:22px;font-weight:800;align-items:center}',
     '.rp-botas i{width:16px;height:16px;border:3px solid #1E1426;border-radius:4px;background:#F2B73A;display:block}',
@@ -464,7 +465,7 @@
     var recta = Recta(ctx.host, { lo: vent.lo, hi: vent.hi, vacia: !!it.vacia, quien: quien });
     var botasEl = document.createElement('div'); botasEl.className = 'rp-botas'; ctx.host.appendChild(botasEl);
     var panelFormas = document.createElement('ul'); panelFormas.className = 'rp-formas'; ctx.host.appendChild(panelFormas);
-    var ctl = document.createElement('div'); ctl.className = 'rp-ctl'; ctx.host.appendChild(ctl);
+    var ctl = document.createElement('div'); ctl.className = 'rp-ctl' + (puente ? ' is-muchos' : ''); ctx.host.appendChild(ctl);
     var zonaTec = document.createElement('div'); ctx.host.appendChild(zonaTec);
     if (quien === 'ex') cargarExplorador();
 
