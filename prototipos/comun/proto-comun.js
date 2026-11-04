@@ -146,25 +146,9 @@
           '<div class="k-gemas" id="hud" aria-label="Gems">' + P.gemaSVG(22) + '<span id="gems">0</span></div></div>' +
         '<section class="k-panel k-panel--sobre proto-inicio">' +
           '<p class="k-rotulo">' + o.rotulo + '</p><h2>' + o.titulo + '</h2><p>' + o.texto + '</p>' +
-          '<p class="k-suave proto-piel-rotulo">Your explorer</p><div class="k-chips proto-pieles" id="pieles"></div>' +
           '<div class="k-botones"><button type="button" class="k-boton k-boton--primario" id="play">PLAY</button></div>' +
         '</section>' +
       '</div>';
-    var tonos = (window.GAME_UI && window.GAME_UI.armoury && window.GAME_UI.armoury.skins) || [];
-    var pieles = $('#pieles');
-    tonos.forEach(function (t) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.className = 'k-piel'; b.style.background = t.value;
-      b.setAttribute('aria-label', t.name); b.setAttribute('aria-pressed', String(t.value === P.piel));
-      b.addEventListener('click', function () {
-        P.piel = t.value;
-        try { localStorage.setItem('samsan:proto-piel', t.value); } catch (e) { /* nada */ }
-        Array.prototype.forEach.call(pieles.children, function (x) { x.setAttribute('aria-pressed', 'false'); });
-        b.setAttribute('aria-pressed', 'true');
-        if (P.mundo && P.mundo.cav) P.mundo.cav.explorador.fijarPiel(t.value);
-      });
-      pieles.appendChild(b);
-    });
     P.mundoEn($('#mundo'));
     $('#play').addEventListener('click', function () { P.sonido('paso'); o.alJugar(); });
   };

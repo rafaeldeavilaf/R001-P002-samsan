@@ -78,10 +78,8 @@
           '<p class="k-rotulo">Year 2 Maths</p><h2>Choose a game</h2>' +
           '<div class="rp-pj" id="mj-pj"></div>' +
           '<div class="mj-lista">' + tarjetas + '</div>' +
-          '<p class="k-suave proto-piel-rotulo">Your explorer</p><div class="k-chips proto-pieles" id="pieles"></div>' +
         '</section>');
     if (P.personajes) P.personajes($('#mj-pj'));
-    pieles($('#pieles'));
     Array.prototype.forEach.call(root.querySelectorAll('.mj-tarjeta'), function (b) {
       b.addEventListener('click', function () { abrir(b.getAttribute('data-juego'), ''); });
     });
@@ -106,22 +104,6 @@
     $('#play').addEventListener('click', function (e) { e.stopPropagation(); empezar(); });
     $('#mj-escena').addEventListener('click', empezar);
     P.vozEn('Welcome! Tap START.');
-  }
-  function pieles(host) {
-    var tonos = (window.GAME_UI && window.GAME_UI.armoury && window.GAME_UI.armoury.skins) || [];
-    tonos.forEach(function (t) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.className = 'k-piel'; b.style.background = t.value;
-      b.setAttribute('aria-label', t.name); b.setAttribute('aria-pressed', String(t.value === P.piel));
-      b.addEventListener('click', function () {
-        P.piel = t.value;
-        try { localStorage.setItem('samsan:proto-piel', t.value); } catch (e) { /* nada */ }
-        Array.prototype.forEach.call(host.children, function (x) { x.setAttribute('aria-pressed', 'false'); });
-        b.setAttribute('aria-pressed', 'true');
-        if (P.mundo && P.mundo.cav) P.mundo.cav.explorador.fijarPiel(t.value);
-      });
-      host.appendChild(b);
-    });
   }
   function abrir(id, atajo) {
     var j = JUEGOS.filter(function (x) { return x.id === id; })[0];

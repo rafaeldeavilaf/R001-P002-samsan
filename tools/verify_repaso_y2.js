@@ -365,7 +365,7 @@ async function verificarMenu() {
   ok($$(J, '.mj-tarjeta').length === 2, 'menu: tocar la escena de bienvenida debe abrir las tarjetas de juego');
   ok(!$(J, '#mundo'), 'menu: el menu no debe tener la escena grande');
   ok(!!$(J, '.mj-tarjeta[data-juego="recta"]') && !!$(J, '.mj-tarjeta[data-juego="abaco"]'), 'menu: faltan las tarjetas recta y abaco');
-  ok($$(J, '#pieles .k-piel').length >= 6, 'menu: faltan los tonos de piel del explorador');
+  ok($$(J, '#pieles .k-piel').length === 0, 'menu: el selector de piel esta oculto por ahora');
   for (const id of ['recta', 'abaco']) {
     $(J, '.mj-tarjeta[data-juego="' + id + '"]').click(); await dormir(40);
     ok(!!$(J, '#rp-go'), 'menu: ' + id + ' debe abrir la ronda 1');
