@@ -98,7 +98,7 @@ GUIA.iniciar({
      "color": "#2563EB",
      "ej": "kite",
      "ejp": "k*i*t*e*",
-     "voz": "i and magic e"
+     "voz": "i, one letter, then magic e"
     },
     {
      "id": "igh",
@@ -125,7 +125,7 @@ GUIA.iniciar({
      "color": "#9333EA",
      "ej": "pie",
      "ejp": "p*ie*",
-     "voz": "i, e"
+     "voz": "i and e side by side"
     }
    ],
    "palabras": [
@@ -187,11 +187,6 @@ GUIA.iniciar({
     {
      "p": "r*igh*t",
      "ico": "right",
-     "zona": "igh"
-    },
-    {
-     "p": "midn*igh*t",
-     "ico": "midnight",
      "zona": "igh"
     },
     {
@@ -301,7 +296,7 @@ GUIA.iniciar({
      "zona": "l"
     },
     {
-     "p": "*gl*ove",
+     "p": "*gl*oves",
      "ico": "glove",
      "zona": "l"
     },
@@ -356,8 +351,8 @@ GUIA.iniciar({
      "zona": "r"
     },
     {
-     "p": "*tr*uck",
-     "ico": "truck",
+     "p": "*tr*actor",
+     "ico": "tractor",
      "zona": "r"
     },
     {
@@ -398,11 +393,6 @@ GUIA.iniciar({
     {
      "p": "*sp*onge",
      "ico": "sponge",
-     "zona": "s"
-    },
-    {
-     "p": "*st*op",
-     "ico": "stop",
      "zona": "s"
     }
    ]
@@ -500,7 +490,7 @@ GUIA.iniciar({
      "zona": "what"
     },
     {
-     "p": "a toy car",
+     "p": "a car",
      "ico": "car",
      "zona": "what"
     },
@@ -516,7 +506,7 @@ GUIA.iniciar({
     },
     {
      "p": "at the park",
-     "ico": "park",
+     "ico": "slide",
      "zona": "where"
     },
     {
@@ -550,8 +540,8 @@ GUIA.iniciar({
      "zona": "when"
     },
     {
-     "p": "at bedtime",
-     "ico": "bed",
+     "p": "in the evening",
+     "ico": "evening",
      "zona": "when"
     },
     {
@@ -593,7 +583,7 @@ GUIA.iniciar({
      "color": "#16A34A",
      "ej": "monkey",
      "ejp": "a monkey",
-     "voz": "it climbs and lives up in the trees"
+     "voz": "it lives up in the trees"
     },
     {
      "id": "agua",
@@ -631,11 +621,6 @@ GUIA.iniciar({
      "zona": "arbol"
     },
     {
-     "p": "a squirrel",
-     "ico": "squirrel",
-     "zona": "arbol"
-    },
-    {
      "p": "a dolphin",
      "ico": "dolphin",
      "zona": "agua"
@@ -661,8 +646,8 @@ GUIA.iniciar({
      "zona": "flores"
     },
     {
-     "p": "a ladybird",
-     "ico": "ladybird",
+     "p": "a bumblebee",
+     "ico": "bumblebee",
      "zona": "flores"
     },
     {
@@ -677,9 +662,9 @@ GUIA.iniciar({
    "titulo": "Our community",
    "escena": "barrio",
    "calcos": [
-    "baker",
+    "doughnut",
     "ambulance",
-    "picnic"
+    "duck"
    ],
    "zonas": [
     {
@@ -730,8 +715,8 @@ GUIA.iniciar({
      "zona": "panaderia"
     },
     {
-     "p": "the baker",
-     "ico": "baker",
+     "p": "buy doughnuts",
+     "ico": "doughnut",
      "zona": "panaderia"
     },
     {
@@ -750,7 +735,7 @@ GUIA.iniciar({
      "zona": "colegio"
     },
     {
-     "p": "my backpack",
+     "p": "my school bag",
      "ico": "backpack",
      "zona": "colegio"
     },
@@ -770,7 +755,7 @@ GUIA.iniciar({
      "zona": "hospital"
     },
     {
-     "p": "a bandage",
+     "p": "a plaster",
      "ico": "bandage",
      "zona": "hospital"
     },
@@ -780,13 +765,8 @@ GUIA.iniciar({
      "zona": "hospital"
     },
     {
-     "p": "go down the slide",
-     "ico": "slide",
-     "zona": "parque"
-    },
-    {
-     "p": "have a picnic",
-     "ico": "picnic",
+     "p": "ride my bike",
+     "ico": "bike",
      "zona": "parque"
     },
     {
@@ -795,8 +775,8 @@ GUIA.iniciar({
      "zona": "parque"
     },
     {
-     "p": "play football",
-     "ico": "ball",
+     "p": "walk the dog",
+     "ico": "dog",
      "zona": "parque"
     }
    ]
@@ -871,8 +851,8 @@ GUIA.iniciar({
      "zona": "rana"
     },
     {
-     "p": "egg",
-     "ico": "egg",
+     "p": "egg in a nest",
+     "ico": "nestegg",
      "zona": "gallina"
     },
     {
@@ -881,8 +861,8 @@ GUIA.iniciar({
      "zona": "gallina"
     },
     {
-     "p": "rooster",
-     "ico": "rooster",
+     "p": "hatching chick",
+     "ico": "hatching",
      "zona": "gallina"
     }
    ]

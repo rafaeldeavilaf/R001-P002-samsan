@@ -35,18 +35,18 @@ ICONOS = {
     "midnight": "1f55b", "fly": "1fab0", "spy": "1f575", "why": "2753", "shy": "1f633", "butterfly": "1f98b", "sky": "1f324",
     "pie": "1f967", "tie": "1f454", "fries": "1f35f", "fried": "1f373", "cried": "1f62d",
     "flag": "1f6a9", "frog": "1f438", "star": "2b50", "clock": "23f0", "plane": "2708", "clap": "1f44f", "flower": "1f338",
-    "glove": "1f9e4", "globe": "1f30d", "plate": "1f37d", "tree": "1f333", "crab": "1f980", "drum": "1f941", "grapes": "1f347",
-    "bread": "1f35e", "train": "1f686", "crown": "1f451", "dragon": "1f409", "truck": "1f69a", "snail": "1f40c", "spoon": "1f944",
+    "glove": "1f9e4", "globe": "1f30e", "plate": "1f37d", "tree": "1f333", "crab": "1f980", "drum": "1f941", "grapes": "1f347",
+    "bread": "1f35e", "train": "1f682", "crown": "1f451", "dragon": "1f409", "truck": "1f69a", "snail": "1f40c", "spoon": "1f944",
     "swim": "1f3ca", "snake": "1f40d", "skate": "26f8", "ski": "1f3bf", "snowman": "26c4", "sponge": "1f9fd", "stop": "1f6d1",
     "grandma": "1f475", "banana": "1f34c", "beach": "1f3d6", "calendar": "1f4c5", "raining": "2614", "firefighter": "1f9d1-200d-1f692",
     "baby": "1f476", "doctor": "1f9d1-200d-2695-fe0f", "teacher": "1f9d1-200d-1f3eb", "farmer": "1f9d1-200d-1f33e", "ball": "26bd",
     "sandwich": "1f96a", "car": "1f697", "book": "1f4d6", "apple": "1f34e", "park": "1f3de", "school": "1f3eb", "home": "1f3e0",
-    "hospital": "1f3e5", "morning": "1f305", "birthday": "1f382", "bed": "1f6cf", "hot": "1f975", "tired": "1f634", "happy": "1f604",
+    "morning": "1f305", "birthday": "1f382", "bed": "1f6cf", "hot": "1f975", "tired": "1f634", "happy": "1f604",
     "cold": "1f976", "monkey": "1f412", "fish": "1f41f", "bee": "1f41d", "sloth": "1f9a5", "parrot": "1f99c", "owl": "1f989",
     "squirrel": "1f43f", "dolphin": "1f42c", "octopus": "1f419", "whale": "1f40b", "shark": "1f988", "ladybird": "1f41e",
     "baker": "1f9d1-200d-1f373", "croissant": "1f950", "cookie": "1f36a", "backpack": "1f392", "pencil": "270f", "books": "1f4da",
     "ambulance": "1f691", "bandage": "1fa79", "ill": "1f912", "picnic": "1f9fa", "duck": "1f986",
-    "hen": "1f414", "caterpillar": "1f41b", "egg": "1f95a", "chick": "1f425", "rooster": "1f413",
+    "hen": "1f414", "tractor": "1f69c", "evening": "1f306", "doughnut": "1f369", "dog": "1f415", "hatching": "1f423", "caterpillar": "1f41b", "egg": "1f95a", "chick": "1f425", "rooster": "1f413",
 }
 
 # Dibujos propios por codigo (36 x 36, colores planos al estilo Twemoji) para
@@ -69,11 +69,23 @@ PROPIOS = {
                  '<circle cx="15" cy="13" r="1" fill="#FFCC4D"/><circle cx="21" cy="13" r="1" fill="#FFCC4D"/>',
     "leafegg": '<path d="M4 30C6 12 20 4 33 4c0 13-9 27-27 27z" fill="#77B255"/><path d="M7 28C14 20 21 13 30 7" fill="none" stroke="#3E721D" stroke-width="1.6" stroke-linecap="round"/>'
                '<ellipse cx="19" cy="20" rx="3" ry="3.8" fill="#FFF8DC" stroke="#C1A256" stroke-width="1"/>',
-    "hummingbird": '<path d="M2 15l11 2" stroke="#292F33" stroke-width="1.6" stroke-linecap="round"/>'
-                   '<path d="M22 20c4 3 9 7 12 12-6-1-10-4-13-8z" fill="#3E721D"/>'
-                   '<ellipse cx="18" cy="19" rx="7" ry="5.5" fill="#5DADEC"/><circle cx="13.5" cy="16.5" r="4.2" fill="#3B88C3"/>'
-                   '<circle cx="12.6" cy="15.8" r="1.1" fill="#292F33"/><path d="M15 21c2 2 5 2 7 1" fill="none" stroke="#DD2E44" stroke-width="2" stroke-linecap="round"/>'
-                   '<path d="M17 15C17 7 22 2 30 3c-2 7-6 11-13 12z" fill="#77B255"/>',
+    "hummingbird": '<path d="M2 16.5l10 1" stroke="#292F33" stroke-width="1.6" stroke-linecap="round"/>'
+                   '<path d="M23 21l10 6-1.6 1.4-9.4-5z" fill="#3E721D"/><path d="M23 22l7 9-2 .6-6.6-7.6z" fill="#5C913B"/>'
+                   '<ellipse cx="19" cy="20.5" rx="7.5" ry="5" fill="#5DADEC"/><circle cx="13.5" cy="17" r="4" fill="#3B88C3"/>'
+                   '<circle cx="12.6" cy="16.3" r="1.1" fill="#292F33"/><path d="M14 20.6c1.5 1.5 4 1.5 6 .4" fill="none" stroke="#DD2E44" stroke-width="2.2" stroke-linecap="round"/>'
+                   '<path d="M18 17c1-7 6-12 13-13-1 6-5 11-13 13z" fill="#BBDDF5"/><path d="M20 15l7-8M19.5 16.2l9.5-5.2" stroke="#88C9F9" stroke-width="1.1" stroke-linecap="round"/>',
+    "bumblebee": '<ellipse cx="13" cy="9" rx="6" ry="4.5" fill="#CCD6DD"/><ellipse cx="23" cy="8.5" rx="6" ry="4.5" fill="#CCD6DD"/>'
+                 '<ellipse cx="19" cy="21" rx="12" ry="10" fill="#292F33"/>'
+                 '<rect x="10" y="14.6" width="19" height="3.6" rx="1.8" fill="#FFCC4D"/><rect x="7.5" y="20" width="23" height="4" rx="2" fill="#FFCC4D"/><rect x="10" y="26" width="18" height="3.2" rx="1.6" fill="#FFCC4D"/>'
+                 '<circle cx="7" cy="20" r="5" fill="#292F33"/><circle cx="5.4" cy="18.6" r="1.4" fill="#FFF"/>',
+    "nestegg": '<ellipse cx="13.5" cy="13.5" rx="4.8" ry="6.4" fill="#FFFFFF" stroke="#C1A256" stroke-width="1.2"/><ellipse cx="22.5" cy="14" rx="4.8" ry="6.4" fill="#FFF3D6" stroke="#C1A256" stroke-width="1.2"/>'
+               '<path d="M3 19c0 8 7 13 15 13s15-5 15-13z" fill="#A0522D"/>'
+               '<path d="M4 21c6 3 22 3 28 0M5 25c6 3 20 3 26 0M8 29c5 2 15 2 20 0" fill="none" stroke="#6B3A1E" stroke-width="1.3" stroke-linecap="round"/>',
+    "hospital": '<rect x="3" y="7" width="30" height="4" rx="1" fill="#99AAB5"/><rect x="4" y="10" width="28" height="24" fill="#E1E8ED"/>'
+                '<rect x="7" y="13" width="4.5" height="4.5" fill="#55ACEE"/><rect x="24.5" y="13" width="4.5" height="4.5" fill="#55ACEE"/>'
+                '<rect x="7" y="21" width="4.5" height="4.5" fill="#55ACEE"/><rect x="24.5" y="21" width="4.5" height="4.5" fill="#55ACEE"/>'
+                '<circle cx="18" cy="17" r="5.6" fill="#FFF" stroke="#1D4ED8" stroke-width="1.2"/><path d="M15.6 14v6M20.4 14v6M15.6 17h4.8" stroke="#1D4ED8" stroke-width="1.9" stroke-linecap="round"/>'
+                '<rect x="14.5" y="25" width="7" height="9" fill="#3B88C3"/>',
 }
 
 SVG_RE = re.compile(r"^\s*<svg[^>]*viewBox=\"0 0 36 36\"[^>]*>(.*)</svg>\s*$", re.S)

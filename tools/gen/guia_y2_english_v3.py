@@ -30,16 +30,16 @@ MUNDOS = [
     {
         "id": "long-i", "titulo": "Long i street", "escena": "calle", "calcos": ["kite", "bike", "lightning"],
         "zonas": [
-            {"id": "ie_", "letrero": "i_e", "lugar": "casa", "color": "#2563EB", "ej": "kite", "ejp": "k*i*t*e*", "voz": "i and magic e"},
+            {"id": "ie_", "letrero": "i_e", "lugar": "casa", "color": "#2563EB", "ej": "kite", "ejp": "k*i*t*e*", "voz": "i, one letter, then magic e"},
             {"id": "igh", "letrero": "igh", "lugar": "casa", "color": "#EA580C", "ej": "night", "ejp": "n*igh*t", "voz": "i, g, h"},
             {"id": "y", "letrero": "y", "lugar": "casa", "color": "#16A34A", "ej": "fly", "ejp": "fl*y*", "voz": "y at the end"},
-            {"id": "ie", "letrero": "ie", "lugar": "casa", "color": "#9333EA", "ej": "pie", "ejp": "p*ie*", "voz": "i, e"},
+            {"id": "ie", "letrero": "ie", "lugar": "casa", "color": "#9333EA", "ej": "pie", "ejp": "p*ie*", "voz": "i and e side by side"},
         ],
         "palabras": [
             ("b*i*k*e*", "bike", "ie_"), ("d*i*c*e*", "dice", "ie_"), ("*i*c*e*", "ice", "ie_"), ("r*i*c*e*", "rice", "ie_"),
             ("n*i*n*e*", "nine", "ie_"), ("f*i*v*e*", "five", "ie_"), ("sm*i*l*e*", "smile", "ie_"), ("sl*i*d*e*", "slide", "ie_"),
             ("l*igh*t", "light", "igh"), ("fl*igh*t", "flight", "igh"), ("l*igh*tning", "lightning", "igh"),
-            ("r*igh*t", "right", "igh"), ("midn*igh*t", "midnight", "igh"),
+            ("r*igh*t", "right", "igh"),
             ("sp*y*", "spy", "y"), ("wh*y*", "why", "y"), ("sh*y*", "shy", "y"), ("butterfl*y*", "butterfly", "y"), ("sk*y*", "sky", "y"),
             ("t*ie*", "tie", "ie"), ("fr*ie*s", "fries", "ie"), ("fr*ie*d", "fried", "ie"), ("cr*ie*d", "cried", "ie"),
         ],
@@ -53,11 +53,11 @@ MUNDOS = [
         ],
         "palabras": [
             ("*cl*ock", "clock", "l"), ("*pl*ane", "plane", "l"), ("*cl*ap", "clap", "l"), ("*fl*ower", "flower", "l"),
-            ("*gl*ove", "glove", "l"), ("*gl*obe", "globe", "l"), ("*pl*ate", "plate", "l"),
+            ("*gl*oves", "glove", "l"), ("*gl*obe", "globe", "l"), ("*pl*ate", "plate", "l"),
             ("*tr*ee", "tree", "r"), ("*cr*ab", "crab", "r"), ("*dr*um", "drum", "r"), ("*gr*apes", "grapes", "r"),
-            ("*br*ead", "bread", "r"), ("*tr*ain", "train", "r"), ("*cr*own", "crown", "r"), ("*dr*agon", "dragon", "r"), ("*tr*uck", "truck", "r"),
+            ("*br*ead", "bread", "r"), ("*tr*ain", "train", "r"), ("*cr*own", "crown", "r"), ("*dr*agon", "dragon", "r"), ("*tr*actor", "tractor", "r"),
             ("*sn*ail", "snail", "s"), ("*sp*oon", "spoon", "s"), ("*sw*im", "swim", "s"), ("*sn*ake", "snake", "s"),
-            ("*sk*ate", "skate", "s"), ("*sk*i", "ski", "s"), ("*sn*owman", "snowman", "s"), ("*sp*onge", "sponge", "s"), ("*st*op", "stop", "s"),
+            ("*sk*ate", "skate", "s"), ("*sk*i", "ski", "s"), ("*sn*owman", "snowman", "s"), ("*sp*onge", "sponge", "s"),
         ],
     },
     {
@@ -71,27 +71,27 @@ MUNDOS = [
         ],
         "palabras": [
             ("a firefighter", "firefighter", "who"), ("the baby", "baby", "who"), ("a doctor", "doctor", "who"), ("my teacher", "teacher", "who"), ("a farmer", "farmer", "who"),
-            ("a ball", "ball", "what"), ("a sandwich", "sandwich", "what"), ("a toy car", "car", "what"), ("a book", "book", "what"), ("an apple", "apple", "what"),
-            ("at the park", "park", "where"), ("at school", "school", "where"), ("at home", "home", "where"), ("at the hospital", "hospital", "where"),
-            ("at night", "night", "when"), ("in the morning", "morning", "when"), ("on my birthday", "birthday", "when"), ("at bedtime", "bed", "when"),
+            ("a ball", "ball", "what"), ("a sandwich", "sandwich", "what"), ("a car", "car", "what"), ("a book", "book", "what"), ("an apple", "apple", "what"),
+            ("at the park", "slide", "where"), ("at school", "school", "where"), ("at home", "home", "where"), ("at the hospital", "hospital", "where"),
+            ("at night", "night", "when"), ("in the morning", "morning", "when"), ("on my birthday", "birthday", "when"), ("in the evening", "evening", "when"),
             ("because it is hot", "hot", "why"), ("because I am tired", "tired", "why"), ("because I am happy", "happy", "why"), ("because it is cold", "cold", "why"),
         ],
     },
     {
         "id": "habitats", "titulo": "Where do animals live?", "escena": "habitat", "calcos": ["sloth", "parrot", "dolphin"],
         "zonas": [
-            {"id": "arbol", "letrero": "trees", "lugar": "arbol", "color": "#16A34A", "ej": "monkey", "ejp": "a monkey", "voz": "it climbs and lives up in the trees"},
+            {"id": "arbol", "letrero": "trees", "lugar": "arbol", "color": "#16A34A", "ej": "monkey", "ejp": "a monkey", "voz": "it lives up in the trees"},
             {"id": "agua", "letrero": "water", "lugar": "agua", "color": "#2563EB", "ej": "fish", "ejp": "a fish", "voz": "it swims and lives in the water"},
             {"id": "flores", "letrero": "flowers", "lugar": "flores", "color": "#DB2777", "ej": "bee", "ejp": "a bee", "voz": "it visits flowers"},
         ],
         "palabras": [
-            ("a sloth", "sloth", "arbol"), ("a parrot", "parrot", "arbol"), ("an owl", "owl", "arbol"), ("a squirrel", "squirrel", "arbol"),
+            ("a sloth", "sloth", "arbol"), ("a parrot", "parrot", "arbol"), ("an owl", "owl", "arbol"),
             ("a dolphin", "dolphin", "agua"), ("an octopus", "octopus", "agua"), ("a whale", "whale", "agua"), ("a shark", "shark", "agua"),
-            ("a butterfly", "butterfly", "flores"), ("a ladybird", "ladybird", "flores"), ("a hummingbird", "hummingbird", "flores"),
+            ("a butterfly", "butterfly", "flores"), ("a bumblebee", "bumblebee", "flores"), ("a hummingbird", "hummingbird", "flores"),
         ],
     },
     {
-        "id": "community", "titulo": "Our community", "escena": "barrio", "calcos": ["baker", "ambulance", "picnic"],
+        "id": "community", "titulo": "Our community", "escena": "barrio", "calcos": ["doughnut", "ambulance", "duck"],
         "zonas": [
             {"id": "panaderia", "letrero": "bakery", "lugar": "edificio", "variante": "panaderia", "color": "#D97706", "ej": "bread", "ejp": "buy bread", "voz": "we buy bread and cakes there"},
             {"id": "colegio", "letrero": "school", "lugar": "edificio", "variante": "colegio", "color": "#DC2626", "ej": "book", "ejp": "read a book", "voz": "we learn there"},
@@ -99,10 +99,10 @@ MUNDOS = [
             {"id": "parque", "letrero": "park", "lugar": "edificio", "variante": "parque", "color": "#16A34A", "ej": "kite", "ejp": "fly a kite", "voz": "we play outside there"},
         ],
         "palabras": [
-            ("buy a cake", "birthday", "panaderia"), ("the baker", "baker", "panaderia"), ("buy croissants", "croissant", "panaderia"), ("buy cookies", "cookie", "panaderia"),
-            ("the teacher", "teacher", "colegio"), ("my backpack", "backpack", "colegio"), ("a pencil", "pencil", "colegio"), ("learn to read", "books", "colegio"),
-            ("an ambulance", "ambulance", "hospital"), ("a bandage", "bandage", "hospital"), ("feel ill", "ill", "hospital"),
-            ("go down the slide", "slide", "parque"), ("have a picnic", "picnic", "parque"), ("feed the ducks", "duck", "parque"), ("play football", "ball", "parque"),
+            ("buy a cake", "birthday", "panaderia"), ("buy doughnuts", "doughnut", "panaderia"), ("buy croissants", "croissant", "panaderia"), ("buy cookies", "cookie", "panaderia"),
+            ("the teacher", "teacher", "colegio"), ("my school bag", "backpack", "colegio"), ("a pencil", "pencil", "colegio"), ("learn to read", "books", "colegio"),
+            ("an ambulance", "ambulance", "hospital"), ("a plaster", "bandage", "hospital"), ("feel ill", "ill", "hospital"),
+            ("ride my bike", "bike", "parque"), ("feed the ducks", "duck", "parque"), ("walk the dog", "dog", "parque"),
         ],
     },
     {
@@ -115,7 +115,7 @@ MUNDOS = [
         "palabras": [
             ("egg on a leaf", "leafegg", "mariposa"), ("caterpillar", "caterpillar", "mariposa"), ("chrysalis", "chrysalis", "mariposa"),
             ("frogspawn", "frogspawn", "rana"), ("tadpole", "tadpole", "rana"), ("froglet", "froglet", "rana"),
-            ("egg", "egg", "gallina"), ("chick", "chick", "gallina"), ("rooster", "rooster", "gallina"),
+            ("egg in a nest", "nestegg", "gallina"), ("chick", "chick", "gallina"), ("hatching chick", "hatching", "gallina"),
         ],
     },
 ]

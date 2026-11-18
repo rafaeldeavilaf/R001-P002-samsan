@@ -108,3 +108,34 @@ Solo palabras y ubicarlas. Se prueban con `python3 tools/historias_juegos.py <gu
 - La v1 se repitió completa después de congelar su motor y sigue pasando sus historias.
 
 - **J18, temas libres (18 nov, tras la prueba de Rafael).** El mapa se veía bloqueado porque solo los círculos de etapa abrían algo y la tarjeta del mundo no respondía. Ahora toda la tarjeta abre el mundo en su siguiente etapa sin terminar, cada mundo muestra ▶ y la etapa siguiente late. Ningún mundo depende de otro.
+
+## v3 · modo aldea («La aldea de Pip», Y2 English)
+
+Se prueban con `python3 tools/historias_aldea.py y2-english-v3`. Son las J de la v2 adaptadas (sin jefe), más dibujo en cada elemento, etapas de 5, álbum y pantalla sin texto para jugar.
+
+| ID | Historia | Criterio de aceptación |
+|---|---|---|
+| A01 | Como niño, quiero saber qué jugar ahora | «Play» lleva a la siguiente etapa sin terminar |
+| A02 | Como niño, antes de un mundo nuevo quiero ver cómo se juega | La primera entrada abre una demostración de Pip con voz que se puede saltar. No se repite sola y el botón ? la repite |
+| A03 | Como niño, quiero ubicar el globo con un toque | Tocar el lugar correcto ubica el globo, se llena una estrella y llega otro |
+| A04 | Como niño, quiero arrastrar el globo con el dedo | Arrastrarlo a su lugar lo ubica |
+| A05 | Como niño, si me equivoco no quiero perder | El lugar tiembla y el globo no entra. Al 2.º error Pip dice el sonido y brilla el lugar correcto |
+| A06 | Como niño atascado, quiero ayuda | La bombilla dice la palabra lenta, luego hace brillar el lugar y luego ubica el globo |
+| A07 | Como niño, quiero rondas cortas que suban de nivel | Cada etapa trae 5 globos, con 2 lugares, luego 3 y luego hasta 4 |
+| A08 | Como niño, quiero palabras distintas cada vez | 4 entradas a la misma etapa dan al menos 3 tandas distintas |
+| A09 | Como niño, quiero una calcomanía por etapa | La calcomanía llega aunque haya errores, repetir no suma, se guarda y queda en el álbum |
+| A10 | Como niño, quiero trajes para Pip | El traje está bloqueado antes; con las calcomanías avisa, se libera y Pip se lo pone |
+| A11 | Como niño que lee poco, quiero un dibujo en cada globo | Cada globo de las 18 etapas trae su dibujo |
+| A12 | Como niño en el teléfono, Atrás no me saca | Atrás desde una etapa vuelve al mapa |
+| A13 | Como niño, quiero música | Suena al primer toque, también si es el botón de música |
+| A14 | Como niño, quiero usarlo en cualquier pantalla | Sin desborde, con contraste AA y toques de 44 px en 4 perfiles |
+| A15 | Como adulto, no quiero red ni puntajes | Sin pedidos de red y sin porcentajes ni puntaje |
+| A16 | Como niño, no quiero trabarme | Las 18 etapas se terminan sin errores de JavaScript |
+| A17 | Como niño que lee poco, quiero oír cada palabra | La voz dice cada palabra al llegar el globo |
+| A18 | Como niño, quiero estudiar el tema que quiera | Sin progreso, cualquier mundo y etapa se abre desde el mapa |
+| A19 | Como niño de 6 años, quiero jugar sin leer | En la etapa solo hay letreros y la palabra del globo |
+| A20 | Como niño, quiero ver un ejemplo en cada lugar | Cada lugar muestra su letrero y un dibujo de ejemplo |
+
+### Resultado del 18 nov 2026
+
+20 historias, 20 OK en Chrome real con los perfiles 390 × 844, 360 × 640, 844 × 390 y 1366 × 768. Las fallas de la primera corrida fueron de la prueba, no del juego: la carga del progreso de prueba se repetía en cada recarga y Playwright no tocaba elementos que se animan (el alto actual del mapa y Pip), que un dedo sí toca.
