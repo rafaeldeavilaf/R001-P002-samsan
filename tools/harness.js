@@ -1184,8 +1184,11 @@ async function main() {
       if (/^\s*\/[\/*]\s*publicar:\s*true\s*(?:\*\/)?\s*$/m.test(fs.readFileSync(path.join(full, f), 'utf8'))) protoPublicados.push(dir + '-' + f.replace(/\.js$/, '') + '.html');
     });
   });
-  const raizEsperada = ['index.html', 'legal.html'].concat(protoPublicados).sort();
-  check('la raiz publica solo portada, legal.html y los bocetos con publicar: true', rootHtml.join(',') === raizEsperada.join(','), rootHtml.join(',') + ' / esperado ' + raizEsperada.join(','));
+  /* Guias de estudio (guias/<nombre>.js -> guia-<nombre>.html), decision del 18 nov 2026. */
+  const guiasPublicadas = fs.existsSync(path.join(ROOT, 'guias'))
+    ? fs.readdirSync(path.join(ROOT, 'guias')).filter(f => /\.js$/.test(f)).map(f => 'guia-' + f.replace(/\.js$/, '') + '.html') : [];
+  const raizEsperada = ['index.html', 'legal.html'].concat(protoPublicados, guiasPublicadas).sort();
+  check('la raiz publica solo portada, legal.html, los bocetos con publicar: true y las guias', rootHtml.join(',') === raizEsperada.join(','), rootHtml.join(',') + ' / esperado ' + raizEsperada.join(','));
   const h2s = Array.from(lDoc.querySelectorAll('main h2')).map(h => h.textContent);
   check('legal.html tiene las cuatro secciones',
         h2s.length === 4 && /Uso educativo/.test(h2s[0]) && /afiliaci/.test(h2s[1]) &&

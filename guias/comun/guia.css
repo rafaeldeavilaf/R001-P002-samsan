@@ -1,0 +1,163 @@
+/* ============================================================
+   SAMSAN — GUIAS DE ESTUDIO (guias/comun/guia.css)
+   Vector plano, sin pixel art. Dos temas: y2 (Pip, blanco y azul) y
+   y6 (Zip, papel de bitacora, azul noche y verde azulado).
+   Fuentes locales (regla 2): tools/build.py las pasa a data: URI.
+   ============================================================ */
+@font-face { font-family: 'Nunito'; font-weight: 400; font-display: swap; src: url('fonts/nunito-latin-400.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 700; font-display: swap; src: url('fonts/nunito-latin-700.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 800; font-display: swap; src: url('fonts/nunito-latin-800.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 900; font-display: swap; src: url('fonts/nunito-latin-900.woff2') format('woff2'); }
+
+:root {
+  --fondo: #EEF5FF; --papel: #FFFFFF; --tinta: #1F2937; --suave: #4B5563;
+  --acento: #1D4ED8; --acento-claro: #DBEAFE; --ok: #15803D; --ok-claro: #DCFCE7;
+  --mal: #B91C1C; --brillo: #F59E0B; --sel: #FBBF24; --borde: 3px; --radio: 18px; --base: 1.15rem;
+}
+html[data-tema="y6"] {
+  --fondo: #F4EEE2; --papel: #FFFDF8; --tinta: #14213D; --suave: #3F4A63;
+  --acento: #0F766E; --acento-claro: #D5F0EA; --brillo: #E4572E; --sel: #F6B98F; --borde: 2px; --radio: 14px; --base: 1.05rem;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--fondo); color: var(--tinta); font-family: 'Nunito', system-ui, sans-serif; font-size: var(--base); line-height: 1.4; -webkit-text-size-adjust: 100%; }
+button { font: inherit; color: inherit; }
+.g-raiz { max-width: 760px; margin: 0 auto; padding: 10px 14px 24px; min-height: 100svh; }
+.g-oculto { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------- barra superior ---------- */
+.g-barra { display: flex; align-items: center; gap: 10px; min-height: 52px; margin-bottom: 8px; }
+.g-barra h1 { flex: 1; margin: 0; font-size: 1.15rem; font-weight: 900; line-height: 1.15; }
+.g-barra h1 small { display: block; font-size: .8rem; font-weight: 700; color: var(--suave); }
+.g-icono { min-width: 48px; min-height: 48px; border: var(--borde) solid var(--tinta); border-radius: 50%; background: var(--papel); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.g-icono svg { width: 24px; height: 24px; }
+.g-icono[aria-pressed="false"] { opacity: .55; }
+
+/* ---------- botones ---------- */
+.g-btn { min-height: 52px; padding: 10px 22px; border: var(--borde) solid var(--tinta); border-radius: 999px; background: var(--acento); color: #fff; font-weight: 900; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 0 var(--tinta); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.g-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--tinta); }
+.g-btn--suave { background: var(--papel); color: var(--tinta); }
+.g-btn--grande { min-height: 64px; font-size: 1.3rem; width: 100%; }
+:focus-visible { outline: 4px solid var(--brillo); outline-offset: 2px; }
+
+/* ---------- mascota y globo ---------- */
+.g-hola { display: flex; align-items: center; gap: 12px; margin: 6px 0 10px; }
+.g-mascota { width: 112px; height: auto; flex-shrink: 0; }
+.g-mascota--chica { width: 70px; }
+.g-globo { position: relative; margin: 0; background: var(--papel); border: var(--borde) solid var(--tinta); border-radius: 20px; padding: 10px 14px; font-weight: 800; font-size: 1.05rem; }
+.g-globo::before { content: ''; position: absolute; left: -12px; top: 50%; margin-top: -9px; border: 9px solid transparent; border-right-color: var(--tinta); border-left: 0; }
+html[data-tema="y6"] .g-mascota .ala { transform-box: fill-box; transform-origin: 50% 90%; animation: g-ala .18s ease-in-out infinite alternate; }
+@keyframes g-ala { from { transform: rotate(-8deg); } to { transform: rotate(10deg); } }
+.g-mascota.salta { animation: g-salto .6s ease; }
+@keyframes g-salto { 30% { transform: translateY(-14px) rotate(-4deg); } 60% { transform: translateY(0); } }
+
+/* ---------- portada ---------- */
+.g-portada h2 { font-size: 1.6rem; font-weight: 900; margin: 4px 0 0; line-height: 1.1; }
+.g-portada .g-sub { margin: 2px 0 14px; color: var(--suave); font-weight: 800; }
+.g-misiones { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 10px; }
+.g-mision { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; min-height: 64px; text-align: left; background: var(--c2); border: var(--borde) solid var(--tinta); border-radius: var(--radio); cursor: pointer; }
+.g-letra { width: 44px; height: 44px; border-radius: 50%; background: var(--c); color: #fff; border: var(--borde) solid var(--tinta); display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.3rem; flex-shrink: 0; }
+html[data-tema="y6"] .g-letra { border-radius: 10px; }
+.g-mision__txt { flex: 1; font-weight: 900; line-height: 1.2; }
+.g-mision__txt small { display: block; font-weight: 700; color: var(--suave); font-size: .85rem; }
+.g-estrellas { display: inline-flex; gap: 2px; flex-shrink: 0; }
+.g-estrellas svg { width: 22px; height: 22px; }
+.g-pie-portada { margin-top: 22px; text-align: center; }
+.g-pie-portada button { background: none; border: 0; color: var(--suave); text-decoration: underline; font-weight: 700; min-height: 44px; cursor: pointer; }
+
+/* ---------- pasos de la mision ---------- */
+.g-pasos { display: flex; gap: 6px; margin: 0 0 12px; flex-wrap: wrap; }
+.g-paso { height: 10px; flex: 1; min-width: 18px; border-radius: 6px; background: #fff; border: 2px solid var(--tinta); }
+.g-paso.hecho { background: var(--c, var(--acento)); }
+.g-paso.ahora { background: var(--brillo); }
+
+/* ---------- aprende ---------- */
+.g-tarjeta { background: var(--papel); border: var(--borde) solid var(--tinta); border-radius: var(--radio); padding: 14px 16px; margin-bottom: 12px; }
+html[data-tema="y6"] .g-tarjeta { box-shadow: 4px 4px 0 var(--tinta); }
+.g-tarjeta h3 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 900; color: var(--c-osc, var(--acento)); }
+.g-tarjeta p { margin: 6px 0; }
+.g-tarjeta mark, .g-frase-ej mark { background: var(--c2, var(--acento-claro)); color: inherit; padding: 0 3px; border-radius: 4px; font-weight: 900; box-shadow: inset 0 -3px 0 var(--c, var(--acento)); }
+.g-ejemplos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.g-ej { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; min-height: 48px; padding: 8px 10px; border: 2px solid var(--tinta); border-radius: 14px; background: var(--c2, var(--acento-claro)); cursor: pointer; font-weight: 800; }
+.g-ej .g-img { font-size: 1.8rem; line-height: 1; }
+.g-ej small { font-weight: 700; color: var(--suave); font-size: .8rem; }
+.g-frase-ej { display: block; width: 100%; text-align: left; padding: 8px 12px; border: 2px solid var(--tinta); border-radius: 12px; background: #fff; margin-top: 6px; cursor: pointer; min-height: 44px; }
+
+/* ---------- actividad ---------- */
+.g-orden { display: flex; align-items: flex-start; gap: 10px; background: var(--papel); border: var(--borde) solid var(--tinta); border-radius: var(--radio); padding: 10px 12px; margin-bottom: 12px; font-weight: 800; }
+.g-orden p { flex: 1; margin: 0; padding-top: 2px; }
+.g-orden .g-icono { min-width: 44px; min-height: 44px; }
+.g-contador { font-weight: 900; color: var(--suave); font-size: .95rem; margin: -4px 0 8px; }
+.g-ficha { min-height: 48px; min-width: 48px; padding: 8px 14px; border: var(--borde) solid var(--tinta); border-radius: 14px; background: #fff; font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 var(--tinta); line-height: 1.2; text-align: center; }
+.g-ficha .g-img { font-size: 1.6rem; display: block; line-height: 1.1; }
+.g-ficha[aria-pressed="true"] { background: var(--sel); color: #1F2937; transform: translateY(-3px); box-shadow: 0 6px 0 var(--tinta); }
+.g-ficha:disabled { opacity: .35; box-shadow: none; cursor: default; }
+.g-pool { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 10px; background: rgba(255,255,255,.55); border: 2px dashed var(--suave); border-radius: var(--radio); margin-bottom: 12px; min-height: 70px; }
+.g-pool--vacia { display: none; }
+.g-cajas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.g-caja { display: flex; flex-direction: column; align-items: stretch; gap: 6px; min-height: 110px; padding: 8px; border: var(--borde) solid var(--tinta); border-radius: var(--radio); background: var(--c2, var(--acento-claro)); cursor: pointer; text-align: center; }
+.g-caja__nombre { font-weight: 900; font-size: 1.1rem; }
+.g-caja__nombre small { display: block; font-weight: 700; font-size: .8rem; color: var(--suave); }
+.g-dentro { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.g-chip { display: inline-block; padding: 3px 8px; border-radius: 10px; background: #fff; border: 2px solid var(--ok); font-weight: 800; font-size: .9rem; }
+
+/* ordenar */
+.g-huecos { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; }
+.g-hueco { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 10px; border: var(--borde) dashed var(--suave); border-radius: 14px; background: rgba(255,255,255,.6); }
+.g-hueco.lleno { border-style: solid; border-color: var(--ok); background: var(--ok-claro); font-weight: 800; }
+.g-hueco__n { width: 32px; height: 32px; border-radius: 50%; background: var(--tinta); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; flex-shrink: 0; }
+.g-hueco .g-img { font-size: 1.5rem; }
+.g-flecha { text-align: center; color: var(--suave); font-weight: 900; line-height: 1; margin: -4px 0; }
+
+/* emparejar */
+.g-pares { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.g-col { display: grid; gap: 8px; align-content: start; }
+.g-col h4 { margin: 0; font-size: .9rem; color: var(--suave); text-transform: uppercase; letter-spacing: .04em; }
+.g-pares .g-ficha { width: 100%; text-align: left; position: relative; }
+.g-ficha.par { background: var(--ok-claro); border-color: var(--ok); color: var(--tinta); opacity: 1; box-shadow: none; }
+.g-ficha .g-num { position: absolute; top: -10px; right: -8px; width: 26px; height: 26px; border-radius: 50%; background: var(--ok); color: #fff; font-size: .85rem; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--tinta); }
+@media (max-width: 560px) { .g-pares--largo { grid-template-columns: 1fr; } }
+
+/* tocar */
+.g-frase { background: var(--papel); border: var(--borde) solid var(--tinta); border-radius: var(--radio); padding: 16px 12px; font-size: 1.35rem; line-height: 2.3; text-align: center; margin-bottom: 12px; }
+html[data-tema="y6"] .g-frase { font-size: 1.2rem; }
+.g-palabra { border: 2px solid transparent; border-bottom: 3px dotted var(--suave); background: none; padding: 2px 4px; border-radius: 8px; cursor: pointer; font-weight: 700; min-height: 44px; line-height: 1.2; }
+.g-palabra.ok { background: var(--ok-claro); border: 2px solid var(--ok); color: var(--tinta); font-weight: 900; }
+.g-palabra.arreglada { background: var(--ok-claro); border: 2px solid var(--ok); }
+
+/* completar */
+.g-reto { text-align: center; background: var(--papel); border: var(--borde) solid var(--tinta); border-radius: var(--radio); padding: 14px 12px; margin-bottom: 12px; }
+.g-reto .g-img { font-size: 3.4rem; line-height: 1.1; display: block; }
+.g-linea { font-size: 1.45rem; font-weight: 800; line-height: 2.1; }
+html[data-tema="y6"] .g-linea { font-size: 1.2rem; }
+.g-blanco { display: inline-block; min-width: 2.4em; border-bottom: 4px solid var(--tinta); margin: 0 3px; padding: 0 4px; color: var(--ok); }
+.g-blanco.ahora { border-bottom-color: var(--brillo); background: rgba(245,158,11,.15); border-radius: 6px 6px 0 0; }
+.g-blanco.lleno { background: var(--ok-claro); border-radius: 6px 6px 0 0; }
+
+/* ---------- ayuda y estados ---------- */
+.g-ayuda-fila { display: flex; justify-content: center; margin-top: 16px; }
+.g-pista { margin: 10px 0 0; padding: 10px 12px; border-radius: 14px; background: #FEF3C7; border: 2px solid #B45309; font-weight: 800; color: #1F2937; }
+.g-pista:empty { display: none; }
+.brilla { animation: g-brillo 1s ease-in-out 3; outline: 4px solid var(--brillo); outline-offset: 2px; }
+@keyframes g-brillo { 50% { outline-color: transparent; } }
+.sacude { animation: g-sacude .4s; }
+@keyframes g-sacude { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .sacude, .brilla, .g-mascota.salta, html[data-tema="y6"] .g-mascota .ala { animation: none; } }
+
+/* ---------- capa de logro ---------- */
+.g-capa { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+.g-logro { background: var(--papel); border: var(--borde) solid var(--tinta); border-radius: 24px; padding: 18px 20px; max-width: 420px; width: 100%; text-align: center; }
+.g-logro h3 { margin: 6px 0; font-size: 1.6rem; font-weight: 900; }
+.g-logro p { margin: 4px 0 14px; font-weight: 700; }
+.g-logro .g-mascota { width: 120px; }
+.g-logro .g-btn { width: 100%; margin-top: 8px; }
+
+/* ---------- pie ---------- */
+.site-foot { max-width: 760px; margin: 18px auto 0; padding: 12px 14px 28px; text-align: center; font-size: .8rem; color: var(--suave); }
+.site-foot p { margin: 2px 0; }
+.site-foot a { color: var(--acento); }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .g-mascota { width: 80px; }
+  .g-hola { margin: 0 0 6px; }
+}

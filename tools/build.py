@@ -471,6 +471,33 @@ def build_proto(kit, ui, brand, credits, carpeta, nombre, materia):
     return page
 
 
+GUIAS = "guias"
+LANG_RE = re.compile(r"^\s*//\s*lang:\s*([a-z]{2})\s*$", re.M)
+
+
+def guias():
+    """Cada guias/<nombre>.js es una guia de estudio (decision del 18 nov 2026):
+    vector plano, sin el mundo pixel art; se publica como guia-<nombre>.html."""
+    raiz = os.path.join(ROOT, GUIAS)
+    if not os.path.isdir(raiz):
+        return []
+    return sorted(f[:-3] for f in os.listdir(raiz) if f.endswith(".js"))
+
+
+def build_guia(credits, nombre):
+    """Una guia: guias/comun/guia.css (fuentes inline) + guias/comun/guia.js + guias/<nombre>.js."""
+    js = read(GUIAS, nombre + ".js")
+    m = TITULO_RE.search(js)
+    titulo = m.group(1) if m else nombre
+    lm = LANG_RE.search(js)
+    css = inline_fonts(read(GUIAS, "comun", "guia.css"))
+    page = head(html.escape(titulo), "Guía de estudio interactiva de SAMSAN.", css, "guia", lm.group(1) if lm else "en")
+    page += '<main id="guia" class="g-raiz"></main>\n' + foot(credits)
+    page += '<script>\n' + read(GUIAS, "comun", "guia.js") + '\n</script>\n'
+    page += '<script>\n' + js + '\n</script>\n</body>\n</html>\n'
+    return page
+
+
 # Guardarrailes sobre cada pagina escrita.
 ASSETS_RE = re.compile(r"""(src|href)\s*=\s*["'][^"']*assets/""")
 EXTERNAL_RE = re.compile(
@@ -537,6 +564,11 @@ def main():
         hechos.append(rel)
         if PUBLICAR_RE.search(read(PROTO, carpeta, nombre + ".js")):
             built.append((carpeta + "-" + nombre + ".html", write(carpeta + "-" + nombre + ".html", pagina)))
+    # Guias de estudio: van a la raiz y el humo las abre (boton #play).
+    for nombre in guias():
+        rel = "guia-" + nombre + ".html"
+        built.append((rel, write(rel, build_guia(credits, nombre))))
+        hechos.append(rel)
     write(LOCAL + "/prototipos.json", json.dumps(hechos, indent=1) + "\n")
 
     for rel, _ in built:
