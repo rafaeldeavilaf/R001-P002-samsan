@@ -94,6 +94,7 @@ Solo palabras y ubicarlas. Se prueban con `python3 tools/historias_juegos.py <gu
 | J15 | Como adulto, no quiero red ni puntajes | Sin pedidos de red y sin porcentajes ni puntaje |
 | J16 | Como niño, no quiero trabarme | Todas las etapas y el jefe se terminan sin errores de JavaScript |
 | J17 | Voz según la edad | Y2 lee cada palabra al aparecer. Y6 no lee sola |
+| J18 | Como niño, quiero estudiar el tema que quiera | Sin progreso, cualquier mundo (tocando su tarjeta), cualquier etapa y el jefe se abren desde el mapa. Ningún botón del mapa está deshabilitado |
 
 ### Resultado del 18 nov 2026
 
@@ -105,3 +106,5 @@ Solo palabras y ubicarlas. Se prueban con `python3 tools/historias_juegos.py <gu
 - **J10, trajes.** Al elegir un traje, la portada se dibujaba dos veces, una debajo de la otra. Ahora la portada se vuelve a armar desde cero.
 - **J16, voz y palabra rápida (encontrado por `verify_guias.js`).** En Y2, si el niño ubicaba la palabra antes de 120 ms, la lectura en voz alta lanzaba un error. Ahora la voz solo lee la palabra que sigue activa.
 - La v1 se repitió completa después de congelar su motor y sigue pasando sus historias.
+
+- **J18, temas libres (18 nov, tras la prueba de Rafael).** El mapa se veía bloqueado porque solo los círculos de etapa abrían algo y la tarjeta del mundo no respondía. Ahora toda la tarjeta abre el mundo en su siguiente etapa sin terminar, cada mundo muestra ▶ y la etapa siguiente late. Ningún mundo depende de otro.

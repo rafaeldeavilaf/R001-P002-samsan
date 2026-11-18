@@ -1063,14 +1063,20 @@
       cfg.mundos.forEach(function (m, wi) {
         var li = el('li', { class: 'g-mundo' });
         colorear(li, m);
-        var cab = el('div', { class: 'g-mundo__cab' });
+        /* Todos los mundos y etapas estan abiertos (decision del 18 nov 2026):
+           el niño estudia el tema que quiera. Toda la tarjeta abre el mundo en
+           su siguiente etapa sin terminar. */
+        var primera = 1; while (primera < etapas().length && st.etapas[idEtapa(wi, primera)]) primera++;
+        var cab = el('button', { class: 'g-mundo__cab g-mundo__abrir', 'aria-label': m.titulo + ' · ' + t('jugar') });
         cab.appendChild(cfg.tema === 'y6' ? el('span', { html: ICO.cubo(m.color, String(wi + 1)) }) : el('span', { class: 'g-letra', text: String(wi + 1), 'aria-hidden': 'true' }));
         cab.appendChild(el('span', { class: 'g-mision__txt', html: esc(m.titulo) + '<small>' + esc(m.zonas.map(function (z) { return z.t; }).join(' · ')) + '</small>' }));
+        cab.appendChild(el('span', { class: 'g-mundo__jugar', 'aria-hidden': 'true', text: '▶' }));
+        cab.addEventListener('click', function () { ir({ w: wi, e: primera }); });
         li.appendChild(cab);
         var fila = el('div', { class: 'g-etapas' });
         for (var e = 1; e <= etapas().length; e++) (function (e) {
-          var hecho = !!st.etapas[idEtapa(wi, e)];
-          var bt = el('button', { class: 'g-etapa' + (hecho ? ' g-etapa--hecha' : ''), 'aria-label': m.titulo + ' · ' + t('etapa') + ' ' + e + (hecho ? ' ✓' : ''),
+          var hecho = !!st.etapas[idEtapa(wi, e)], aqui = !hecho && e === primera;
+          var bt = el('button', { class: 'g-etapa' + (hecho ? ' g-etapa--hecha' : '') + (aqui ? ' g-etapa--aqui' : ''), 'aria-label': m.titulo + ' · ' + t('etapa') + ' ' + e + (hecho ? ' ✓' : ''),
             html: hecho ? ICO_GEMA : '<b>' + e + '</b>' });
           bt.addEventListener('click', function () { ir({ w: wi, e: e }); });
           fila.appendChild(bt);

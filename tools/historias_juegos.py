@@ -235,6 +235,21 @@ class PruebaJuego(H.Prueba):
             self.anotar('J15', not red and not puntajes, 'sin pedidos de red ni puntajes', {'red': red[:3], 'puntajes': puntajes})
             self.anotar('J16', not fallidas and not errores, 'todas las etapas y el jefe se terminan sin errores', {'fallidas': fallidas, 'errores': errores[:3]})
 
+            # J18 temas libres: sin progreso, cualquier mundo y etapa se abre desde el mapa
+            ctx = await self.b.new_context(**H.PERFILES['celular']); await ctx.add_init_script(H.VOZ % 'false'); await self.con_estado(ctx, {'vistos': todos_vistos})
+            ctx, pg = await self.pagina(ctx=ctx)
+            deshabilitados = await pg.locator('.g-mundo button:disabled').count()
+            await pg.locator('.g-mundo__abrir').last.click(); await pg.wait_for_selector('.g-ficha--grande')
+            abre_ultimo = ms[-1]['titulo'] in await pg.locator('.g-barra h1').inner_text()
+            await pg.go_back(); await pg.wait_for_selector('.g-mapa')
+            await pg.locator('.g-mundo').nth(len(ms) // 2).locator('.g-etapa').nth(2).click(); await pg.wait_for_selector('.g-ficha--grande')
+            etapa3 = 'Stage 3' in await pg.locator('.g-barra small').inner_text() or 'STAGE 3' in (await pg.locator('.g-barra small').inner_text()).upper()
+            await pg.go_back(); await pg.wait_for_selector('.g-mapa')
+            await pg.locator('.g-jefe-btn').click(); await pg.wait_for_selector('.g-ficha--grande')
+            jefe = await pg.locator('.g-zona-u').count() >= 2
+            self.anotar('J18', deshabilitados == 0 and abre_ultimo and etapa3 and jefe, 'sin progreso: el ultimo mundo, la etapa 3 de un mundo del medio y el jefe se abren', {'deshabilitados': deshabilitados, 'ultimo_mundo': abre_ultimo, 'etapa3': etapa3, 'jefe': jefe})
+            await ctx.close()
+
             # J17 voz segun la edad
             ctx = await self.b.new_context(**H.PERFILES['celular']); await ctx.add_init_script(H.VOZ % 'false'); await self.con_estado(ctx, {'vistos': todos_vistos})
             ctx, pg = await self.pagina(m0['id'] + '-2', ctx=ctx)

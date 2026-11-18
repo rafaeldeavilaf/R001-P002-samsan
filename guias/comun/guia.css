@@ -289,3 +289,12 @@ html[data-tema="y6"] .g-cuenta { color: #0B1120; }
 .g-consejo p mark, .g-logro p mark { background: var(--c2, var(--acento-claro)); color: inherit; padding: 0 3px; border-radius: 4px; font-weight: 900; box-shadow: inset 0 -3px 0 var(--c, var(--acento)); }
 .g-zona-u .g-cuenta { top: auto; bottom: 6px; }
 .g-zona-u .g-dentro { padding-bottom: 26px; }
+
+/* mapa abierto: toda la tarjeta del mundo se toca; la siguiente etapa se marca */
+.g-mundo__abrir { cursor: pointer; min-height: 52px; border-radius: 12px; }
+.g-mundo__jugar { width: 40px; height: 40px; border-radius: 50%; background: var(--c); color: #fff; border: var(--borde) solid var(--linea); display: inline-flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+html[data-tema="y6"] .g-mundo__jugar { border-radius: 10px; color: #0B1120; }
+.g-etapa--aqui { background: var(--c); color: #fff; animation: g-late 1.4s ease-in-out infinite; }
+html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
+@keyframes g-late { 50% { box-shadow: 0 0 0 6px var(--c2), 0 0 14px var(--c); } }
+@media (prefers-reduced-motion: reduce) { .g-etapa--aqui { animation: none; } }
