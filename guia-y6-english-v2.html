@@ -642,10 +642,12 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     });
     return mejor;
   }
-  function hablar(texto) {
+  /* op (opcional, modo aldea): { lento: palabra despacio como pista, cola: no corta lo que se esta diciendo } */
+  function hablar(texto, op) {
     if (!vozOn || !window.speechSynthesis || !texto) return;
+    op = op || {};
     try {
-      speechSynthesis.cancel();
+      if (!op.cola) speechSynthesis.cancel();
       var limpio = plano(texto).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '').replace(/_+/g, ' ').trim();
       if (!limpio) return;
       if (!voces.length) cargarVoces();
@@ -653,7 +655,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       if (!v) return;   /* sin voz local no habla: queda el texto (regla 2) */
       var u = new SpeechSynthesisUtterance(limpio);
       u.voice = v; u.lang = v.lang;
-      u.rate = cfg.velocidad || 0.9;
+      u.rate = op.lento ? 0.55 : (cfg.velocidad || 0.9);
       u.onstart = function () { Musica.bajar(true); };
       u.onend = u.onerror = function () { Musica.bajar(false); };
       speechSynthesis.speak(u);
@@ -720,7 +722,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
 
   /* ---------- navegacion con el boton Atras del telefono ---------- */
   function ir(estado, reemplazar) {
-    var h = cfg.modo === 'juego' ? J.hash(estado) : (estado.m === undefined ? '' : (cfg.misiones[estado.m].id + (estado.p ? '-' + estado.p : '')));
+    var h = cfg.modo === 'aldea' ? AL.hash(estado) : cfg.modo === 'juego' ? J.hash(estado) : (estado.m === undefined ? '' : (cfg.misiones[estado.m].id + (estado.p ? '-' + estado.p : '')));
     try { history[reemplazar ? 'replaceState' : 'pushState'](estado, '', '#' + h); } catch (e) { /* file:// sin historial */ }
     pintar(estado);
   }
@@ -765,7 +767,8 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { /* nada */ }
     raiz.innerHTML = '';
     var cap = document.querySelector('.g-capa'); if (cap) cap.remove();
-    if (cfg.modo === 'juego') J.pintar(estado);
+    if (cfg.modo === 'aldea') AL.pintar(estado);
+    else if (cfg.modo === 'juego') J.pintar(estado);
     else if (estado.m === undefined) portada();
     else mision(estado.m, estado.p || 0);
     try { window.scrollTo(0, 0); } catch (e) { /* nada */ }
@@ -1585,6 +1588,308 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     }
     return { cargar: cargar, pintar: pintar, hash: hash, desdeHash: desdeHash, gemas: gemas };
   })();
+  /* ============================================================
+     MODO ALDEA (Y2 English v3, «La aldea de Pip», 18 nov 2026)
+     Usa el kit visual de guias/comun/aldea.js (window.ALDEA) y los dibujos
+     de guias/comun/iconos.js (window.ICONOS); build.py los incluye cuando
+     la guia declara `// usa: aldea`.
+       Mapa en camino por la aldea, con Pip parado en su etapa. Todo abierto.
+       Etapa: 5 globos; 2, 3 y hasta 4 lugares (cfg.etapas). Pip llega con un
+       globo (dibujo grande y palabra) y el niño lo lleva a su lugar.
+       Demostracion de Pip la primera vez que se entra a un mundo (y con ?).
+       Una calcomania por etapa terminada, nunca por aciertos (regla 4); van
+       al album de la portada y liberan los trajes de Pip.
+     Datos: { modo: 'aldea', porEtapa, etapas: [2,3,4], pieles, mundos: [{ id,
+       titulo, escena, calcos: [3 dibujos], zonas: [{id, letrero, lugar,
+       variante, color, ej, ejp, voz}], palabras: [{p, ico, zona}] }] }
+     ============================================================ */
+  var AL = (function () {
+    var st = { etapas: {}, piel: null, vistos: {} };
+    var ICONOS = function (k) { return (window.ICONOS || {})[k] || ''; };
+    function K() { return window.ALDEA; }
+    function clave() { return 'samsan:aldea-' + cfg.id; }
+    function cargar() { try { var x = JSON.parse(localStorage.getItem(clave()) || '{}'); st.etapas = x.etapas || {}; st.piel = x.piel || null; st.vistos = x.vistos || {}; } catch (e) { /* nada */ } }
+    function guardar() { try { localStorage.setItem(clave(), JSON.stringify(st)); } catch (e) { /* nada */ } }
+    function etapas() { return cfg.etapas || [2, 3, 4]; }
+    function idEtapa(wi, e) { return cfg.mundos[wi].id + '-' + e; }
+    function calcos() { return Object.keys(st.etapas).length; }
+    function pieles() { return cfg.pieles || [{ id: 'base', nombre: 'Classic', gemas: 0 }]; }
+    function piel() { var ps = pieles(), id = st.piel; return ps.filter(function (p) { return p.id === id && calcos() >= p.gemas; })[0] || ps[0]; }
+    function siguiente() {
+      for (var wi = 0; wi < cfg.mundos.length; wi++) for (var e = 1; e <= etapas().length; e++) if (!st.etapas[idEtapa(wi, e)]) return { w: wi, e: e };
+      return { w: 0, e: 1 };
+    }
+    function hash(x) { return x.w === undefined ? '' : cfg.mundos[x.w].id + '-' + x.e; }
+    function desdeHash(h) {
+      var r = {};
+      cfg.mundos.forEach(function (m, wi) { var mm = new RegExp('^' + m.id + '-(\\d)$').exec(h); if (mm && +mm[1] >= 1 && +mm[1] <= etapas().length) r = { w: wi, e: +mm[1] }; });
+      return r;
+    }
+    function pintar(x) {
+      pielActual = piel();
+      raiz.classList.toggle('g-raiz--aldea', x.w !== undefined);
+      if (x.w !== undefined) etapa(x.w, x.e); else portada();
+    }
+    function pipVolando(chico) {
+      var s = vestir(K().pip(cfg.mascotaNombre || 'Pip'), pielActual);
+      return chico ? s.replace('class="al-pip"', 'class="al-pip al-pip--chico"') : s;
+    }
+
+    /* ---------- portada: Pip, Play, mapa en camino, album y trajes ---------- */
+    function portada() {
+      var s = el('section', { class: 'g-portada al-portada' });
+      s.appendChild(barra(cfg.titulo, cfg.subtitulo));
+      var sig = siguiente(), mSig = cfg.mundos[sig.w];
+      var hola = el('div', { class: 'al-hola' });
+      var pc = el('button', { class: 'al-pip-caja al-hola__pip', 'aria-label': cfg.mascotaNombre || 'Pip', html: pipVolando() });
+      pc.addEventListener('click', function () { hablar(t('aldea_hola')); K().celebrar(pc.querySelector('.al-pip')); });
+      hola.appendChild(pc);
+      var play = el('button', { id: 'play', class: 'g-btn g-btn--grande al-play', 'aria-label': t('jugar') + ' · ' + mSig.titulo + ' · ' + t('etapa') + ' ' + sig.e,
+        html: '<span class="al-play__ico">' + K().icono(ICONOS(mSig.calcos[sig.e - 1]), 'al-ico') + '</span>▶ ' + esc(t('jugar')) });
+      play.addEventListener('click', function () { ir(sig); });
+      hola.appendChild(play);
+      s.appendChild(hola);
+
+      /* mapa: un camino que zigzaguea por la aldea, un alto por mundo */
+      s.appendChild(el('h2', { class: 'g-seccion', text: t('mapa') }));
+      var mapa = el('div', { class: 'al-mapa' });
+      var n = cfg.mundos.length, alto = 150, d = '';
+      for (var i = 0; i < n; i++) {
+        var x = i % 2 ? 72 : 28, y = i * alto + alto / 2;
+        if (!i) d = 'M' + x + ' ' + y; else { var x0 = (i - 1) % 2 ? 72 : 28, y0 = (i - 1) * alto + alto / 2; d += ' C' + x0 + ' ' + (y0 + alto * 0.55) + ' ' + x + ' ' + (y - alto * 0.55) + ' ' + x + ' ' + y; }
+      }
+      mapa.innerHTML = '<svg class="al-mapa__camino" viewBox="0 0 100 ' + n * alto + '" preserveAspectRatio="none" aria-hidden="true">' +
+        '<path d="' + d + '" fill="none" stroke="#D6B07A" stroke-width="26" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
+        '<path d="' + d + '" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-dasharray="2 14" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".85"/></svg>';
+      mapa.style.setProperty('--filas', String(n));
+      cfg.mundos.forEach(function (m, wi) {
+        var alto2 = el('div', { class: 'al-alto' + (wi % 2 ? ' al-alto--d' : '') });
+        var primera = 1; while (primera < etapas().length && st.etapas[idEtapa(wi, primera)]) primera++;
+        var z0 = m.zonas[0];
+        var tile = el('button', { class: 'al-alto__mundo', 'aria-label': m.titulo + ' · ' + t('jugar'),
+          html: '<span class="al-alto__ico">' + K().icono(ICONOS(z0.ej), 'al-ico') + '</span><span class="al-alto__nombre">' + esc(m.titulo) + '</span>' });
+        tile.style.setProperty('--c', z0.color);
+        tile.addEventListener('click', function () { ir({ w: wi, e: primera }); });
+        alto2.appendChild(tile);
+        var fila = el('div', { class: 'al-alto__etapas' });
+        for (var e = 1; e <= etapas().length; e++) (function (e) {
+          var hecho = !!st.etapas[idEtapa(wi, e)], aqui = sig.w === wi && sig.e === e;
+          var bt = el('button', { class: 'al-parada' + (hecho ? ' al-parada--hecha' : '') + (aqui ? ' al-parada--aqui' : ''), 'aria-label': m.titulo + ' · ' + t('etapa') + ' ' + e + (hecho ? ' ✓' : ''),
+            html: hecho ? K().icono(ICONOS(m.calcos[e - 1]), 'al-ico') : '<b>' + e + '</b>' });
+          bt.addEventListener('click', function () { ir({ w: wi, e: e }); });
+          if (aqui) bt.appendChild(el('span', { class: 'al-parada__pip', 'aria-hidden': 'true', html: pipVolando(true) }));
+          fila.appendChild(bt);
+        })(e);
+        alto2.appendChild(fila);
+        mapa.appendChild(alto2);
+      });
+      s.appendChild(mapa);
+
+      /* album de calcomanias: una por etapa; las que faltan se ven en gris */
+      s.appendChild(el('h2', { class: 'g-seccion', text: t('album') + ' · ' + calcos() + ' / ' + cfg.mundos.length * etapas().length }));
+      var album = el('div', { class: 'al-album', role: 'list' });
+      cfg.mundos.forEach(function (m, wi) {
+        m.calcos.forEach(function (c, ci) {
+          var tiene = !!st.etapas[idEtapa(wi, ci + 1)];
+          album.appendChild(el('span', { class: 'al-calco' + (tiene ? '' : ' al-calco--falta'), role: 'listitem', 'aria-label': m.titulo + ' · ' + (ci + 1) + (tiene ? ' ✓' : ''), html: K().icono(ICONOS(c), 'al-ico') }));
+        });
+      });
+      s.appendChild(album);
+
+      /* trajes de Pip, que se liberan con calcomanias */
+      s.appendChild(el('h2', { class: 'g-seccion', text: t('trajes') }));
+      var tr = el('div', { class: 'g-trajes' });
+      pieles().forEach(function (p) {
+        var libre = calcos() >= p.gemas, puesto = piel().id === p.id;
+        var bt = el('button', { class: 'g-traje' + (puesto ? ' g-traje--puesto' : ''), 'aria-pressed': String(puesto), 'aria-label': p.nombre + (libre ? '' : ' · ' + p.gemas + ' ' + t('calcos')), disabled: libre ? null : 'disabled',
+          html: mascota(true, p) + '<span>' + esc(p.nombre) + '</span>' + (libre ? '' : '<small>' + ICO_CANDADO_A + p.gemas + '</small>') });
+        if (libre) bt.addEventListener('click', function () { st.piel = p.id; guardar(); sonido('toc'); ir({}, true); });
+        tr.appendChild(bt);
+      });
+      s.appendChild(tr);
+      if (Object.keys(st.etapas).length) {
+        var pie = el('div', { class: 'g-pie-portada' });
+        pie.appendChild(el('button', { text: t('reiniciar'), onclick: function () { if (window.confirm(t('confirmar'))) { st = { etapas: {}, piel: null, vistos: {} }; guardar(); ir({}, true); } } }));
+        s.appendChild(pie);
+      }
+      raiz.appendChild(s);
+    }
+    var ICO_CANDADO_A = '<svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><rect x="5" y="10" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 10 V7 A4 4 0 0 1 16 7 V10" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>';
+
+    /* 5 palabras repartidas entre las zonas de la etapa, al menos una por zona */
+    function tanda(m, zonas) {
+      var n = cfg.porEtapa || 5, porZona = Math.floor(n / zonas.length), sobra = n - porZona * zonas.length, out = [];
+      mezclar(zonas).forEach(function (z, i) {
+        out = out.concat(mezclar(m.palabras.filter(function (p) { return p.zona === z.id; })).slice(0, porZona + (i < sobra ? 1 : 0)));
+      });
+      return mezclar(out);
+    }
+
+    /* ---------- etapa ---------- */
+    function etapa(wi, e) {
+      var A = K(), m = cfg.mundos[wi];
+      var elegidas = mezclar(m.zonas).slice(0, Math.min(etapas()[e - 1] || 2, m.zonas.length));
+      var zonas = m.zonas.filter(function (z) { return elegidas.indexOf(z) >= 0; });
+      var cola = tanda(m, zonas), N = cola.length;
+      var p = el('section', { class: 'al-pantalla g-etapa-pant' });
+      var bar = el('div', { class: 'al-barra' });
+      bar.appendChild(el('button', { class: 'g-icono', 'aria-label': t('atras'), html: ICO.atras, onclick: function () { ir({}); } }));
+      var est = A.estrellas(N); bar.appendChild(est);
+      var bDemo = el('button', { class: 'g-icono', 'aria-label': t('consejo'), html: '<b aria-hidden="true">?</b>' });
+      var bAyuda = el('button', { class: 'g-icono al-bombilla', 'aria-label': t('ayuda'), html: ICO.bombilla });
+      bar.appendChild(bDemo); bar.appendChild(bAyuda);
+      p.appendChild(bar);
+      var esc2 = A.escena(m.escena); esc2.nodo.setAttribute('data-n', String(zonas.length));
+      esc2.nodo.setAttribute('data-mundo', m.id);
+      var porId = {};
+      zonas.forEach(function (z) {
+        var l = A.lugar({ id: z.id, tipo: z.lugar, variante: z.variante, color: z.color, letrero: z.letrero, ejemplo: ICONOS(z.ej), etiqueta: z.letrero });
+        l.addEventListener('click', function () { soltar(l); });
+        porId[z.id] = { zona: z, nodo: l };
+        esc2.lugares.appendChild(l);
+      });
+      var vuelo = el('div', { class: 'al-vuelo' });
+      var pipCaja = el('div', { class: 'al-pip-caja', html: pipVolando() });
+      vuelo.appendChild(pipCaja);
+      esc2.cielo.appendChild(vuelo);
+      p.appendChild(esc2.nodo);
+      var estado = el('p', { class: 'al-oculto', role: 'status' });
+      p.appendChild(estado);
+      raiz.appendChild(p);
+
+      var activo = null, globo = null, peldano = 0, ocupado = false, enDemo = false, timers = [];
+      function despues(f, ms) { timers.push(setTimeout(function () { if (p.isConnected) f(); }, ms)); }
+      pipCaja.addEventListener('click', function () { if (activo) hablar(activo.p); });
+
+      function nuevoGlobo(texto, ico, i) {
+        var g = A.globo({ palabra: texto, icono: ICONOS(ico), indice: i });
+        vuelo.appendChild(g); A.entrar(vuelo);
+        return g;
+      }
+      function sacar() {
+        if (globo) { globo.remove(); globo = null; }
+        if (!cola.length) return despues(fin, 350);
+        activo = cola.shift(); activo._err = 0; peldano = 0; ocupado = false;
+        globo = nuevoGlobo(activo.p, activo.ico, N - cola.length);
+        A.arrastre(globo, { alSoltar: function (l) { soltar(l); }, alTocar: function () { if (activo) hablar(activo.p); } });
+        var este = activo;
+        if (cfg.leerFichas) despues(function () { if (activo === este) hablar(este.p); }, 650);
+      }
+      function volverGlobo() {
+        if (!globo) return;
+        globo.style.transition = 'transform .3s ease'; globo.style.transform = '';
+        var g = globo; setTimeout(function () { g.style.transition = ''; }, 320);
+      }
+      function acertar(l, ico, alFin) {
+        var g = globo; globo = null; g.disabled = true;
+        A.volar(g, l, function () {
+          g.remove(); sonido('toc');
+          A.abrir(l, ICONOS(ico), alFin);
+          despues(function () { sonido('ok'); racha++; A.celebrar(pipCaja.querySelector('.al-pip')); }, 260);
+        });
+      }
+      function soltar(l) {
+        if (!activo || ocupado || enDemo) return;
+        var id = l.getAttribute('data-lugar'), z = porId[activo.zona];
+        if (id === activo.zona) {
+          ocupado = true;
+          var a = activo; activo = null;
+          estado.textContent = a.p.replace(/\*/g, '') + ' ✓';
+          acertar(l, a.ico, function () { sacar(); });
+          despues(function () { A.llenarEstrella(est); }, 300);
+        } else {
+          activo._err++; racha = 0; sonido('mal'); A.temblar(l); volverGlobo();
+          if (activo._err === 1) hablar(activo.p, { lento: true });
+          else { hablar(activo.p + '. ' + z.zona.voz + '.'); A.brillar(z.nodo); }
+        }
+      }
+      bAyuda.addEventListener('click', function () {
+        if (!activo || ocupado || enDemo) return;
+        var z = porId[activo.zona];
+        peldano++;
+        if (peldano === 1) hablar(activo.p, { lento: true });
+        else if (peldano === 2) { A.brillar(z.nodo); hablar(z.zona.voz); }
+        else soltar(z.nodo);
+      });
+
+      /* demostracion de Pip: lleva el ejemplo de cada lugar a su sitio (unos 10 s) */
+      function demo(alTerminar) {
+        enDemo = true; p.classList.add('al-demo');
+        var guardado = globo; if (guardado) guardado.style.display = 'none';
+        var tapa = el('button', { class: 'al-demo__tapa', 'aria-label': t('saltar') });
+        esc2.nodo.appendChild(tapa);
+        var lista = zonas.slice(0, Math.min(zonas.length, 2)), k = 0, cerrado = false;
+        function cerrar() {
+          if (cerrado) return; cerrado = true;
+          tapa.remove(); p.classList.remove('al-demo'); enDemo = false;
+          vuelo.querySelectorAll('.al-globo--demo').forEach(function (g) { g.remove(); });
+          if (guardado) guardado.style.display = '';
+          hablar(t('aldea_turno'));
+          alTerminar && alTerminar();
+        }
+        tapa.addEventListener('click', function () { try { speechSynthesis.cancel(); } catch (er) { /* nada */ } cerrar(); });
+        hablar(t('aldea_mira'));
+        function uno() {
+          if (cerrado) return;
+          if (k >= lista.length) return despues(cerrar, 500);
+          var z = lista[k++];
+          var g = nuevoGlobo(z.ejp, z.ej, k); g.classList.add('al-globo--demo'); g.disabled = true;
+          despues(function () { if (!cerrado) hablar(z.ejp, { cola: true }); }, 700);
+          despues(function () {
+            if (cerrado) return;
+            A.volar(g, porId[z.id].nodo, function () {
+              g.remove(); sonido('toc');
+              A.abrir(porId[z.id].nodo, ICONOS(z.ej));
+              hablar(z.ejp + '. ' + z.voz + '.', { cola: true });
+              despues(uno, 3200);
+            });
+          }, 2000);
+        }
+        despues(uno, 900);
+      }
+      bDemo.addEventListener('click', function () { if (!ocupado && !enDemo) demo(function () { if (activo) hablar(activo.p); }); });
+
+      function fin() {
+        var id = idEtapa(wi, e), nueva = !st.etapas[id], antes = calcos();
+        st.etapas[id] = 1; guardar();
+        var desbloqueo = pieles().filter(function (pp) { return pp.gemas > antes && pp.gemas <= calcos(); })[0];
+        sonido(desbloqueo ? 'nivel' : 'fin');
+        var capa = el('div', { class: 'g-capa', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('etapa_ok') });
+        var box = el('div', { class: 'g-logro al-fin', html: '<div class="al-fin__pip">' + pipVolando() + '</div>' });
+        var e2 = A.estrellas(N); for (var i = 0; i < N; i++) A.llenarEstrella(e2);
+        box.appendChild(e2);
+        box.appendChild(el('div', { class: 'al-calco al-calco--nueva', 'aria-label': t('calco_nueva'), html: A.icono(ICONOS(m.calcos[e - 1]), 'al-ico') }));
+        if (desbloqueo) box.appendChild(el('p', { class: 'g-insignia', html: '<small>' + esc(t('nuevo_traje')) + '</small>' + mascota(true, desbloqueo) + esc(desbloqueo.nombre) }));
+        var sigE = e < etapas().length ? { w: wi, e: e + 1 } : siguiente();
+        var fila = el('div', { class: 'al-fin__botones' });
+        var bMapa = el('button', { class: 'g-btn g-btn--suave', 'aria-label': t('mapa'), html: ICO_MAPA });
+        bMapa.addEventListener('click', function () { capa.remove(); ir({}); });
+        var bOtra = el('button', { class: 'g-btn g-btn--suave', 'aria-label': t('otra'), html: ICO.otra });
+        bOtra.addEventListener('click', function () { capa.remove(); ir({ w: wi, e: e }, true); });
+        var bSig = el('button', { id: 'siguiente', class: 'g-btn', 'aria-label': t('siguiente_etapa'), html: '▶' });
+        bSig.addEventListener('click', function () { capa.remove(); ir(sigE); });
+        fila.appendChild(bMapa); fila.appendChild(bOtra); fila.appendChild(bSig);
+        box.appendChild(fila);
+        capa.appendChild(box); document.body.appendChild(capa);
+        A.celebrar(box.querySelector('.al-pip'));
+        try { var r = box.getBoundingClientRect(); A.confeti(r.left + r.width / 2, r.top + 60, 36); } catch (er) { /* nada */ }
+        hablar(nueva ? t('aldea_calco') : t('etapa_ok'));
+        setTimeout(function () { bSig.focus(); }, 50);
+      }
+
+      if (!st.vistos[m.id]) { st.vistos[m.id] = 1; guardar(); demo(sacar); }
+      else sacar();
+      G._aldea_etapa = { zonas: zonas, activo: function () { return activo; }, enDemo: function () { return enDemo; } };   /* solo para pruebas */
+    }
+    var ICO_MAPA = '<svg viewBox="0 0 24 24" aria-hidden="true" width="28" height="28"><path d="M3 6 L9 4 L15 6 L21 4 V18 L15 20 L9 18 L3 20 Z M9 4 V18 M15 6 V20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
+    return { cargar: cargar, pintar: pintar, hash: hash, desdeHash: desdeHash, calcos: calcos, estado: function () { return st; } };
+  })();
+  TEXTOS.en.album = 'My stickers'; TEXTOS.en.calcos = 'stickers'; TEXTOS.en.aldea_hola = "Hi! I'm Pip. Help me take everything to its place in the village!";
+  TEXTOS.en.aldea_mira = 'Watch me!'; TEXTOS.en.aldea_turno = 'Your turn!'; TEXTOS.en.aldea_calco = 'Well done! You got a new sticker!';
+  TEXTOS.en.calco_nueva = 'New sticker'; TEXTOS.en.saltar = 'Skip';
+  TEXTOS.es.album = 'Mis calcomanías'; TEXTOS.es.calcos = 'calcomanías'; TEXTOS.es.aldea_hola = '¡Hola! Soy Pip. ¡Ayúdame a llevar cada cosa a su lugar en la aldea!';
+  TEXTOS.es.aldea_mira = '¡Mira cómo lo hago!'; TEXTOS.es.aldea_turno = '¡Ahora tú!'; TEXTOS.es.aldea_calco = '¡Muy bien! ¡Ganaste una calcomanía!';
+  TEXTOS.es.calco_nueva = 'Calcomanía nueva'; TEXTOS.es.saltar = 'Saltar';
   TEXTOS.en.jugar = 'Play'; TEXTOS.en.mapa = 'World map'; TEXTOS.en.etapa = 'Stage'; TEXTOS.en.gemas = 'gems'; TEXTOS.en.gema = 'gem';
   TEXTOS.en.etapa_ok = 'Stage clear!'; TEXTOS.en.jefe_ok = 'Boss defeated!'; TEXTOS.en.trajes = 'Outfits'; TEXTOS.en.nuevo_traje = 'New outfit unlocked';
   TEXTOS.en.oleada = 'Wave'; TEXTOS.en.consejo = 'Tip'; TEXTOS.en.listo = "I'm ready"; TEXTOS.en.siguiente_etapa = 'Next stage'; TEXTOS.en.vencido = 'DONE';
@@ -1600,7 +1905,8 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     document.documentElement.setAttribute('data-tema', cfg.tema || 'y2');
     raiz = document.getElementById('guia');
     try { vozOn = localStorage.getItem('samsan:guia-voz') !== '0'; musicaOn = localStorage.getItem('samsan:guia-musica-' + cfg.id) !== '0'; } catch (e) { vozOn = true; musicaOn = true; }
-    if (cfg.modo === 'juego') { cfg.misiones = []; J.cargar(); } else armarJefe();
+    if (cfg.modo === 'aldea') { cfg.misiones = []; AL.cargar(); }
+    else if (cfg.modo === 'juego') { cfg.misiones = []; J.cargar(); } else armarJefe();
     cargar(); cargarVoces();
     if (window.speechSynthesis && 'onvoiceschanged' in speechSynthesis) speechSynthesis.onvoiceschanged = cargarVoces;
     /* la musica necesita un primer toque (regla de los navegadores) */
@@ -1609,8 +1915,8 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     });
     /* entrada directa por #id-mision o #id-mision-N (modo juego: #mundo-etapa o #jefe) */
     var h = (location.hash || '').slice(1), estado = {};
-    if (cfg.modo === 'juego') {
-      estado = J.desdeHash(h);
+    if (cfg.modo === 'juego' || cfg.modo === 'aldea') {
+      estado = (cfg.modo === 'aldea' ? AL : J).desdeHash(h);
       if (estado.w !== undefined || estado.jefe) { try { history.replaceState({}, '', location.pathname); } catch (e) { /* nada */ } ir(estado); }
       else ir({}, true);
       return;
@@ -1626,6 +1932,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
   G._TIPOS = TIPOS;
   G._musica = Musica;
   G._juego = J;   /* solo para pruebas: estado() y medir(estilo, segundos) */
+  G._aldea = AL;  /* solo para pruebas */
 })();
 
 </script>
