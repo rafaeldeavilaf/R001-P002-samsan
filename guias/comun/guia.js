@@ -406,7 +406,7 @@
     try { history[reemplazar ? 'replaceState' : 'pushState'](estado, '', '#' + h); } catch (e) { /* file:// sin historial */ }
     pintar(estado);
   }
-  window.addEventListener('popstate', function (ev) { if (cfg) pintar(ev.state || {}); });
+  window.addEventListener('popstate', function (ev) { if (cfg) pintar(ev.state || (cfg.modo === 'aldea' ? AL.desdeHash(location.hash.slice(1)) : {})); });
 
   function barra(titulo, sub, alVolver) {
     var b = el('header', { class: 'g-barra' });
@@ -1459,13 +1459,18 @@
       var fonetica = /\*/.test(zonas[0].ejp);
       function plano2(x) { return String(x).replace(/\*/g, ''); }
       /* el nombre del lugar con su ejemplo */
-      function decirLugar(z) { return fonetica ? plano2(z.ejp) + '. ' + z.voz + '.' : (plano2(z.ejp) === z.letrero ? z.letrero + '.' : z.letrero + ' ' + plano2(z.ejp) + '.'); }
+      var preguntas = /\?$/.test(zonas[0].letrero);
+      function decirLugar(z) {
+        if (fonetica) return plano2(z.ejp) + '. ' + z.voz + '.';
+        if (preguntas) return z.letrero + ' ' + plano2(z.ejp) + '.';
+        return z.letrero + '! ' + (plano2(z.ejp) === z.letrero ? '' : plano2(z.ejp) + '. ') + z.voz + '.';
+      }
       /* pista por ejemplo y no por regla: el ejemplo del lugar y la palabra juntos */
       function pistaPorEjemplo(z, palabra) {
         var w = plano2(palabra), e = plano2(z.ejp);
         if (fonetica) return e + '. ' + w + '. ' + z.voz + '.';
-        if (e === z.letrero) return w + '. ' + z.voz + '.';
-        return z.letrero + ' ' + e + '. ' + z.letrero + ' ' + w + '.';
+        if (preguntas) return z.letrero + ' ' + e + '. ' + z.letrero + ' ' + w + '.';
+        return (e === z.letrero ? '' : e + '. ') + w + '. ' + z.voz + '.';
       }
       function despues(f, ms) { timers.push(setTimeout(function () { if (p.isConnected) f(); }, ms)); }
       pipCaja.addEventListener('click', function () { if (activo) hablar(activo.p); });
@@ -1484,8 +1489,9 @@
         globo = nuevoGlobo(activo.p, activo.ico, N - cola.length);
         A.arrastre(globo, { alSoltar: function (l) { soltar(l); }, alTocar: function () { if (activo) hablar(activo.p); } });
         var este = activo;
-        var enCola = trasDemo; trasDemo = false;
-        if (cfg.leerFichas) despues(function () { if (activo === este) hablar(este.p, { cola: enCola }); }, 650);
+        trasDemo = false;
+        /* en cola: no corta el animo del acierto anterior ni «Your turn!» */
+        if (cfg.leerFichas) despues(function () { if (activo === este) hablar(este.p, { cola: true }); }, 650);
       }
       function volverGlobo() {
         if (!globo) return;
@@ -1544,7 +1550,7 @@
           alTerminar && alTerminar();
         }
         saltar.addEventListener('click', function () { try { speechSynthesis.cancel(); } catch (er) { /* nada */ } cerrar(); });
-        hablar(t('aldea_mira'));
+        hablar(m.titulo + '! ' + t('aldea_mira'));
         function uno() {
           if (cerrado) return;
           if (k >= lista.length) return despues(cerrar, 500);
@@ -1556,13 +1562,14 @@
             if (cerrado) return;
             A.volar(g, porId[z.id].nodo, function () {
               g.remove();
-              if (cerrado) return;   /* saltaron la demostracion mientras el globo volaba */
+              if (cerrado) return;
+              /* (la demostracion vuela despacio para que se vea el arrastre) */   /* saltaron la demostracion mientras el globo volaba */
               sonido('toc');
               A.abrir(porId[z.id].nodo, ICONOS(z.ej));
               hablar(z.ejp + '. ' + z.voz + '.', { cola: true });
               despues(uno, 2600);
-            });
-          }, 1500);
+            }, { lento: true });
+          }, 1300);
         }
         despues(uno, 900);
       }
@@ -1582,7 +1589,7 @@
           /* el traje nuevo se pone solo; se cambia en la portada */
           st.piel = desbloqueo.id; guardar(); pielActual = desbloqueo;
           box.querySelector('.al-fin__pip').innerHTML = pipVolando();
-          box.appendChild(el('p', { class: 'g-insignia al-insignia', html: '<small>' + esc(t('nuevo_traje')) + '</small>' + esc(desbloqueo.nombre) }));
+          box.appendChild(el('p', { class: 'g-insignia al-insignia', html: '<small>' + esc(t('nuevo_traje')) + '</small>' + pipVolando(true) + esc(desbloqueo.nombre) }));
         }
         var sigE = e < etapas().length ? { w: wi, e: e + 1 } : siguiente();
         var fila = el('div', { class: 'al-fin__botones' });
@@ -1597,7 +1604,7 @@
         capa.appendChild(box); document.body.appendChild(capa);
         A.celebrar(box.querySelector('.al-pip'));
         try { var r = box.getBoundingClientRect(); A.confeti(r.left + r.width / 2, r.top + 60, 36); } catch (er) { /* nada */ }
-        hablar(nueva ? t('aldea_calco') : t('etapa_ok'));
+        hablar(nueva ? t('aldea_calco') : t('etapa_ok'), { cola: true });
         if (desbloqueo) hablar(t('aldea_traje'), { cola: true });
         setTimeout(function () { bSig.focus(); }, 50);
       }

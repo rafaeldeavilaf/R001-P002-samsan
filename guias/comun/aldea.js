@@ -156,7 +156,7 @@
         '<path d="M60 126 L28 118 M60 126 L92 132 M60 126 L40 140" stroke="#15803D" stroke-width="2" stroke-linecap="round"/>' +
         '<circle cx="22" cy="122" r="12" fill="#FFFFFF" stroke="' + K + '" stroke-width="2.4"/>' + anidar(ej, 13, 113, 18) +
         '<g class="al-ventana" data-x="80" data-y="104" data-l="24"></g>' +
-        asomar(t.c, 'rana', 42, 64, 36, 56, 'M30 30 H90 V122 H30 Z') +
+        asomar(t.c, 'gente', 42, 64, 36, 56, 'M30 30 H90 V122 H30 Z') +
         '<g class="al-puerta al-puerta--flor">' +
         '<path d="M60 120 C40 116 36 92 44 76 C52 88 56 100 60 120 Z" fill="' + t.medio + '" stroke="' + K + '" stroke-width="2.6" stroke-linejoin="round"/>' +
         '<path d="M60 120 C80 116 84 92 76 76 C68 88 64 100 60 120 Z" fill="' + t.medio + '" stroke="' + K + '" stroke-width="2.6" stroke-linejoin="round"/>' +
@@ -279,6 +279,7 @@
     var top = op.variante in VAR ? VAR[op.variante] : (TOPE[op.tipo] || 0);
     var largo = (String(op.letrero || '').replace(/\*/g, '').length || 1) + (op.ejemplo ? 1.3 : 0);
     b.style.setProperty('--letrero-k', Math.min(0.25, 0.95 / largo).toFixed(3));
+    b.style.setProperty('--letrero-k2', Math.min(0.25, 0.92 / (String(op.letrero || '').replace(/\*/g, '').length || 1)).toFixed(3));
     b.innerHTML = (op.letrero ? '<span class="al-letrero" aria-hidden="true">' + (op.ejemplo ? A.icono(op.ejemplo, 'al-ico al-letrero__ico') : '') + '<span>' + marcas(op.letrero) + '</span></span>' : '') +
       '<svg class="al-dibujo-lugar" viewBox="0 ' + top + ' 120 ' + (150 - top) + '" aria-hidden="true">' + dib(t, op.ejemplo, op.variante) + '</svg>';
     return b;
@@ -419,12 +420,23 @@
   A.entrar = function (nodo) { reiniciarClase(nodo, 'al-entra'); setTimeout(function () { nodo.classList.remove('al-entra'); }, 900); };
 
   /* El globo vuela a la puerta del lugar y se encoge; luego se quita. */
-  A.volar = function (globo, lugar, alLlegar) {
+  /* op.lento (demostracion): viaja despacio a tamaño casi normal, como arrastrado, y se encoge al llegar */
+  A.volar = function (globo, lugar, alLlegar, op) {
     var g = centro(globo), d = centro(lugar.querySelector('.al-puerta') || lugar);
-    var dx = d.x - g.x, dy = d.y - g.y;
+    var dx = d.x - g.x, dy = d.y - g.y, base = globo.style.transform || '';
     globo.style.animation = 'none';
+    if (op && op.lento && !MENOS_MOV) {
+      globo.style.transition = 'transform 1.25s cubic-bezier(.45,.05,.55,.95)';
+      globo.style.transform = base + ' translate(' + dx + 'px,' + (dy - g.r.height * 0.25) + 'px) scale(.75)';
+      setTimeout(function () {
+        globo.style.transition = 'transform .28s ease-in, opacity .28s';
+        globo.style.transform = base + ' translate(' + dx + 'px,' + dy + 'px) scale(.2)'; globo.style.opacity = '0';
+      }, 1250);
+      setTimeout(function () { alLlegar && alLlegar(); }, 1530);
+      return;
+    }
     globo.style.transition = MENOS_MOV ? 'opacity .2s' : 'transform .42s cubic-bezier(.4,.1,.6,1), opacity .42s';
-    globo.style.transform = (globo.style.transform || '') + ' translate(' + dx + 'px,' + dy + 'px) scale(.2)';
+    globo.style.transform = base + ' translate(' + dx + 'px,' + dy + 'px) scale(.2)';
     globo.style.opacity = '0';
     setTimeout(function () { alLlegar && alLlegar(); }, MENOS_MOV ? 200 : 420);
   };

@@ -65,14 +65,14 @@ MUNDOS = [
         "zonas": [
             {"id": "who", "letrero": "Who?", "lugar": "puesto", "color": "#16A34A", "ej": "grandma", "ejp": "my grandma", "voz": "a person"},
             {"id": "what", "letrero": "What?", "lugar": "puesto", "color": "#2563EB", "ej": "banana", "ejp": "a banana", "voz": "a thing"},
-            {"id": "where", "letrero": "Where?", "lugar": "puesto", "color": "#DC2626", "ej": "beach", "ejp": "at the beach", "voz": "a place"},
+            {"id": "where", "letrero": "Where?", "lugar": "puesto", "color": "#DC2626", "ej": "home", "ejp": "at home", "voz": "a place"},
             {"id": "when", "letrero": "When?", "lugar": "puesto", "color": "#9333EA", "ej": "calendar", "ejp": "on Monday", "voz": "a time"},
             {"id": "why", "letrero": "Why?", "lugar": "puesto", "color": "#B45309", "ej": "raining", "ejp": "because it is raining", "voz": "because"},
         ],
         "palabras": [
             ("a firefighter", "firefighter", "who"), ("the baby", "baby", "who"), ("a doctor", "doctor", "who"), ("my teacher", "teacher", "who"), ("a farmer", "farmer", "who"),
             ("a ball", "ball", "what"), ("a sandwich", "sandwich", "what"), ("a car", "car", "what"), ("a book", "book", "what"), ("an apple", "apple", "what"),
-            ("at the park", "slide", "where"), ("at school", "school", "where"), ("at home", "home", "where"), ("at the hospital", "hospital", "where"),
+            ("at the park", "slide", "where"), ("at school", "school", "where"), ("at the beach", "beach", "where"), ("at the hospital", "hospital", "where"),
             ("at night", "night", "when"), ("in the morning", "morning", "when"), ("on my birthday", "birthday", "when"), ("in the evening", "evening", "when"),
             ("because it is hot", "hot", "why"), ("because I am tired", "tired", "why"), ("because I am happy", "happy", "why"), ("because it is cold", "cold", "why"),
         ],

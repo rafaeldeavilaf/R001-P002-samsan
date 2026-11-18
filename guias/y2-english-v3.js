@@ -430,8 +430,8 @@ GUIA.iniciar({
      "letrero": "Where?",
      "lugar": "puesto",
      "color": "#DC2626",
-     "ej": "beach",
-     "ejp": "at the beach",
+     "ej": "home",
+     "ejp": "at home",
      "voz": "a place"
     },
     {
@@ -515,8 +515,8 @@ GUIA.iniciar({
      "zona": "where"
     },
     {
-     "p": "at home",
-     "ico": "home",
+     "p": "at the beach",
+     "ico": "beach",
      "zona": "where"
     },
     {
