@@ -288,7 +288,7 @@ async function jugarAldea(nombre, cfg) {
   /* la primera entrada a un mundo abre la demostracion de Pip y despues deja jugar */
   s = await abrirAldea(file, cfg.mundos[0].id + '-1', null); d = s.d; et = s.w.GUIA._aldea_etapa;
   check(nombre + ': primera entrada abre la demostracion', et.enDemo() && !!d.querySelector('.al-demo__tapa'));
-  d.querySelector('.al-demo__tapa').click(); await espera(50);
+  d.querySelector('.al-demo__saltar').click(); await espera(50);
   check(nombre + ': al saltar la demostracion sale el primer globo', !et.enDemo() && !!et.activo());
   s.w.close();
 }

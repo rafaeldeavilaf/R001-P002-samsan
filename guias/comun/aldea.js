@@ -277,9 +277,9 @@
     var TOPE = { casa: 8, hoja: 56, puesto: 10, arbol: 6, agua: 58, flores: 18, gallinero: 24, edificio: 26 };
     var VAR = { colegio: -10, hospital: 6, panaderia: 26, parque: 28 };
     var top = op.variante in VAR ? VAR[op.variante] : (TOPE[op.tipo] || 0);
-    var largo = String(op.letrero || '').replace(/\*/g, '').length || 1;
+    var largo = (String(op.letrero || '').replace(/\*/g, '').length || 1) + (op.ejemplo ? 1.3 : 0);
     b.style.setProperty('--letrero-k', Math.min(0.25, 0.95 / largo).toFixed(3));
-    b.innerHTML = (op.letrero ? '<span class="al-letrero" aria-hidden="true">' + marcas(op.letrero) + '</span>' : '') +
+    b.innerHTML = (op.letrero ? '<span class="al-letrero" aria-hidden="true">' + (op.ejemplo ? A.icono(op.ejemplo, 'al-ico al-letrero__ico') : '') + '<span>' + marcas(op.letrero) + '</span></span>' : '') +
       '<svg class="al-dibujo-lugar" viewBox="0 ' + top + ' 120 ' + (150 - top) + '" aria-hidden="true">' + dib(t, op.ejemplo, op.variante) + '</svg>';
     return b;
   };
@@ -367,6 +367,13 @@
     return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5 L15.1 8.2 L22.4 9 L17 14 L18.5 21.3 L12 17.6 L5.5 21.3 L7 14 L1.6 9 L8.9 8.2 Z" fill="' +
       (llena ? '#FBBF24' : '#FFFFFF') + '" stroke="' + K + '" stroke-width="1.6" stroke-linejoin="round"/></svg>';
   }
+  /* Mano que muestra el arrastre en la demostracion de Pip. */
+  A.mano = function () {
+    var m = el('span', 'al-mano');
+    m.setAttribute('aria-hidden', 'true');
+    m.innerHTML = '<svg viewBox="0 0 40 48"><path d="M14 22 V6 a4 4 0 0 1 8 0 V20 l2-1 a4 4 0 0 1 5 3 l1-.5 a4 4 0 0 1 5 3 V34 c0 7-5 12-12 12 h-2 c-5 0-8-2-11-6 L4 32 a3.6 3.6 0 0 1 5-5 l5 5 Z" fill="#FFFFFF" stroke="' + K + '" stroke-width="3" stroke-linejoin="round"/></svg>';
+    return m;
+  };
   A.estrellas = function (n) {
     var c = el('div', 'al-estrellas');
     c.setAttribute('role', 'img');

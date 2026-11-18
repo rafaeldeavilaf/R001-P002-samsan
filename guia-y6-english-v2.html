@@ -1604,7 +1604,9 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
        variante, color, ej, ejp, voz}], palabras: [{p, ico, zona}] }] }
      ============================================================ */
   var AL = (function () {
-    var st = { etapas: {}, piel: null, vistos: {} };
+    var st = { etapas: {}, piel: null, vistos: {} }, pintado = null;
+    /* un cambio de #mundo-etapa a mano (o un enlace) tambien cambia de pantalla */
+    window.addEventListener('hashchange', function () { if (cfg && cfg.modo === 'aldea' && location.hash !== pintado) pintar(desdeHash(location.hash.slice(1))); });
     var ICONOS = function (k) { return (window.ICONOS || {})[k] || ''; };
     function K() { return window.ALDEA; }
     function clave() { return 'samsan:aldea-' + cfg.id; }
@@ -1628,6 +1630,8 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     function pintar(x) {
       pielActual = piel();
       raiz.classList.toggle('g-raiz--aldea', x.w !== undefined);
+      document.body.classList.toggle('al-jugando', x.w !== undefined);
+      pintado = location.hash;
       if (x.w !== undefined) etapa(x.w, x.e); else portada();
     }
     function pipVolando(chico) {
@@ -1667,7 +1671,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
         var primera = 1; while (primera < etapas().length && st.etapas[idEtapa(wi, primera)]) primera++;
         var z0 = m.zonas[0];
         var tile = el('button', { class: 'al-alto__mundo', 'aria-label': m.titulo + ' · ' + t('jugar'),
-          html: '<span class="al-alto__ico">' + K().icono(ICONOS(z0.ej), 'al-ico') + '</span><span class="al-alto__nombre">' + esc(m.titulo) + '</span>' });
+          html: '<span class="al-alto__ico">' + K().icono(ICONOS(m.calcos[0]), 'al-ico') + '</span><span class="al-alto__nombre">' + esc(m.titulo) + '</span>' });
         tile.style.setProperty('--c', z0.color);
         tile.addEventListener('click', function () { ir({ w: wi, e: primera }); });
         alto2.appendChild(tile);
@@ -1691,7 +1695,9 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       cfg.mundos.forEach(function (m, wi) {
         m.calcos.forEach(function (c, ci) {
           var tiene = !!st.etapas[idEtapa(wi, ci + 1)];
-          album.appendChild(el('span', { class: 'al-calco' + (tiene ? '' : ' al-calco--falta'), role: 'listitem', 'aria-label': m.titulo + ' · ' + (ci + 1) + (tiene ? ' ✓' : ''), html: K().icono(ICONOS(c), 'al-ico') }));
+          var ca = el(tiene ? 'button' : 'span', { class: 'al-calco' + (tiene ? '' : ' al-calco--falta'), role: 'listitem', 'aria-label': m.titulo + ' · ' + (ci + 1) + (tiene ? ' ✓' : ''), html: K().icono(ICONOS(c), 'al-ico') });
+          if (tiene) ca.addEventListener('click', function () { hablar(NOMBRE_CALCO[c] || c); ca.classList.remove('al-salta'); void ca.offsetWidth; ca.classList.add('al-salta'); });
+          album.appendChild(ca);
         });
       });
       s.appendChild(album);
@@ -1708,12 +1714,15 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       });
       s.appendChild(tr);
       if (Object.keys(st.etapas).length) {
-        var pie = el('div', { class: 'g-pie-portada' });
+        /* lejos del dedo del niño: dentro de «For grown-ups» y con confirmacion */
+        var pie = el('details', { class: 'g-pie-portada al-adultos' });
+        pie.appendChild(el('summary', { text: t('adultos') }));
         pie.appendChild(el('button', { text: t('reiniciar'), onclick: function () { if (window.confirm(t('confirmar'))) { st = { etapas: {}, piel: null, vistos: {} }; guardar(); ir({}, true); } } }));
         s.appendChild(pie);
       }
       raiz.appendChild(s);
     }
+    var NOMBRE_CALCO = { birthday: 'birthday cake', nestegg: 'egg' };
     var ICO_CANDADO_A = '<svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><rect x="5" y="10" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 10 V7 A4 4 0 0 1 16 7 V10" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>';
 
     /* 5 palabras repartidas entre las zonas de la etapa, al menos una por zona */
@@ -1744,11 +1753,20 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       var porId = {};
       zonas.forEach(function (z) {
         var l = A.lugar({ id: z.id, tipo: z.lugar, variante: z.variante, color: z.color, letrero: z.letrero, ejemplo: ICONOS(z.ej), etiqueta: z.letrero });
-        l.addEventListener('click', function () { soltar(l); });
+        l.addEventListener('click', function (ev) {
+          if (ev.target && ev.target.closest && ev.target.closest('.al-letrero')) { hablar(decirLugar(z)); return; }
+          soltar(l);
+        });
         porId[z.id] = { zona: z, nodo: l };
         esc2.lugares.appendChild(l);
       });
       var vuelo = el('div', { class: 'al-vuelo' });
+      var colaVista = el('div', { class: 'al-cola', 'aria-hidden': 'true' });
+      esc2.cielo.appendChild(colaVista);
+      function pintarCola() {
+        colaVista.innerHTML = '';
+        cola.slice(0, 2).forEach(function (w, i) { colaVista.appendChild(el('span', { class: 'al-cola__globo al-cola__globo--' + i, html: A.icono(ICONOS(w.ico), 'al-ico') })); });
+      }
       var pipCaja = el('div', { class: 'al-pip-caja', html: pipVolando() });
       vuelo.appendChild(pipCaja);
       esc2.cielo.appendChild(vuelo);
@@ -1758,6 +1776,17 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       raiz.appendChild(p);
 
       var activo = null, globo = null, peldano = 0, ocupado = false, enDemo = false, timers = [];
+      var fonetica = /\*/.test(zonas[0].ejp);
+      function plano2(x) { return String(x).replace(/\*/g, ''); }
+      /* el nombre del lugar con su ejemplo */
+      function decirLugar(z) { return fonetica ? plano2(z.ejp) + '. ' + z.voz + '.' : (plano2(z.ejp) === z.letrero ? z.letrero + '.' : z.letrero + ' ' + plano2(z.ejp) + '.'); }
+      /* pista por ejemplo y no por regla: el ejemplo del lugar y la palabra juntos */
+      function pistaPorEjemplo(z, palabra) {
+        var w = plano2(palabra), e = plano2(z.ejp);
+        if (fonetica) return e + '. ' + w + '. ' + z.voz + '.';
+        if (e === z.letrero) return w + '. ' + z.voz + '.';
+        return z.letrero + ' ' + e + '. ' + z.letrero + ' ' + w + '.';
+      }
       function despues(f, ms) { timers.push(setTimeout(function () { if (p.isConnected) f(); }, ms)); }
       pipCaja.addEventListener('click', function () { if (activo) hablar(activo.p); });
 
@@ -1766,14 +1795,17 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
         vuelo.appendChild(g); A.entrar(vuelo);
         return g;
       }
+      var trasDemo = false;   /* la primera palabra despues de la demo no corta «Your turn!» */
       function sacar() {
         if (globo) { globo.remove(); globo = null; }
         if (!cola.length) return despues(fin, 350);
         activo = cola.shift(); activo._err = 0; peldano = 0; ocupado = false;
+        pintarCola();
         globo = nuevoGlobo(activo.p, activo.ico, N - cola.length);
         A.arrastre(globo, { alSoltar: function (l) { soltar(l); }, alTocar: function () { if (activo) hablar(activo.p); } });
         var este = activo;
-        if (cfg.leerFichas) despues(function () { if (activo === este) hablar(este.p); }, 650);
+        var enCola = trasDemo; trasDemo = false;
+        if (cfg.leerFichas) despues(function () { if (activo === este) hablar(este.p, { cola: enCola }); }, 650);
       }
       function volverGlobo() {
         if (!globo) return;
@@ -1785,7 +1817,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
         A.volar(g, l, function () {
           g.remove(); sonido('toc');
           A.abrir(l, ICONOS(ico), alFin);
-          despues(function () { sonido('ok'); racha++; A.celebrar(pipCaja.querySelector('.al-pip')); }, 260);
+          despues(function () { sonAcierto(m.escena); racha++; A.celebrar(pipCaja.querySelector('.al-pip')); }, 260);
         });
       }
       function soltar(l) {
@@ -1795,20 +1827,21 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
           ocupado = true;
           var a = activo; activo = null;
           estado.textContent = a.p.replace(/\*/g, '') + ' ✓';
+          var bravo = t('bravo'); hablar(bravo[Math.floor(Math.random() * bravo.length)] + ' ' + plano2(a.p) + '!');
           acertar(l, a.ico, function () { sacar(); });
           despues(function () { A.llenarEstrella(est); }, 300);
         } else {
           activo._err++; racha = 0; sonido('mal'); A.temblar(l); volverGlobo();
           if (activo._err === 1) hablar(activo.p, { lento: true });
-          else { hablar(activo.p + '. ' + z.zona.voz + '.'); A.brillar(z.nodo); }
+          else { hablar(pistaPorEjemplo(z.zona, activo.p)); A.brillar(z.nodo); }
         }
       }
       bAyuda.addEventListener('click', function () {
         if (!activo || ocupado || enDemo) return;
         var z = porId[activo.zona];
-        peldano++;
+        peldano = Math.max(peldano, activo._err) + 1;
         if (peldano === 1) hablar(activo.p, { lento: true });
-        else if (peldano === 2) { A.brillar(z.nodo); hablar(z.zona.voz); }
+        else if (peldano === 2) { A.brillar(z.nodo); hablar(pistaPorEjemplo(z.zona, activo.p)); }
         else soltar(z.nodo);
       });
 
@@ -1816,7 +1849,9 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       function demo(alTerminar) {
         enDemo = true; p.classList.add('al-demo');
         var guardado = globo; if (guardado) guardado.style.display = 'none';
-        var tapa = el('button', { class: 'al-demo__tapa', 'aria-label': t('saltar') });
+        var tapa = el('div', { class: 'al-demo__tapa' });
+        var saltar = el('button', { class: 'g-icono al-demo__saltar', 'aria-label': t('saltar'), html: ICO_SALTAR });
+        tapa.appendChild(saltar);
         esc2.nodo.appendChild(tapa);
         var lista = zonas.slice(0, Math.min(zonas.length, 2)), k = 0, cerrado = false;
         function cerrar() {
@@ -1825,29 +1860,33 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
           vuelo.querySelectorAll('.al-globo--demo').forEach(function (g) { g.remove(); });
           if (guardado) guardado.style.display = '';
           hablar(t('aldea_turno'));
+          trasDemo = true;
           alTerminar && alTerminar();
         }
-        tapa.addEventListener('click', function () { try { speechSynthesis.cancel(); } catch (er) { /* nada */ } cerrar(); });
+        saltar.addEventListener('click', function () { try { speechSynthesis.cancel(); } catch (er) { /* nada */ } cerrar(); });
         hablar(t('aldea_mira'));
         function uno() {
           if (cerrado) return;
           if (k >= lista.length) return despues(cerrar, 500);
           var z = lista[k++];
           var g = nuevoGlobo(z.ejp, z.ej, k); g.classList.add('al-globo--demo'); g.disabled = true;
-          despues(function () { if (!cerrado) hablar(z.ejp, { cola: true }); }, 700);
+          g.appendChild(A.mano());
+          despues(function () { if (!cerrado) hablar(z.ejp, { cola: true }); }, 500);
           despues(function () {
             if (cerrado) return;
             A.volar(g, porId[z.id].nodo, function () {
-              g.remove(); sonido('toc');
+              g.remove();
+              if (cerrado) return;   /* saltaron la demostracion mientras el globo volaba */
+              sonido('toc');
               A.abrir(porId[z.id].nodo, ICONOS(z.ej));
               hablar(z.ejp + '. ' + z.voz + '.', { cola: true });
-              despues(uno, 3200);
+              despues(uno, 2600);
             });
-          }, 2000);
+          }, 1500);
         }
         despues(uno, 900);
       }
-      bDemo.addEventListener('click', function () { if (!ocupado && !enDemo) demo(function () { if (activo) hablar(activo.p); }); });
+      bDemo.addEventListener('click', function () { if (!ocupado && !enDemo) demo(function () { trasDemo = false; if (activo) hablar(activo.p, { cola: true }); }); });
 
       function fin() {
         var id = idEtapa(wi, e), nueva = !st.etapas[id], antes = calcos();
@@ -1859,7 +1898,12 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
         var e2 = A.estrellas(N); for (var i = 0; i < N; i++) A.llenarEstrella(e2);
         box.appendChild(e2);
         box.appendChild(el('div', { class: 'al-calco al-calco--nueva', 'aria-label': t('calco_nueva'), html: A.icono(ICONOS(m.calcos[e - 1]), 'al-ico') }));
-        if (desbloqueo) box.appendChild(el('p', { class: 'g-insignia', html: '<small>' + esc(t('nuevo_traje')) + '</small>' + mascota(true, desbloqueo) + esc(desbloqueo.nombre) }));
+        if (desbloqueo) {
+          /* el traje nuevo se pone solo; se cambia en la portada */
+          st.piel = desbloqueo.id; guardar(); pielActual = desbloqueo;
+          box.querySelector('.al-fin__pip').innerHTML = pipVolando();
+          box.appendChild(el('p', { class: 'g-insignia al-insignia', html: '<small>' + esc(t('nuevo_traje')) + '</small>' + esc(desbloqueo.nombre) }));
+        }
         var sigE = e < etapas().length ? { w: wi, e: e + 1 } : siguiente();
         var fila = el('div', { class: 'al-fin__botones' });
         var bMapa = el('button', { class: 'g-btn g-btn--suave', 'aria-label': t('mapa'), html: ICO_MAPA });
@@ -1874,22 +1918,30 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
         A.celebrar(box.querySelector('.al-pip'));
         try { var r = box.getBoundingClientRect(); A.confeti(r.left + r.width / 2, r.top + 60, 36); } catch (er) { /* nada */ }
         hablar(nueva ? t('aldea_calco') : t('etapa_ok'));
+        if (desbloqueo) hablar(t('aldea_traje'), { cola: true });
         setTimeout(function () { bSig.focus(); }, 50);
       }
 
-      if (!st.vistos[m.id]) { st.vistos[m.id] = 1; guardar(); demo(sacar); }
+      if (!st.vistos[m.id]) { st.vistos[m.id] = 1; guardar(); pintarCola(); demo(sacar); }
       else sacar();
       G._aldea_etapa = { zonas: zonas, activo: function () { return activo; }, enDemo: function () { return enDemo; } };   /* solo para pruebas */
+    }
+    var ICO_SALTAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5 L12 12 L3 19 Z M12 5 L21 12 L12 19 Z" fill="currentColor"/></svg>';
+    /* cada mundo suena distinto al acertar */
+    function sonAcierto(escena) {
+      var N = { calle: [660, 880, 990], estanque: [392, 523, 784], plaza: [587, 740, 880], habitat: [523, 659, 1047], barrio: [784, 659, 988], granja: [440, 554, 659] }[escena] || [660, 880];
+      var r = 1 + Math.min(racha, 6) * 0.04;
+      N.forEach(function (f, i) { tono(f * r, i * 0.07, 0.16); });
     }
     var ICO_MAPA = '<svg viewBox="0 0 24 24" aria-hidden="true" width="28" height="28"><path d="M3 6 L9 4 L15 6 L21 4 V18 L15 20 L9 18 L3 20 Z M9 4 V18 M15 6 V20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
     return { cargar: cargar, pintar: pintar, hash: hash, desdeHash: desdeHash, calcos: calcos, estado: function () { return st; } };
   })();
   TEXTOS.en.album = 'My stickers'; TEXTOS.en.calcos = 'stickers'; TEXTOS.en.aldea_hola = "Hi! I'm Pip. Help me take everything to its place in the village!";
   TEXTOS.en.aldea_mira = 'Watch me!'; TEXTOS.en.aldea_turno = 'Your turn!'; TEXTOS.en.aldea_calco = 'Well done! You got a new sticker!';
-  TEXTOS.en.calco_nueva = 'New sticker'; TEXTOS.en.saltar = 'Skip';
+  TEXTOS.en.calco_nueva = 'New sticker'; TEXTOS.en.saltar = 'Skip'; TEXTOS.en.aldea_traje = 'Pip has a new outfit!'; TEXTOS.en.adultos = 'For grown-ups';
   TEXTOS.es.album = 'Mis calcomanías'; TEXTOS.es.calcos = 'calcomanías'; TEXTOS.es.aldea_hola = '¡Hola! Soy Pip. ¡Ayúdame a llevar cada cosa a su lugar en la aldea!';
   TEXTOS.es.aldea_mira = '¡Mira cómo lo hago!'; TEXTOS.es.aldea_turno = '¡Ahora tú!'; TEXTOS.es.aldea_calco = '¡Muy bien! ¡Ganaste una calcomanía!';
-  TEXTOS.es.calco_nueva = 'Calcomanía nueva'; TEXTOS.es.saltar = 'Saltar';
+  TEXTOS.es.calco_nueva = 'Calcomanía nueva'; TEXTOS.es.saltar = 'Saltar'; TEXTOS.es.aldea_traje = '¡Pip tiene un traje nuevo!'; TEXTOS.es.adultos = 'Para adultos';
   TEXTOS.en.jugar = 'Play'; TEXTOS.en.mapa = 'World map'; TEXTOS.en.etapa = 'Stage'; TEXTOS.en.gemas = 'gems'; TEXTOS.en.gema = 'gem';
   TEXTOS.en.etapa_ok = 'Stage clear!'; TEXTOS.en.jefe_ok = 'Boss defeated!'; TEXTOS.en.trajes = 'Outfits'; TEXTOS.en.nuevo_traje = 'New outfit unlocked';
   TEXTOS.en.oleada = 'Wave'; TEXTOS.en.consejo = 'Tip'; TEXTOS.en.listo = "I'm ready"; TEXTOS.en.siguiente_etapa = 'Next stage'; TEXTOS.en.vencido = 'DONE';

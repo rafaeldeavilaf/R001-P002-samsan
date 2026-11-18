@@ -81,7 +81,7 @@ class PruebaAldea(H.Prueba):
             dichos = [d['texto'] for d in await pg.evaluate('window.__dichos')]
             ejs = [z['ejp'].replace('*', '') for z in m0['zonas']]
             dijo_ej = any(any(e in d for e in ejs) for d in dichos)
-            await pg.locator('.al-demo__tapa').click(force=True); await pg.wait_for_timeout(200)
+            await pg.locator('.al-demo__saltar').click(); await pg.wait_for_timeout(200)
             juega = await self.activo(pg) is not None
             await pg.reload(); await pg.wait_for_selector('.al-barra'); await pg.wait_for_timeout(300)
             demo2 = await pg.locator('.al-demo__tapa').count()
@@ -109,11 +109,15 @@ class PruebaAldea(H.Prueba):
             self.anotar('A05', tiembla and sigue and brilla and any(voz in d for d in dichos), 'lugar equivocado: tiembla, no entra; al 2.o error Pip da el sonido y brilla el correcto', {'tiembla': tiembla, 'sigue': sigue, 'brilla': brilla, 'dijo': dichos[-1:]})
             await pg.wait_for_timeout(2700)
             b = pg.locator('.al-bombilla')
+            # tras 2 errores la bombilla sigue desde ahi: un toque ubica el globo
+            await b.click(); await pg.wait_for_timeout(2300)
+            un_toque = await self.estrellas(pg) == '2 / 5'
+            a2 = await self.activo(pg)
             await pg.evaluate('window.__dichos = []'); await b.click(); await pg.wait_for_timeout(50)
             p1 = [d['texto'] for d in await pg.evaluate('window.__dichos')]
             await b.click(); br = await pg.locator('.al-pantalla [data-lugar="%s"]' % a2['zona']).evaluate("e => e.classList.contains('al-brilla')")
             await b.click(); await pg.wait_for_timeout(2300)
-            self.anotar('A06', p1 and p1[0] == a2['p'].replace('*', '') and br and await self.estrellas(pg) == '2 / 5', 'bombilla: palabra lenta, brilla el lugar, luego lo ubica', {'dijo': p1, 'brilla': br, 'estrellas': await self.estrellas(pg)})
+            self.anotar('A06', un_toque and p1 and p1[0] == a2['p'].replace('*', '') and br and await self.estrellas(pg) == '3 / 5', 'bombilla: palabra lenta, brilla el lugar con la pista por ejemplo, luego lo ubica; tras 2 errores sigue desde ahi', {'tras_2_errores_un_toque': un_toque, 'dijo': p1, 'brilla': br, 'estrellas': await self.estrellas(pg)})
             await ctx.close()
 
             # A04 arrastre tactil del globo

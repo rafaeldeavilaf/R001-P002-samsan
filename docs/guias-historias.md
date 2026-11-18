@@ -116,11 +116,11 @@ Se prueban con `python3 tools/historias_aldea.py y2-english-v3`. Son las J de la
 | ID | Historia | Criterio de aceptación |
 |---|---|---|
 | A01 | Como niño, quiero saber qué jugar ahora | «Play» lleva a la siguiente etapa sin terminar |
-| A02 | Como niño, antes de un mundo nuevo quiero ver cómo se juega | La primera entrada abre una demostración de Pip con voz que se puede saltar. No se repite sola y el botón ? la repite |
+| A02 | Como niño, antes de un mundo nuevo quiero ver cómo se juega | La primera entrada abre una demostración de Pip con voz y una mano que arrastra, que se salta con su botón. No se repite sola y el botón ? la repite |
 | A03 | Como niño, quiero ubicar el globo con un toque | Tocar el lugar correcto ubica el globo, se llena una estrella y llega otro |
 | A04 | Como niño, quiero arrastrar el globo con el dedo | Arrastrarlo a su lugar lo ubica |
 | A05 | Como niño, si me equivoco no quiero perder | El lugar tiembla y el globo no entra. Al 2.º error Pip dice el sonido y brilla el lugar correcto |
-| A06 | Como niño atascado, quiero ayuda | La bombilla dice la palabra lenta, luego hace brillar el lugar y luego ubica el globo |
+| A06 | Como niño atascado, quiero ayuda | La bombilla dice la palabra lenta, luego hace brillar el lugar con la pista por ejemplo y luego ubica el globo. Si ya hubo errores, sigue desde ese paso |
 | A07 | Como niño, quiero rondas cortas que suban de nivel | Cada etapa trae 5 globos, con 2 lugares, luego 3 y luego hasta 4 |
 | A08 | Como niño, quiero palabras distintas cada vez | 4 entradas a la misma etapa dan al menos 3 tandas distintas |
 | A09 | Como niño, quiero una calcomanía por etapa | La calcomanía llega aunque haya errores, repetir no suma, se guarda y queda en el álbum |
