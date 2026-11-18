@@ -1,5 +1,6 @@
 // titulo: Year 6 English · Exam prep
 // lang: en
+// motor: v1
 /* ============================================================
    GUIA DE ESTUDIO — YEAR 6 · ENGLISH (jugador mayor)
    Objetivos de la study guide de mitad de año: adverbs and adverbial

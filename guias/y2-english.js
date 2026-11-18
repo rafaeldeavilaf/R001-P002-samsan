@@ -1,5 +1,6 @@
 // titulo: Year 2 English · Study guide
 // lang: en
+// motor: v1
 /* ============================================================
    GUIA DE ESTUDIO — YEAR 2 · ENGLISH (jugador menor)
    Objetivos de la study guide de mitad de año: long i, consonant blends,

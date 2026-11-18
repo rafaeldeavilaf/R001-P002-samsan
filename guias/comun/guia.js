@@ -155,8 +155,15 @@
         '</g></svg>';
     }
   };
-  function mascota(chica) {
-    var s = MASCOTAS[cfg.mascota](cfg.mascotaNombre || '');
+  /* Traje: cambia los colores base de la mascota (modo juego, se desbloquean con gemas). */
+  var pielActual = null;
+  function vestir(s, piel) {
+    if (!piel || !piel.colores) return s;
+    Object.keys(piel.colores).forEach(function (de) { s = s.split(de).join(piel.colores[de]); });
+    return s;
+  }
+  function mascota(chica, piel) {
+    var s = vestir(MASCOTAS[cfg.mascota](cfg.mascotaNombre || ''), piel || pielActual);
     return chica ? s.replace('class="g-mascota', 'class="g-mascota g-mascota--chica') : s;
   }
 
@@ -393,7 +400,8 @@
 
   /* ---------- navegacion con el boton Atras del telefono ---------- */
   function ir(estado, reemplazar) {
-    try { history[reemplazar ? 'replaceState' : 'pushState'](estado, '', '#' + (estado.m === undefined ? '' : (cfg.misiones[estado.m].id + (estado.p ? '-' + estado.p : '')))); } catch (e) { /* file:// sin historial */ }
+    var h = cfg.modo === 'juego' ? J.hash(estado) : (estado.m === undefined ? '' : (cfg.misiones[estado.m].id + (estado.p ? '-' + estado.p : '')));
+    try { history[reemplazar ? 'replaceState' : 'pushState'](estado, '', '#' + h); } catch (e) { /* file:// sin historial */ }
     pintar(estado);
   }
   window.addEventListener('popstate', function (ev) { if (cfg) pintar(ev.state || {}); });
@@ -437,7 +445,8 @@
     try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { /* nada */ }
     raiz.innerHTML = '';
     var cap = document.querySelector('.g-capa'); if (cap) cap.remove();
-    if (estado.m === undefined) portada();
+    if (cfg.modo === 'juego') J.pintar(estado);
+    else if (estado.m === undefined) portada();
     else mision(estado.m, estado.p || 0);
     try { window.scrollTo(0, 0); } catch (e) { /* nada */ }
   }
@@ -976,6 +985,287 @@
     };
   };
 
+
+  /* ============================================================
+     MODO JUEGO (v2, 18 nov 2026): "solo palabras y ubicarlas".
+     Mapa de mundos (un tema cada uno) con 3 etapas que crecen en zonas y
+     palabras; una palabra activa a la vez que se arrastra o se ubica tocando
+     su zona; gemas por etapa terminada (nunca por aciertos) que desbloquean
+     trajes de la mascota; jefe final por oleadas que mezcla mundos.
+     Datos: { modo: 'juego', mundos: [{ id, titulo, color, claro, pista,
+       consejo, zonas: [{id, t, sub, ej}], palabras: [{t, zona, voz}] }],
+       etapas: [{zonas, palabras}], jefe: {titulo, oleadas, palabras},
+       pieles: [{id, nombre, gemas, colores: {'#viejo': '#nuevo'}}] }
+     ============================================================ */
+  var J = (function () {
+    var st = { etapas: {}, piel: null, vistos: {} };
+    var ETAPAS = [{ zonas: 2, palabras: 6 }, { zonas: 3, palabras: 8 }, { zonas: 99, palabras: 10 }];
+    var ICO_GEMA = '<svg class="g-gema" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3 H18 L22 9 L12 21 L2 9 Z" fill="#22D3EE" stroke="#0B1120" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 9 H22 M8 3 L12 9 L16 3 M12 9 L12 21" fill="none" stroke="#0B1120" stroke-width="1.2" opacity=".55"/></svg>';
+    var ICO_CANDADO = '<svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><rect x="5" y="10" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 10 V7 A4 4 0 0 1 16 7 V10" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>';
+    function clave() { return 'samsan:juego-' + cfg.id; }
+    function cargar() { try { var x = JSON.parse(localStorage.getItem(clave()) || '{}'); st.etapas = x.etapas || {}; st.piel = x.piel || null; st.vistos = x.vistos || {}; } catch (e) { /* nada */ } }
+    function guardar() { try { localStorage.setItem(clave(), JSON.stringify(st)); } catch (e) { /* nada */ } }
+    function etapas() { return cfg.etapas || ETAPAS; }
+    function idEtapa(wi, e) { return cfg.mundos[wi].id + '-' + e; }
+    function gemas() { var n = 0; Object.keys(st.etapas).forEach(function (k) { n += k === 'jefe' ? 3 : 1; }); return n; }
+    function hechasMundo(wi) { var n = 0; for (var e = 1; e <= etapas().length; e++) if (st.etapas[idEtapa(wi, e)]) n++; return n; }
+    function pieles() { return cfg.pieles || [{ id: 'base', nombre: 'Classic', gemas: 0 }]; }
+    function piel() { var ps = pieles(), id = st.piel; return ps.filter(function (p) { return p.id === id && gemas() >= p.gemas; })[0] || ps[0]; }
+    function siguiente() {
+      for (var wi = 0; wi < cfg.mundos.length; wi++) for (var e = 1; e <= etapas().length; e++) if (!st.etapas[idEtapa(wi, e)]) return { w: wi, e: e };
+      return st.etapas.jefe ? { w: 0, e: 1 } : { jefe: true };
+    }
+    function hash(x) { return x.jefe ? 'jefe' : (x.w === undefined ? '' : cfg.mundos[x.w].id + '-' + x.e); }
+    function desdeHash(h) {
+      if (h === 'jefe') return { jefe: true };
+      var r = {};
+      cfg.mundos.forEach(function (m, wi) { var mm = new RegExp('^' + m.id + '-(\\d)$').exec(h); if (mm && +mm[1] >= 1 && +mm[1] <= etapas().length) r = { w: wi, e: +mm[1] }; });
+      return r;
+    }
+
+    function pintar(x) {
+      pielActual = piel();
+      if (x.jefe) etapa(null, 0, true);
+      else if (x.w !== undefined) etapa(x.w, x.e, false);
+      else portada();
+    }
+
+    function contadorGemas() { return el('span', { class: 'g-contador-gemas', 'aria-label': gemas() + ' ' + t('gemas'), html: ICO_GEMA + '<b>' + gemas() + '</b>' }); }
+
+    function portada() {
+      var s = el('section', { class: 'g-portada g-juego' });
+      var b = barra(cfg.titulo, cfg.subtitulo);
+      b.insertBefore(contadorGemas(), b.children[1]);
+      s.appendChild(b);
+      var hola = el('div', { class: 'g-hola', html: mascota() });
+      hola.appendChild(el('p', { class: 'g-globo', html: marcas(cfg.saludo) }));
+      hola.addEventListener('click', function () { hablar(cfg.saludo); });
+      s.appendChild(hola);
+      var sig = siguiente();
+      var nombreSig = sig.jefe ? cfg.jefe.titulo : cfg.mundos[sig.w].titulo + ' · ' + t('etapa') + ' ' + sig.e;
+      var play = el('button', { id: 'play', class: 'g-btn g-btn--grande', html: '▶ ' + esc(t('jugar')) + ' · ' + esc(nombreSig) });
+      play.addEventListener('click', function () { ir(sig); });
+      s.appendChild(play);
+      /* trajes */
+      s.appendChild(el('h2', { class: 'g-seccion', text: t('trajes') }));
+      var tr = el('div', { class: 'g-trajes' });
+      pieles().forEach(function (p) {
+        var libre = gemas() >= p.gemas, puesto = piel().id === p.id;
+        var bt = el('button', { class: 'g-traje' + (puesto ? ' g-traje--puesto' : ''), 'aria-pressed': String(puesto), 'aria-label': p.nombre + (libre ? '' : ' · ' + p.gemas + ' ' + t('gemas')), disabled: libre ? null : 'disabled',
+          html: mascota(true, p) + '<span>' + esc(p.nombre) + '</span>' + (libre ? '' : '<small>' + ICO_CANDADO + p.gemas + '</small>') });
+        if (libre) bt.addEventListener('click', function () { st.piel = p.id; guardar(); sonido('toc'); ir({}, true); });
+        tr.appendChild(bt);
+      });
+      s.appendChild(tr);
+      /* mapa */
+      s.appendChild(el('h2', { class: 'g-seccion', text: t('mapa') }));
+      var mapa = el('ol', { class: 'g-mapa' });
+      cfg.mundos.forEach(function (m, wi) {
+        var li = el('li', { class: 'g-mundo' });
+        colorear(li, m);
+        var cab = el('div', { class: 'g-mundo__cab' });
+        cab.appendChild(cfg.tema === 'y6' ? el('span', { html: ICO.cubo(m.color, String(wi + 1)) }) : el('span', { class: 'g-letra', text: String(wi + 1), 'aria-hidden': 'true' }));
+        cab.appendChild(el('span', { class: 'g-mision__txt', html: esc(m.titulo) + '<small>' + esc(m.zonas.map(function (z) { return z.t; }).join(' · ')) + '</small>' }));
+        li.appendChild(cab);
+        var fila = el('div', { class: 'g-etapas' });
+        for (var e = 1; e <= etapas().length; e++) (function (e) {
+          var hecho = !!st.etapas[idEtapa(wi, e)];
+          var bt = el('button', { class: 'g-etapa' + (hecho ? ' g-etapa--hecha' : ''), 'aria-label': m.titulo + ' · ' + t('etapa') + ' ' + e + (hecho ? ' ✓' : ''),
+            html: hecho ? ICO_GEMA : '<b>' + e + '</b>' });
+          bt.addEventListener('click', function () { ir({ w: wi, e: e }); });
+          fila.appendChild(bt);
+        })(e);
+        li.appendChild(fila);
+        mapa.appendChild(li);
+      });
+      if (cfg.jefe) {
+        var lj = el('li', { class: 'g-mundo g-mundo--jefe' });
+        colorear(lj, cfg.jefe);
+        var bj = el('button', { class: 'g-mundo__cab g-jefe-btn', html: (cfg.tema === 'y6' ? ICO.cubo(cfg.jefe.color, '!') : '<span class="g-letra" aria-hidden="true">★</span>') +
+          '<span class="g-mision__txt">' + esc(cfg.jefe.titulo) + '<small>' + esc(cfg.jefe.sub || '') + '</small></span>' + (st.etapas.jefe ? '<span class="g-tag g-tag--ok">' + esc(t('vencido')) + '</span>' : '') });
+        bj.addEventListener('click', function () { ir({ jefe: true }); });
+        lj.appendChild(bj);
+        mapa.appendChild(lj);
+      }
+      s.appendChild(mapa);
+      if (Object.keys(st.etapas).length) {
+        var pie = el('div', { class: 'g-pie-portada' });
+        pie.appendChild(el('button', { text: t('reiniciar'), onclick: function () { if (window.confirm(t('confirmar'))) { st = { etapas: {}, piel: null, vistos: {} }; guardar(); ir({}, true); } } }));
+        s.appendChild(pie);
+      }
+      raiz.appendChild(s);
+    }
+
+    /* reparte `n` palabras entre las zonas elegidas, al menos una por zona */
+    function muestra(m, zonas, n) {
+      var porZona = Math.max(1, Math.floor(n / zonas.length)), sobra = n - porZona * zonas.length, out = [];
+      mezclar(zonas).forEach(function (z, i) {
+        out = out.concat(mezclar(m.palabras.filter(function (p) { return p.zona === z.id; })).slice(0, porZona + (i < sobra ? 1 : 0)));
+      });
+      return mezclar(out);
+    }
+    function oleadas(esJefe, wi, e) {
+      if (!esJefe) {
+        var m = cfg.mundos[wi], cfgE = etapas()[e - 1];
+        var zonas = mezclar(m.zonas).slice(0, Math.min(cfgE.zonas, m.zonas.length));
+        zonas = m.zonas.filter(function (z) { return zonas.indexOf(z) >= 0; });
+        return [{ mundo: m, zonas: zonas, palabras: muestra(m, zonas, cfgE.palabras) }];
+      }
+      return mezclar(cfg.mundos.slice()).slice(0, cfg.jefe.oleadas || 3).map(function (m) {
+        var elegidas = mezclar(m.zonas).slice(0, 3);
+        var zonas = m.zonas.filter(function (z) { return elegidas.indexOf(z) >= 0; });
+        if (zonas.length < 2) zonas = m.zonas.slice(0, 2);
+        return { mundo: m, zonas: zonas, palabras: muestra(m, zonas, cfg.jefe.palabras || 4) };
+      });
+    }
+
+    function consejo(m, alCerrar) {
+      var capa = el('div', { class: 'g-capa', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('consejo') });
+      var box = el('div', { class: 'g-logro g-consejo', html: mascota(true) });
+      colorear(box, m);
+      box.appendChild(el('h3', { text: m.titulo }));
+      if (m.consejo) box.appendChild(el('p', { html: marcas(m.consejo) }));
+      var lista = el('div', { class: 'g-consejo__zonas' });
+      m.zonas.forEach(function (z) {
+        var bt = el('button', { class: 'g-consejo__zona', html: '<b>' + esc(z.t) + '</b>' + (z.ej ? '<span>' + marcas(z.ej) + '</span>' : '') });
+        bt.addEventListener('click', function () { hablar(z.t + '. ' + (z.ej || '')); });
+        lista.appendChild(bt);
+      });
+      box.appendChild(lista);
+      var go = el('button', { class: 'g-btn', text: t('listo') + ' ▶' });
+      go.addEventListener('click', function () { capa.remove(); alCerrar && alCerrar(); });
+      box.appendChild(go);
+      capa.appendChild(box); document.body.appendChild(capa);
+      setTimeout(function () { go.focus(); }, 30);
+      if (cfg.vozAuto) hablar(m.consejo || m.titulo);
+    }
+
+    function etapa(wi, e, esJefe) {
+      var olas = oleadas(esJefe, wi, e), oi = 0;
+      var m0 = esJefe ? cfg.jefe : cfg.mundos[wi];
+      var s = el('section', { class: 'g-etapa-pant' });
+      colorear(s, olas[0].mundo);
+      var b = barra(esJefe ? cfg.jefe.titulo : m0.titulo, esJefe ? t('oleada') + ' 1 / ' + olas.length : t('etapa') + ' ' + e + ' / ' + etapas().length, function () { ir({}); });
+      if (!esJefe) b.insertBefore(el('button', { class: 'g-icono', 'aria-label': t('consejo'), html: '<b aria-hidden="true">?</b>', onclick: function () { consejo(m0); } }), b.children[2]);
+      s.appendChild(b);
+      var total = olas.reduce(function (a, o) { return a + o.palabras.length; }, 0), hechas = 0;
+      var barraG = el('div', { class: 'g-progreso', 'aria-hidden': 'true' });
+      for (var i = 0; i < total; i++) barraG.appendChild(el('span'));
+      s.appendChild(barraG);
+      var anuncio = el('p', { class: 'g-oleada', role: 'status' });
+      s.appendChild(anuncio);
+      var dock = el('div', { class: 'g-dock' });
+      var lado = el('div', { class: 'g-dock__mascota', html: mascota(true) });
+      var activaBox = el('div', { class: 'g-dock__activa' });
+      var prox = el('div', { class: 'g-dock__prox', 'aria-hidden': 'true' });
+      dock.appendChild(lado); dock.appendChild(activaBox); dock.appendChild(prox);
+      s.appendChild(dock);
+      var zonasBox = el('div', { class: 'g-cajas g-zonas' });
+      s.appendChild(zonasBox);
+      var pista = el('p', { class: 'g-pista', role: 'status' });
+      var fila = el('div', { class: 'g-ayuda-fila' });
+      s.appendChild(fila); s.appendChild(pista);
+      raiz.appendChild(s);
+
+      var cola = [], activa = null, carta = null, porZona = {}, peldano = 0, ola = null;
+      function zonaDe(id) { return porZona[id]; }
+      function montarOla() {
+        ola = olas[oi]; cola = ola.palabras.slice(); porZona = {}; zonasBox.innerHTML = '';
+        colorear(s, ola.mundo);
+        if (esJefe) {
+          $('.g-barra small', s).textContent = t('oleada') + ' ' + (oi + 1) + ' / ' + olas.length + ' · ' + ola.mundo.titulo;
+          anuncio.textContent = t('oleada') + ' ' + (oi + 1) + ' · ' + ola.mundo.titulo;
+          anuncio.classList.remove('g-oleada--ve'); void anuncio.offsetWidth; anuncio.classList.add('g-oleada--ve');
+        }
+        ola.zonas.forEach(function (z) {
+          var bt = el('button', { class: 'g-caja g-zona-u', 'data-destino': z.id, html: '<span class="g-caja__nombre">' + esc(z.t) + (z.sub ? '<small>' + esc(z.sub) + '</small>' : '') + '</span><span class="g-cuenta" aria-hidden="true">0</span>' });
+          var dentro = el('span', { class: 'g-dentro' }); bt.appendChild(dentro);
+          bt.addEventListener('click', function () { ubicar(z.id); });
+          porZona[z.id] = { boton: bt, dentro: dentro, n: 0 };
+          zonasBox.appendChild(bt);
+        });
+        sacar();
+      }
+      function pintarProx() {
+        prox.innerHTML = '';
+        cola.slice(0, 2).forEach(function (p) { prox.appendChild(el('span', { class: 'g-prox', text: p.t })); });
+      }
+      function sacar() {
+        activaBox.innerHTML = '';
+        if (!cola.length) {
+          oi++;
+          if (oi < olas.length) { setTimeout(montarOla, 350); return; }
+          return setTimeout(fin, 450);
+        }
+        activa = cola.shift(); activa._err = 0;
+        carta = el('button', { class: 'g-ficha g-ficha--grande', 'aria-label': activa.t, html: '<span>' + esc(activa.t) + '</span>' });
+        carta.addEventListener('click', function () { if (activa) hablar(activa.voz || activa.t); });
+        arrastrable(carta, function (d) { ubicar(d.getAttribute('data-destino')); });
+        activaBox.appendChild(carta);
+        pintarProx();
+        var esta = activa;   /* el nino puede ubicarla antes de que hable la voz */
+        if (cfg.leerFichas) setTimeout(function () { if (activa === esta) hablar(esta.voz || esta.t); }, 120);
+      }
+      function ubicar(id) {
+        if (!activa || !zonaDe(id)) return;
+        var z = zonaDe(id);
+        if (activa.zona === id) {
+          volar(carta, z.boton);
+          z.n++; $('.g-cuenta', z.boton).textContent = String(z.n);
+          z.dentro.appendChild(el('span', { class: 'g-chip', text: activa.t }));
+          barraG.children[hechas].classList.add('lleno'); hechas++;
+          sonido('ok'); racha++; chispas(z.boton); pista.textContent = ''; peldano = 0;
+          var mz = $('.g-mascota', lado); if (mz) { mz.classList.remove('salta'); void mz.offsetWidth; mz.classList.add('salta'); }
+          activa = null; carta.disabled = true;
+          setTimeout(sacar, 260);
+        } else {
+          activa._err++; racha = 0; sonido('mal');
+          [carta, z.boton].forEach(function (n) { n.classList.remove('sacude'); void n.offsetWidth; n.classList.add('sacude'); });
+          pista.textContent = activa._err >= 2 ? (ola.mundo.pista || t('pista_def')) : t('intenta');
+          if (activa._err >= 2) brillar(zonaDe(activa.zona).boton);
+        }
+      }
+      function brillar(n) { n.classList.remove('brilla'); void n.offsetWidth; n.classList.add('brilla'); }
+      fila.appendChild(el('button', { class: 'g-btn g-btn--suave', html: ICO.bombilla + ' ' + esc(t('ayuda')), onclick: function () {
+        if (!activa) return;
+        peldano++;
+        if (peldano === 1) { pista.textContent = ola.mundo.pista || t('pista_def'); hablar(ola.mundo.pista || ''); }
+        else if (peldano === 2) brillar(zonaDe(activa.zona).boton);
+        else { peldano = 0; ubicar(activa.zona); }
+      } }));
+      function fin() {
+        var clave2 = esJefe ? 'jefe' : idEtapa(wi, e), nueva = !st.etapas[clave2], antes = gemas();
+        st.etapas[clave2] = 1; guardar();
+        var desbloqueo = pieles().filter(function (p) { return p.gemas > antes && p.gemas <= gemas(); })[0];
+        sonido(desbloqueo ? 'nivel' : 'fin');
+        var capa = el('div', { class: 'g-capa', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('etapa_ok') });
+        var box = el('div', { class: 'g-logro', html: mascota() });
+        $('.g-mascota', box).classList.add('salta');
+        box.appendChild(el('h3', { text: esJefe ? t('jefe_ok') : t('etapa_ok') }));
+        box.appendChild(el('p', { class: 'g-gana', html: ICO_GEMA + (nueva ? ' +' + (esJefe ? 3 : 1) : ' ✓') + ' · ' + gemas() + ' ' + esc(gemas() === 1 ? t('gema') : t('gemas')) }));
+        if (desbloqueo) box.appendChild(el('p', { class: 'g-insignia', html: '<small>' + esc(t('nuevo_traje')) + '</small>' + mascota(true, desbloqueo) + esc(desbloqueo.nombre) }));
+        var sigE = !esJefe && e < etapas().length ? { w: wi, e: e + 1 } : siguiente();
+        var bSig = el('button', { class: 'g-btn', text: (sigE.jefe ? cfg.jefe.titulo : (sigE.w === wi && !esJefe ? t('siguiente_etapa') : t('siguiente'))) + ' ▶' });
+        bSig.addEventListener('click', function () { capa.remove(); ir(sigE); });
+        box.appendChild(bSig);
+        box.appendChild(el('button', { class: 'g-btn g-btn--suave', html: ICO.otra + ' ' + esc(t('otra')), onclick: function () { capa.remove(); ir(esJefe ? { jefe: true } : { w: wi, e: e }, true); } }));
+        box.appendChild(el('button', { class: 'g-btn g-btn--suave', text: t('mapa'), onclick: function () { capa.remove(); ir({}); } }));
+        capa.appendChild(box); document.body.appendChild(capa);
+        hablar(esJefe ? t('jefe_ok') : t('etapa_ok'));
+        setTimeout(function () { bSig.focus(); }, 50);
+      }
+      montarOla();
+      if (!esJefe && !st.vistos[cfg.mundos[wi].id]) { st.vistos[cfg.mundos[wi].id] = 1; guardar(); consejo(cfg.mundos[wi]); }
+    }
+    return { cargar: cargar, pintar: pintar, hash: hash, desdeHash: desdeHash, gemas: gemas };
+  })();
+  TEXTOS.en.jugar = 'Play'; TEXTOS.en.mapa = 'World map'; TEXTOS.en.etapa = 'Stage'; TEXTOS.en.gemas = 'gems'; TEXTOS.en.gema = 'gem';
+  TEXTOS.en.etapa_ok = 'Stage clear!'; TEXTOS.en.jefe_ok = 'Boss defeated!'; TEXTOS.en.trajes = 'Outfits'; TEXTOS.en.nuevo_traje = 'New outfit unlocked';
+  TEXTOS.en.oleada = 'Wave'; TEXTOS.en.consejo = 'Tip'; TEXTOS.en.listo = "I'm ready"; TEXTOS.en.siguiente_etapa = 'Next stage'; TEXTOS.en.vencido = 'DONE';
+  TEXTOS.es.jugar = 'Jugar'; TEXTOS.es.mapa = 'Mapa'; TEXTOS.es.etapa = 'Etapa'; TEXTOS.es.gemas = 'gemas'; TEXTOS.es.gema = 'gema';
+  TEXTOS.es.etapa_ok = '¡Etapa superada!'; TEXTOS.es.jefe_ok = '¡Jefe vencido!'; TEXTOS.es.trajes = 'Trajes'; TEXTOS.es.nuevo_traje = 'Traje nuevo';
+  TEXTOS.es.oleada = 'Oleada'; TEXTOS.es.consejo = 'Consejo'; TEXTOS.es.listo = '¡Listo!'; TEXTOS.es.siguiente_etapa = 'Siguiente etapa'; TEXTOS.es.vencido = 'HECHO';
+
   /* ---------- arranque ---------- */
   G.iniciar = function (c) {
     cfg = c;
@@ -984,15 +1274,21 @@
     document.documentElement.setAttribute('data-tema', cfg.tema || 'y2');
     raiz = document.getElementById('guia');
     try { vozOn = localStorage.getItem('samsan:guia-voz') !== '0'; musicaOn = localStorage.getItem('samsan:guia-musica-' + cfg.id) !== '0'; } catch (e) { vozOn = true; musicaOn = true; }
-    armarJefe();
+    if (cfg.modo === 'juego') { cfg.misiones = []; J.cargar(); } else armarJefe();
     cargar(); cargarVoces();
     if (window.speechSynthesis && 'onvoiceschanged' in speechSynthesis) speechSynthesis.onvoiceschanged = cargarVoces;
     /* la musica necesita un primer toque (regla de los navegadores) */
     ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (tipo) {
       document.addEventListener(tipo, function (e) { if (!(e.target && e.target.closest && e.target.closest('.g-btn-musica'))) Musica.empezar(); }, true);
     });
-    /* entrada directa por #id-mision o #id-mision-N */
+    /* entrada directa por #id-mision o #id-mision-N (modo juego: #mundo-etapa o #jefe) */
     var h = (location.hash || '').slice(1), estado = {};
+    if (cfg.modo === 'juego') {
+      estado = J.desdeHash(h);
+      if (estado.w !== undefined || estado.jefe) { try { history.replaceState({}, '', location.pathname); } catch (e) { /* nada */ } ir(estado); }
+      else ir({}, true);
+      return;
+    }
     cfg.misiones.forEach(function (m, mi) {
       if (h === m.id) estado = { m: mi, p: 0 };
       var mm = new RegExp('^' + m.id + '-(\\d+)$').exec(h);
@@ -1002,5 +1298,6 @@
     else ir({}, true);
   };
   G._TIPOS = TIPOS;
-  G._musica = Musica;   /* solo para pruebas: estado() y medir(estilo, segundos) */
+  G._musica = Musica;
+  G._juego = J;   /* solo para pruebas: estado() y medir(estilo, segundos) */
 })();

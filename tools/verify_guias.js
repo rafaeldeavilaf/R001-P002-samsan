@@ -150,12 +150,85 @@ async function jugar(nombre, cfg) {
   }
 }
 
+/* ---------- modo juego (v2): mundos, etapas, jefe, gemas y trajes ---------- */
+function validarJuego(nombre, cfg) {
+  check(nombre + ': id y lang', cfg.id === nombre && /^(en|es)-/.test(cfg.lang), cfg.id + ' ' + cfg.lang);
+  const ids = new Set();
+  cfg.mundos.forEach(m => {
+    const k = nombre + '/' + m.id;
+    check(k + ': id unico', !ids.has(m.id)); ids.add(m.id);
+    check(k + ': consejo y pista', !!m.consejo && !!m.pista);
+    check(k + ': al menos 2 zonas', m.zonas.length >= 2);
+    const zs = new Set(m.zonas.map(z => z.id));
+    check(k + ': cada palabra va a una zona que existe', m.palabras.every(p => zs.has(p.zona)), m.palabras.filter(p => !zs.has(p.zona)).map(p => p.t).join(','));
+    check(k + ': cada zona tiene al menos 3 palabras', m.zonas.every(z => m.palabras.filter(p => p.zona === z.id).length >= 3), m.zonas.map(z => z.id + ':' + m.palabras.filter(p => p.zona === z.id).length).join(' '));
+    check(k + ': cada zona trae su ejemplo', m.zonas.every(z => !!z.ej));
+    check(k + ': palabras sin repetir', new Set(m.palabras.map(p => p.t.toLowerCase())).size === m.palabras.length);
+    check(k + ': color y claro', /^#[0-9A-F]{6}$/i.test(m.color) && /^#[0-9A-F]{6}$/i.test(m.claro));
+  });
+  const max = cfg.mundos.length * 3 + (cfg.jefe ? 3 : 0), ps = cfg.pieles || [];
+  check(nombre + ': trajes en orden y alcanzables', ps.length > 0 && ps[0].gemas === 0 && ps.every((p, i) => i === 0 || p.gemas > ps[i - 1].gemas) && ps[ps.length - 1].gemas <= max, ps.map(p => p.gemas).join(',') + ' / max ' + max);
+}
+
+async function jugarJuego(nombre, cfg) {
+  const file = path.join(ROOT, 'guia-' + nombre + '.html');
+  check(nombre + ': existe ' + path.basename(file), fs.existsSync(file));
+  const html = fs.readFileSync(file, 'utf8');
+  check(nombre + ': sin pedir nada a terceros', !/(src|href)\s*=\s*["']https?:/i.test(html) && !/url\(\s*['"]?https?:/i.test(html));
+  const p = await abrir(file);
+  check(nombre + ': portada con #play, mapa y trajes', !!p.d.querySelector('#play') && p.d.querySelectorAll('.g-mundo').length === cfg.mundos.length + (cfg.jefe ? 1 : 0) && p.d.querySelectorAll('.g-traje').length === (cfg.pieles || []).length);
+  check(nombre + ': trajes bloqueados al empezar', [...p.d.querySelectorAll('.g-traje')].slice(1).every(b => b.disabled));
+  check(nombre + ': portada sin errores', p.errores.length === 0, p.errores.join(' | '));
+  p.w.close();
+  let guardado = {};
+  const rutas = [];
+  cfg.mundos.forEach(m => { for (let e = 1; e <= 3; e++) rutas.push(m.id + '-' + e); });
+  if (cfg.jefe) rutas.push('jefe');
+  /* una sola "sesion": el progreso se pasa de pagina en pagina */
+  let progreso = null;
+  for (const r of rutas) {
+    const s = await abrir(file, r);
+    if (progreso) { s.w.localStorage.setItem('samsan:juego-' + cfg.id, progreso); }
+    const d = s.d;
+    if (r !== 'jefe' && r.endsWith('-1')) check(nombre + '/' + r + ': la primera etapa del mundo muestra el consejo', !!d.querySelector('.g-consejo'));
+    const capa0 = d.querySelector('.g-consejo'); if (capa0) capa0.closest('.g-capa').querySelector('.g-btn').click();
+    check(nombre + '/' + r + ': palabra activa y zonas', !!d.querySelector('.g-ficha--grande') && d.querySelectorAll('.g-zona-u').length >= 2);
+    const llenasAntes = d.querySelectorAll('.g-progreso .lleno').length;
+    let n = 0;
+    while (!d.querySelector('.g-capa') && n < 900) { const b = d.querySelector('.g-ayuda-fila .g-btn'); if (b) b.click(); n++; if (n % 3 === 0) await espera(270); }
+    check(nombre + '/' + r + ': se termina con la ayuda', !!d.querySelector('.g-capa'), 'clics ' + n + ' ' + llenasAntes);
+    progreso = s.w.localStorage.getItem('samsan:juego-' + cfg.id);
+    try { guardado = JSON.parse(progreso || '{}'); } catch (e) { guardado = {}; }
+    check(nombre + '/' + r + ': queda la gema', guardado.etapas && guardado.etapas[r] === 1, progreso);
+    check(nombre + '/' + r + ': sin errores de JS', s.errores.length === 0, s.errores.join(' | '));
+    s.w.close();
+  }
+  /* el desbloqueo de trajes con gemas se prueba en Chrome real (tools/historias_juegos.py) */
+}
+
+/* error controlado en el modo juego: zona equivocada no recibe la palabra */
+async function errorJuego(nombre, cfg) {
+  const file = path.join(ROOT, 'guia-' + nombre + '.html');
+  const s = await abrir(file, cfg.mundos[0].id + '-3');
+  const d = s.d;
+  const capa0 = d.querySelector('.g-consejo'); if (capa0) capa0.closest('.g-capa').querySelector('.g-btn').click();
+  const texto = d.querySelector('.g-ficha--grande').textContent.trim();
+  const zona = cfg.mundos[0].palabras.find(p => p.t === texto).zona;
+  const mala = [...d.querySelectorAll('.g-zona-u')].find(z => z.getAttribute('data-destino') !== zona);
+  mala.click(); mala.click();
+  check(nombre + ': zona equivocada no recibe la palabra', mala.querySelectorAll('.g-chip').length === 0 && d.querySelector('.g-ficha--grande').textContent.trim() === texto);
+  check(nombre + ': al 2.o error sale la pista y brilla la zona correcta', d.querySelector('.g-pista').textContent === cfg.mundos[0].pista && d.querySelector('.g-zona-u[data-destino="' + zona + '"]').classList.contains('brilla'));
+  check(nombre + ': sin puntaje ni porcentajes', !/\d+\s*%|score\s*:/i.test(d.body.textContent));
+  s.w.close();
+}
+
 (async () => {
   if (!fs.existsSync(DIR)) { console.log('OMITIDO: no hay guias/'); return; }
   const nombres = fs.readdirSync(DIR).filter(f => f.endsWith('.js')).map(f => f.slice(0, -3));
   for (const n of nombres) {
     console.log('\n== guia ' + n);
     const cfg = leerConfig(n);
+    if (cfg.modo === 'juego') { validarJuego(n, cfg); await errorJuego(n, cfg); await jugarJuego(n, cfg); continue; }
     validarDatos(n, cfg);
     await jugar(n, cfg);
   }

@@ -473,6 +473,8 @@ def build_proto(kit, ui, brand, credits, carpeta, nombre, materia):
 
 GUIAS = "guias"
 LANG_RE = re.compile(r"^\s*//\s*lang:\s*([a-z]{2})\s*$", re.M)
+# `// motor: v1` usa el motor congelado de guias/comun/v1/ (decision del 18 nov 2026).
+MOTOR_RE = re.compile(r"^\s*//\s*motor:\s*([a-z0-9]+)\s*$", re.M)
 
 
 def guias():
@@ -490,10 +492,14 @@ def build_guia(credits, nombre):
     m = TITULO_RE.search(js)
     titulo = m.group(1) if m else nombre
     lm = LANG_RE.search(js)
-    css = inline_fonts(read(GUIAS, "comun", "guia.css"))
+    mm = MOTOR_RE.search(js)
+    motor = ("comun", mm.group(1)) if mm else ("comun",)
+    if not os.path.exists(os.path.join(ROOT, GUIAS, *motor, "guia.js")):
+        fail("%s/%s.js pide el motor %s y no existe." % (GUIAS, nombre, "/".join(motor)))
+    css = inline_fonts(read(GUIAS, *motor, "guia.css"))
     page = head(html.escape(titulo), "Guía de estudio interactiva de SAMSAN.", css, "guia", lm.group(1) if lm else "en")
     page += '<main id="guia" class="g-raiz"></main>\n' + foot(credits)
-    page += '<script>\n' + read(GUIAS, "comun", "guia.js") + '\n</script>\n'
+    page += '<script>\n' + read(GUIAS, *motor, "guia.js") + '\n</script>\n'
     page += '<script>\n' + js + '\n</script>\n</body>\n</html>\n'
     return page
 

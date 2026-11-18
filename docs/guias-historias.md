@@ -1,7 +1,7 @@
 ---
 estado: vigente
 actualizado: 2026-11-18
-descripcion: Historias de usuario de las guías de estudio con su criterio de aceptación; cada una tiene una prueba en tools/historias_guias.py que se corre por guía.
+descripcion: Historias de usuario de las guías de estudio (v1) y del modo juego (v2) con su criterio de aceptación; cada una tiene su prueba en tools/historias_guias.py o tools/historias_juegos.py, que se corren por guía.
 ---
 
 # Historias de usuario · Guías de estudio
@@ -70,3 +70,38 @@ Se corrió cada guía por separado en Chrome real, con los perfiles 390 × 844, 
 - **Y6-5, volumen en teléfono.** La energía de la música por encima de 300 Hz ya era mayor en Y6 (0,005) que en Y2 (0,0034) antes del cambio. Que no se oyera venía del arranque (H11), no de las frecuencias. Igual se reescribió el estilo `synth` con bajo una octava arriba y melodía en la zona media (0,0055).
 - **Controles negativos.** El auditor detectó texto claro sobre blanco, un botón de 20 px y un bloque de 900 px inyectados a propósito.
 - **Lo que no se puede probar aquí.** El sonido real en un iPhone con el interruptor de silencio y la voz real de cada teléfono. Se revisan en el equipo.
+
+## v2 · modo juego (Word Quest y Word Drop)
+
+Solo palabras y ubicarlas. Se prueban con `python3 tools/historias_juegos.py <guia>` (`y2-english-v2` o `y6-english-v2`), una guía a la vez.
+
+| ID | Historia | Criterio de aceptación |
+|---|---|---|
+| J01 | Como niño, quiero saber qué jugar ahora | «Play» nombra la siguiente etapa sin terminar |
+| J02 | Como niño, antes de un mundo nuevo quiero un consejo corto | La primera etapa de cada mundo abre un consejo con un ejemplo por zona, que se oye al tocarlo, y no se repite |
+| J03 | Como niño, quiero ubicar la palabra con un toque | Tocar la zona ubica la palabra activa y sale la siguiente |
+| J04 | Como niño, quiero arrastrarla con el dedo | Arrastrar la palabra a su zona la ubica |
+| J05 | Como niño, si me equivoco no quiero perder | La palabra no entra y aparece «Try again». Al segundo error sale la pista y brilla la zona correcta |
+| J06 | Como niño atascado, quiero ayuda | La bombilla da la pista, luego hace brillar la zona y luego ubica la palabra |
+| J07 | Como niño, quiero que suba la dificultad | Etapa 1 con 2 zonas y 6 palabras, etapa 2 con 3 y 8, etapa 3 con todas y unas 10 |
+| J08 | Como niño, quiero palabras distintas cada vez | 4 entradas a la misma etapa dan al menos 3 tandas distintas |
+| J09 | Como niño, quiero ganar una gema por etapa | +1 gema al terminar aunque haya errores. Repetirla no suma. Se guarda al recargar |
+| J10 | Como niño, quiero desbloquear y ponerle trajes a la mascota | El traje está bloqueado antes de tener las gemas. Al alcanzarlas avisa, se libera, se viste y se recuerda |
+| J11 | Como niño, quiero un jefe final | El jefe trae oleadas de mundos distintos, cambian las zonas y da +3 gemas |
+| J12 | Como niño en el teléfono, Atrás no me saca | Atrás desde una etapa vuelve al mapa |
+| J13 | Como niño, quiero música | Suena al primer toque, también si ese toque es el botón de música |
+| J14 | Como niño, quiero usarlo en cualquier pantalla | Sin desborde, con contraste AA y toques de 44 px en 4 perfiles |
+| J15 | Como adulto, no quiero red ni puntajes | Sin pedidos de red y sin porcentajes ni puntaje |
+| J16 | Como niño, no quiero trabarme | Todas las etapas y el jefe se terminan sin errores de JavaScript |
+| J17 | Voz según la edad | Y2 lee cada palabra al aparecer. Y6 no lee sola |
+
+### Resultado del 18 nov 2026
+
+| Guía | Historias | Primera corrida | Después |
+|---|---|---|---|
+| Year 2 v2 (`y2-english-v2`) | 17 | 10 OK, la prueba se detuvo en J10 | 17 OK |
+| Year 6 v2 (`y6-english-v2`) | 17 | 17 OK | 17 OK |
+
+- **J10, trajes.** Al elegir un traje, la portada se dibujaba dos veces, una debajo de la otra. Ahora la portada se vuelve a armar desde cero.
+- **J16, voz y palabra rápida (encontrado por `verify_guias.js`).** En Y2, si el niño ubicaba la palabra antes de 120 ms, la lectura en voz alta lanzaba un error. Ahora la voz solo lee la palabra que sigue activa.
+- La v1 se repitió completa después de congelar su motor y sigue pasando sus historias.
