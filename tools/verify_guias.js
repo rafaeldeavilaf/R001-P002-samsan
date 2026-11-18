@@ -40,8 +40,8 @@ function validarDatos(nombre, cfg) {
     check(k + ': id unico', !ids.has(m.id)); ids.add(m.id);
     check(k + ': tiene Aprende', Array.isArray(m.aprende) && m.aprende.length > 0);
     check(k + ': color y claro', /^#[0-9A-F]{6}$/i.test(m.color) && /^#[0-9A-F]{6}$/i.test(m.claro));
-    m.actividades.forEach((a, i) => {
-      const q = k + '-' + (i + 1) + ' (' + a.tipo + ')';
+    m.actividades.forEach((a0, i) => (a0.variantes ? a0.variantes.map(v => Object.assign({}, a0, v)) : [a0]).forEach((a, vi) => {
+      const q = k + '-' + (i + 1) + (a0.variantes ? '/v' + (vi + 1) : '') + ' (' + a.tipo + ')';
       check(q + ': tipo conocido', TIPOS.includes(a.tipo), a.tipo);
       check(q + ': orden y pista', !!a.orden && !!a.pista);
       if (a.tipo === 'clasificar') {
@@ -49,7 +49,10 @@ function validarDatos(nombre, cfg) {
         check(q + ': cada ficha va a una caja que existe', a.items.every(x => cajas.has(x.caja)));
         check(q + ': cada caja recibe algo', a.cajas.every(c => a.items.some(x => x.caja === c.id)));
         check(q + ': fichas sin repetir', new Set(a.items.map(txt)).size === a.items.length);
+        if (a.muestra) { const por = Math.floor(a.muestra / a.cajas.length); check(q + ': banco alcanza para la muestra (' + por + ' por caja)', a.cajas.every(c => a.items.filter(x => x.caja === c.id).length >= por)); }
       }
+      const banco = a.tipo === 'emparejar' ? a.pares : a.tipo === 'tocar' ? a.frases : a.items;
+      if (a.muestra) check(q + ': muestra menor o igual al banco', a.muestra <= banco.length, a.muestra + ' / ' + banco.length);
       if (a.tipo === 'ordenar') check(q + ': al menos 3 pasos distintos', a.items.length >= 3 && new Set(a.items.map(txt)).size === a.items.length);
       if (a.tipo === 'emparejar') {
         check(q + ': izquierdas distintas', new Set(a.pares.map(p => txt(p[0]))).size === a.pares.length);
@@ -64,7 +67,7 @@ function validarDatos(nombre, cfg) {
         check(q + ': respuestas entre las fichas en "' + it.frase + '"', cabe, resp.join(',') + ' / ' + bolsa.join(','));
         check(q + ': hay al menos una ficha que sobra (no se regala)', bolsa.length > resp.length || resp.length >= 4);
       });
-    });
+    }));
   });
 }
 
@@ -90,45 +93,55 @@ async function jugar(nombre, cfg) {
   /* portada */
   const p = await abrir(file);
   check(nombre + ': portada con #play', !!p.d.querySelector('#play'));
-  check(nombre + ': una tarjeta por mision', p.d.querySelectorAll('.g-mision').length === cfg.misiones.length);
+  check(nombre + ': una tarjeta por mision', p.d.querySelectorAll('.g-mision').length === cfg.misiones.length + (cfg.jefe ? 1 : 0));
   check(nombre + ': portada sin errores', p.errores.length === 0, p.errores.join(' | '));
   p.d.querySelector('#play').click(); await espera(10);
-  check(nombre + ': START abre Aprende de la primera mision', !!p.d.querySelector('.g-tarjeta') && /Let|Vamos/.test(p.d.querySelector('.g-barra small').textContent));
+  check(nombre + ': START abre Aprende de la primera mision', !!p.d.querySelector('.g-tarjeta') && !!p.d.querySelector('.g-mision-pant'));
   p.w.close();
 
-  for (const m of cfg.misiones) {
+  /* el Boss round se arma al cargar: una actividad al azar de cada mision */
+  const lista = cfg.misiones.slice();
+  if (cfg.jefe) {
+    const n = Math.min(cfg.misiones.length, cfg.jefe.max || 6);
+    const p2 = await abrir(file);
+    check(nombre + ': portada muestra el Boss round', p2.d.querySelectorAll('.g-mision').length === cfg.misiones.length + 1);
+    p2.w.close();
+    lista.push({ id: 'boss', jefe: true, actividades: Array.from({ length: n }, () => null) });
+  }
+  for (const m of lista) {
     for (let i = 0; i < m.actividades.length; i++) {
       const a = m.actividades[i], q = nombre + '/' + m.id + '-' + (i + 1);
       const s = await abrir(file, m.id + '-' + (i + 1));
       const { d, w } = s;
       check(q + ': abre la actividad', !!d.querySelector('.g-orden'), d.body.textContent.slice(0, 80));
-      check(q + ': sin opcion multiple ni puntaje', !d.querySelector('input[type=radio]') && !/score|puntaje|\d+\s*%/i.test(d.querySelector('.g-zona').textContent));
+      check(q + ': sin opcion multiple ni puntaje', !d.querySelector('input[type=radio]') && !/\bscore\s*:|puntaje|\d+\s*%/i.test(d.querySelector('.g-zona').textContent));
       /* una jugada equivocada no avanza */
-      if (a.tipo === 'clasificar') {
+      if (d.querySelector('.g-caja')) {
         const f = d.querySelector('.g-pool .g-ficha'); f.click();
-        const item = a.items.find(x => x.t === f.textContent.trim());
-        const malCaja = [...d.querySelectorAll('.g-caja')].find((c, k) => a.cajas[k].id !== item.caja);
+        const malCaja = [...d.querySelectorAll('.g-caja')].find(c => c.getAttribute('data-destino') !== f._x.caja);
         malCaja.click();
         check(q + ': caja equivocada no recibe la ficha', f.isConnected && malCaja.querySelectorAll('.g-chip').length === 0);
       }
-      if (a.tipo === 'tocar') {
+      if (d.querySelector('.g-frase')) {
         const mala = [...d.querySelectorAll('.g-palabra')].find(b => !b._g);
         if (mala) { mala.click(); check(q + ': palabra que no es objetivo no se marca', !mala.classList.contains('ok')); }
       }
-      if (a.tipo === 'completar') {
-        const resp = a.items[0].frase.match(/\[([^\]]+)\]/)[1].split('|');
+      if (d.querySelector('.g-blanco')) {
+        const resp = d.querySelector('.g-blanco')._r;
         const mala = [...d.querySelectorAll('.g-pool .g-ficha')].find(f => !resp.includes(f.textContent.trim()));
         if (mala) { mala.click(); check(q + ': ficha equivocada no llena el espacio', d.querySelector('.g-blanco').textContent === ''); }
       }
       /* terminar solo con la ayuda */
       const ayuda = [...d.querySelectorAll('.g-ayuda-fila .g-btn')][0];
       let n = 0;
-      while (!d.querySelector('.g-capa') && n < 600) { ayuda.click(); n++; if (n % 3 === 0) await espera(5); if (a.tipo !== 'clasificar' && a.tipo !== 'emparejar') await espera(a.tipo === 'completar' ? 2 : 0); }
+      while (!d.querySelector('.g-capa') && n < 600) { ayuda.click(); n++; if (n % 3 === 0) await espera(5); }
       for (let k = 0; k < 40 && !d.querySelector('.g-capa'); k++) { ayuda.click(); await espera(400); }
       check(q + ': se termina con la ayuda', !!d.querySelector('.g-capa'), 'clics ' + n);
       let guardado = {};
       try { guardado = JSON.parse(w.localStorage.getItem('samsan:guia-' + cfg.id) || '{}'); } catch (e) { /* nada */ }
       check(q + ': queda la estrella', guardado[m.id + '-' + (i + 1)] === 1);
+      const otra = [...d.querySelectorAll('.g-capa .g-btn')][1];
+      check(q + ': la capa ofrece otra ronda', !!otra);
       const sig = d.querySelector('.g-capa .g-btn');
       if (sig) { sig.click(); await espera(10); check(q + ': el boton de la capa navega', !d.querySelector('.g-capa')); }
       check(q + ': sin errores de JS', s.errores.length === 0, s.errores.join(' | '));
