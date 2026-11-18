@@ -222,12 +222,84 @@ async function errorJuego(nombre, cfg) {
   s.w.close();
 }
 
+
+/* ---------- modo aldea (Y2 English v3, «La aldea de Pip») ---------- */
+function validarAldea(nombre, cfg) {
+  const iconos = fs.readFileSync(path.join(DIR, 'comun', 'iconos.js'), 'utf8');
+  const ICONOS = JSON.parse(iconos.slice(iconos.indexOf('window.ICONOS = ') + 16, iconos.lastIndexOf(';')));
+  check(nombre + ': id y lang', cfg.id === nombre && /^(en|es)-/.test(cfg.lang));
+  check(nombre + ': etapas de 5 con 2, 3 y hasta 4 lugares', cfg.porEtapa === 5 && JSON.stringify(cfg.etapas) === '[2,3,4]');
+  cfg.mundos.forEach(m => {
+    const k = nombre + '/' + m.id, zonas = new Set(m.zonas.map(z => z.id));
+    check(k + ': escena del kit', ['calle', 'estanque', 'plaza', 'habitat', 'barrio', 'granja'].includes(m.escena), m.escena);
+    check(k + ': cada palabra va a una zona que existe', m.palabras.every(p => zonas.has(p.zona)));
+    check(k + ': cada palabra, ejemplo y calcomania tiene dibujo', m.palabras.every(p => ICONOS[p.ico]) && m.zonas.every(z => ICONOS[z.ej]) && m.calcos.every(c => ICONOS[c]),
+      [].concat(m.palabras.map(p => p.ico), m.zonas.map(z => z.ej), m.calcos).filter(x => !ICONOS[x]).join(','));
+    check(k + ': cada zona alcanza para 3 globos', m.zonas.every(z => m.palabras.filter(p => p.zona === z.id).length >= 3));
+    check(k + ': sin palabras repetidas', new Set(m.palabras.map(p => p.p)).size === m.palabras.length);
+  });
+}
+async function abrirAldea(file, hash, vistos) {
+  const errores = [];
+  const vc = new VirtualConsole();
+  vc.on('jsdomError', e => { const m = String(e && e.message); if (!/Not implemented/i.test(m)) errores.push(m); });
+  const dom = new JSDOM(fs.readFileSync(file, 'utf8'), {
+    url: 'https://example.test/' + path.basename(file) + (hash ? '#' + hash : ''),
+    runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: vc,
+    beforeParse(w) { if (vistos) w.localStorage.setItem('samsan:aldea-y2-english-v3', JSON.stringify({ etapas: {}, vistos })); }
+  });
+  await espera(40);
+  return { dom, w: dom.window, d: dom.window.document, errores };
+}
+async function jugarAldea(nombre, cfg) {
+  const file = path.join(ROOT, 'guia-' + nombre + '.html');
+  const vistos = {}; cfg.mundos.forEach(m => { vistos[m.id] = 1; });
+  /* error: el globo no entra en el lugar equivocado y al 2.o error brilla el correcto */
+  let s = await abrirAldea(file, cfg.mundos[0].id + '-3', vistos);
+  let d = s.d, et = s.w.GUIA._aldea_etapa;
+  const activo = et.activo(), mala = [...d.querySelectorAll('.al-pantalla .al-lugar')].find(l => l.dataset.lugar !== activo.zona);
+  mala.click(); mala.click();
+  check(nombre + ': lugar equivocado no recibe el globo', et.activo() === activo && d.querySelector('.al-estrellas').getAttribute('aria-label') === '0 / 5');
+  check(nombre + ': al 2.o error brilla el lugar correcto', d.querySelector('.al-pantalla [data-lugar="' + activo.zona + '"]').classList.contains('al-brilla'));
+  const visible = d.body.cloneNode(true); visible.querySelectorAll('script, style').forEach(n => n.remove());
+  check(nombre + ': sin puntaje ni porcentajes', !/\d+\s*%|score\s*:/i.test(visible.textContent));
+  s.w.close();
+  /* cada mundo en su etapa mas grande, solo con la bombilla (3 toques = una jugada) */
+  for (const m of cfg.mundos) {
+    s = await abrirAldea(file, m.id + '-3', vistos); d = s.d; et = s.w.GUIA._aldea_etapa;
+    const n = Math.min(4, m.zonas.length);
+    check(nombre + '/' + m.id + ': etapa 3 con ' + n + ' lugares', d.querySelectorAll('.al-pantalla .al-lugar').length === n);
+    const vistas = [];
+    for (let i = 0; i < 5; i++) {
+      for (let k = 0; k < 40 && !et.activo(); k++) await espera(100);
+      if (!et.activo()) break;
+      vistas.push(et.activo().zona);
+      const b = d.querySelector('.al-bombilla'); b.click(); b.click(); b.click();
+      await espera(2100);
+    }
+    for (let k = 0; k < 20 && !d.querySelector('.al-fin'); k++) await espera(100);
+    check(nombre + '/' + m.id + ': 5 globos, todos los lugares reciben', vistas.length === 5 && new Set(vistas).size === n, vistas.join(','));
+    check(nombre + '/' + m.id + ': termina con calcomania', !!d.querySelector('.al-fin .al-calco--nueva'));
+    const guardado = JSON.parse(s.w.localStorage.getItem('samsan:aldea-y2-english-v3') || '{}');
+    check(nombre + '/' + m.id + ': la etapa queda guardada', !!(guardado.etapas || {})[m.id + '-3']);
+    check(nombre + '/' + m.id + ': sin errores de JavaScript', s.errores.length === 0, s.errores.join(' | '));
+    s.w.close();
+  }
+  /* la primera entrada a un mundo abre la demostracion de Pip y despues deja jugar */
+  s = await abrirAldea(file, cfg.mundos[0].id + '-1', null); d = s.d; et = s.w.GUIA._aldea_etapa;
+  check(nombre + ': primera entrada abre la demostracion', et.enDemo() && !!d.querySelector('.al-demo__tapa'));
+  d.querySelector('.al-demo__tapa').click(); await espera(50);
+  check(nombre + ': al saltar la demostracion sale el primer globo', !et.enDemo() && !!et.activo());
+  s.w.close();
+}
+
 (async () => {
   if (!fs.existsSync(DIR)) { console.log('OMITIDO: no hay guias/'); return; }
   const nombres = fs.readdirSync(DIR).filter(f => f.endsWith('.js')).map(f => f.slice(0, -3));
   for (const n of nombres) {
     console.log('\n== guia ' + n);
     const cfg = leerConfig(n);
+    if (cfg.modo === 'aldea') { validarAldea(n, cfg); await jugarAldea(n, cfg); continue; }
     if (cfg.modo === 'juego') { validarJuego(n, cfg); await errorJuego(n, cfg); await jugarJuego(n, cfg); continue; }
     validarDatos(n, cfg);
     await jugar(n, cfg);

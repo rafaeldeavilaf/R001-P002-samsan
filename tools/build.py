@@ -475,6 +475,7 @@ GUIAS = "guias"
 LANG_RE = re.compile(r"^\s*//\s*lang:\s*([a-z]{2})\s*$", re.M)
 # `// motor: v1` usa el motor congelado de guias/comun/v1/ (decision del 18 nov 2026).
 MOTOR_RE = re.compile(r"^\s*//\s*motor:\s*([a-z0-9]+)\s*$", re.M)
+ALDEA_RE = re.compile(r"^\s*//\s*usa:\s*aldea\s*$", re.M)
 
 
 def guias():
@@ -497,8 +498,15 @@ def build_guia(credits, nombre):
     if not os.path.exists(os.path.join(ROOT, GUIAS, *motor, "guia.js")):
         fail("%s/%s.js pide el motor %s y no existe." % (GUIAS, nombre, "/".join(motor)))
     css = inline_fonts(read(GUIAS, *motor, "guia.css"))
+    # `// usa: aldea` suma el kit de la aldea de Pip y sus dibujos (Y2 English v3, 18 nov 2026).
+    aldea = ALDEA_RE.search(js) is not None
+    if aldea:
+        css += "\n" + read(GUIAS, "comun", "aldea.css")
     page = head(html.escape(titulo), "Guía de estudio interactiva de SAMSAN.", css, "guia", lm.group(1) if lm else "en")
     page += '<main id="guia" class="g-raiz"></main>\n' + foot(credits)
+    if aldea:
+        for archivo in ("iconos.js", "aldea.js"):
+            page += '<script>\n' + read(GUIAS, "comun", archivo) + '\n</script>\n'
     page += '<script>\n' + read(GUIAS, *motor, "guia.js") + '\n</script>\n'
     page += '<script>\n' + js + '\n</script>\n</body>\n</html>\n'
     return page

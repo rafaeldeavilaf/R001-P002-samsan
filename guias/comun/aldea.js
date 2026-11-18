@@ -346,7 +346,10 @@
     var color = op.color || COLORES_GLOBO[(op.indice || 0) % COLORES_GLOBO.length];
     var b = el('button', 'al-globo');
     b.type = 'button';
-    b.setAttribute('aria-label', op.etiqueta || op.palabra.replace(/\*/g, ''));
+    var plano = op.palabra.replace(/\*/g, ''), largo = Math.max.apply(null, plano.split(' ').map(function (w) { return w.length; }));
+    var L = plano.indexOf(' ') >= 0 ? Math.max(largo, Math.ceil(plano.length / 2)) : plano.length;
+    b.style.setProperty('--pal', (100 / Math.max(L, 4)).toFixed(2));
+    b.setAttribute('aria-label', op.etiqueta || plano);
     b.innerHTML = '<svg class="al-globo__bola" viewBox="0 0 60 92" aria-hidden="true">' +
       '<path d="M30 58 C30 70 22 76 30 92" fill="none" stroke="' + K + '" stroke-width="2"/>' +
       '<ellipse cx="30" cy="28" rx="24" ry="27" fill="' + color + '" stroke="' + K + '" stroke-width="3"/>' +

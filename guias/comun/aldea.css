@@ -40,10 +40,10 @@
 .al-suelo--plaza { background-color: #FDE7C4; background-image: linear-gradient(90deg, rgba(146,64,14,.22) 2px, transparent 2px), linear-gradient(rgba(146,64,14,.22) 2px, transparent 2px); background-size: 34px 22px; }
 .al-suelo--prado { background: linear-gradient(#86EFAC, #4ADE80); }
 .al-suelo--campo { background-color: #A3E635; background-image: repeating-linear-gradient(176deg, transparent 0 16px, rgba(77,124,15,.35) 16px 19px); }
-.al-decor { position: absolute; bottom: calc(var(--base) + 2px); height: calc(var(--ancho-lugar) * 1.3); }
+.al-decor { position: absolute; bottom: calc(var(--base) + 2px); height: min(calc(var(--ancho-lugar) * 1.3), 22cqh); }
 .al-decor--i { left: 1%; } .al-decor--d { right: 1%; }
 .al-decor--centro { left: 50%; transform: translateX(-50%); bottom: calc(var(--suelo) - 5cqh); height: 12cqh; }
-.al-decor--granero { bottom: calc(var(--suelo) - 1px); height: 17cqh; }
+.al-decor--granero { bottom: calc(var(--suelo) - 1px); height: min(14cqh, 120px); }
 .al-escena--estanque .al-decor { bottom: calc(var(--suelo) - 8cqh); height: calc(var(--ancho-lugar) * 1.1); }
 .al-valla { position: absolute; left: 0; width: 100%; height: 3cqh; bottom: calc(var(--suelo) + 1px); }
 .al-chorro { animation: al-chorro 1.6s ease-in-out infinite; }
@@ -98,7 +98,7 @@
   display: flex; align-items: center; justify-content: center; gap: 2cqw; padding: 2cqh 3cqw; pointer-events: none;
 }
 .al-vuelo { display: flex; align-items: center; justify-content: center; gap: 3cqw; max-height: 100%; }
-.al-pip { width: min(30cqw, 17cqh, 150px); height: auto; overflow: visible; flex-shrink: 0; }
+.al-pip { width: min(24cqw, 17cqh, 150px); height: auto; overflow: visible; flex-shrink: 0; }
 .al-pip-caja { animation: al-flota 2.2s ease-in-out infinite; pointer-events: auto; cursor: pointer; }
 .al-ala { transform-box: view-box; animation: al-aletea .32s ease-in-out infinite alternate; }
 .al-ala-i { transform-origin: 46px 70px; }
@@ -120,7 +120,7 @@
 }
 .al-ico { display: block; width: 100%; height: 100%; }
 .al-carta__dibujo { width: min(34cqw, 19cqh, 170px); height: min(34cqw, 19cqh, 170px); }
-.al-carta__palabra { font-family: 'Nunito', system-ui, sans-serif; font-weight: 900; font-size: min(12cqw, 7cqh, 3.2rem); line-height: 1.05; letter-spacing: .03em; white-space: nowrap; }
+.al-carta__palabra { font-family: 'Nunito', system-ui, sans-serif; font-weight: 900; font-size: min(12cqw, 7cqh, 3.2rem, calc(var(--pal, 12) * 1cqw)); line-height: 1.05; letter-spacing: .02em; text-align: center; text-wrap: balance; max-width: 62cqw; }
 .al-carta__palabra mark { background: #FDE68A; color: #9A3412; border-radius: 6px; padding: 0 .04em; box-shadow: inset 0 -.12em 0 #F59E0B; }
 .al-globo.al-arrastrando { animation: none; cursor: grabbing; z-index: 40; }
 .al-globo > * { transition: transform .15s ease; }
@@ -135,7 +135,7 @@
   .al-globo__bola { height: min(22cqh, 90px); margin: 0 -4px 0 0; transform: rotate(-90deg); }
   .al-carta { flex-direction: row; gap: 1.4cqw; padding: 1cqh 2cqw; }
   .al-carta__dibujo { width: min(17cqh, 130px); height: min(17cqh, 130px); }
-  .al-carta__palabra { font-size: min(8cqh, 3.2rem); }
+  .al-carta__palabra { font-size: min(8cqh, 3.2rem, calc(var(--pal, 12) * 1.6cqw)); max-width: 46cqw; }
   .al-pip { width: min(14cqw, 20cqh, 150px); }
 }
 
@@ -171,3 +171,48 @@
   .al-nube, .al-sol__rayos, .al-ala, .al-pip-caja, .al-globo, .al-ola, .al-chorro { animation: none !important; }
   .al-entra, .al-pip--fiesta, .al-sube { animation-duration: .01s !important; }
 }
+
+/* ============================================================
+   MODO ALDEA DEL MOTOR (guia.js): portada, mapa, album y fin de etapa
+   ============================================================ */
+.g-raiz--aldea { max-width: none; padding: 0; }
+.al-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.al-barra .al-estrella { width: clamp(24px, 7.4vw, 36px); height: clamp(24px, 7.4vw, 36px); }
+.al-barra .al-estrellas { gap: clamp(2px, 1vw, 6px); }
+.al-bombilla svg { width: 26px; height: 26px; }
+.al-bombilla path { fill: #FDE047; }
+.al-pip--chico { width: 44px !important; }
+.al-demo .al-globo { cursor: default; }
+.al-demo__tapa { position: absolute; inset: 0; z-index: 9; background: transparent; border: 0; padding: 0; cursor: pointer; }
+
+.al-hola { display: flex; align-items: center; gap: 14px; margin: 4px 0 6px; }
+.al-hola__pip { background: none; border: 0; padding: 0; cursor: pointer; }
+.al-hola__pip .al-pip { width: min(30vw, 150px); }
+.al-play { flex: 1; min-height: 76px; font-size: 1.5rem; gap: 12px; }
+.al-play__ico { width: 46px; height: 46px; background: #FFFFFF; border-radius: 14px; padding: 4px; border: 2px solid #1F2937; display: inline-block; }
+
+.al-mapa { position: relative; display: grid; grid-template-rows: repeat(var(--filas, 6), 150px); background: linear-gradient(#DCFCE7, #BBF7D0); border: 3px solid #1F2937; border-radius: 22px; overflow: hidden; padding: 0 8px; }
+.al-mapa__camino { position: absolute; inset: 0; width: 100%; height: 100%; }
+.al-alto { position: relative; display: flex; align-items: center; gap: 10px; justify-content: flex-start; padding-left: 2%; }
+.al-alto--d { flex-direction: row-reverse; padding: 0 2% 0 0; }
+.al-alto__mundo { display: flex; flex-direction: column; align-items: center; gap: 4px; width: min(36vw, 170px); padding: 8px 6px; background: #FFFFFF; border: 3px solid #1F2937; border-bottom: 7px solid var(--c, #1D4ED8); border-radius: 18px; cursor: pointer; box-shadow: 0 4px 0 #1F2937; color: #1F2937; }
+.al-alto__ico { width: 54px; height: 54px; }
+.al-alto__nombre { font-weight: 900; font-size: .9rem; line-height: 1.1; text-align: center; }
+.al-alto__etapas { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 190px; }
+.al-parada { position: relative; width: 50px; height: 50px; border-radius: 50%; border: 3px solid #1F2937; background: #FFFFFF; color: #1F2937; font-weight: 900; font-size: 1.15rem; cursor: pointer; padding: 6px; box-shadow: 0 3px 0 #1F2937; }
+.al-parada--hecha { background: #FEF3C7; }
+.al-parada--aqui { background: #FDE047; animation: al-late 1.1s ease-in-out infinite; }
+.al-parada__pip { position: absolute; left: 50%; top: -40px; transform: translateX(-50%); pointer-events: none; }
+@keyframes al-late { 50% { transform: scale(1.1); } }
+
+.al-album { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.al-album .al-calco { width: 100%; height: auto; aspect-ratio: 1; padding: 8%; background: #FFFFFF; border: 3px solid #1F2937; border-radius: 16px; display: block; }
+.al-calco--falta { border-style: dashed !important; border-color: #9CA3AF !important; }
+.al-calco--falta .al-ico { filter: grayscale(1) brightness(1.6); opacity: .28; }
+.al-fin { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.al-fin__pip .al-pip { width: 140px; }
+.al-fin .al-calco--nueva { width: 116px; height: 116px; padding: 12px; background: #FFFFFF; border: 4px solid #1F2937; border-radius: 26px; box-shadow: 0 5px 0 #1F2937; animation: al-pop .55s cubic-bezier(.3,1.6,.5,1) .3s both; }
+.al-fin__botones { display: flex; gap: 10px; }
+.al-fin__botones .g-btn { min-width: 64px; min-height: 60px; font-size: 1.5rem; }
+@media (max-width: 420px) { .al-album { grid-template-columns: repeat(3, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .al-parada--aqui { animation: none; } }
