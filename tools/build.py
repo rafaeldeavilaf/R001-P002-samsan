@@ -504,6 +504,30 @@ def build_guia(credits, nombre):
     return page
 
 
+def bocetos_guia():
+    """guias/bocetos/<nombre>.js: bocetos de las guias para que Rafael apruebe un
+    diseño antes de construirlo (decision del 18 nov 2026, aldea de Pip). Solo
+    se construyen en _local/ y nunca se publican."""
+    raiz = os.path.join(ROOT, GUIAS, "bocetos")
+    if not os.path.isdir(raiz):
+        return []
+    return sorted(f[:-3] for f in os.listdir(raiz) if f.endswith(".js"))
+
+
+def build_boceto_guia(credits, nombre):
+    """Un boceto de guia: guia.css + aldea.css, iconos.js + aldea.js + el boceto."""
+    js = read(GUIAS, "bocetos", nombre + ".js")
+    m = TITULO_RE.search(js)
+    titulo = m.group(1) if m else nombre
+    css = inline_fonts(read(GUIAS, "comun", "guia.css")) + "\n" + read(GUIAS, "comun", "aldea.css")
+    page = head(html.escape(titulo), "Boceto local de SAMSAN.", css, "guia", "en")
+    page += '<main id="boceto" class="al-boceto"></main>\n' + foot(credits)
+    for archivo in ("iconos.js", "aldea.js"):
+        page += '<script>\n' + read(GUIAS, "comun", archivo) + '\n</script>\n'
+    page += '<script>\n' + js + '\n</script>\n</body>\n</html>\n'
+    return page
+
+
 # Guardarrailes sobre cada pagina escrita.
 ASSETS_RE = re.compile(r"""(src|href)\s*=\s*["'][^"']*assets/""")
 EXTERNAL_RE = re.compile(
@@ -574,6 +598,10 @@ def main():
     for nombre in guias():
         rel = "guia-" + nombre + ".html"
         built.append((rel, write(rel, build_guia(credits, nombre))))
+        hechos.append(rel)
+    for nombre in bocetos_guia():
+        rel = LOCAL + "/boceto-" + nombre + ".html"
+        built.append((rel, write(rel, build_boceto_guia(credits, nombre))))
         hechos.append(rel)
     write(LOCAL + "/prototipos.json", json.dumps(hechos, indent=1) + "\n")
 
