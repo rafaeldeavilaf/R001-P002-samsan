@@ -54,7 +54,8 @@ html[data-tema="y6"] .g-barra h1 small { font-family: var(--etiqueta); font-size
 .g-icono { min-width: 48px; min-height: 48px; border: var(--borde) solid var(--linea); border-radius: 50%; background: var(--papel); color: var(--tinta); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; flex-shrink: 0; }
 html[data-tema="y6"] .g-icono { border-radius: 12px; }
 .g-icono svg { width: 24px; height: 24px; }
-.g-icono[aria-pressed="false"] { opacity: .45; }
+.g-icono[aria-pressed="false"] { opacity: .5; position: relative; }
+.g-icono[aria-pressed="false"]::after { content: ''; position: absolute; width: 60%; height: 3px; background: currentColor; transform: rotate(-45deg); border-radius: 2px; }
 
 /* ---------- botones ---------- */
 .g-btn { min-height: 52px; padding: 10px 22px; border: var(--borde) solid var(--linea); border-radius: 999px; background: var(--acento); color: var(--sobre-acento); font-weight: 900; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 0 var(--sombra); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
@@ -190,7 +191,7 @@ html[data-tema="y6"] .g-col h4 { font-family: var(--etiqueta); font-size: .55rem
 /* tocar */
 .g-frase { background: var(--papel); border: var(--borde) solid var(--linea); border-radius: var(--radio); padding: 16px 12px; font-size: 1.35rem; line-height: 2.3; text-align: center; margin-bottom: 12px; }
 html[data-tema="y6"] .g-frase { font-size: 1.2rem; }
-.g-palabra { border: 2px solid transparent; border-bottom: 3px dotted var(--suave); background: none; color: var(--tinta); padding: 2px 4px; border-radius: 8px; cursor: pointer; font-weight: 700; min-height: 44px; line-height: 1.2; }
+.g-palabra { min-width: 32px; border: 2px solid transparent; border-bottom: 3px dotted var(--suave); background: none; color: var(--tinta); padding: 2px 4px; border-radius: 8px; cursor: pointer; font-weight: 700; min-height: 44px; line-height: 1.2; }
 .g-palabra.ok { background: var(--ok-claro); border: 2px solid var(--ok); color: var(--tinta); font-weight: 900; }
 
 /* completar */
@@ -434,79 +435,118 @@ html[data-tema="y6"] .g-logro { border-color: #A3E635; box-shadow: 0 0 40px rgba
   }
 
   var Musica = (function () {
-    var master = null, timer = null, paso = 0, prox = 0, ruido = null, est = null, sonando = false;
+    var master = null, timer = null, paso = 0, prox = 0, est = null, sonando = false, ruidos = new WeakMap();
+    var VOL = 0.32, VOL_BAJO = 0.08;
     var mtof = function (m) { return 440 * Math.pow(2, (m - 69) / 12); };
-    function nota(m, t0, dur, vol, tipo, corte) {
-      var c = ac;
+    /* Cada voz recibe el contexto (c) y el destino (d): asi la misma partitura
+       suena en vivo y se mide en un OfflineAudioContext (prueba de volumen). */
+    function nota(c, d, m, t0, dur, vol, tipo, corte) {
       var o = c.createOscillator(), g = c.createGain();
       o.type = tipo; o.frequency.value = mtof(m);
       g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.015);
       g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
       if (corte) { var f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = corte; o.connect(f); f.connect(g); }
       else o.connect(g);
-      g.connect(master); o.start(t0); o.stop(t0 + dur + 0.05);
+      g.connect(d); o.start(t0); o.stop(t0 + dur + 0.05);
     }
-    function bombo(t0) {
-      var c = ac, o = c.createOscillator(), g = c.createGain();
-      o.frequency.setValueAtTime(130, t0); o.frequency.exponentialRampToValueAtTime(42, t0 + 0.18);
-      g.gain.setValueAtTime(0.5, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.22);
-      o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + 0.25);
+    function ruido(c) {
+      if (!ruidos.has(c)) { var b = c.createBuffer(1, Math.floor(c.sampleRate * 0.1), c.sampleRate), x = b.getChannelData(0); for (var i = 0; i < x.length; i++) x[i] = Math.random() * 2 - 1; ruidos.set(c, b); }
+      return ruidos.get(c);
     }
-    function platillo(t0, vol) {
-      var c = ac;
-      if (!ruido) { ruido = c.createBuffer(1, c.sampleRate * 0.1, c.sampleRate); var d = ruido.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    function golpe(c, d, t0, vol, filtro, frec, dur) {
       var s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
-      s.buffer = ruido; f.type = 'highpass'; f.frequency.value = 7000;
-      g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.05);
-      s.connect(f); f.connect(g); g.connect(master); s.start(t0); s.stop(t0 + 0.06);
+      s.buffer = ruido(c); f.type = filtro; f.frequency.value = frec;
+      g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      s.connect(f); f.connect(g); g.connect(d); s.start(t0); s.stop(t0 + dur + 0.02);
+    }
+    /* Bombo con "clic" en frecuencias medias: el golpe grave no suena en un
+       parlante de telefono (menos de ~200 Hz), el clic si. */
+    function bombo(c, d, t0) {
+      var o = c.createOscillator(), g = c.createGain();
+      o.frequency.setValueAtTime(220, t0); o.frequency.exponentialRampToValueAtTime(70, t0 + 0.12);
+      g.gain.setValueAtTime(0.35, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+      o.connect(g); g.connect(d); o.start(t0); o.stop(t0 + 0.2);
+      golpe(c, d, t0, 0.12, 'bandpass', 1800, 0.03);
     }
     var ESTILOS = {
       /* Year 2: alegre, en Do mayor (C G Am F), corcheas */
       alegre: {
         bpm: 112, acordes: [[60, 64, 67], [55, 59, 62], [57, 60, 64], [53, 57, 60]],
         melodia: [72, -1, 74, 76, -1, 74, 72, -1, 71, -1, 72, 74, -1, -1, 71, -1, 72, -1, 76, -1, 79, 76, -1, 74, 72, -1, 69, 72, -1, -1, -1, -1],
-        tocar: function (t0, p, ch, d) {
+        tocar: function (c, d, t0, p, ch, dt) {
           var i = p % 8;
-          if (i === 0 || i === 4) nota(ch[0] - 24, t0, d * 1.8, 0.16, 'sine');
-          nota(ch[[0, 1, 2, 1, 0, 1, 2, 1][i]] + 12, t0, d * 0.9, 0.035, 'triangle');
-          var m = this.melodia[p % 32]; if (m > 0) nota(m, t0, d * 1.6, 0.05, 'sine');
+          if (i === 0 || i === 4) nota(c, d, ch[0] - 24, t0, dt * 1.8, 0.16, 'sine');
+          nota(c, d, ch[[0, 1, 2, 1, 0, 1, 2, 1][i]] + 12, t0, dt * 0.9, 0.035, 'triangle');
+          var m = this.melodia[p % 32]; if (m > 0) nota(c, d, m, t0, dt * 1.6, 0.05, 'sine');
         }
       },
-      /* Year 6: synth tranquilo, La menor (Am F C G), bombo y platillo suaves */
+      /* Year 6: synth de videojuego en La menor (Am F C G). Todo lo que tiene
+         que oirse vive por encima de 200 Hz: bajo una octava arriba con brillo,
+         arpegio y melodia en la zona media, platillo y clic del bombo. */
       synth: {
-        bpm: 92, acordes: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]],
-        tocar: function (t0, p, ch, d) {
+        bpm: 104, acordes: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]],
+        melodia: [76, -1, -1, 74, 72, -1, 71, -1, 72, -1, -1, 69, 67, -1, 69, -1, 67, -1, -1, 64, 67, -1, 72, -1, 71, -1, 74, -1, 71, -1, -1, -1],
+        tocar: function (c, d, t0, p, ch, dt) {
           var i = p % 8;
-          if (i === 0 || i === 4) bombo(t0);
-          if (i === 2 || i === 6) platillo(t0, 0.06);
-          if ([0, 3, 4, 6].indexOf(i) >= 0) nota(ch[0] - 24, t0, d * 0.9, 0.12, 'sawtooth', 380);
-          if (i === 0) ch.forEach(function (m) { nota(m, t0, d * 7.5, 0.018, 'square', 900); });
-          if (i % 2 === 1) nota(ch[(p >> 1) % 3] + 12, t0, d * 0.7, 0.03, 'square', 2200);
+          if (i === 0 || i === 4) bombo(c, d, t0);
+          if (i % 2 === 1) golpe(c, d, t0, 0.07, 'highpass', 6500, 0.04);
+          if ([0, 3, 4, 6].indexOf(i) >= 0) nota(c, d, ch[0] - 12, t0, dt * 0.85, 0.09, 'sawtooth', 1400);
+          if (i === 0) ch.forEach(function (m) { nota(c, d, m, t0, dt * 7.5, 0.022, 'triangle'); });
+          nota(c, d, ch[[0, 1, 2, 1][p % 4]] + 12, t0, dt * 0.6, 0.035, 'square', 2600);
+          var m = this.melodia[p % 32]; if (m > 0) nota(c, d, m, t0, dt * 1.8, 0.05, 'triangle');
         }
       }
     };
     function programar() {
-      var d = 60 / est.bpm / 2;
+      var dt = 60 / est.bpm / 2;
       while (prox < ac.currentTime + 0.15) {
         var ch = est.acordes[Math.floor(paso / 8) % est.acordes.length];
-        try { est.tocar(prox, paso, ch, d); } catch (e) { /* nada */ }
-        prox += d; paso++;
+        try { est.tocar(ac, master, prox, paso, ch, dt); } catch (e) { /* nada */ }
+        prox += dt; paso++;
       }
     }
+    /* iPhone con el interruptor de silencio: un <audio> local en bucle (silencio,
+       data: URI, nada sale del navegador) pone la sesion en modo reproduccion. */
+    var mudo = null;
+    function desbloquear() {
+      try {
+        if (!mudo) { mudo = new Audio('data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA=='); mudo.loop = true; mudo.setAttribute('playsinline', ''); }
+        var pr = mudo.play(); if (pr && pr.catch) pr.catch(function () { /* nada */ });
+      } catch (e) { /* nada */ }
+    }
     function empezar() {
+      if (sonando && ac && ac.state === 'suspended') { try { ac.resume(); } catch (e) { /* nada */ } }
       if (sonando || !musicaOn || !cfg || !cfg.musica || document.hidden) return;
+      desbloquear();
+      /* iPhone: con el interruptor de silencio, Web Audio calla salvo que la
+         sesion de audio sea de reproduccion (Safari 17+). */
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* nada */ }
       if (!audio()) return;
       try {
         est = ESTILOS[cfg.musica]; if (!est) return;
-        master = master || (function () { var g = ac.createGain(); g.gain.value = 0.32; g.connect(ac.destination); return g; })();
+        if (!master) { master = ac.createGain(); master.gain.value = VOL; master.connect(ac.destination); }
         prox = ac.currentTime + 0.1; sonando = true;
         timer = setInterval(programar, 30);
       } catch (e) { sonando = false; }
     }
-    function parar() { if (timer) clearInterval(timer); timer = null; sonando = false; }
-    function bajar(si) { try { if (master) master.gain.setTargetAtTime(si ? 0.08 : 0.32, ac.currentTime, 0.12); } catch (e) { /* nada */ } }
+    function parar() { if (timer) clearInterval(timer); timer = null; sonando = false; try { if (mudo) mudo.pause(); } catch (e) { /* nada */ } }
+    var bajo = false;
+    function bajar(si) { bajo = si; try { if (master) master.gain.setTargetAtTime(si ? VOL_BAJO : VOL, ac.currentTime, 0.12); } catch (e) { /* nada */ } }
+    /* Prueba: renderiza la partitura sin sonar y mide energia total y audible en telefono. */
+    function medir(estilo, segundos) {
+      var sr = 44100, c = new OfflineAudioContext(1, sr * segundos, sr), g = c.createGain();
+      g.gain.value = VOL; g.connect(c.destination);
+      var e = ESTILOS[estilo], dt = 60 / e.bpm / 2, tt = 0.05, pp = 0;
+      while (tt < segundos - 0.3) { e.tocar(c, g, tt, pp, e.acordes[Math.floor(pp / 8) % e.acordes.length], dt); tt += dt; pp++; }
+      /* filtro paso alto a 300 Hz en paralelo: lo que un parlante de telefono reproduce */
+      return c.startRendering().then(function (buf) {
+        var x = buf.getChannelData(0), n = x.length, tot = 0, alto = 0, y = 0, prev = 0, a = 1 / (1 + 2 * Math.PI * 300 / sr);
+        for (var i = 0; i < n; i++) { tot += x[i] * x[i]; y = a * (y + x[i] - prev); prev = x[i]; alto += y * y; }
+        return { rms: Math.sqrt(tot / n), rmsTelefono: Math.sqrt(alto / n) };
+      });
+    }
     document.addEventListener('visibilitychange', function () { if (document.hidden) parar(); else empezar(); });
-    return { empezar: empezar, parar: parar, bajar: bajar };
+    return { empezar: empezar, parar: parar, bajar: bajar, medir: medir, estado: function () { return { sonando: sonando, on: musicaOn, bajo: bajo, ctx: ac ? ac.state : 'none' }; } };
   })();
 
   /* ---------- voz del telefono (sin enviar nada fuera) ---------- */
@@ -610,10 +650,12 @@ html[data-tema="y6"] .g-logro { border-color: #A3E635; box-shadow: 0 0 40px rgba
     if (alVolver) b.appendChild(el('button', { class: 'g-icono', 'aria-label': t('atras'), html: ICO.atras, onclick: alVolver }));
     b.appendChild(el('h1', { html: esc(titulo) + (sub ? '<small>' + esc(sub) + '</small>' : '') }));
     if (cfg.musica) {
-      var bm = el('button', { class: 'g-icono', 'aria-label': t('musica'), 'aria-pressed': String(musicaOn), html: ICO.musica });
+      var bm = el('button', { class: 'g-icono g-btn-musica', 'aria-label': t('musica'), 'aria-pressed': String(musicaOn), html: ICO.musica });
       bm.addEventListener('click', function () {
+        /* Encendida pero aun sin sonar (falta el primer toque): este toque la arranca, no la apaga. */
+        if (musicaOn && !Musica.estado().sonando) { Musica.empezar(); return; }
         musicaOn = !musicaOn; bm.setAttribute('aria-pressed', String(musicaOn));
-        try { localStorage.setItem('samsan:guia-musica', musicaOn ? '1' : '0'); } catch (e) { /* nada */ }
+        try { localStorage.setItem('samsan:guia-musica-' + cfg.id, musicaOn ? '1' : '0'); } catch (e) { /* nada */ }
         if (musicaOn) Musica.empezar(); else Musica.parar();
       });
       b.appendChild(bm);
@@ -1188,13 +1230,14 @@ html[data-tema="y6"] .g-logro { border-color: #A3E635; box-shadow: 0 0 40px rgba
     cfg.textos = cfg.textos || {};
     document.documentElement.setAttribute('data-tema', cfg.tema || 'y2');
     raiz = document.getElementById('guia');
-    try { vozOn = localStorage.getItem('samsan:guia-voz') !== '0'; musicaOn = localStorage.getItem('samsan:guia-musica') !== '0'; } catch (e) { vozOn = true; musicaOn = true; }
+    try { vozOn = localStorage.getItem('samsan:guia-voz') !== '0'; musicaOn = localStorage.getItem('samsan:guia-musica-' + cfg.id) !== '0'; } catch (e) { vozOn = true; musicaOn = true; }
     armarJefe();
     cargar(); cargarVoces();
     if (window.speechSynthesis && 'onvoiceschanged' in speechSynthesis) speechSynthesis.onvoiceschanged = cargarVoces;
     /* la musica necesita un primer toque (regla de los navegadores) */
-    document.addEventListener('pointerdown', function () { Musica.empezar(); }, true);
-    document.addEventListener('keydown', function () { Musica.empezar(); }, true);
+    ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (tipo) {
+      document.addEventListener(tipo, function (e) { if (!(e.target && e.target.closest && e.target.closest('.g-btn-musica'))) Musica.empezar(); }, true);
+    });
     /* entrada directa por #id-mision o #id-mision-N */
     var h = (location.hash || '').slice(1), estado = {};
     cfg.misiones.forEach(function (m, mi) {
@@ -1206,6 +1249,7 @@ html[data-tema="y6"] .g-logro { border-color: #A3E635; box-shadow: 0 0 40px rgba
     else ir({}, true);
   };
   G._TIPOS = TIPOS;
+  G._musica = Musica;   /* solo para pruebas: estado() y medir(estilo, segundos) */
 })();
 
 </script>

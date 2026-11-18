@@ -45,7 +45,8 @@ html[data-tema="y6"] .g-barra h1 small { font-family: var(--etiqueta); font-size
 .g-icono { min-width: 48px; min-height: 48px; border: var(--borde) solid var(--linea); border-radius: 50%; background: var(--papel); color: var(--tinta); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; flex-shrink: 0; }
 html[data-tema="y6"] .g-icono { border-radius: 12px; }
 .g-icono svg { width: 24px; height: 24px; }
-.g-icono[aria-pressed="false"] { opacity: .45; }
+.g-icono[aria-pressed="false"] { opacity: .5; position: relative; }
+.g-icono[aria-pressed="false"]::after { content: ''; position: absolute; width: 60%; height: 3px; background: currentColor; transform: rotate(-45deg); border-radius: 2px; }
 
 /* ---------- botones ---------- */
 .g-btn { min-height: 52px; padding: 10px 22px; border: var(--borde) solid var(--linea); border-radius: 999px; background: var(--acento); color: var(--sobre-acento); font-weight: 900; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 0 var(--sombra); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
@@ -181,7 +182,7 @@ html[data-tema="y6"] .g-col h4 { font-family: var(--etiqueta); font-size: .55rem
 /* tocar */
 .g-frase { background: var(--papel); border: var(--borde) solid var(--linea); border-radius: var(--radio); padding: 16px 12px; font-size: 1.35rem; line-height: 2.3; text-align: center; margin-bottom: 12px; }
 html[data-tema="y6"] .g-frase { font-size: 1.2rem; }
-.g-palabra { border: 2px solid transparent; border-bottom: 3px dotted var(--suave); background: none; color: var(--tinta); padding: 2px 4px; border-radius: 8px; cursor: pointer; font-weight: 700; min-height: 44px; line-height: 1.2; }
+.g-palabra { min-width: 32px; border: 2px solid transparent; border-bottom: 3px dotted var(--suave); background: none; color: var(--tinta); padding: 2px 4px; border-radius: 8px; cursor: pointer; font-weight: 700; min-height: 44px; line-height: 1.2; }
 .g-palabra.ok { background: var(--ok-claro); border: 2px solid var(--ok); color: var(--tinta); font-weight: 900; }
 
 /* completar */
