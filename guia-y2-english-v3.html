@@ -556,8 +556,8 @@ body.al-jugando .site-foot { display: none; }
 @media (prefers-reduced-motion: reduce) { .al-cola__globo, .al-mano { animation: none; } }
 
 /* ronda 3: con 4 lugares el dibujo va arriba de la palabra para que los letreros no se pisen */
-.al-escena[data-n="4"] .al-letrero { flex-direction: column; gap: 0; line-height: 1; padding: .12em .28em .14em; font-size: max(.92rem, calc(var(--ancho-lugar) * var(--letrero-k2, .25))); }
-.al-escena[data-n="4"] .al-letrero__ico { width: max(26px, 1.3em); height: max(26px, 1.3em); }
+.al-escena[data-n="3"] .al-letrero, .al-escena[data-n="4"] .al-letrero { flex-direction: column; gap: 0; line-height: 1; padding: .12em .28em .14em; font-size: max(.92rem, calc(var(--ancho-lugar) * var(--letrero-k2, .25))); }
+.al-escena[data-n="3"] .al-letrero__ico, .al-escena[data-n="4"] .al-letrero__ico { width: max(26px, 1.3em); height: max(26px, 1.3em); }
 .al-cola__globo { width: max(40px, min(12cqw, 10cqh, 52px)); height: max(40px, min(12cqw, 10cqh, 52px)); position: relative; }
 .al-cola__globo::after { content: ''; position: absolute; left: 50%; top: 100%; width: 2px; height: 12px; background: #1F2937; }
 .al-insignia .al-pip { width: 70px; display: block; margin: 2px auto 0; }
@@ -1010,6 +1010,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
     var g = centro(globo), d = centro(lugar.querySelector('.al-puerta') || lugar);
     var dx = d.x - g.x, dy = d.y - g.y, base = globo.style.transform || '';
     globo.style.animation = 'none';
+    void globo.offsetWidth;   /* reflujo: sin esto el navegador no anima el viaje y el globo salta */
     if (op && op.lento && !MENOS_MOV) {
       globo.style.transition = 'transform 1.25s cubic-bezier(.45,.05,.55,.95)';
       globo.style.transform = base + ' translate(' + dx + 'px,' + (dy - g.r.height * 0.25) + 'px) scale(.75)';
@@ -2556,6 +2557,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
 
       var activo = null, globo = null, peldano = 0, ocupado = false, enDemo = false, timers = [];
       var fonetica = /\*/.test(zonas[0].ejp);
+      function nombreMundo() { return /[?!.]$/.test(m.titulo) ? m.titulo : m.titulo + '!'; }
       function plano2(x) { return String(x).replace(/\*/g, ''); }
       /* el nombre del lugar con su ejemplo */
       var preguntas = /\?$/.test(zonas[0].letrero);
@@ -2649,7 +2651,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
           alTerminar && alTerminar();
         }
         saltar.addEventListener('click', function () { try { speechSynthesis.cancel(); } catch (er) { /* nada */ } cerrar(); });
-        hablar(m.titulo + '! ' + t('aldea_mira'));
+        hablar(nombreMundo() + ' ' + t('aldea_mira'));
         function uno() {
           if (cerrado) return;
           if (k >= lista.length) return despues(cerrar, 500);
@@ -2703,13 +2705,14 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
         capa.appendChild(box); document.body.appendChild(capa);
         A.celebrar(box.querySelector('.al-pip'));
         try { var r = box.getBoundingClientRect(); A.confeti(r.left + r.width / 2, r.top + 60, 36); } catch (er) { /* nada */ }
-        hablar(nueva ? t('aldea_calco') : t('etapa_ok'), { cola: true });
+        /* el traje primero: es lo que mas emociona y un toque rapido a ▶ cortaria lo que va en cola */
         if (desbloqueo) hablar(t('aldea_traje'), { cola: true });
+        hablar(nueva ? t('aldea_calco') : t('etapa_ok'), { cola: true });
         setTimeout(function () { bSig.focus(); }, 50);
       }
 
       if (!st.vistos[m.id]) { st.vistos[m.id] = 1; guardar(); pintarCola(); demo(sacar); }
-      else sacar();
+      else { hablar(nombreMundo()); sacar(); }   /* Pip dice el nombre del mundo en cada etapa */
       G._aldea_etapa = { zonas: zonas, activo: function () { return activo; }, enDemo: function () { return enDemo; } };   /* solo para pruebas */
     }
     var ICO_SALTAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5 L12 12 L3 19 Z M12 5 L21 12 L12 19 Z" fill="currentColor"/></svg>';

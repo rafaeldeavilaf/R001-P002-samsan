@@ -425,6 +425,7 @@
     var g = centro(globo), d = centro(lugar.querySelector('.al-puerta') || lugar);
     var dx = d.x - g.x, dy = d.y - g.y, base = globo.style.transform || '';
     globo.style.animation = 'none';
+    void globo.offsetWidth;   /* reflujo: sin esto el navegador no anima el viaje y el globo salta */
     if (op && op.lento && !MENOS_MOV) {
       globo.style.transition = 'transform 1.25s cubic-bezier(.45,.05,.55,.95)';
       globo.style.transform = base + ' translate(' + dx + 'px,' + (dy - g.r.height * 0.25) + 'px) scale(.75)';

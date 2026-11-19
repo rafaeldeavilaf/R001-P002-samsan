@@ -139,3 +139,20 @@ Se prueban con `python3 tools/historias_aldea.py y2-english-v3`. Son las J de la
 ### Resultado del 18 nov 2026
 
 20 historias, 20 OK en Chrome real con los perfiles 390 × 844, 360 × 640, 844 × 390 y 1366 × 768. Las fallas de la primera corrida fueron de la prueba, no del juego: la carga del progreso de prueba se repetía en cada recarga y Playwright no tocaba elementos que se animan (el alto actual del mapa y Pip), que un dedo sí toca.
+
+### Panel de 3 agentes con perfil de niño de 6 a 7 años que aprende inglés (18 nov 2026)
+
+Cada agente jugó en Chrome real con su perfil y su pantalla, con la voz simulada, y calificó de 1 a 10 con la escala de Rafael (10 es «lo pide otra vez y lo juega solo», 3 es «una ficha del colegio en pantalla»). Meta: promedio de al menos 8.
+
+| Perfil | Pantalla | Ronda 1 | Ronda 2 | Ronda 3 |
+|---|---|---|---|---|
+| Niño impaciente que casi no lee | 390 × 844 | 7 | 8 | 8 |
+| Niña tímida a la que le cuesta el inglés | 360 × 640 | 7 | 8 | 9 |
+| Niño curioso que ya juega en la tablet | 844 × 390 y 1366 × 768 | 6 | 7 | 7,5 |
+| **Promedio** | | **6,7** | **7,7** | **8,2** |
+
+- **Ronda 1 a 2.** Se arreglaron un bloqueo del final de etapa en horizontal al ganar un traje, «Your turn!» cortado y la demostración que seguía tras saltarla. Se sumaron demostración más corta con mano y botón para saltar, letreros con dibujo que se oyen al tocarlos sin contar como intento, ánimo con la palabra en cada acierto, sonido propio por mundo, pistas por ejemplo, cola de globos, siluetas oscuras en el álbum, traje que se pone solo y «Start again» dentro de «For grown-ups».
+- **Ronda 2 a 3.** Pistas con frase natural fuera de fonética y de preguntas, letreros apilados con 3 y 4 lugares, Where? con una casa en vez de la sombrilla, vuelo lento en la demostración, vecino neutro en los nenúfares y Pip con el traje nuevo en el final en horizontal.
+- **Después de la ronda 3.** El globo saltaba en vez de volar (faltaba un reflujo antes de la transición) y se corrigió. Pip dice el nombre del mundo en cada etapa y el aviso del traje va antes que el de la calcomanía.
+- **Se descartó a propósito.** Estrellas plateadas por error y premio por ronda perfecta, porque la regla 4 prohíbe medir aciertos frente al niño.
+- **Queda para una propuesta aparte.** Una mecánica distinta por mundo (ordenar el ciclo de vida en la granja, Pip pregunta en voz alta en la plaza) y una etapa 3 que se sienta como nivel difícil. Es lo que le falta al perfil curioso.

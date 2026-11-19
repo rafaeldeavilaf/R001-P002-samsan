@@ -1457,6 +1457,7 @@
 
       var activo = null, globo = null, peldano = 0, ocupado = false, enDemo = false, timers = [];
       var fonetica = /\*/.test(zonas[0].ejp);
+      function nombreMundo() { return /[?!.]$/.test(m.titulo) ? m.titulo : m.titulo + '!'; }
       function plano2(x) { return String(x).replace(/\*/g, ''); }
       /* el nombre del lugar con su ejemplo */
       var preguntas = /\?$/.test(zonas[0].letrero);
@@ -1550,7 +1551,7 @@
           alTerminar && alTerminar();
         }
         saltar.addEventListener('click', function () { try { speechSynthesis.cancel(); } catch (er) { /* nada */ } cerrar(); });
-        hablar(m.titulo + '! ' + t('aldea_mira'));
+        hablar(nombreMundo() + ' ' + t('aldea_mira'));
         function uno() {
           if (cerrado) return;
           if (k >= lista.length) return despues(cerrar, 500);
@@ -1604,13 +1605,14 @@
         capa.appendChild(box); document.body.appendChild(capa);
         A.celebrar(box.querySelector('.al-pip'));
         try { var r = box.getBoundingClientRect(); A.confeti(r.left + r.width / 2, r.top + 60, 36); } catch (er) { /* nada */ }
-        hablar(nueva ? t('aldea_calco') : t('etapa_ok'), { cola: true });
+        /* el traje primero: es lo que mas emociona y un toque rapido a ▶ cortaria lo que va en cola */
         if (desbloqueo) hablar(t('aldea_traje'), { cola: true });
+        hablar(nueva ? t('aldea_calco') : t('etapa_ok'), { cola: true });
         setTimeout(function () { bSig.focus(); }, 50);
       }
 
       if (!st.vistos[m.id]) { st.vistos[m.id] = 1; guardar(); pintarCola(); demo(sacar); }
-      else sacar();
+      else { hablar(nombreMundo()); sacar(); }   /* Pip dice el nombre del mundo en cada etapa */
       G._aldea_etapa = { zonas: zonas, activo: function () { return activo; }, enDemo: function () { return enDemo; } };   /* solo para pruebas */
     }
     var ICO_SALTAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5 L12 12 L3 19 Z M12 5 L21 12 L12 19 Z" fill="currentColor"/></svg>';

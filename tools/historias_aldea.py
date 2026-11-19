@@ -175,10 +175,10 @@ class PruebaAldea(H.Prueba):
             await pg.goto(self.url + '#' + todas[n - 1]); await pg.reload(); await pg.wait_for_selector('.al-globo')
             await self.terminar(pg)
             aviso = await pg.locator('.al-fin .g-insignia').count()
-            await pg.goto(self.url); await pg.reload(); await pg.wait_for_selector('.g-traje')
+            await pg.goto(self.url); await pg.reload(); await pg.wait_for_selector('.g-traje'); await pg.wait_for_timeout(300)
             libre = not await pg.locator('.g-traje').nth(1).is_disabled()
             if libre: await pg.locator('.g-traje').nth(1).click(); await pg.wait_for_timeout(200)
-            else: print('    estado', await pg.evaluate("localStorage.getItem(%r)" % self.clave))
+            else: print('    estado', await pg.evaluate("localStorage.getItem(%r)" % self.clave), pg.url)
             color = list(pieles[1]['colores'].values())[0]
             svg = await pg.locator('.al-hola .al-pip').evaluate('e => e.outerHTML')
             self.anotar('A10', bloq and aviso == 1 and libre and color in svg, 'bloqueado antes; con las calcomanias avisa, se libera y Pip se lo pone', {'bloqueado_antes': bloq, 'aviso': aviso, 'libre': libre, 'vestido': color in svg})
