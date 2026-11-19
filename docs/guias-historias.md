@@ -156,3 +156,9 @@ Cada agente jugó en Chrome real con su perfil y su pantalla, con la voz simulad
 - **Después de la ronda 3.** El globo saltaba en vez de volar (faltaba un reflujo antes de la transición) y se corrigió. Pip dice el nombre del mundo en cada etapa y el aviso del traje va antes que el de la calcomanía.
 - **Se descartó a propósito.** Estrellas plateadas por error y premio por ronda perfecta, porque la regla 4 prohíbe medir aciertos frente al niño.
 - **Queda para una propuesta aparte.** Una mecánica distinta por mundo (ordenar el ciclo de vida en la granja, Pip pregunta en voz alta en la plaza) y una etapa 3 que se sienta como nivel difícil. Es lo que le falta al perfil curioso.
+
+### Ajustes del 18 nov 2026 tras la prueba de Rafael en su teléfono
+
+- **Blends.** Los letreros pasan de «l», «r» y «s» a «_l», «_r» y «s_», con la misma raya de «i_e»: dicen qué posición tiene la letra que decide. Con «l» solo no se entendía que era la segunda letra.
+- **Un solo ejemplo por lugar.** Con letrero, el dibujo de ejemplo va solo en el letrero. El círculo del dibujo queda como ventana redonda en los edificios y desaparece en los lugares de naturaleza.
+- **Prueba.** `tools/historias_aldea.py` siembra el progreso una sola vez con la página abierta. Sembrarlo en cada carga a veces borraba lo que la prueba acababa de ganar (A09 y A10 fallaban de forma intermitente).

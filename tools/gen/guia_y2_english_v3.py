@@ -47,9 +47,9 @@ MUNDOS = [
     {
         "id": "blends", "titulo": "Blend pond", "escena": "estanque", "calcos": ["frog", "snail", "dragon"],
         "zonas": [
-            {"id": "l", "letrero": "l", "lugar": "hoja", "color": "#0EA5E9", "ej": "flag", "ejp": "*fl*ag", "voz": "the second letter is l"},
-            {"id": "r", "letrero": "r", "lugar": "hoja", "color": "#DB2777", "ej": "frog", "ejp": "*fr*og", "voz": "the second letter is r"},
-            {"id": "s", "letrero": "s", "lugar": "hoja", "color": "#F59E0B", "ej": "star", "ejp": "*st*ar", "voz": "s comes first"},
+            {"id": "l", "letrero": "_l", "lugar": "hoja", "color": "#0EA5E9", "ej": "flag", "ejp": "*fl*ag", "voz": "the second letter is l"},
+            {"id": "r", "letrero": "_r", "lugar": "hoja", "color": "#DB2777", "ej": "frog", "ejp": "*fr*og", "voz": "the second letter is r"},
+            {"id": "s", "letrero": "s_", "lugar": "hoja", "color": "#F59E0B", "ej": "star", "ejp": "*st*ar", "voz": "s comes first"},
         ],
         "palabras": [
             ("*cl*ock", "clock", "l"), ("*pl*ane", "plane", "l"), ("*cl*ap", "clap", "l"), ("*fl*ower", "flower", "l"),

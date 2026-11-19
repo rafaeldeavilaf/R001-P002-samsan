@@ -710,6 +710,17 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
       '<g clip-path="url(#' + id + ')"><g class="al-vecino"><g transform="translate(' + dx.toFixed(1) + ' ' + dy.toFixed(1) + ') scale(' + esc2.toFixed(3) + ')">' + vecino(color, tipo) + '</g></g></g>';
   }
 
+  /* Insignia redonda del dibujo de un lugar. Con letrero, el ejemplo va en el
+     letrero (18 nov 2026: un solo punto de referencia); el circulo queda como
+     ventana redonda en los edificios y desaparece en los lugares de naturaleza. */
+  function insignia(cx, cy, r, w, ej, x, y, l, ventana) {
+    var aro = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (ej ? '#FFFFFF' : '#BFDBFE') + '" stroke="' + K + '" stroke-width="' + w + '"/>';
+    if (ej) return aro + anidar(ej, x, y, l);
+    if (!ventana) return '';
+    return aro + '<path d="M' + cx + ' ' + (cy - r) + ' V' + (cy + +r) + ' M' + (cx - r) + ' ' + cy + ' H' + (cx + +r) + '" stroke="' + K + '" stroke-width="' + (w * 0.8).toFixed(1) + '"/>' +
+      '<path d="M' + (cx - r * 0.55).toFixed(1) + ' ' + (cy - r * 0.2).toFixed(1) + ' q' + (r * 0.15).toFixed(1) + ' ' + (-r * 0.35).toFixed(1) + ' ' + (r * 0.4).toFixed(1) + ' ' + (-r * 0.4).toFixed(1) + '" fill="none" stroke="#FFFFFF" stroke-width="' + (w * 0.8).toFixed(1) + '" stroke-linecap="round" opacity=".8"/>';
+  }
+
   /* ============================================================
      LUGARES (viewBox 0 0 120 150; la base queda en y = 150)
      Cada dibujo marca:
@@ -722,7 +733,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
       return '<rect x="84" y="16" width="13" height="30" fill="' + t.oscuro + '" stroke="' + K + '" stroke-width="3"/>' +
         '<rect x="14" y="58" width="92" height="92" fill="' + t.claro + '" stroke="' + K + '" stroke-width="3"/>' +
         '<polygon points="4,64 60,10 116,64" fill="' + t.c + '" stroke="' + K + '" stroke-width="3" stroke-linejoin="round"/>' +
-        '<circle cx="60" cy="44" r="18.5" fill="#FFFFFF" stroke="' + K + '" stroke-width="3"/>' + anidar(ej, 45, 29, 30) +
+        insignia(60, 44, 18.5, 3, ej, 45, 29, 30, true) +
         '<rect x="24" y="98" width="34" height="52" fill="#3B2A20"/>' +
         asomar(t.c, 'gente', 24, 98, 34, 52, 'M24 98 H58 V150 H24 Z') +
         '<g class="al-puerta"><rect x="24" y="98" width="34" height="52" rx="2" fill="' + t.oscuro + '" stroke="' + K + '" stroke-width="3"/>' +
@@ -739,7 +750,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
         '<path d="M6 126 A54 20 0 1 0 60 110 L60 126 Z" fill="#4ADE80" stroke="' + K + '" stroke-width="3" stroke-linejoin="round"/>' +
         '<path d="M60 110 A54 20 0 0 1 114 126 L60 126 Z" fill="#22C55E" stroke="' + K + '" stroke-width="3" stroke-linejoin="round"/>' +
         '<path d="M60 126 L28 118 M60 126 L92 132 M60 126 L40 140" stroke="#15803D" stroke-width="2" stroke-linecap="round"/>' +
-        '<circle cx="22" cy="122" r="12" fill="#FFFFFF" stroke="' + K + '" stroke-width="2.4"/>' + anidar(ej, 13, 113, 18) +
+        insignia(22, 122, 12, 2.4, ej, 13, 113, 18, false) +
         '<g class="al-ventana" data-x="80" data-y="104" data-l="24"></g>' +
         asomar(t.c, 'gente', 42, 64, 36, 56, 'M30 30 H90 V122 H30 Z') +
         '<g class="al-puerta al-puerta--flor">' +
@@ -758,7 +769,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
         '<path d="M4 30 L60 12 L116 30 Z" fill="' + t.oscuro + '" stroke="' + K + '" stroke-width="2.6" stroke-linejoin="round"/>' + franjas +
         '<rect x="8" y="98" width="104" height="52" rx="3" fill="' + t.c + '" stroke="' + K + '" stroke-width="3"/>' +
         '<rect x="4" y="94" width="112" height="9" rx="3" fill="' + t.oscuro + '" stroke="' + K + '" stroke-width="2.6"/>' +
-        '<circle cx="34" cy="126" r="14" fill="#FFFFFF" stroke="' + K + '" stroke-width="2.4"/>' + anidar(ej, 24, 116, 20) +
+        insignia(34, 126, 14, 2.4, ej, 24, 116, 20, false) +
         '<rect x="58" y="112" width="44" height="28" rx="4" fill="#FEF3C7" stroke="' + K + '" stroke-width="2.4"/>' +
         '<g class="al-ventana" data-x="67" data-y="113" data-l="26"></g>';
     },
@@ -768,7 +779,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
         '<circle cx="34" cy="62" r="26" fill="#22C55E" stroke="' + K + '" stroke-width="3"/><circle cx="86" cy="62" r="26" fill="#22C55E" stroke="' + K + '" stroke-width="3"/>' +
         '<circle cx="60" cy="40" r="32" fill="#4ADE80" stroke="' + K + '" stroke-width="3"/><circle cx="60" cy="76" r="22" fill="#22C55E"/>' +
         '<path d="M40 88 Q60 96 80 88" fill="none" stroke="' + K + '" stroke-width="3"/>' +
-        '<circle cx="32" cy="58" r="13" fill="#FFFFFF" stroke="' + K + '" stroke-width="2.4"/>' + anidar(ej, 23, 49, 18) +
+        insignia(32, 58, 13, 2.4, ej, 23, 49, 18, false) +
         '<g class="al-ventana" data-x="74" data-y="44" data-l="26"></g>' +
         '<ellipse cx="60" cy="116" rx="9" ry="13" fill="#3B2A20"/>' +
         asomar(t.c, 'gente', 50, 100, 20, 30, 'M51 103 A9 13 0 1 0 69 116 A9 13 0 0 0 51 116 Z') +
@@ -782,7 +793,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
         '<path d="M6 104 C6 94 26 92 30 102 L30 118 L6 118 Z" fill="#9CA3AF" stroke="' + K + '" stroke-width="2.6" stroke-linejoin="round"/>' +
         '<path d="M100 120 L102 82 M106 120 L110 90 M94 120 L94 92" stroke="#15803D" stroke-width="3" stroke-linecap="round"/>' +
         '<ellipse cx="102" cy="80" rx="3" ry="8" fill="#92400E" stroke="' + K + '" stroke-width="1.6"/>' +
-        '<circle cx="20" cy="84" r="13" fill="#FFFFFF" stroke="' + K + '" stroke-width="2.4"/>' + anidar(ej, 11, 75, 18) +
+        insignia(20, 84, 13, 2.4, ej, 11, 75, 18, false) +
         '<g class="al-ventana" data-x="68" data-y="98" data-l="24"></g>' +
         asomar(t.c, 'pez', 38, 62, 44, 54, 'M20 20 H100 V120 H20 Z') +
         '<g class="al-puerta al-puerta--ola"><path d="M36 118 q8 -12 16 0 q8 -12 16 0 q8 -12 16 0" fill="#93C5FD" stroke="' + K + '" stroke-width="2.4" stroke-linejoin="round"/></g>';
@@ -797,7 +808,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
         '<path d="M26 134 L26 92 M94 134 L94 96 M60 134 L60 84" stroke="#15803D" stroke-width="4" stroke-linecap="round"/>' +
         '<path d="M26 118 q-12 -6 -14 -16 q12 2 14 16 M94 120 q12 -6 14 -16 q-12 2 -14 16" fill="#4ADE80" stroke="' + K + '" stroke-width="2"/>' +
         flor(26, 86, '#F472B6', 10) + flor(94, 90, '#A78BFA', 10) +
-        '<circle cx="24" cy="44" r="13" fill="#FFFFFF" stroke="' + K + '" stroke-width="2.4"/>' + anidar(ej, 15, 35, 18) +
+        insignia(24, 44, 13, 2.4, ej, 15, 35, 18, false) +
         '<g class="al-ventana" data-x="82" data-y="34" data-l="26"></g>' +
         asomar(t.c, 'abeja', 40, 20, 40, 44, 'M20 0 H100 V72 H20 Z') +
         '<g class="al-puerta al-puerta--flor">' + flor(60, 72, t.c, 13) + '</g>';
@@ -806,7 +817,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
       return '<rect x="18" y="66" width="84" height="76" fill="' + t.c + '" stroke="' + K + '" stroke-width="3"/>' +
         '<path d="M18 80 H102 M18 96 H102 M18 112 H102 M18 128 H102" stroke="' + K + '" stroke-width="1.4" opacity=".3"/>' +
         '<polygon points="8,70 60,26 112,70" fill="' + t.oscuro + '" stroke="' + K + '" stroke-width="3" stroke-linejoin="round"/>' +
-        '<circle cx="60" cy="52" r="12" fill="#FFFFFF" stroke="' + K + '" stroke-width="2.4"/>' + anidar(ej, 51, 43, 18) +
+        insignia(60, 52, 12, 2.4, ej, 51, 43, 18, true) +
         '<rect x="22" y="142" width="8" height="8" fill="' + t.oscuro + '" stroke="' + K + '" stroke-width="2"/><rect x="90" y="142" width="8" height="8" fill="' + t.oscuro + '" stroke="' + K + '" stroke-width="2"/>' +
         '<path d="M44 142 A16 18 0 0 1 76 142 Z" fill="#3B2A20"/>' +
         asomar(t.c, 'pollito', 46, 116, 28, 26, 'M44 142 A16 18 0 0 1 76 142 Z') +
@@ -825,7 +836,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
       return techo +
         '<rect x="14" y="30" width="92" height="120" fill="' + t.claro + '" stroke="' + K + '" stroke-width="3"/>' +
         '<rect x="10" y="28" width="100" height="10" rx="2" fill="' + t.c + '" stroke="' + K + '" stroke-width="3"/>' +
-        '<circle cx="34" cy="64" r="14" fill="#FFFFFF" stroke="' + K + '" stroke-width="2.6"/>' + anidar(ej, 24, 54, 20) +
+        insignia(34, 64, 14, 2.6, ej, 24, 54, 20, true) +
         '<rect x="62" y="50" width="34" height="30" rx="3" fill="#FEF3C7" stroke="' + K + '" stroke-width="2.6"/>' +
         '<g class="al-ventana" data-x="65" data-y="51" data-l="28"></g>' +
         '<rect x="42" y="112" width="36" height="38" fill="#3B2A20"/>' +
@@ -839,7 +850,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
         '<circle cx="22" cy="86" r="18" fill="#22C55E" stroke="' + K + '" stroke-width="3"/><circle cx="98" cy="86" r="18" fill="#22C55E" stroke="' + K + '" stroke-width="3"/>' +
         '<path d="M34 64 A26 26 0 0 1 86 64" fill="none" stroke="' + t.oscuro + '" stroke-width="7" stroke-linecap="round"/><path d="M34 64 A26 26 0 0 1 86 64" fill="none" stroke="' + K + '" stroke-width="2" stroke-linecap="round" opacity=".5"/>' +
         '<rect x="30" y="62" width="8" height="80" fill="' + t.oscuro + '" stroke="' + K + '" stroke-width="2.4"/><rect x="82" y="62" width="8" height="80" fill="' + t.oscuro + '" stroke="' + K + '" stroke-width="2.4"/>' +
-        '<circle cx="60" cy="42" r="12" fill="#FFFFFF" stroke="' + K + '" stroke-width="2.4"/>' + anidar(ej, 51, 33, 18) +
+        insignia(60, 42, 12, 2.4, ej, 51, 33, 18, false) +
         '<g class="al-ventana" data-x="100" data-y="110" data-l="20"></g>' +
         asomar(t.c, 'gente', 40, 92, 40, 50, 'M38 70 H82 V142 H38 Z') +
         '<g class="al-puerta al-puerta--reja"><rect x="38" y="92" width="44" height="50" fill="none"/>' +
@@ -866,7 +877,7 @@ window.ICONOS = {"ambulance":"<path fill=\"#CCD6DD\" d=\"M35 12c0-1-1-4-4-4H9.40
     b.style.setProperty('--letrero-k', Math.min(0.25, 0.95 / largo).toFixed(3));
     b.style.setProperty('--letrero-k2', Math.min(0.25, 0.92 / (String(op.letrero || '').replace(/\*/g, '').length || 1)).toFixed(3));
     b.innerHTML = (op.letrero ? '<span class="al-letrero" aria-hidden="true">' + (op.ejemplo ? A.icono(op.ejemplo, 'al-ico al-letrero__ico') : '') + '<span>' + marcas(op.letrero) + '</span></span>' : '') +
-      '<svg class="al-dibujo-lugar" viewBox="0 ' + top + ' 120 ' + (150 - top) + '" aria-hidden="true">' + dib(t, op.ejemplo, op.variante) + '</svg>';
+      '<svg class="al-dibujo-lugar" viewBox="0 ' + top + ' 120 ' + (150 - top) + '" aria-hidden="true">' + dib(t, op.letrero ? null : op.ejemplo, op.variante) + '</svg>';
     return b;
   };
 
@@ -3028,7 +3039,7 @@ GUIA.iniciar({
    "zonas": [
     {
      "id": "l",
-     "letrero": "l",
+     "letrero": "_l",
      "lugar": "hoja",
      "color": "#0EA5E9",
      "ej": "flag",
@@ -3037,7 +3048,7 @@ GUIA.iniciar({
     },
     {
      "id": "r",
-     "letrero": "r",
+     "letrero": "_r",
      "lugar": "hoja",
      "color": "#DB2777",
      "ej": "frog",
@@ -3046,7 +3057,7 @@ GUIA.iniciar({
     },
     {
      "id": "s",
-     "letrero": "s",
+     "letrero": "s_",
      "lugar": "hoja",
      "color": "#F59E0B",
      "ej": "star",

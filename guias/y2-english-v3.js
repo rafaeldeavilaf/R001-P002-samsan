@@ -248,7 +248,7 @@ GUIA.iniciar({
    "zonas": [
     {
      "id": "l",
-     "letrero": "l",
+     "letrero": "_l",
      "lugar": "hoja",
      "color": "#0EA5E9",
      "ej": "flag",
@@ -257,7 +257,7 @@ GUIA.iniciar({
     },
     {
      "id": "r",
-     "letrero": "r",
+     "letrero": "_r",
      "lugar": "hoja",
      "color": "#DB2777",
      "ej": "frog",
@@ -266,7 +266,7 @@ GUIA.iniciar({
     },
     {
      "id": "s",
-     "letrero": "s",
+     "letrero": "s_",
      "lugar": "hoja",
      "color": "#F59E0B",
      "ej": "star",

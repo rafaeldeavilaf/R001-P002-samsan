@@ -31,14 +31,18 @@ class PruebaAldea(H.Prueba):
         if ctx is None:
             ctx = await self.b.new_context(**H.PERFILES[perfil])
             await ctx.add_init_script(H.VOZ % ('true' if remota else 'false'))
-            if estado is not None:
-                # una sola vez por pestaña: las recargas conservan el progreso que haga la prueba
-                await ctx.add_init_script("if (!sessionStorage.getItem('__ini')) { localStorage.setItem(%r, %r); sessionStorage.setItem('__ini', '1'); }" % (self.clave, json.dumps(estado)))
         pg = await ctx.new_page()
         pg.errores = []; pg.red = []
         pg.on('pageerror', lambda e: pg.errores.append(str(e)))
         pg.on('request', lambda r: pg.red.append(r.url) if not r.url.startswith(('file:', 'data:', 'blob:')) else None)
+        if estado is not None:
+            # se siembra una sola vez con la pagina abierta y se recarga: las recargas
+            # que haga la prueba conservan el progreso (sembrarlo en cada carga lo borraba)
+            await pg.goto(self.url); await pg.wait_for_selector('.g-barra')
+            await pg.evaluate("([k, v]) => localStorage.setItem(k, v)", [self.clave, json.dumps(estado)])
+            if hash: await pg.goto('about:blank')
         await pg.goto(self.url + ('#' + hash if hash else ''))
+        if estado is not None and not hash: await pg.reload()
         await pg.wait_for_selector('.g-barra, .al-barra', timeout=8000)
         return ctx, pg
 
