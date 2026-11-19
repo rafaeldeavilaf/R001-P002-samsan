@@ -101,11 +101,20 @@ def leer(fuente, codigo):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--fuente", required=True, help="carpeta con los SVG de Twemoji")
+    ap.add_argument("--fuente", help="carpeta con los SVG de Twemoji; sin ella solo valida guias/comun/iconos.js")
     a = ap.parse_args()
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from guia_y2_english_v3 import iconos_usados
     usados = iconos_usados()
+    if not a.fuente:
+        # Actions corre cada generador sin argumentos: ahi se comprueba que el
+        # archivo versionado tenga justo los dibujos que usa el banco.
+        texto = open(SALIDA, encoding="utf-8").read()
+        hechos = set(json.loads(texto[texto.index("window.ICONOS = ") + 16:texto.rindex(";")]))
+        assert hechos == usados, "iconos.js no coincide con el banco: faltan %s, sobran %s (regenerar con --fuente)" % (sorted(usados - hechos), sorted(hechos - usados))
+        assert "CC BY 4.0" in texto, "iconos.js perdio el credito de Twemoji"
+        print("guias/comun/iconos.js: %d iconos, coincide con el banco" % len(hechos))
+        return
     salida = {}
     for clave in sorted(usados & set(PROPIOS)):
         salida[clave] = PROPIOS[clave]
