@@ -49,6 +49,10 @@ ICONOS = {
     "persona": "1f464", "caja": "1f4e6", "lugar": "1f4cd", "pensar": "1f914",
     "hen": "1f414", "tractor": "1f69c", "evening": "1f306", "doughnut": "1f369", "dog": "1f415", "hatching": "1f423", "caterpillar": "1f41b", "egg": "1f95a", "chick": "1f425", "rooster": "1f413",
     "cow": "1f404", "monday": "1f5d3", "hospital": "1f3e5", "seven": "1f556", "summer": "2600", "castle": "1f3f0", "winter": "2744",
+    # leccion 3 de Learn with Pip (Why y because): situacion -> razon
+    "umbrella": "2602", "rain": "1f327", "windy": "1f32c", "coat": "1f9e5", "sleeping": "1f634", "cheering": "1f64c", "trophy": "1f3c6",
+    "sunglasses": "1f60e", "sunny": "2600", "bottle": "1f37c", "snowing": "1f328", "seedling": "1f331", "sunrain": "1f326",
+    "yawn": "1f971", "puppy": "1f436", "bone": "1f9b4",
 }
 
 # Dibujos propios por codigo (36 x 36, colores planos al estilo Twemoji) para
@@ -103,6 +107,23 @@ MODIFICADOS = {
 }
 
 
+# Dibujos de Twemoji con algo agregado encima (tambien permitido por CC BY 4.0
+# indicandolo): clave -> (codigo, dibujo propio que se suma). Lo agregado es de
+# SAMSAN. Sirven para una SITUACION que ningun emoji muestra (leccion 3, Why).
+_GOTAS = ((10.3, 18.6, 3.4, 7.2), (17.6, 20.4, 3.0, 4.2), (23.2, 18.8, 3.4, 9.4))
+COMPUESTOS = {
+    # el bebe llora: cejas tristes suaves y dos lagrimas (nada de llanto fuerte)
+    "babycry": ("1f476", '<path fill="none" stroke="#662214" stroke-width="1.6" stroke-linecap="round" d="M9.6 14.6l4.6-1.8M26.4 14.6l-4.6-1.8"/>'
+                         '<path fill="#5DADEC" d="M11.6 21.2c-.9 1.8-2.1 3.3-2.1 4.7a2.1 2.1 0 0 0 4.2 0c0-1.4-1.2-2.9-2.1-4.7z"/>'
+                         '<path fill="#5DADEC" d="M24.4 21.2c-.9 1.8-2.1 3.3-2.1 4.7a2.1 2.1 0 0 0 4.2 0c0-1.4-1.2-2.9-2.1-4.7z"/>'),
+    # el helado se derrite: chorreones de crema sobre el cono y una gota que cae
+    "melting": ("1f366", "".join('<path fill="#FFE8B6" d="M%s %sh%sv%sa%s %s 0 0 1-%s 0z"/>'
+                                 '<path fill="none" stroke="#E8B04B" stroke-width=".6" stroke-linecap="round" d="M%s %sv%sa%s %s 0 0 0 %s 0v-%s"/>'
+                                 % (x, y, w, h, w / 2, w / 2, w, x, y + 1.2, h - 1.2, w / 2, w / 2, w, h - 1.2) for x, y, w, h in _GOTAS)
+                + '<path fill="#FFE8B6" stroke="#E8B04B" stroke-width=".6" d="M30 27.6c-.9 1.7-2 3-2 4.2a2 2 0 0 0 4 0c0-1.2-1.1-2.5-2-4.2z"/>'),
+}
+
+
 def leer(fuente, codigo):
     for nombre in (codigo, codigo.replace("-fe0f", "")):
         ruta = os.path.join(fuente, nombre + ".svg")
@@ -131,7 +152,7 @@ def main():
     salida = {}
     for clave in sorted(usados & set(PROPIOS)):
         salida[clave] = PROPIOS[clave]
-    for clave, codigo in sorted(list(ICONOS.items()) + [(k, v[0]) for k, v in MODIFICADOS.items()]):
+    for clave, codigo in sorted(list(ICONOS.items()) + [(k, v[0]) for k, v in MODIFICADOS.items()] + [(k, v[0]) for k, v in COMPUESTOS.items()]):
         if clave not in usados:
             continue
         svg = leer(a.fuente, codigo)
@@ -140,7 +161,7 @@ def main():
             svg = svg.replace(quitar, "")
         m = SVG_RE.match(svg)
         assert m, "%s (%s): no es un SVG de 36 x 36" % (clave, codigo)
-        dentro = m.group(1)
+        dentro = m.group(1) + (COMPUESTOS[clave][1] if clave in COMPUESTOS else "")
         assert not re.search(r"\bid=|<defs|url\(#|<script|<image|href=", dentro), "%s (%s): trae ids, defs o enlaces" % (clave, codigo)
         salida[clave] = dentro
     cuerpo = json.dumps(dict(sorted(salida.items())), ensure_ascii=False, separators=(",", ":"), sort_keys=True)
@@ -148,6 +169,7 @@ def main():
              "   ICONOS DE LA ALDEA (generado por tools/gen/iconos_twemoji.py; no se edita a mano)\n"
              "   Graficos: Twemoji, CC BY 4.0, (c) Twitter, Inc. y otros colaboradores, sin cambios en el dibujo\n"
              "   salvo: " + ", ".join("%s (%s sin el reloj)" % (k, v[0]) for k, v in sorted(MODIFICADOS.items()) if k in usados) + ".\n"
+             "   con algo agregado por SAMSAN: " + ", ".join("%s (%s)" % (k, v[0]) for k, v in sorted(COMPUESTOS.items()) if k in usados) + ".\n"
              "   Propios de SAMSAN (dibujados por codigo): " + ", ".join(sorted(usados & set(PROPIOS))) + ".\n"
              "   https://github.com/jdecked/twemoji · https://creativecommons.org/licenses/by/4.0/\n"
              "   Cada valor es el interior de un SVG de 36 x 36 (ALDEA.icono lo envuelve).\n"

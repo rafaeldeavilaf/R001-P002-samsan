@@ -335,3 +335,48 @@ body.al-jugando .site-foot { display: none; }
 .le-pantalla .al-bombilla[hidden] { display: none; }
 /* en las lecciones el sol de adorno se quita: se confundia con el sol de «in summer» (revision 23 nov 2026) */
 .le-pantalla .al-sol { display: none; }
+
+/* ---------- mecanica «parejas» (leccion 3, Why y because) ----------
+   Tarjetas de RAZON en vez de casas: dibujo arriba y «Because ...» abajo,
+   en el rosa de Why. Tres en fila caben en un celular de 390 px. */
+.al-escena[data-mec="parejas"] { --ancho-lugar: min(30cqw, 26cqh, 210px); }
+.al-escena[data-mec="parejas"][data-n="2"] { --ancho-lugar: min(36cqw, 27cqh, 220px); }
+.al-escena[data-mec="parejas"] .al-lugares { align-items: stretch; }
+.al-escena[data-mec="parejas"] .al-cielo { bottom: calc(var(--base) + var(--ancho-lugar) * 1.45 + 14px); }
+.le-razon { align-self: stretch; }
+.le-razon__caja {
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: .25em; position: relative;
+  box-sizing: border-box; width: 100%; height: 100%; min-height: calc(var(--ancho-lugar) * 1.3); padding: .55em .3em .45em;
+  background: #FFFFFF; border: 3px solid #1F2937; border-bottom: 7px solid var(--c); border-radius: 16px; box-shadow: 0 4px 0 #1F2937;
+  font-size: clamp(.95rem, calc(var(--ancho-lugar) * .122), 1.3rem);
+}
+.le-razon__ico { width: 60%; height: auto; aspect-ratio: 1; flex-shrink: 0; display: block; }
+.le-razon__txt { font-family: 'Nunito', system-ui, sans-serif; font-weight: 800; line-height: 1.15; text-align: center; color: #1F2937; overflow-wrap: anywhere; hyphens: none; }
+.le-razon__txt b { display: block; color: var(--c); font-weight: 900; font-size: 1.08em; }
+.le-razon__par { position: absolute; left: -10px; top: -18px; width: 34%; aspect-ratio: 1; box-sizing: border-box; padding: 3px; border-radius: 50%; background: #FFFFFF; border: 3px solid var(--c); display: none; }
+.le-razon__par svg { width: 100%; height: 100%; display: block; }
+.le-razon--hecha .le-razon__par { display: block; animation: al-pop .42s cubic-bezier(.3,1.6,.5,1); }
+.le-razon--hecha .le-razon__caja { background: #FDF2F8; }
+.le-razon.al-sobre .le-razon__caja, .le-guia.le-razon .le-razon__caja { background: #FEF3C7; }
+.le-razon:focus-visible { outline: 4px solid #F59E0B; outline-offset: 4px; border-radius: 16px; }
+/* la pregunta del globo: Why en rosa */
+.le-globo--why .al-carta__palabra mark { background: none; box-shadow: none; color: #DB2777; padding: 0; }
+/* en horizontal la pregunta es larga: el dibujo de la situacion crece y la letra se modera */
+@container (min-aspect-ratio: 13/10) {
+  .le-globo--why .al-carta__dibujo { width: min(24cqh, 150px); height: min(24cqh, 150px); }
+  .le-globo--why .al-carta__palabra { font-size: min(7cqh, 2.4rem, calc(var(--pal, 12) * 1.6cqw)); }
+}
+/* resumen: la tarjeta de Why y tres parejas que suenan */
+.le-resumen__fila--par { flex-direction: column; align-items: stretch; }
+.le-resumen__fila--par > .le-cod { align-self: center; }
+.le-resumen__pares { display: grid; gap: 8px; }
+.le-par {
+  appearance: none; display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 6px 8px; text-align: left;
+  border: 3px solid #1F2937; border-radius: 14px; background: #FFFFFF; font-family: 'Nunito', system-ui, sans-serif; color: #1F2937; cursor: pointer;
+}
+.le-par__ico { flex-shrink: 0; width: 40px; height: 40px; }
+.le-par__ico svg { width: 100%; height: 100%; display: block; }
+.le-par__txt { flex: 1; display: flex; flex-direction: column; font-weight: 800; font-size: .95rem; line-height: 1.2; }
+.le-par__txt b { font-weight: 900; }
+.le-par__txt span { color: #BE185D; }
+@media (prefers-reduced-motion: reduce) { .le-razon--hecha .le-razon__par { animation: none; } }

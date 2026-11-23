@@ -300,6 +300,7 @@ function validarLeccion(nombre, cfg) {
   check(nombre + ': id, idioma y idioma de explicacion', cfg.id === nombre && /^en-/.test(cfg.lang) && /^es-/.test(cfg.langExplica));
   check(nombre + ': codigo fijo con color, icono y traduccion', Object.values(cfg.codigo).every(c => /^#[0-9A-F]{6}$/i.test(c.color) && ICONOS[c.ico] && /^¿.+\?$/.test(c.es)));
   cfg.lecciones.forEach(L => {
+    if (L.mecanica === 'parejas') { validarParejas(nombre, L, ICONOS); return; }
     const k = nombre + '/' + L.id, items = [].concat(L.yo, L.juntos, L.tu);
     check(k + ': 2 en yo, 4+ en juntos, 6+ en tu', L.yo.length === 2 && L.juntos.length >= 4 && L.tu.length >= 6);
     check(k + ': cada ejemplo va a una casa de la leccion', items.every(i => L.zonas.includes(i.zona)));
@@ -308,6 +309,20 @@ function validarLeccion(nombre, cfg) {
     check(k + ': cada casa tiene su por que', L.zonas.every(z => L.por[z]));
     check(k + ': mira tiene dibujos que existen y la leccion su pregunta para pensar', L.mira.every(m => !m.ico || ICONOS[m.ico]) && !!L.piensa);
   });
+}
+/* mecanica «parejas» (leccion 3, Why y because): pregunta Why -> tarjeta Because */
+function validarParejas(nombre, L, ICONOS) {
+  const k = nombre + '/' + L.id, rondas = [L.modelos, L.yo].concat(L.juntos, L.tu), pares = [].concat(...rondas);
+  check(k + ': 2 modelos, 2 en yo, 1 ronda de 3 en juntos y 2 rondas de 3 en tu', L.modelos.length === 2 && L.yo.length === 2 &&
+    L.juntos.length === 1 && L.tu.length === 2 && L.juntos.concat(L.tu).every(r => r.length === 3));
+  check(k + ': cada pregunta empieza con Why y cada razon con Because', pares.every(p => /^Why .+\?$/.test(p.en) && /^Because .+\.$/.test(p.razon) && /^¿Por qué /.test(p.es) && /^Porque /.test(p.esRazon)));
+  check(k + ': cada tarjeta es su razon', pares.every(p => p.zona === p.icoRazon));
+  const dib = [].concat(...pares.map(p => [p.ico, p.icoRazon]));
+  check(k + ': dibujos que existen y no se repiten', dib.every(d => ICONOS[d]) && new Set(dib).size === dib.length && new Set(dib.map(d => ICONOS[d])).size === dib.length);
+  check(k + ': en cada ronda las razones son distintas', rondas.every(r => new Set(r.map(p => p.razon)).size === r.length));
+  check(k + ': ninguna pareja se repite', new Set(pares.map(p => p.id)).size === pares.length);
+  check(k + ': resumen de 3 parejas con dibujo y calcomania', L.resumen.length === 3 && L.resumen.every(p => ICONOS[p.ico] && ICONOS[p.icoRazon]) && !!ICONOS[L.calco]);
+  check(k + ': mira usa los modelos y la leccion su pregunta para pensar', L.mira.every(m => (!m.ico || ICONOS[m.ico]) && (!m.zona || L.modelos.some(p => p.zona === m.zona))) && !!L.piensa);
 }
 async function jugarLeccion(nombre, cfg) {
   const file = path.join(ROOT, 'guia-' + nombre + '.html');
@@ -322,19 +337,28 @@ async function jugarLeccion(nombre, cfg) {
     });
     await espera(60);
     const w = dom.window, d = w.document, P = () => w.GUIA._leccion_pantalla;
-    const pasos = [], tu = []; let fallo = false;
-    for (let k = 0; k < 600 && P() && P().paso() !== 'aprendi'; k++) {
+    const pasos = [], tu = [], PAR = L.mecanica === 'parejas', juegos = { tu: new Set(), juntos: new Set() }; let fallo = false, fuera = 0, ultimo = null;
+    for (let k = 0; k < 900 && P() && P().paso() !== 'aprendi'; k++) {
       await espera(40);
       const paso = P().paso(); if (pasos[pasos.length - 1] !== paso) pasos.push(paso);
       const seg = !d.querySelector('.le-seguir').disabled, a = P().activo();
       if (seg) { P().seguir(); continue; }
-      if (!a || d.querySelector('.al-volando')) continue;
-      if (paso === 'tu' && !fallo) { fallo = true; tu.push(a.ico); P().soltar(L.zonas.find(z => z !== a.zona)); continue; }
-      P().soltar(a.zona);
+      if (!a || d.querySelector('.al-volando') || a === ultimo) continue;
+      const razones = PAR ? P().razones() : L.zonas;
+      if (PAR) { juegos[paso] && juegos[paso].add(razones.slice().sort().join('+')); if (!razones.includes(a.zona)) fuera++; }
+      if (paso === 'tu' && !fallo) { fallo = true; tu.push(a.ico); P().soltar(razones.find(z => z !== a.zona)); await espera(30); continue; }
+      ultimo = a; P().soltar(a.zona);
     }
     if (P()) pasos.push(P().paso());
     const salieron = P().salieron.filter(x => /^tu:/.test(x)).map(x => x.slice(3));
     check(nombre + '/' + L.id + ': recorre los 5 pasos en orden', pasos.join(',') === 'mira,yo,juntos,tu,aprendi', pasos.join(','));
+    if (PAR) {
+      /* el fallado vuelve al final de SU ronda (la primera de tu solo), no al final de todo */
+      const n1 = L.tu[0].length, total = L.tu.reduce((t, r) => t + r.length, 0);
+      check(nombre + '/' + L.id + ': el fallado vuelve al final de su ronda', salieron.length === total + 1 && salieron[n1] === tu[0] && salieron.slice(0, n1).includes(tu[0]), salieron.join(',') + ' fallo ' + tu[0]);
+      check(nombre + '/' + L.id + ': cada pregunta tiene su razon en la ronda y llegan tarjetas nuevas', fuera === 0 && juegos.tu.size === L.tu.length && juegos.juntos.size === L.juntos.length, 'fuera ' + fuera + ' rondas tu ' + juegos.tu.size);
+      check(nombre + '/' + L.id + ': el resumen trae 3 parejas que suenan', d.querySelectorAll('.le-resumen .le-par').length === 3);
+    } else
     check(nombre + '/' + L.id + ': el ejemplo fallado vuelve al final', salieron.length === L.tu.length + 1 && salieron[salieron.length - 1] === tu[0], salieron.join(',') + ' fallo ' + tu[0]);
     check(nombre + '/' + L.id + ': termina con resumen y calcomania', !!d.querySelector('.le-resumen .le-calco'));
     const visible = d.body.cloneNode(true); visible.querySelectorAll('script, style').forEach(n => n.remove());

@@ -1652,6 +1652,11 @@
                la regla con ese ejemplo y el ejemplo regresa al final (por
                dentro: nada mide aciertos frente al niño, regla 4).
        aprendi resumen con ejemplos que se oyen y una calcomania.
+     Mecanica «parejas» (L.mecanica, leccion 3 Why y because, aditiva): en vez
+     de casas fijas hay tarjetas de RAZON («Because ...» con su dibujo) y el
+     globo es una pregunta Why con el dibujo de la SITUACION. Se juega por
+     rondas (L.juntos y L.tu son listas de rondas); al acabar una ronda llegan
+     tarjetas nuevas y el fallado vuelve al final de SU ronda.
      Codigo fijo (cfg.codigo): cada pregunta con su color, icono y traduccion.
      Usa el kit de la aldea (window.ALDEA) y sus dibujos (window.ICONOS).
      ============================================================ */
@@ -1767,8 +1772,9 @@
       bar.appendChild(bAyuda);
       p.appendChild(bar);
       var esc2 = A.escena(L.escena || 'calle'); esc2.nodo.setAttribute('data-n', String(L.zonas.length));
-      var porZona = {};
-      L.zonas.forEach(function (z) {
+      var porZona = {}, PAR = L.mecanica === 'parejas';
+      if (PAR) esc2.nodo.setAttribute('data-mec', 'parejas');
+      if (!PAR) L.zonas.forEach(function (z) {
         var c = C(z);
         var l = A.lugar({ id: z, tipo: 'casa', color: c.color, letrero: c.t + '?', ejemplo: IC(c.ico), etiqueta: c.t + ', ' + c.es });
         l.insertBefore(el('span', { class: 'le-traduccion', lang: 'es', 'aria-hidden': 'true', text: c.es, style: '--c:' + c.color }), l.querySelector('.al-dibujo-lugar'));
@@ -1835,22 +1841,43 @@
       pipCaja.addEventListener('click', function () { if (activo) hablar(activo.en, { lang: cfg.lang }); });
 
       function volverGlobo() { var g = globo; if (!g) return; g.style.transition = 'transform .3s ease'; g.style.transform = ''; setTimeout(function () { g.style.transition = ''; }, 320); }
+      /* parejas: pone las tarjetas de razon de una ronda (cambian en cada ronda) */
+      function ponerRazones(lista) {
+        Object.keys(porZona).forEach(function (q) { delete porZona[q]; });
+        esc2.lugares.innerHTML = '';
+        esc2.nodo.setAttribute('data-n', String(lista.length));
+        lista.forEach(function (it) {
+          var c = el('button', { type: 'button', class: 'al-lugar le-razon', 'data-lugar': it.zona, 'aria-label': it.razon, style: '--c:' + C('why').color, html:
+            '<span class="al-dibujo-lugar le-razon__caja"><span class="le-razon__par" aria-hidden="true"></span>' + A.icono(IC(it.icoRazon), 'al-ico le-razon__ico') +
+            '<span class="le-razon__txt" lang="en"><b>Because</b> ' + esc(it.razon.replace(/^Because\s+/, '')) + '</span></span>' });
+          c.addEventListener('click', function () { if (activo && (paso === 'juntos' || paso === 'tu')) soltar(it.zona); else hablar(it.razon, { lang: cfg.lang }); });
+          porZona[it.zona] = c;
+          esc2.lugares.appendChild(c);
+        });
+      }
+      function emparejar(l, it) {
+        if (!PAR || !l) return;
+        l.classList.add('le-razon--hecha');
+        var par = l.querySelector('.le-razon__par'); if (par) par.innerHTML = A.icono(IC(it.ico), 'al-ico');
+      }
       function quitarCarta() { if (globo) { globo.remove(); globo = null; } }
       function mostrarCarta(ico, palabra) {
         quitarCarta();
-        globo = A.globo({ palabra: palabra || ' ', icono: IC(ico), indice: Math.floor(Math.random() * 6) });
+        globo = A.globo({ palabra: (PAR ? String(palabra || ' ').replace(/^Why\b/, '*Why*') : palabra) || ' ', icono: IC(ico), indice: Math.floor(Math.random() * 6) });
         globo.classList.add('le-globo');
+        if (PAR) globo.classList.add('le-globo--why');
         vuelo.appendChild(globo); A.entrar(vuelo);
         return globo;
       }
-      function frase(it) { return C(it.zona).q + ' ' + it.en.charAt(0).toUpperCase() + it.en.slice(1) + '.'; }
-      function por(it) { return it.nota || L.por[it.zona]; }
+      function frase(it) { return PAR ? it.en + ' ' + it.razon : C(it.zona).q + ' ' + it.en.charAt(0).toUpperCase() + it.en.slice(1) + '.'; }
+      function por(it) { return PAR ? it.esRazon : it.nota || L.por[it.zona]; }
       function porque(it) { return por(it) + ' Va en la casa de ' + C(it.zona).t + '.'; }
       function llevar(it, alFin) {
         var g = globo, l = porZona[it.zona];
         ocupado = true;
         A.volar(g, l, function () {
           g.remove(); if (globo === g) globo = null;
+          emparejar(l, it);
           A.confeti(l.getBoundingClientRect().left + l.offsetWidth / 2, l.getBoundingClientRect().top + 20, 16);
           A.celebrar(pipCaja.querySelector('.al-pip'));
           ocupado = false;
@@ -1861,28 +1888,45 @@
       /* 1 · MIRA */
       function mira() {
         marcarPaso('mira');
+        if (PAR) ponerRazones(L.modelos);
         guion(L.mira, function () { quitarCarta(); esperarSeguir(yo); });
       }
       /* 2 · YO LO HAGO: Pip lleva dos ejemplos con la mano y dice por que */
       function yo() {
         marcarPaso('yo');
+        if (PAR) ponerRazones(L.yo);
         var i = 0;
         guion([{ es: 'Mira cómo lo hago yo.' }], function uno() {
           if (i >= L.yo.length) { esperarSeguir(juntos); return; }
           var it = L.yo[i++];
           var g = mostrarCarta(it.ico, it.en);
           var mano = A.mano(); g.appendChild(mano);
-          guion([{ en: frase(it) }, { es: porque(it), zona: it.zona }], function () { llevar(it, function () { despues(uno, 400); }); });
+          guion(PAR ? [{ en: it.en }, { en: it.razon, zona: it.zona }, { es: it.es + ' ' + it.esRazon }] : [{ en: frase(it) }, { es: porque(it), zona: it.zona }], function () { llevar(it, function () { despues(uno, 400); }); });
         });
       }
       /* 3 · JUNTOS y 4 · TU: el niño lleva el globo; en juntos la casa correcta brilla */
-      function juntos() { ronda('juntos', L.juntos.slice(), tu); }
-      function tu() { ronda('tu', mezclar(L.tu), aprendi); }
-      function ronda(k, items, siguiente) {
+      function juntos() { if (PAR) rondas('juntos', L.juntos, tu); else ronda('juntos', L.juntos.slice(), tu); }
+      function tu() { if (PAR) rondas('tu', L.tu, aprendi); else ronda('tu', mezclar(L.tu), aprendi); }
+      /* parejas: varias rondas seguidas, cada una con sus tarjetas; en tu solo
+         se barajan las tarjetas y el orden de las preguntas */
+      function rondas(k, lista, siguiente) {
+        var r = 0;
+        function una(primera) {
+          var R = lista[r++], mas = r < lista.length;
+          ponerRazones(k === 'tu' ? mezclar(R) : R);
+          ronda(k, k === 'tu' ? mezclar(R) : R.slice(), siguiente, { primera: primera, alVaciar: mas ? function () {
+            guion([{ es: (L.textos && L.textos.otra) || '¡Muy bien!' }], function () { una(false); });
+          } : null });
+        }
+        una(true);
+      }
+      function ronda(k, items, siguiente, op) {
         marcarPaso(k);
         cola = items; var repetidos = {};
-        guion([{ es: k === 'juntos' ? 'Ahora lo hacemos juntos. La casa que brilla es la correcta. Lleva el globo.' : 'Ahora tú solo. ' + (L.piensa || 'Piensa bien antes de soltar.') }], sacar);
+        var intro = op && op.primera === false ? null : k === 'juntos' ? ((L.textos && L.textos.juntos) || 'Ahora lo hacemos juntos. La casa que brilla es la correcta. Lleva el globo.') : 'Ahora tú solo. ' + (L.piensa || 'Piensa bien antes de soltar.');
+        if (intro) guion([{ es: intro }], sacar); else sacar();
         function sacar() {
+          if (!cola.length && op && op.alVaciar) { activo = null; quitarCarta(); op.alVaciar(); return; }
           if (!cola.length) { activo = null; quitarCarta(); esperarSeguir(siguiente); guion([{ es: '¡Muy bien! Toca Seguir.' }]); return; }
           activo = cola.shift(); ayudado = false; salieron.push(k + ':' + activo.ico);
           var g = mostrarCarta(activo.ico, activo.en);
@@ -1906,8 +1950,8 @@
             volverGlobo();
             /* re-explicar con este ejemplo, no «try again» */
             ayudado = true;
-            if (k === 'tu' && !repetidos[it.ico]) { repetidos[it.ico] = 1; cola.push({ en: it.en, ico: it.ico, zona: it.zona, nota: it.nota, otra: true }); }
-            guion([{ es: 'Mira otra vez. ' + por(it) + ' ' + C(it.zona).regla }, { en: frase(it) }], function () { porZona[it.zona].classList.add('le-guia'); });
+            if (k === 'tu' && !repetidos[it.ico]) { repetidos[it.ico] = 1; var copia = { otra: true }; Object.keys(it).forEach(function (q) { if (q !== 'otra') copia[q] = it[q]; }); cola.push(copia); }
+            guion(PAR ? [{ es: 'Mira otra vez. ' + it.es }, { en: it.razon }] : [{ es: 'Mira otra vez. ' + por(it) + ' ' + C(it.zona).regla }, { en: frase(it) }], function () { porZona[it.zona].classList.add('le-guia'); });
           }
         };
       }
@@ -1916,7 +1960,7 @@
         if (!activo) return;
         ayudado = true;
         porZona[activo.zona].classList.add('le-guia');
-        guion([{ es: por(activo) + ' ' + C(activo.zona).regla }]);
+        guion(PAR ? [{ es: activo.es }, { en: activo.razon }] : [{ es: por(activo) + ' ' + C(activo.zona).regla }]);
       });
 
       /* 5 · LO QUE APRENDI */
@@ -1929,7 +1973,21 @@
         var capa = el('div', { class: 'g-capa le-resumen', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Lo que aprendí' });
         var box = el('div', { class: 'g-logro' });
         box.appendChild(el('h3', { text: 'Lo que aprendí' }));
-        L.resumen.forEach(function (r) {
+        if (PAR) {
+          /* parejas: la tarjeta de Why y tres parejas que suenan (pregunta y razon) */
+          var filaP = el('div', { class: 'le-resumen__fila le-resumen__fila--par', style: '--c:' + C('why').color });
+          filaP.appendChild(tarjetaCodigo('why'));
+          var lista = el('div', { class: 'le-resumen__pares' });
+          L.resumen.forEach(function (e) {
+            var b = el('button', { class: 'le-par', 'aria-label': e.en + ' ' + e.razon, html:
+              '<span class="le-par__ico">' + A.icono(IC(e.ico), 'al-ico') + '</span><span class="le-par__txt" lang="en"><b>' + esc(e.en) + '</b><span>' + esc(e.razon) + '</span></span><span class="le-par__ico">' + A.icono(IC(e.icoRazon), 'al-ico') + '</span>' });
+            b.addEventListener('click', function () { hablar(e.en, { lang: cfg.lang }); hablar(e.razon, { lang: cfg.lang, cola: true }); });
+            lista.appendChild(b);
+          });
+          filaP.appendChild(lista);
+          box.appendChild(filaP);
+        }
+        if (!PAR) L.resumen.forEach(function (r) {
           var c = C(r.zona), fila = el('div', { class: 'le-resumen__fila', style: '--c:' + c.color });
           fila.appendChild(tarjetaCodigo(r.zona));
           var ejs = el('div', { class: 'le-resumen__ej' });
@@ -1947,10 +2005,11 @@
         box.appendChild(el('button', { class: 'g-btn g-btn--suave', html: ICO.otra + ' Repetir la lección', onclick: function () { capa.remove(); ir({ l: li }, true); } }));
         box.appendChild(el('button', { class: 'g-btn' + (sigL === null ? '' : ' g-btn--suave'), text: 'Lecciones', onclick: function () { capa.remove(); ir({}); } }));
         capa.appendChild(box); document.body.appendChild(capa);
-        guion([{ es: 'Esto es lo que aprendiste hoy.' }].concat(L.resumen.map(function (r) { return { es: C(r.zona).t + ' significa ' + C(r.zona).es.replace(/[¿?]/g, '') + '. ' + C(r.zona).regla }; })));
+        guion([{ es: 'Esto es lo que aprendiste hoy.' }].concat((PAR ? L.zonas.map(function (z) { return { zona: z }; }) : L.resumen).map(function (r) { return { es: C(r.zona).t + ' significa ' + C(r.zona).es.replace(/[¿?]/g, '') + '. ' + C(r.zona).regla }; })));
       }
 
-      G._leccion_pantalla = { salieron: salieron, paso: function () { return paso; }, activo: function () { return activo; }, seguir: function () { bSeguir.click(); }, soltar: soltar };   /* solo pruebas */
+      G._leccion_pantalla = { salieron: salieron, paso: function () { return paso; }, activo: function () { return activo; }, seguir: function () { bSeguir.click(); }, soltar: soltar,
+        razones: function () { return Object.keys(porZona); } };   /* solo pruebas */
       mira();
     }
     return { cargar: cargar, pintar: pintar, hash: hash, desdeHash: desdeHash, estado: function () { return st; } };

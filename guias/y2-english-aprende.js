@@ -349,6 +349,235 @@ GUIA.iniciar({
      ]
     }
    ]
+  },
+  {
+   "id": "why-because",
+   "unidad": "wh",
+   "titulo": "Why y because",
+   "en": "Why and because",
+   "calco": "umbrella",
+   "escena": "habitat",
+   "mecanica": "parejas",
+   "zonas": [
+    "why"
+   ],
+   "piensa": "Piensa. ¿Por qué pasa esto? Busca la razón.",
+   "textos": {
+    "juntos": "Ahora lo hacemos juntos. La razón que brilla es la correcta. Lleva el globo a su razón.",
+    "otra": "¡Muy bien! Ahora tres razones nuevas."
+   },
+   "mira": [
+    {
+     "es": "Hoy vas a aprender a preguntar por qué en inglés."
+    },
+    {
+     "es": "Why sirve para preguntar por una razón, por qué pasa algo."
+    },
+    {
+     "es": "La respuesta empieza con because, que quiere decir porque."
+    },
+    {
+     "en": "Why is the girl holding an umbrella?",
+     "ico": "umbrella"
+    },
+    {
+     "en": "Because it is raining.",
+     "zona": "rain"
+    },
+    {
+     "es": "Tiene un paraguas porque está lloviendo."
+    },
+    {
+     "en": "Why is the boy happy?",
+     "ico": "happy"
+    },
+    {
+     "en": "Because it is his birthday.",
+     "zona": "birthday"
+    },
+    {
+     "es": "Está feliz porque es su cumpleaños."
+    },
+    {
+     "es": "Recuerda. Why pregunta por qué. La respuesta empieza con because."
+    }
+   ],
+   "modelos": [
+    {
+     "id": "umbrella",
+     "en": "Why is the girl holding an umbrella?",
+     "ico": "umbrella",
+     "razon": "Because it is raining.",
+     "icoRazon": "rain",
+     "es": "¿Por qué la niña tiene un paraguas?",
+     "esRazon": "Porque está lloviendo.",
+     "zona": "rain"
+    },
+    {
+     "id": "happy",
+     "en": "Why is the boy happy?",
+     "ico": "happy",
+     "razon": "Because it is his birthday.",
+     "icoRazon": "birthday",
+     "es": "¿Por qué está feliz el niño?",
+     "esRazon": "Porque es su cumpleaños.",
+     "zona": "birthday"
+    }
+   ],
+   "yo": [
+    {
+     "id": "icecream",
+     "en": "Why is the ice cream melting?",
+     "ico": "melting",
+     "razon": "Because it is hot.",
+     "icoRazon": "hot",
+     "es": "¿Por qué se derrite el helado?",
+     "esRazon": "Porque hace calor.",
+     "zona": "hot"
+    },
+    {
+     "id": "kite",
+     "en": "Why is the kite flying?",
+     "ico": "kite",
+     "razon": "Because it is windy.",
+     "icoRazon": "windy",
+     "es": "¿Por qué vuela la cometa?",
+     "esRazon": "Porque hace viento.",
+     "zona": "windy"
+    }
+   ],
+   "juntos": [
+    [
+     {
+      "id": "coat",
+      "en": "Why is the girl wearing a coat?",
+      "ico": "coat",
+      "razon": "Because it is cold.",
+      "icoRazon": "cold",
+      "es": "¿Por qué la niña lleva abrigo?",
+      "esRazon": "Porque hace frío.",
+      "zona": "cold"
+     },
+     {
+      "id": "sleeping",
+      "en": "Why is the boy sleeping?",
+      "ico": "sleeping",
+      "razon": "Because it is night-time.",
+      "icoRazon": "night",
+      "es": "¿Por qué duerme el niño?",
+      "esRazon": "Porque es de noche.",
+      "zona": "night"
+     },
+     {
+      "id": "cheering",
+      "en": "Why are the children cheering?",
+      "ico": "cheering",
+      "razon": "Because they won the cup.",
+      "icoRazon": "trophy",
+      "es": "¿Por qué celebran los niños?",
+      "esRazon": "Porque ganaron la copa.",
+      "zona": "trophy"
+     }
+    ]
+   ],
+   "tu": [
+    [
+     {
+      "id": "sunglasses",
+      "en": "Why is the boy wearing sunglasses?",
+      "ico": "sunglasses",
+      "razon": "Because it is sunny.",
+      "icoRazon": "sunny",
+      "es": "¿Por qué el niño lleva gafas de sol?",
+      "esRazon": "Porque hace sol.",
+      "zona": "sunny"
+     },
+     {
+      "id": "baby",
+      "en": "Why is the baby crying?",
+      "ico": "babycry",
+      "razon": "Because he is hungry.",
+      "icoRazon": "bottle",
+      "es": "¿Por qué llora el bebé?",
+      "esRazon": "Porque tiene hambre.",
+      "zona": "bottle"
+     },
+     {
+      "id": "snowman",
+      "en": "Why is the girl making a snowman?",
+      "ico": "snowman",
+      "razon": "Because it is snowing.",
+      "icoRazon": "snowing",
+      "es": "¿Por qué la niña hace un muñeco de nieve?",
+      "esRazon": "Porque está nevando.",
+      "zona": "snowing"
+     }
+    ],
+    [
+     {
+      "id": "plant",
+      "en": "Why is the plant growing?",
+      "ico": "seedling",
+      "razon": "Because it gets sun and rain.",
+      "icoRazon": "sunrain",
+      "es": "¿Por qué crece la planta?",
+      "esRazon": "Porque recibe sol y lluvia.",
+      "zona": "sunrain"
+     },
+     {
+      "id": "bed",
+      "en": "Why is the boy going to bed?",
+      "ico": "bed",
+      "razon": "Because he is tired.",
+      "icoRazon": "yawn",
+      "es": "¿Por qué el niño se va a la cama?",
+      "esRazon": "Porque está cansado.",
+      "zona": "yawn"
+     },
+     {
+      "id": "dog",
+      "en": "Why is the dog happy?",
+      "ico": "puppy",
+      "razon": "Because it has got a bone.",
+      "icoRazon": "bone",
+      "es": "¿Por qué está feliz el perro?",
+      "esRazon": "Porque tiene un hueso.",
+      "zona": "bone"
+     }
+    ]
+   ],
+   "resumen": [
+    {
+     "id": "umbrella",
+     "en": "Why is the girl holding an umbrella?",
+     "ico": "umbrella",
+     "razon": "Because it is raining.",
+     "icoRazon": "rain",
+     "es": "¿Por qué la niña tiene un paraguas?",
+     "esRazon": "Porque está lloviendo.",
+     "zona": "rain"
+    },
+    {
+     "id": "happy",
+     "en": "Why is the boy happy?",
+     "ico": "happy",
+     "razon": "Because it is his birthday.",
+     "icoRazon": "birthday",
+     "es": "¿Por qué está feliz el niño?",
+     "esRazon": "Porque es su cumpleaños.",
+     "zona": "birthday"
+    },
+    {
+     "id": "kite",
+     "en": "Why is the kite flying?",
+     "ico": "kite",
+     "razon": "Because it is windy.",
+     "icoRazon": "windy",
+     "es": "¿Por qué vuela la cometa?",
+     "esRazon": "Porque hace viento.",
+     "zona": "windy"
+    }
+   ]
   }
  ]
 });

@@ -510,6 +510,8 @@
       if (!ini || e.pointerId !== ini.id) return;
       var l = vale && movido ? lugarEn(e.clientX, e.clientY) : null, eraMov = movido;
       ini = null; marcar(null); nodo.classList.remove('al-arrastrando');
+      /* el origen puesto en el dedo se quita: si no, en horizontal el globo (rotado) queda corrido de la carta */
+      Array.prototype.forEach.call(nodo.children, function (h) { h.style.transformOrigin = ''; });
       if (eraMov) {
         nodo._sinClick = true; setTimeout(function () { nodo._sinClick = false; }, 60);
         if (l) { op.alSoltar && op.alSoltar(l); }
