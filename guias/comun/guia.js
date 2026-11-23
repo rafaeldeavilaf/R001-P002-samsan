@@ -1844,7 +1844,8 @@
         return globo;
       }
       function frase(it) { return C(it.zona).q + ' ' + it.en.charAt(0).toUpperCase() + it.en.slice(1) + '.'; }
-      function porque(it) { return L.por[it.zona] + ' Va en la casa de ' + C(it.zona).t + '.'; }
+      function por(it) { return it.nota || L.por[it.zona]; }
+      function porque(it) { return por(it) + ' Va en la casa de ' + C(it.zona).t + '.'; }
       function llevar(it, alFin) {
         var g = globo, l = porZona[it.zona];
         ocupado = true;
@@ -1899,14 +1900,14 @@
             sonido('ok'); racha++;
             activo = null;
             /* primero vuela a la casa y despues Pip dice la frase completa */
-            llevar(it, function () { guion([{ en: frase(it) }, { es: (k === 'juntos' || ayudado ? '' : '¡Bien! ') + L.por[it.zona] }], function () { despues(sacar, 300); }); });
+            llevar(it, function () { guion([{ en: frase(it) }, { es: (k === 'juntos' || ayudado ? '' : '¡Bien! ') + por(it) }], function () { despues(sacar, 300); }); });
           } else {
             sonido('mal'); racha = 0; A.temblar(l);
             volverGlobo();
             /* re-explicar con este ejemplo, no «try again» */
             ayudado = true;
-            if (k === 'tu' && !repetidos[it.ico]) { repetidos[it.ico] = 1; cola.push({ en: it.en, ico: it.ico, zona: it.zona, otra: true }); }
-            guion([{ es: 'Mira otra vez. ' + L.por[it.zona] + ' ' + C(it.zona).regla }, { en: frase(it) }], function () { porZona[it.zona].classList.add('le-guia'); });
+            if (k === 'tu' && !repetidos[it.ico]) { repetidos[it.ico] = 1; cola.push({ en: it.en, ico: it.ico, zona: it.zona, nota: it.nota, otra: true }); }
+            guion([{ es: 'Mira otra vez. ' + por(it) + ' ' + C(it.zona).regla }, { en: frase(it) }], function () { porZona[it.zona].classList.add('le-guia'); });
           }
         };
       }
@@ -1915,7 +1916,7 @@
         if (!activo) return;
         ayudado = true;
         porZona[activo.zona].classList.add('le-guia');
-        guion([{ es: L.por[activo.zona] + ' ' + C(activo.zona).regla }]);
+        guion([{ es: por(activo) + ' ' + C(activo.zona).regla }]);
       });
 
       /* 5 · LO QUE APRENDI */

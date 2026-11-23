@@ -235,7 +235,7 @@ GUIA.iniciar({
      "zona": "where"
     },
     {
-     "en": "Where is the cow? At the farm.",
+     "en": "Where is the cow? On the farm.",
      "ico": "cow",
      "zona": "where"
     },
@@ -255,13 +255,14 @@ GUIA.iniciar({
    "yo": [
     {
      "en": "at school",
-     "ico": "school",
+     "ico": "escuela",
      "zona": "where"
     },
     {
      "en": "in the morning",
      "ico": "morning",
-     "zona": "when"
+     "zona": "when",
+     "nota": "El sol sale. Es la mañana."
     }
    ],
    "juntos": [
@@ -295,11 +296,12 @@ GUIA.iniciar({
     {
      "en": "in summer",
      "ico": "summer",
-     "zona": "when"
+     "zona": "when",
+     "nota": "Es el verano, una época del año."
     },
     {
      "en": "in the park",
-     "ico": "park",
+     "ico": "slide",
      "zona": "where"
     },
     {
@@ -315,7 +317,8 @@ GUIA.iniciar({
     {
      "en": "in winter",
      "ico": "winter",
-     "zona": "when"
+     "zona": "when",
+     "nota": "Es el invierno, la época del frío y la nieve."
     }
    ],
    "resumen": [
@@ -323,12 +326,12 @@ GUIA.iniciar({
      "zona": "where",
      "ej": [
       {
-       "ico": "cow",
-       "en": "at the farm"
+       "ico": "escuela",
+       "en": "at school"
       },
       {
-       "ico": "school",
-       "en": "at school"
+       "ico": "beach",
+       "en": "at the beach"
       }
      ]
     },

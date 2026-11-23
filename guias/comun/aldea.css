@@ -333,3 +333,5 @@ body.al-jugando .site-foot { display: none; }
 .le-resumen .g-btn { margin-top: 8px; width: 100%; }
 @media (prefers-reduced-motion: reduce) { .le-guia .al-dibujo-lugar, .le-seguir--late { animation: none; } .le-guia .al-dibujo-lugar { filter: drop-shadow(0 0 8px #F59E0B); } }
 .le-pantalla .al-bombilla[hidden] { display: none; }
+/* en las lecciones el sol de adorno se quita: se confundia con el sol de «in summer» (revision 23 nov 2026) */
+.le-pantalla .al-sol { display: none; }

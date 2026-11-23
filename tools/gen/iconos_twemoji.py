@@ -93,6 +93,16 @@ PROPIOS = {
 SVG_RE = re.compile(r"^\s*<svg[^>]*viewBox=\"0 0 36 36\"[^>]*>(.*)</svg>\s*$", re.S)
 
 
+# Dibujos de Twemoji con un cambio (CC BY 4.0 lo permite si se indica):
+# clave -> (codigo, [fragmentos que se quitan]).
+# escuela: el colegio 1f3eb sin el reloj de la torre, que se confundia con el
+# despertador de la casa When (revision de exactitud, 23 nov 2026).
+MODIFICADOS = {
+    "escuela": ("1f3eb", ['<circle cx="14" cy="9" r="6" fill="#A7A9AC"/>', '<circle cx="14" cy="9" r="4" fill="#E6E7E8"/>',
+                          '<path fill="#A0041E" d="M17 10h-3a1 1 0 0 1-1-1V4a1 1 0 0 1 2 0v4h2a1 1 0 0 1 0 2z"/>']),
+}
+
+
 def leer(fuente, codigo):
     for nombre in (codigo, codigo.replace("-fe0f", "")):
         ruta = os.path.join(fuente, nombre + ".svg")
@@ -121,10 +131,13 @@ def main():
     salida = {}
     for clave in sorted(usados & set(PROPIOS)):
         salida[clave] = PROPIOS[clave]
-    for clave, codigo in sorted(ICONOS.items()):
+    for clave, codigo in sorted(list(ICONOS.items()) + [(k, v[0]) for k, v in MODIFICADOS.items()]):
         if clave not in usados:
             continue
         svg = leer(a.fuente, codigo)
+        for quitar in MODIFICADOS.get(clave, (None, []))[1]:
+            assert quitar in svg, "%s: no encuentro %s" % (clave, quitar)
+            svg = svg.replace(quitar, "")
         m = SVG_RE.match(svg)
         assert m, "%s (%s): no es un SVG de 36 x 36" % (clave, codigo)
         dentro = m.group(1)
@@ -133,7 +146,8 @@ def main():
     cuerpo = json.dumps(dict(sorted(salida.items())), ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     texto = ("/* ============================================================\n"
              "   ICONOS DE LA ALDEA (generado por tools/gen/iconos_twemoji.py; no se edita a mano)\n"
-             "   Graficos: Twemoji, CC BY 4.0, (c) Twitter, Inc. y otros colaboradores, sin cambios en el dibujo.\n"
+             "   Graficos: Twemoji, CC BY 4.0, (c) Twitter, Inc. y otros colaboradores, sin cambios en el dibujo\n"
+             "   salvo: " + ", ".join("%s (%s sin el reloj)" % (k, v[0]) for k, v in sorted(MODIFICADOS.items()) if k in usados) + ".\n"
              "   Propios de SAMSAN (dibujados por codigo): " + ", ".join(sorted(usados & set(PROPIOS))) + ".\n"
              "   https://github.com/jdecked/twemoji · https://creativecommons.org/licenses/by/4.0/\n"
              "   Cada valor es el interior de un SVG de 36 x 36 (ALDEA.icono lo envuelve).\n"

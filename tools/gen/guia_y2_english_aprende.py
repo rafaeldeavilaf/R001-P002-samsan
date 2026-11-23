@@ -71,16 +71,16 @@ LECCIONES = [
         "mira": [
             {"es": "Hoy vas a aprender dos palabras más para preguntar en inglés."},
             {"es": "Where sirve para preguntar por un lugar.", "zona": "where"},
-            {"en": "Where is the cow? At the farm.", "ico": "cow", "zona": "where"},
+            {"en": "Where is the cow? On the farm.", "ico": "cow", "zona": "where"},
             {"es": "When sirve para preguntar por un momento, cuándo pasa algo.", "zona": "when"},
             {"en": "When do you sleep? At night.", "ico": "night", "zona": "when"},
             {"es": "Recuerda. Si es un lugar, Where. Si es un momento, When."},
         ],
-        "yo": [("at school", "school", "where"), ("in the morning", "morning", "when")],
+        "yo": [("at school", "escuela", "where"), ("in the morning", "morning", "when", "El sol sale. Es la mañana.")],
         "juntos": [("at the beach", "beach", "where"), ("on Monday", "monday", "when"), ("at the hospital", "hospital", "where"), ("at 7 o'clock", "seven", "when")],
-        "tu": [("at home", "home", "where"), ("in summer", "summer", "when"), ("in the park", "park", "where"),
-               ("on my birthday", "birthday", "when"), ("in the castle", "castle", "where"), ("in winter", "winter", "when")],
-        "resumen": {"where": [("at the farm", "cow"), ("at school", "school")], "when": [("at night", "night"), ("in the morning", "morning")]},
+        "tu": [("at home", "home", "where"), ("in summer", "summer", "when", "Es el verano, una época del año."), ("in the park", "slide", "where"),
+               ("on my birthday", "birthday", "when"), ("in the castle", "castle", "where"), ("in winter", "winter", "when", "Es el invierno, la época del frío y la nieve.")],
+        "resumen": {"where": [("at school", "escuela"), ("at the beach", "beach")], "when": [("at night", "night"), ("in the morning", "morning")]},
     },
 ]
 
@@ -89,8 +89,13 @@ PREPOSICION = ("at ", "in ", "on ")
 
 
 def item(t):
-    texto, ico, zona = t
-    return {"en": texto, "ico": ico, "zona": zona}
+    # (texto, dibujo, casa[, nota]): la nota es lo que Pip dice de ese ejemplo
+    # en vez del «por» general de la casa (p. ej. aclarar que summer es una epoca).
+    texto, ico, zona = t[:3]
+    d = {"en": texto, "ico": ico, "zona": zona}
+    if len(t) > 3:
+        d["nota"] = t[3]
+    return d
 
 
 def construir():
@@ -99,7 +104,7 @@ def construir():
         assert set(L["zonas"]) <= set(CODIGO), L["id"]
         vistos = set()
         for paso in ("yo", "juntos", "tu"):
-            for texto, ico, zona in L[paso]:
+            for texto, ico, zona, *_ in L[paso]:
                 assert zona in L["zonas"], (L["id"], texto, zona)
                 assert ico not in vistos, "%s: el dibujo %s se repite" % (L["id"], ico)
                 vistos.add(ico)
@@ -113,7 +118,7 @@ def construir():
             assert m.get("ico") not in vistos, "%s: el dibujo %s de mira se repite en un ejemplo" % (L["id"], m.get("ico"))
             assert "zona" not in m or m["zona"] in L["zonas"], (L["id"], m)
         for paso in ("yo", "juntos", "tu"):
-            for texto, ico, zona in L[paso]:
+            for texto, ico, zona, *_ in L[paso]:
                 if zona in ("where", "when"):
                     assert texto.startswith(PREPOSICION), "%s: «%s» debe empezar con at, in u on" % (L["id"], texto)
         lecciones.append({
