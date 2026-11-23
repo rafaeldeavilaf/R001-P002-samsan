@@ -46,7 +46,8 @@ VOZ = r"""
   const remota = %s;
   const voces = [{ name: 'Google UK English Female', lang: 'en-GB', localService: false },
                  { name: 'Google español', lang: 'es-ES', localService: false }];
-  if (!remota) voces.push({ name: 'Daniel', lang: 'en-GB', localService: true }, { name: 'Monica', lang: 'es-ES', localService: true });
+  /* Monica (es-ES) y Sofia (es-US) son locales: Pip debe elegir el acento latinoamericano */
+  if (!remota) voces.push({ name: 'Daniel', lang: 'en-GB', localService: true }, { name: 'Monica', lang: 'es-ES', localService: true }, { name: 'Sofia', lang: 'es-US', localService: true });
   window.__dichos = [];
   const ss = { speaking: false, getVoices: () => voces, cancel() {}, onvoiceschanged: null,
     speak(u) { window.__dichos.push({ texto: u.text, voz: u.voice && u.voice.name });
@@ -279,7 +280,7 @@ class Prueba:
             await pg.locator('.g-ej, .g-frase-ej').first.click(); await pg.wait_for_timeout(80)
             d2 = await pg.evaluate('window.__dichos')
             await ctx.close()
-            locales = {'Daniel', 'Monica'}
+            locales = {'Daniel', 'Monica', 'Sofia'}
             self.anotar('H13', d1 and all(x['voz'] in locales for x in d1) and not d2,
                         'usa la voz local; sin voz local no habla', {'voces_usadas': sorted({x['voz'] for x in d1}), 'con_solo_red': len(d2)})
 

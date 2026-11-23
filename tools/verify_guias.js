@@ -302,6 +302,7 @@ function validarLeccion(nombre, cfg) {
   cfg.lecciones.forEach(L => {
     if (L.mecanica === 'parejas') { validarParejas(nombre, L, ICONOS); return; }
     if (L.mecanica === 'cuento') { validarCuento(nombre, L, ICONOS, cfg.codigo); return; }
+    if (L.mecanica === 'fichas') { validarFichas(nombre, L, ICONOS, cfg.codigo); return; }
     const k = nombre + '/' + L.id, items = [].concat(L.yo, L.juntos, L.tu);
     check(k + ': 2 en yo, 4+ en juntos, 6+ en tu', L.yo.length === 2 && L.juntos.length >= 4 && L.tu.length >= 6);
     check(k + ': cada ejemplo va a una casa de la leccion', items.every(i => L.zonas.includes(i.zona)));
@@ -333,11 +334,25 @@ function validarCuento(nombre, L, ICONOS, COD) {
   check(k + ': cada trozo que responde sale una vez en el texto', cuentos.every(c => c.partes.every(p => [].concat(...c.frases).filter(t => t[1] === p.zona).length === 1 && [].concat(...c.frases).some(t => t[0] === p.txt && t[1] === p.zona))));
   check(k + ': cada pregunta empieza con su Wh y tiene traduccion', qs.every(q => q.en.split(' ')[0] === COD[q.zona].t && /\?$/.test(q.en) && /^¿.+\?$/.test(q.es)));
   check(k + ': la respuesta de cada pregunta esta en su cuento (dibujo y trozo)', qs.every(q => { const c = L.cuentos[q.cuento]; const p = c && c.partes.find(x => x.zona === q.zona); return p && p.txt === q.resp && p.ico === q.ico && c.frases[q.frase].map(t => t[0]).join('') === q.dice; }));
+  check(k + ': con pronombre, Pip lee la frase de la pregunta y dice a quien se refiere', qs.filter(q => q.nota).length >= 1 && qs.filter(q => q.nota).every(q => /^(She|He) /.test(q.dice) && q.dice.indexOf(q.en.split(' ').slice(1).join(' ').replace('?', '')) >= 0 && q.nota.indexOf('«' + q.dice.split(' ')[0] + '»') === 0), qs.filter(q => q.nota).map(q => q.id).join(','));
   check(k + ': ninguna pregunta trae su respuesta', qs.every(q => q.en.toLowerCase().indexOf(q.resp.toLowerCase()) < 0));
   check(k + ': 2+ en yo, 3+ en juntos y tu solo pregunta las cinco en cada cuento', L.yo.length >= 2 && L.juntos.length >= 3 && L.tu.every(r => new Set(r.preguntas.map(q => q.zona)).size === 5 && r.preguntas.every(q => q.cuento === r.cuento)));
   const dib = [].concat(...cuentos.map(c => c.partes.map(p => p.ico)));
   check(k + ': los dibujos de las partes no se repiten en la leccion', new Set(dib.map(d => ICONOS[d])).size === dib.length);
   check(k + ': resumen con dibujo, calcomania y pregunta para pensar', L.resumen.length >= 3 && !!ICONOS[L.calco] && !!L.piensa);
+}
+/* mecanica «fichas» (leccion 5, hacer la pregunta): la respuesta a la vista y la pregunta en fichas */
+function validarFichas(nombre, L, ICONOS, COD) {
+  const k = nombre + '/' + L.id, qs = [].concat(L.modelos, L.yo, L.juntos, L.tu), todas = qs.concat(L.resumen);
+  check(k + ': 1 o 2 en mira, 2 en yo, 3 en juntos y 5 en tu', L.modelos.length >= 1 && L.modelos.length <= 2 && L.yo.length === 2 && L.juntos.length === 3 && L.tu.length === 5);
+  check(k + ': tu solo cubre Who, What, Where, When y Why', L.tu.map(q => q.zona).sort().join() === Object.keys(COD).sort().join());
+  check(k + ': 3 o 4 fichas y la primera es la Wh de su zona', todas.every(q => q.fichas.length >= 3 && q.fichas.length <= 4 && q.fichas[0] === COD[q.zona].t));
+  check(k + ': las fichas unidas forman la pregunta y solo la ultima lleva ?', todas.every(q => q.fichas.join(' ') === q.en && q.fichas.every((f, i) => f.endsWith('?') === (i === q.fichas.length - 1))));
+  check(k + ': fichas sin repetir (una sola forma de ordenarlas)', todas.every(q => new Set(q.fichas.map(f => f.toLowerCase())).size === q.fichas.length));
+  check(k + ': respuesta y traducciones', todas.every(q => /\.$/.test(q.resp) && /^¿.+\?$/.test(q.es) && /\.$/.test(q.esResp)));
+  check(k + ': dibujos que existen y no se repiten', qs.every(q => ICONOS[q.ico]) && new Set(qs.map(q => ICONOS[q.ico])).size === qs.length && !!ICONOS[L.calco]);
+  check(k + ': ninguna pregunta sale dos veces', new Set(qs.map(q => q.id)).size === qs.length);
+  check(k + ': resumen de 3 preguntas ya vistas', L.resumen.length === 3 && L.resumen.every(r => qs.some(q => q.id === r.id)) && !!L.piensa);
 }
 async function jugarLeccion(nombre, cfg) {
   const file = path.join(ROOT, 'guia-' + nombre + '.html');
@@ -352,13 +367,36 @@ async function jugarLeccion(nombre, cfg) {
     });
     await espera(60);
     const w = dom.window, d = w.document, P = () => w.GUIA._leccion_pantalla;
-    const pasos = [], tu = [], PAR = L.mecanica === 'parejas', CUE = L.mecanica === 'cuento', juegos = { tu: new Set(), juntos: new Set() }; let fallo = false, fuera = 0, ultimo = null;
+    const pasos = [], tu = [], PAR = L.mecanica === 'parejas', CUE = L.mecanica === 'cuento', FIC = L.mecanica === 'fichas', juegos = { tu: new Set(), juntos: new Set() }; let fallo = false, fuera = 0, ultimo = null;
     const colores = { juntos: new Set(), tu: new Set() };
-    for (let k = 0; k < 900 && P() && P().paso() !== 'aprendi'; k++) {
+    /* «Otra vez» tocado mientras Pip habla, en medio de cada paso: la leccion debe seguir hasta el final */
+    const otraEn = new Set();
+    const otraVez = () => { const pa = P() && P().paso(); if (pa && pa !== 'aprendi' && !otraEn.has(pa) && P().hablando()) { P().otra(); otraEn.add(pa); } };
+    const fic = { brillaJuntos: 0, brillaTuAntes: 0, devuelta: null, explica: '', hueco0: null };
+    for (let k = 0; k < 1500 && P() && P().paso() !== 'aprendi'; k++) {
       await espera(40);
+      otraVez();
       const paso = P().paso(); if (pasos[pasos.length - 1] !== paso) pasos.push(paso);
       const seg = !d.querySelector('.le-seguir').disabled, a = P().activo();
-      if (seg) { P().seguir(); continue; }
+      if (seg) { P().seguir(); otraVez(); continue; }
+      if (FIC) {
+        if (!a || P().ocupado()) continue;
+        const h = P().puestas().indexOf(null); if (h < 0) continue;
+        const guia = d.querySelector('.le-ficha.le-guia');
+        if (paso === 'juntos' && guia && guia.getAttribute('aria-label') === a.fichas[h]) fic.brillaJuntos++;
+        if (paso === 'tu' && !fallo && guia) fic.brillaTuAntes++;
+        if (paso === 'tu' && !fallo) {
+          /* error a proposito: una ficha que no va en el siguiente hueco */
+          fallo = true; tu.push(a.id);
+          const mala = a.fichas.find((f, i) => i !== h && P().fichas().includes(f));
+          P().soltar(mala); await espera(5);
+          fic.devuelta = P().puestas()[h] === null && P().fichas().includes(mala);
+          fic.explica = d.querySelector('.le-dialogo__texto').textContent; fic.hueco0 = h;
+          continue;
+        }
+        P().soltar(a.fichas[h]);
+        continue;
+      }
       if (!a || d.querySelector('.al-volando') || a === ultimo) continue;
       const razones = PAR || CUE ? P().razones() : L.zonas;
       if (PAR) { juegos[paso] && juegos[paso].add(razones.slice().sort().join('+')); if (!razones.includes(a.zona)) fuera++; }
@@ -369,7 +407,13 @@ async function jugarLeccion(nombre, cfg) {
     if (P()) pasos.push(P().paso());
     const salieron = P().salieron.filter(x => /^tu:/.test(x)).map(x => x.slice(3));
     check(nombre + '/' + L.id + ': recorre los 5 pasos en orden', pasos.join(',') === 'mira,yo,juntos,tu,aprendi', pasos.join(','));
-    if (CUE) {
+    check(nombre + '/' + L.id + ': «Otra vez» en medio de cada paso no deja la leccion parada', ['mira', 'yo', 'juntos', 'tu'].every(x => otraEn.has(x)) && P().paso() === 'aprendi', [...otraEn].join(',') + ' -> ' + P().paso());
+    if (FIC) {
+      check(nombre + '/' + L.id + ': la ficha mal puesta vuelve a su sitio y Pip re-explica', fic.devuelta === true && /Mira otra vez/.test(fic.explica) && (fic.hueco0 !== 0 || /palabra que pregunta/.test(fic.explica)), fic.explica);
+      check(nombre + '/' + L.id + ': la pregunta fallada vuelve al final una vez', salieron.length === L.tu.length + 1 && salieron[salieron.length - 1] === tu[0], salieron.join(',') + ' fallo ' + tu[0]);
+      check(nombre + '/' + L.id + ': en juntos brilla la ficha siguiente y en tu solo no', fic.brillaJuntos >= L.juntos.reduce((t, q) => t + q.fichas.length, 0) && fic.brillaTuAntes === 0, fic.brillaJuntos + ' / ' + fic.brillaTuAntes);
+      check(nombre + '/' + L.id + ': el resumen trae 3 preguntas con su respuesta que suenan', d.querySelectorAll('.le-resumen .le-par--fichas').length === L.resumen.length);
+    } else if (CUE) {
       /* el fallado vuelve al final de su cuento y lo que le costo vuelve en el cuento siguiente */
       const n1 = L.tu[0].preguntas.length, zona = id => id.split(':')[1];
       check(nombre + '/' + L.id + ': la pregunta fallada vuelve al final de su cuento', salieron[n1] === tu[0] && salieron.slice(0, n1).includes(tu[0]), salieron.join(',') + ' fallo ' + tu[0]);
@@ -397,13 +441,38 @@ async function jugarLeccion(nombre, cfg) {
   }
 }
 
+/* voz de Pip: en español prefiere una voz local latinoamericana (es-US, es-419, es-MX, es-CO);
+   si no hay, cualquier voz es- local; nunca una voz por red */
+async function probarVoz(nombre, cfg) {
+  const file = path.join(ROOT, 'guia-' + nombre + '.html');
+  async function usadas(voces) {
+    const dom = new JSDOM(fs.readFileSync(file, 'utf8'), {
+      url: 'https://example.test/' + path.basename(file) + '#' + cfg.lecciones[0].id, runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: new VirtualConsole(),
+      beforeParse(w) {
+        w.__SAMSAN_RAPIDO = true; w.__dichos = [];
+        w.speechSynthesis = { getVoices: () => voces, cancel() {}, speak(u) { w.__dichos.push({ t: u.text, voz: u.voice && u.voice.name, lang: u.lang }); setTimeout(() => u.onend && u.onend(), 5); } };
+        w.SpeechSynthesisUtterance = function (t) { this.text = t; };
+      }
+    });
+    await espera(400);
+    const r = dom.window.__dichos.slice(); dom.window.close(); return r;
+  }
+  const base = [{ name: 'Daniel', lang: 'en-GB', localService: true }, { name: 'Monica', lang: 'es-ES', localService: true }, { name: 'Google español de Estados Unidos', lang: 'es-US', localService: false }];
+  const d1 = await usadas(base.concat([{ name: 'Sofia', lang: 'es-US', localService: true }]));
+  const es1 = d1.filter(x => /^es/.test(x.lang)), en1 = d1.filter(x => /^en/.test(x.lang));
+  check(nombre + ': Pip habla español con la voz local es-US si el telefono la tiene', es1.length > 0 && es1.every(x => x.voz === 'Sofia') && en1.every(x => x.voz === 'Daniel'), [...new Set(d1.map(x => x.voz))].join(','));
+  const d2 = await usadas(base);
+  const es2 = d2.filter(x => /^es/.test(x.lang));
+  check(nombre + ': sin voz latinoamericana local usa la es-ES local, nunca la de red', es2.length > 0 && es2.every(x => x.voz === 'Monica'), [...new Set(d2.map(x => x.voz))].join(','));
+}
+
 (async () => {
   if (!fs.existsSync(DIR)) { console.log('OMITIDO: no hay guias/'); return; }
   const nombres = fs.readdirSync(DIR).filter(f => f.endsWith('.js')).map(f => f.slice(0, -3)).filter(n => !process.env.SOLO || n === process.env.SOLO);   /* SOLO=<guia> para probar una */
   for (const n of nombres) {
     console.log('\n== guia ' + n);
     const cfg = leerConfig(n);
-    if (cfg.modo === 'leccion') { validarLeccion(n, cfg); await jugarLeccion(n, cfg); continue; }
+    if (cfg.modo === 'leccion') { validarLeccion(n, cfg); await probarVoz(n, cfg); await jugarLeccion(n, cfg); continue; }
     if (cfg.modo === 'aldea') { validarAldea(n, cfg); await jugarAldea(n, cfg); continue; }
     if (cfg.modo === 'juego') { validarJuego(n, cfg); await errorJuego(n, cfg); await jugarJuego(n, cfg); continue; }
     validarDatos(n, cfg);

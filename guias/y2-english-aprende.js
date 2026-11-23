@@ -630,7 +630,7 @@ GUIA.iniciar({
      "parte": "what"
     },
     {
-     "es": "Where busca un lugar.",
+     "es": "Where busca un lugar. Con «go» decimos «to»: «to the beach».",
      "parte": "where"
     },
     {
@@ -831,8 +831,9 @@ GUIA.iniciar({
        "es": "¿Quién encuentra una concha grande?",
        "resp": "Mia",
        "ico": "girl",
-       "frase": 0,
-       "dice": "Mia goes to the beach."
+       "nota": "«She» es Mia. Mia encuentra la concha.",
+       "frase": 2,
+       "dice": "She finds a big shell."
       },
       {
        "id": "playa:where:1",
@@ -888,8 +889,9 @@ GUIA.iniciar({
        "es": "¿Quién encuentra una concha grande?",
        "resp": "Mia",
        "ico": "girl",
-       "frase": 0,
-       "dice": "Mia goes to the beach."
+       "nota": "«She» es Mia. Mia encuentra la concha.",
+       "frase": 2,
+       "dice": "She finds a big shell."
       },
       "what": {
        "id": "playa:what:0",
@@ -975,6 +977,271 @@ GUIA.iniciar({
    ]
   },
   {
+   "id": "pregunta",
+   "unidad": "wh",
+   "titulo": "Arma la pregunta",
+   "en": "Make the question",
+   "calco": "parrot",
+   "mecanica": "fichas",
+   "zonas": [
+    "who",
+    "what",
+    "where",
+    "when",
+    "why"
+   ],
+   "piensa": "Piensa. Primero la palabra que pregunta, después «is».",
+   "textos": {
+    "juntos": "Ahora lo hacemos juntos. La ficha que brilla es la siguiente. Arrástrala al hueco o tócala.",
+    "tu": "Ahora tú solo. Mira la respuesta y arma la pregunta."
+   },
+   "mira": [
+    {
+     "es": "Hoy vas a armar preguntas en inglés."
+    },
+    {
+     "es": "Las preguntas en inglés empiezan con la palabra que pregunta: Who, What, Where, When o Why."
+    },
+    {
+     "es": "Mira. Esta es la respuesta. Las fichas se ponen solas."
+    }
+   ],
+   "cierre": [
+    {
+     "es": "Recuerda. Primero la palabra que pregunta, después «is», y al final la ficha con el signo de pregunta."
+    }
+   ],
+   "modelos": [
+    {
+     "id": "perro",
+     "zona": "where",
+     "fichas": [
+      "Where",
+      "is",
+      "the dog?"
+     ],
+     "en": "Where is the dog?",
+     "resp": "In the park.",
+     "ico": "slide",
+     "es": "¿Dónde está el perro?",
+     "esResp": "En el parque."
+    },
+    {
+     "id": "puerta",
+     "zona": "who",
+     "fichas": [
+      "Who",
+      "is",
+      "at",
+      "the door?"
+     ],
+     "en": "Who is at the door?",
+     "resp": "Grandma.",
+     "ico": "grandma",
+     "es": "¿Quién está en la puerta?",
+     "esResp": "La abuela."
+    }
+   ],
+   "yo": [
+    {
+     "id": "caja",
+     "zona": "what",
+     "fichas": [
+      "What",
+      "is",
+      "in",
+      "the box?"
+     ],
+     "en": "What is in the box?",
+     "resp": "A ball.",
+     "ico": "ball",
+     "es": "¿Qué hay en la caja?",
+     "esResp": "Una pelota."
+    },
+    {
+     "id": "fiesta",
+     "zona": "when",
+     "fichas": [
+      "When",
+      "is",
+      "the party?"
+     ],
+     "en": "When is the party?",
+     "resp": "On Saturday.",
+     "ico": "saturday",
+     "es": "¿Cuándo es la fiesta?",
+     "esResp": "El sábado."
+    }
+   ],
+   "juntos": [
+    {
+     "id": "mojado",
+     "zona": "why",
+     "fichas": [
+      "Why",
+      "is",
+      "the boy",
+      "wet?"
+     ],
+     "en": "Why is the boy wet?",
+     "resp": "Because it is raining.",
+     "ico": "rain",
+     "es": "¿Por qué está mojado el niño?",
+     "esResp": "Porque está lloviendo."
+    },
+    {
+     "id": "gato",
+     "zona": "where",
+     "fichas": [
+      "Where",
+      "is",
+      "the cat?"
+     ],
+     "en": "Where is the cat?",
+     "resp": "On the bed.",
+     "ico": "bed",
+     "es": "¿Dónde está el gato?",
+     "esResp": "En la cama."
+    },
+    {
+     "id": "cocina",
+     "zona": "who",
+     "fichas": [
+      "Who",
+      "is",
+      "in",
+      "the kitchen?"
+     ],
+     "en": "Who is in the kitchen?",
+     "resp": "The cook.",
+     "ico": "baker",
+     "es": "¿Quién está en la cocina?",
+     "esResp": "El cocinero."
+    }
+   ],
+   "tu": [
+    {
+     "id": "bici",
+     "zona": "who",
+     "fichas": [
+      "Who",
+      "is",
+      "on",
+      "the bike?"
+     ],
+     "en": "Who is on the bike?",
+     "resp": "Sam.",
+     "ico": "biker",
+     "es": "¿Quién va en la bicicleta?",
+     "esResp": "Sam."
+    },
+    {
+     "id": "comiendo",
+     "zona": "what",
+     "fichas": [
+      "What",
+      "is",
+      "Mia",
+      "eating?"
+     ],
+     "en": "What is Mia eating?",
+     "resp": "An apple.",
+     "ico": "apple",
+     "es": "¿Qué está comiendo Mia?",
+     "esResp": "Una manzana."
+    },
+    {
+     "id": "abuelo",
+     "zona": "where",
+     "fichas": [
+      "Where",
+      "is",
+      "Grandpa?"
+     ],
+     "en": "Where is Grandpa?",
+     "resp": "At the beach.",
+     "ico": "beach",
+     "es": "¿Dónde está el abuelo?",
+     "esResp": "En la playa."
+    },
+    {
+     "id": "desayuno",
+     "zona": "when",
+     "fichas": [
+      "When",
+      "is",
+      "breakfast?"
+     ],
+     "en": "When is breakfast?",
+     "resp": "In the morning.",
+     "ico": "morning",
+     "es": "¿Cuándo es el desayuno?",
+     "esResp": "Por la mañana."
+    },
+    {
+     "id": "frio",
+     "zona": "why",
+     "fichas": [
+      "Why",
+      "is",
+      "the girl",
+      "cold?"
+     ],
+     "en": "Why is the girl cold?",
+     "resp": "Because it is snowing.",
+     "ico": "snowing",
+     "es": "¿Por qué tiene frío la niña?",
+     "esResp": "Porque está nevando."
+    }
+   ],
+   "resumen": [
+    {
+     "id": "perro",
+     "zona": "where",
+     "fichas": [
+      "Where",
+      "is",
+      "the dog?"
+     ],
+     "en": "Where is the dog?",
+     "resp": "In the park.",
+     "ico": "slide",
+     "es": "¿Dónde está el perro?",
+     "esResp": "En el parque."
+    },
+    {
+     "id": "puerta",
+     "zona": "who",
+     "fichas": [
+      "Who",
+      "is",
+      "at",
+      "the door?"
+     ],
+     "en": "Who is at the door?",
+     "resp": "Grandma.",
+     "ico": "grandma",
+     "es": "¿Quién está en la puerta?",
+     "esResp": "La abuela."
+    },
+    {
+     "id": "mojado",
+     "zona": "why",
+     "fichas": [
+      "Why",
+      "is",
+      "the boy",
+      "wet?"
+     ],
+     "en": "Why is the boy wet?",
+     "resp": "Because it is raining.",
+     "ico": "rain",
+     "es": "¿Por qué está mojado el niño?",
+     "esResp": "Porque está lloviendo."
+    }
+   ]
+  },
+  {
    "id": "repaso",
    "unidad": "wh",
    "titulo": "Repaso mezclado",
@@ -1009,7 +1276,7 @@ GUIA.iniciar({
      "frase": 1
     },
     {
-     "en": "He takes a bucket because he wants to catch crabs.",
+     "en": "He takes a bucket because he wants to look for crabs.",
      "frase": 2
     },
     {
@@ -1072,7 +1339,7 @@ GUIA.iniciar({
         null
        ],
        [
-        "because he wants to catch crabs",
+        "because he wants to look for crabs",
         "why"
        ],
        [
@@ -1112,7 +1379,7 @@ GUIA.iniciar({
       },
       {
        "zona": "why",
-       "txt": "because he wants to catch crabs",
+       "txt": "because he wants to look for crabs",
        "ico": "crab",
        "x": 81,
        "y": 76
@@ -1156,7 +1423,7 @@ GUIA.iniciar({
         null
        ],
        [
-        "on her birthday",
+        "in the morning",
         "when"
        ],
        [
@@ -1204,8 +1471,8 @@ GUIA.iniciar({
       },
       {
        "zona": "when",
-       "txt": "on her birthday",
-       "ico": "birthday",
+       "txt": "in the morning",
+       "ico": "morning",
        "x": 78,
        "y": 26
       },
@@ -1367,7 +1634,7 @@ GUIA.iniciar({
      "resp": "a bucket",
      "ico": "bucket",
      "frase": 2,
-     "dice": "He takes a bucket because he wants to catch crabs."
+     "dice": "He takes a bucket because he wants to look for crabs."
     },
     {
      "id": "isla:when:0",
@@ -1386,10 +1653,10 @@ GUIA.iniciar({
      "zona": "why",
      "en": "Why does Grandpa take a bucket?",
      "es": "¿Por qué lleva el abuelo un balde?",
-     "resp": "because he wants to catch crabs",
+     "resp": "because he wants to look for crabs",
      "ico": "crab",
      "frase": 2,
-     "dice": "He takes a bucket because he wants to catch crabs."
+     "dice": "He takes a bucket because he wants to look for crabs."
     }
    ],
    "tu": [
@@ -1435,10 +1702,10 @@ GUIA.iniciar({
        "zona": "when",
        "en": "When does Grandma go to the market?",
        "es": "¿Cuándo va la abuela al mercado?",
-       "resp": "on her birthday",
-       "ico": "birthday",
+       "resp": "in the morning",
+       "ico": "morning",
        "frase": 1,
-       "dice": "She goes on her birthday."
+       "dice": "She goes in the morning."
       },
       {
        "id": "mercado:why:0",
@@ -1461,8 +1728,9 @@ GUIA.iniciar({
        "es": "¿Quién compra mangos?",
        "resp": "Grandma",
        "ico": "grandma",
-       "frase": 0,
-       "dice": "Grandma goes to the market."
+       "nota": "«She» es la abuela. La abuela compra los mangos.",
+       "frase": 2,
+       "dice": "She buys some mangoes because she wants to make juice."
       },
       "what": {
        "id": "mercado:what:0",
@@ -1479,8 +1747,8 @@ GUIA.iniciar({
        "id": "mercado:where:1",
        "cuento": "mercado",
        "zona": "where",
-       "en": "Where does Grandma go on her birthday?",
-       "es": "¿A dónde va la abuela en su cumpleaños?",
+       "en": "Where does Grandma go in the morning?",
+       "es": "¿A dónde va la abuela por la mañana?",
        "resp": "to the market",
        "ico": "market",
        "frase": 0,
@@ -1492,10 +1760,10 @@ GUIA.iniciar({
        "zona": "when",
        "en": "When does Grandma go to the market?",
        "es": "¿Cuándo va la abuela al mercado?",
-       "resp": "on her birthday",
-       "ico": "birthday",
+       "resp": "in the morning",
+       "ico": "morning",
        "frase": 1,
-       "dice": "She goes on her birthday."
+       "dice": "She goes in the morning."
       },
       "why": {
        "id": "mercado:why:0",
@@ -1578,8 +1846,9 @@ GUIA.iniciar({
        "es": "¿Quién lleva una cámara?",
        "resp": "Sam",
        "ico": "boy",
-       "frase": 0,
-       "dice": "Sam goes to the park."
+       "nota": "«He» es Sam. Sam lleva la cámara.",
+       "frase": 2,
+       "dice": "He takes a camera because he wants to take a photo of an iguana."
       },
       "what": {
        "id": "parque:what:0",

@@ -48,7 +48,7 @@ ICONOS = {
     "ambulance": "1f691", "bandage": "1fa79", "ill": "1f912", "picnic": "1f9fa", "duck": "1f986",
     "persona": "1f464", "caja": "1f4e6", "lugar": "1f4cd", "pensar": "1f914",
     "hen": "1f414", "tractor": "1f69c", "evening": "1f306", "doughnut": "1f369", "dog": "1f415", "hatching": "1f423", "caterpillar": "1f41b", "egg": "1f95a", "chick": "1f425", "rooster": "1f413",
-    "cow": "1f404", "monday": "1f5d3", "hospital": "1f3e5", "seven": "1f556", "summer": "2600", "castle": "1f3f0", "winter": "2744",
+    "cow": "1f404", "monday": "1f5d3", "hospital": "1f3e5", "summer": "2600", "castle": "1f3f0", "winter": "2744",
     # leccion 3 de Learn with Pip (Why y because): situacion -> razon
     "umbrella": "2602", "rain": "1f327", "windy": "1f32c", "coat": "1f9e5", "sleeping": "1f634", "cheering": "1f64c", "trophy": "1f3c6",
     "sunglasses": "1f60e", "sunny": "2600", "bottle": "1f37c", "snowing": "1f328", "seedling": "1f331", "sunrain": "1f326",
@@ -56,8 +56,12 @@ ICONOS = {
     # lecciones 4 y 6 de Learn with Pip (cuentos): personas genericas, animales y lugares del Caribe.
     # iguana: Twemoji no tiene iguana; el lagarto verde 1f98e hace de iguana. sunday: calendario sin texto.
     "girl": "1f467", "boy": "1f466", "grandpa": "1f474", "shell": "1f41a", "turtle": "1f422", "palm": "1f334",
-    "island": "1f3dd", "six": "1f555", "bucket": "1faa3", "mango": "1f96d", "juice": "1f964", "sunday": "1f5d3",
-    "camera": "1f4f7", "iguana": "1f98e",
+    "island": "1f3dd", "bucket": "1faa3", "mango": "1f96d", "sunday": "1f5d3",
+    "camera": "1f4f7",
+    # six, seven (relojes) son PROPIOS; juice va en RECOLOR e iguana en COMPUESTOS (revision 23 nov 2026)
+    # leccion 5 de Learn with Pip (hacer la pregunta): «Who is on the bike? Sam.» y «When is the party? On Saturday.»
+    # saturday: el mismo calendario sin texto que monday y sunday (el dia lo dice la respuesta escrita)
+    "biker": "1f6b4", "saturday": "1f5d3",
 }
 
 # Dibujos propios por codigo (36 x 36, colores planos al estilo Twemoji) para
@@ -107,6 +111,33 @@ PROPIOS["market"] = ('<path d="M7 13h2.4v21H7zM26.6 13h2.4v21h-2.4z" fill="#8B5E
                      '<circle cx="9" cy="21" r="3.2" fill="#F4900C"/><circle cx="15.6" cy="21" r="3.2" fill="#77B255"/><circle cx="22.2" cy="21" r="3.2" fill="#FFCC4D"/><circle cx="28.4" cy="21.4" r="2.8" fill="#F4900C"/>'
                      '<path d="M15.6 17.8v-1.6" stroke="#3E721D" stroke-width="1.2" stroke-linecap="round"/>')
 
+
+
+def reloj(hora):
+    """Reloj de pared dibujado por codigo (lecciones 2 y 6): esfera blanca, 12 marcas, aguja
+    larga azul y fina al 12 y aguja corta roja y gruesa a la hora. Los relojes de Twemoji
+    (1f555, 1f556) se leian como un boton de pausa (revision independiente, 23 nov 2026)."""
+    import math
+    marcas = "".join('<path d="M%.2f %.2fL%.2f %.2f" stroke="#292F33" stroke-width="%s" stroke-linecap="round"/>' % (
+        18 + (13.2 if i % 3 == 0 else 14.2) * math.sin(i * math.pi / 6), 18 - (13.2 if i % 3 == 0 else 14.2) * math.cos(i * math.pi / 6),
+        18 + 15.6 * math.sin(i * math.pi / 6), 18 - 15.6 * math.cos(i * math.pi / 6), "1.8" if i % 3 == 0 else "1") for i in range(12))
+    a = hora % 12 * math.pi / 6
+    return ('<circle cx="18" cy="18" r="17.5" fill="#3B88C3"/><circle cx="18" cy="18" r="16" fill="#FFFFFF"/>' + marcas +
+            '<path d="M18 18V4.6" stroke="#3B88C3" stroke-width="1.9" stroke-linecap="round"/>'
+            '<path d="M18 18L%.2f %.2f" stroke="#DD2E44" stroke-width="3.4" stroke-linecap="round"/>' % (18 + 8.2 * math.sin(a), 18 - 8.2 * math.cos(a)) +
+            '<circle cx="18" cy="18" r="2" fill="#292F33"/>')
+
+
+PROPIOS["six"] = reloj(6)
+PROPIOS["seven"] = reloj(7)
+
+# Dibujos de Twemoji con colores cambiados (CC BY 4.0, indicado en la cabecera):
+# clave -> (codigo, {color de Twemoji: color nuevo}). Cada color debe existir en el SVG.
+# juice: el liquido azul del vaso 1f964 pasa a naranja (jugo de mango, leccion 6).
+RECOLOR = {
+    "juice": ("1f964", {"#55ACEE": "#FFAC33", "#3B88C3": "#F4900C"}),
+}
+
 SVG_RE = re.compile(r"^\s*<svg[^>]*viewBox=\"0 0 36 36\"[^>]*>(.*)</svg>\s*$", re.S)
 
 
@@ -125,7 +156,20 @@ MODIFICADOS = {
 # quitan antes, como en MODIFICADOS]). Lo agregado es de
 # SAMSAN. Sirven para una SITUACION que ningun emoji muestra (leccion 3, Why).
 _GOTAS = ((10.3, 18.6, 3.4, 7.2), (17.6, 20.4, 3.0, 4.2), (23.2, 18.8, 3.4, 9.4))
+def _cresta():
+    """puas verde claro a lo largo del lomo del lagarto 1f98e (vista de arriba): asi se lee iguana"""
+    import math
+    P = [(11, 4.6), (15, 6.2), (19, 7.6), (23, 10), (26.4, 13.4), (28.8, 17.4), (29.6, 21.6)]
+    r = ""
+    for (x0, y0), (x1, y1) in zip(P, P[1:]):
+        mx, my = (x0 + x1) / 2, (y0 + y1) / 2; dx, dy = x1 - x0, y1 - y0; L = math.hypot(dx, dy); nx, ny = dy / L, -dx / L
+        r += '<path d="M%.2f %.2fL%.2f %.2fL%.2f %.2fz" fill="#A6D388"/>' % (x0, y0, mx + nx * 3.6, my + ny * 3.6, x1, y1)
+    return r
+
+
 COMPUESTOS = {
+    # iguana (lecciones 4 y 6): Twemoji no tiene iguana; el lagarto 1f98e con una cresta de puas verde claro
+    "iguana": ("1f98e", _cresta()),
     # el bebe llora: cejas tristes suaves y dos lagrimas (nada de llanto fuerte)
     # (revision de exactitud, 23 nov 2026: la boca sonriente con diente se leia como «llorar de risa»;
     #  se quita y va una boca triste abierta)
@@ -170,13 +214,16 @@ def main():
     salida = {}
     for clave in sorted(usados & set(PROPIOS)):
         salida[clave] = PROPIOS[clave]
-    for clave, codigo in sorted(list(ICONOS.items()) + [(k, v[0]) for k, v in MODIFICADOS.items()] + [(k, v[0]) for k, v in COMPUESTOS.items()]):
+    for clave, codigo in sorted(list(ICONOS.items()) + [(k, v[0]) for k, v in MODIFICADOS.items()] + [(k, v[0]) for k, v in COMPUESTOS.items()] + [(k, v[0]) for k, v in RECOLOR.items()]):
         if clave not in usados:
             continue
         svg = leer(a.fuente, codigo)
         for quitar in MODIFICADOS.get(clave, (None, []))[1] + (list(COMPUESTOS[clave][2]) if clave in COMPUESTOS and len(COMPUESTOS[clave]) > 2 else []):
             assert quitar in svg, "%s: no encuentro %s" % (clave, quitar)
             svg = svg.replace(quitar, "")
+        for viejo, nuevo in (RECOLOR[clave][1].items() if clave in RECOLOR else []):
+            assert ('fill="%s"' % viejo) in svg, "%s: el color %s no esta en %s" % (clave, viejo, codigo)
+            svg = svg.replace('fill="%s"' % viejo, 'fill="%s"' % nuevo)
         m = SVG_RE.match(svg)
         assert m, "%s (%s): no es un SVG de 36 x 36" % (clave, codigo)
         dentro = m.group(1) + (COMPUESTOS[clave][1] if clave in COMPUESTOS else "")
@@ -187,6 +234,7 @@ def main():
              "   ICONOS DE LA ALDEA (generado por tools/gen/iconos_twemoji.py; no se edita a mano)\n"
              "   Graficos: Twemoji, CC BY 4.0, (c) Twitter, Inc. y otros colaboradores, sin cambios en el dibujo\n"
              "   salvo: " + ", ".join("%s (%s sin el reloj)" % (k, v[0]) for k, v in sorted(MODIFICADOS.items()) if k in usados) + ".\n"
+             "   con colores cambiados: " + ", ".join("%s (%s, %s)" % (k, v[0], " y ".join("%s por %s" % (a, b) for a, b in v[1].items())) for k, v in sorted(RECOLOR.items()) if k in usados) + ".\n"
              "   con algo agregado por SAMSAN: " + ", ".join("%s (%s%s)" % (k, v[0], " con la boca cambiada" if len(v) > 2 else "") for k, v in sorted(COMPUESTOS.items()) if k in usados) + ".\n"
              "   Propios de SAMSAN (dibujados por codigo): " + ", ".join(sorted(usados & set(PROPIOS))) + ".\n"
              "   https://github.com/jdecked/twemoji · https://creativecommons.org/licenses/by/4.0/\n"

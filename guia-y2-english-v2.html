@@ -631,13 +631,16 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
 
   /* ---------- voz del telefono (sin enviar nada fuera) ---------- */
   function cargarVoces() { try { voces = window.speechSynthesis ? speechSynthesis.getVoices() : []; } catch (e) { voces = []; } }
+  var LATAM = ['es-us', 'es-419', 'es-mx', 'es-co'];
   function mejorVoz(idioma) {
     var lang = (idioma || cfg.lang).toLowerCase(), base = lang.slice(0, 2), mejor = null, top = -1;
     voces.forEach(function (v) {
       var l = (v.lang || '').replace('_', '-').toLowerCase();
       /* Regla 2 del repo: solo voces del propio telefono (localService), nada por red. */
       if (l.slice(0, 2) !== base || v.localService !== true) return;
-      var p = (l === lang ? 4 : 0) + (/natural|premium|enhanced|neural|siri/i.test(v.name) ? 5 : 0);
+      /* en español Pip prefiere acento latinoamericano si el telefono lo tiene (es-US, es-419, es-MX, es-CO)
+         antes que es-ES; si no hay ninguno, cualquier voz es- local */
+      var p = (base === 'es' && LATAM.indexOf(l) >= 0 ? 10 : 0) + (l === lang ? 4 : 0) + (/natural|premium|enhanced|neural|siri/i.test(v.name) ? 5 : 0);
       if (p > top) { top = p; mejor = v; }
     });
     return mejor;
@@ -2011,19 +2014,30 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       setTimeout(fin, espera(900 + txt.length * 75));
     }
     var INGLES = /\b(Who|What|Where|When|Why|because)\b/;
+    /* «...» dentro de una linea en español es ingles (leccion 5: «Después de
+       «Where» va «is»»): lo dice la voz inglesa y se ve como ficha. Aditivo:
+       las lecciones 1 a 4 y 6 no usan comillas angulares. */
     function partir(es) {
       var r = [];
-      es.split(/\b(Who|What|Where|When|Why|because)\b/).forEach(function (x) {
-        if (!x || !/[A-Za-zÁÉÍÓÚáéíóúñ]/.test(x)) return;
-        r.push({ t: x.trim(), lang: INGLES.test(x) && x.length < 9 ? cfg.lang : (cfg.langExplica || 'es-ES') });
+      es.split(/«([^»]+)»/).forEach(function (bloque, j) {
+        if (j % 2 === 1) { r.push({ t: bloque.trim(), lang: cfg.lang }); return; }
+        bloque.split(/\b(Who|What|Where|When|Why|because)\b/).forEach(function (x) {
+          if (!x || !/[A-Za-zÁÉÍÓÚáéíóúñ]/.test(x)) return;
+          r.push({ t: x.trim(), lang: INGLES.test(x) && x.length < 9 ? cfg.lang : (cfg.langExplica || 'es-ES') });
+        });
       });
       return r;
     }
-    function lineaHtml(linea) {
-      if (linea.es) return '<span class="le-es" lang="es">' + marcas(linea.es).replace(/\b(Who|What|Where|When|Why|because)\b/g, function (w) {
+    function palabrasWh(html) {
+      return html.replace(/\b(Who|What|Where|When|Why|because)\b/g, function (w) {
         var z = { Who: 'who', What: 'what', Where: 'where', When: 'when', Why: 'why', because: 'why' }[w];
         return '<b class="le-palabra" style="--c:' + C(z).color + '" lang="en">' + w + '</b>';
-      }) + '</span>';
+      });
+    }
+    function lineaHtml(linea) {
+      if (linea.es) return '<span class="le-es" lang="es">' + linea.es.split(/«([^»]+)»/).map(function (bloque, j) {
+        return j % 2 === 1 ? '<b class="le-cita" lang="en">' + palabrasWh(esc(bloque)) + '</b>' : palabrasWh(marcas(bloque));
+      }).join('') + '</span>';
       return '<span class="le-en" lang="en">' + esc(linea.en) + '</span>';
     }
 
@@ -2083,6 +2097,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     function leccion(li) {
       var A = K(), L = cfg.lecciones[li], mio = token;
       if (L.mecanica === 'cuento') { leccionCuento(li); return; }
+      if (L.mecanica === 'fichas') { leccionFichas(li); return; }
       var p = el('section', { class: 'al-pantalla le-pantalla' });
       var bar = el('div', { class: 'al-barra' });
       bar.appendChild(el('button', { class: 'g-icono', 'aria-label': t('atras'), html: ICO.atras, onclick: function () { ir({}); } }));
@@ -2136,12 +2151,13 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       }
       function mostrar(lineas) { texto.innerHTML = lineas.map(lineaHtml).join(' '); }
       /* dice varias lineas seguidas mostrando cada una; alFin al terminar */
-      var cadena = 0;
+      var cadena = 0, pendiente = null;
       function guion(lineas, alFin) {
-        ultima = lineas; var i = 0, esta = ++cadena;   /* un guion nuevo deja callado al anterior */
+        ultima = lineas; pendiente = alFin || null;
+        var i = 0, esta = ++cadena;   /* un guion nuevo deja callado al anterior */
         (function uno() {
           if (!vivo() || esta !== cadena) return;
-          if (i >= lineas.length) { if (alFin) alFin(); return; }
+          if (i >= lineas.length) { pendiente = null; if (alFin) alFin(); return; }
           var ln = lineas[i++];
           mostrar([ln]);
           if (ln.zona) { A.brillar(porZona[ln.zona]); }
@@ -2151,13 +2167,13 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       }
       function esperarSeguir(f) { bSeguir.disabled = false; bSeguir.classList.add('le-seguir--late'); alSeguir = f; despues(function () { try { bSeguir.focus({ preventScroll: true }); } catch (e) { /* nada */ } }, 50); }
       bSeguir.addEventListener('click', function () { if (bSeguir.disabled) return; bSeguir.disabled = true; bSeguir.classList.remove('le-seguir--late'); var f = alSeguir; alSeguir = null; if (f) f(); });
+      /* «otra vez» repite lo ultimo y luego sigue donde iba, como en la mecanica
+         «cuento» (antes cambiaba el token y cortaba la cadena del guion: si se
+         tocaba mientras Pip hablaba, la leccion se quedaba parada) */
       bOtra.addEventListener('click', function () {
         if (!ultima) return;
-        token++; mio = token;   /* corta lo que se estaba diciendo, sin perder la pantalla */
         try { speechSynthesis.cancel(); } catch (e) { /* nada */ }
-        var l2 = ultima;
-        l2.forEach(function (ln, k) { decir(ln, null, k > 0); });
-        mostrar(l2);
+        guion(ultima, pendiente);
       });
       pipCaja.addEventListener('click', function () { if (activo) hablar(activo.en, { lang: cfg.lang }); });
 
@@ -2330,7 +2346,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       }
 
       G._leccion_pantalla = { salieron: salieron, paso: function () { return paso; }, activo: function () { return activo; }, seguir: function () { bSeguir.click(); }, soltar: soltar,
-        razones: function () { return Object.keys(porZona); } };   /* solo pruebas */
+        razones: function () { return Object.keys(porZona); }, otra: function () { bOtra.click(); }, hablando: function () { return !!pendiente; } };   /* solo pruebas */
       mira();
     }
 
@@ -2495,7 +2511,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
           guion([{ en: q.en }, { es: q.es }], function () {
             var mano = A.mano(); nodos[q.zona][0].appendChild(mano);
             guiar(q.zona);
-            guion([{ es: regla(q.zona) }, { en: mayus(q.resp) + '.' }, { en: q.dice, frase: q.frase }], function () {
+            guion([{ es: regla(q.zona) }, { en: mayus(q.resp) + '.' }, { en: q.dice, frase: q.frase }].concat(q.nota ? [{ es: q.nota }] : []), function () {
               mano.remove(); limpiar(); bien(q.zona); despues(uno, 900);
             });
           });
@@ -2543,7 +2559,8 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
             sonido('ok'); racha++;
             activo = null;
             bien(z);
-            guion([{ en: it.dice, frase: it.frase }, { es: (k === 'juntos' || ayudado ? '' : '¡Bien! ') + regla(z) }], function () { despues(sacar, 300); });
+            /* con pronombre (Who finds a big shell?) Pip lee la frase de la pregunta y dice a quien se refiere */
+            guion([{ en: it.dice, frase: it.frase }].concat(it.nota ? [{ es: it.nota }] : []).concat([{ es: (k === 'juntos' || ayudado ? '' : '¡Bien! ') + regla(z) }]), function () { despues(sacar, 300); });
           } else {
             sonido('mal'); racha = 0; A.temblar(nodo || nodos[z][0]);
             /* re-explicar con esta pregunta, no «try again» */
@@ -2593,7 +2610,301 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
 
       G._leccion_pantalla = { salieron: salieron, paso: function () { return paso; }, activo: function () { return activo; }, seguir: function () { bSeguir.click(); },
         soltar: function (z) { soltar(z); }, razones: function () { return Object.keys(nodos); }, cuento: function () { return cuentoAct; },
-        color: function () { return caja.classList.contains('le-cuento--color'); } };   /* solo pruebas */
+        color: function () { return caja.classList.contains('le-cuento--color'); }, otra: function () { bOtra.click(); }, hablando: function () { return !!pendiente; } };   /* solo pruebas */
+      mira();
+    }
+
+    /* ---------- mecanica «fichas» (leccion 5, hacer la pregunta, aditiva) ----------
+       Arriba la RESPUESTA con su dibujo y el color de su pregunta; debajo una
+       fila de huecos y abajo las fichas desordenadas (3 o 4; la primera de la
+       pregunta siempre es la Wh, con su color e icono). El niño arrastra cada
+       ficha a un hueco, o la toca y va al siguiente hueco libre. Cada ficha se
+       valida al ponerla: si no va ahi, vuelve a su sitio y Pip re-explica en
+       español con esa posicion; en tu solo la pregunta fallada vuelve al final
+       una vez (por dentro, sin mostrar nada al niño). Con la pregunta completa
+       Pip la lee en ingles y dice la respuesta.
+       mira: las fichas se ponen solas; yo: Pip las lleva con la mano;
+       juntos: la ficha siguiente brilla; tu: sin ayuda a la vista. */
+    function leccionFichas(li) {
+      var A = K(), L = cfg.lecciones[li], mio = token;
+      var p = el('section', { class: 'al-pantalla le-pantalla le-pantalla--fichas' });
+      var bar = el('div', { class: 'al-barra' });
+      bar.appendChild(el('button', { class: 'g-icono', 'aria-label': t('atras'), html: ICO.atras, onclick: function () { ir({}); } }));
+      var pasosBar = el('ol', { class: 'le-pasos', 'aria-label': 'Pasos' });
+      PASOS.forEach(function (k, i) { pasosBar.appendChild(el('li', { class: 'le-paso', 'data-paso': k, html: '<span>' + (i + 1) + '</span><small>' + NOMBRE_PASO[k] + '</small>' })); });
+      bar.appendChild(pasosBar);
+      var bAyuda = el('button', { class: 'g-icono al-bombilla', 'aria-label': t('ayuda'), html: ICO.bombilla });
+      bar.appendChild(bAyuda);
+      p.appendChild(bar);
+      var bResp = el('button', { type: 'button', class: 'le-resp', hidden: 'hidden' });
+      p.appendChild(bResp);
+      var tablero = el('div', { class: 'le-tablero' });
+      var fila = el('div', { class: 'le-huecos', role: 'group', 'aria-label': 'Pregunta' });
+      var pool = el('div', { class: 'le-fichas', role: 'group', 'aria-label': 'Fichas' });
+      tablero.appendChild(fila); tablero.appendChild(pool);
+      p.appendChild(tablero);
+      var dialogo = el('div', { class: 'le-dialogo le-dialogo--pip', role: 'status', 'aria-live': 'polite' });
+      var pipCaja = el('button', { type: 'button', class: 'al-pip-caja le-dialogo__pip', 'aria-label': 'Pip', html: vestir(A.pip('Pip'), null) });
+      var texto = el('p', { class: 'le-dialogo__texto' });
+      var acciones = el('div', { class: 'le-dialogo__acciones' });
+      var bOtra = el('button', { class: 'g-icono', 'aria-label': 'Otra vez', html: ICO.otra });
+      var bSeguir = el('button', { class: 'g-btn le-seguir', html: 'Seguir ▶', disabled: 'disabled' });
+      acciones.appendChild(bOtra); acciones.appendChild(bSeguir);
+      dialogo.appendChild(pipCaja); dialogo.appendChild(texto); dialogo.appendChild(acciones);
+      p.appendChild(dialogo);
+      raiz.appendChild(p);
+
+      var salieron = [];   /* solo pruebas */
+      var paso = null, activo = null, actual = null, cola = [], ultima = null, pendiente = null, alSeguir = null, ayudado = false, ocupado = false;
+      var huecos = [], puestas = [], repetidos = {}, siguiente = null;
+      function vivo() { return mio === token && p.isConnected; }
+      function despues(f, ms) { setTimeout(function () { if (vivo()) f(); }, espera(ms)); }
+      function marcarPaso(k) {
+        paso = k;
+        Array.prototype.forEach.call(pasosBar.children, function (n) {
+          var i = PASOS.indexOf(n.getAttribute('data-paso')), j = PASOS.indexOf(k);
+          n.classList.toggle('le-paso--ahora', i === j); n.classList.toggle('le-paso--hecho', i < j);
+        });
+        p.setAttribute('data-paso', k);
+        bAyuda.hidden = !(k === 'juntos' || k === 'tu');
+      }
+      function mostrar(lineas) { texto.innerHTML = lineas.map(lineaHtml).join(' '); }
+      var cadena = 0;
+      function guion(lineas, alFin) {
+        ultima = lineas; pendiente = alFin || null;
+        var i = 0, esta = ++cadena;
+        (function uno() {
+          if (!vivo() || esta !== cadena) return;
+          if (i >= lineas.length) { pendiente = null; if (alFin) alFin(); return; }
+          var ln = lineas[i++];
+          mostrar([ln]);
+          decir(ln, uno);
+        })();
+      }
+      function esperarSeguir(f) { bSeguir.disabled = false; bSeguir.classList.add('le-seguir--late'); alSeguir = f; despues(function () { try { bSeguir.focus({ preventScroll: true }); } catch (e) { /* nada */ } }, 50); }
+      bSeguir.addEventListener('click', function () { if (bSeguir.disabled) return; bSeguir.disabled = true; bSeguir.classList.remove('le-seguir--late'); var f = alSeguir; alSeguir = null; if (f) f(); });
+      /* «otra vez» repite lo ultimo y luego sigue donde iba (no deja la leccion parada) */
+      bOtra.addEventListener('click', function () {
+        if (!ultima) return;
+        try { speechSynthesis.cancel(); } catch (e) { /* nada */ }
+        guion(ultima, pendiente);
+      });
+      function decirResp(q) { hablar(q.resp, { lang: cfg.lang }); }
+      pipCaja.addEventListener('click', function () { if (actual) { hablar(actual.resp, { lang: cfg.lang }); hablar(actual.es, { lang: cfg.langExplica, cola: true }); } A.celebrar(pipCaja.querySelector('.al-pip')); });
+      bResp.addEventListener('click', function () { if (actual) decirResp(actual); });
+
+      function regla(z) { var c = C(z); return 'La respuesta es ' + c.pide + '. ' + c.regla.split(',')[0].replace(/\.?$/, '.'); }
+      function whHtml(q) { var c = C(q.zona); return esc(q.en).replace(new RegExp('^' + c.t + '\\b'), '<span class="le-wh" style="--c:' + c.color + '">' + c.t + '</span>'); }
+      function cita(s) { return '«' + s + '»'; }
+      /* lo que Pip dice de una posicion: la regla, no «try again» */
+      function explicar(q, h, f) {
+        var n = q.fichas.length;
+        if (f === 0 && h !== 0) return 'La palabra que pregunta, ' + cita(q.fichas[0]) + ', va primero.';
+        if (h === 0) return 'La pregunta empieza con la palabra que pregunta. Busca la ficha de color.';
+        if (h === n - 1) return 'La pregunta termina con el signo de pregunta. Al final va ' + cita(q.fichas[n - 1]) + '.';
+        return 'Después de ' + cita(q.fichas[h - 1]) + ' va ' + cita(q.fichas[h]) + '.';
+      }
+      function libre() { for (var h = 0; h < huecos.length; h++) if (!puestas[h]) return h; return -1; }
+      function fichaDe(i) { return pool.querySelector('.le-ficha[data-i="' + i + '"]'); }
+      function limpiarGuia() { Array.prototype.forEach.call(p.querySelectorAll('.le-guia'), function (n) { n.classList.remove('le-guia'); }); }
+      function guiar(h) { limpiarGuia(); if (h < 0) return; var f = fichaDe(h); if (f) f.classList.add('le-guia'); if (huecos[h]) huecos[h].classList.add('le-guia'); }
+
+      /* la respuesta arriba, los huecos y las fichas desordenadas (nunca ya en orden) */
+      function ponerPregunta(q) {
+        var c = C(q.zona);
+        actual = q; puestas = q.fichas.map(function () { return null; }); huecos = [];
+        bResp.hidden = false; bResp.style.setProperty('--c', c.color);
+        bResp.setAttribute('aria-label', q.resp + ' ' + q.esResp);
+        bResp.innerHTML = '<span class="le-resp__ico">' + A.icono(IC(q.ico), 'al-ico') + '</span><span class="le-resp__txt"><small lang="es">La respuesta</small><b lang="en">' + esc(q.resp) + '</b><small lang="es">' + esc(q.esResp) + '</small></span>' +
+          '<span class="le-resp__wh" aria-hidden="true">' + A.icono(IC(c.ico), 'al-ico') + '</span>';
+        fila.innerHTML = ''; pool.innerHTML = ''; fila.classList.remove('le-huecos--lista');
+        q.fichas.forEach(function (f, h) {
+          var hu = el('div', { class: 'le-hueco', 'data-h': String(h) });
+          huecos.push(hu); fila.appendChild(hu);
+        });
+        var orden = q.fichas.map(function (f, i) { return i; });
+        for (var k = 0; k < 20 && orden.every(function (x, i) { return x === i; }); k++) orden = mezclar(orden);
+        if (orden.every(function (x, i) { return x === i; })) orden.reverse();
+        orden.forEach(function (i, pos) {
+          var f = q.fichas[i], wh = i === 0;
+          var b = el('button', { type: 'button', class: 'le-ficha' + (wh ? ' le-ficha--wh' : ''), 'data-i': String(i), lang: 'en', 'aria-label': f,
+            style: (wh ? '--c:' + c.color + ';' : '') + '--gira:' + ((pos % 2 ? 1 : -1) * (1 + (pos % 3))) + 'deg',
+            html: (wh ? '<span class="le-ficha__ico" aria-hidden="true">' + A.icono(IC(c.ico), 'al-ico') + '</span>' : '') + '<span>' + esc(f) + '</span>' });
+          A.arrastre(b, { selector: '.le-hueco', alSoltar: function (hu) { poner(b, +hu.getAttribute('data-h'), true); }, alTocar: function () { poner(b); } });
+          pool.appendChild(b);
+        });
+      }
+      function quitarPregunta() { actual = null; bResp.hidden = true; fila.innerHTML = ''; pool.innerHTML = ''; huecos = []; puestas = []; }
+      /* la ficha va al hueco (vuela si viene del monton) y queda fija ahi */
+      function fijar(b, h, alFin, yaAlli) {
+        var hu = huecos[h];
+        function dentro() {
+          if (!vivo()) return;
+          var fija = b.cloneNode(true);   /* sin los oyentes del arrastre */
+          fija.classList.remove('le-guia', 'al-arrastrando'); fija.classList.add('le-ficha--puesta');
+          fija.removeAttribute('style'); if (b.classList.contains('le-ficha--wh')) fija.style.setProperty('--c', C(actual.zona).color);
+          var m = fija.querySelector('.al-mano'); if (m) m.remove();
+          fija.addEventListener('click', function () { hablar(fija.getAttribute('aria-label'), { lang: cfg.lang }); });
+          b.remove(); hu.innerHTML = ''; hu.appendChild(fija); hu.classList.add('le-hueco--lleno'); hu.classList.remove('le-guia');
+          puestas[h] = fija;
+          if (alFin) alFin();
+        }
+        if (yaAlli || A.menosMovimiento()) { dentro(); return; }
+        var a = b.getBoundingClientRect(), d = hu.getBoundingClientRect();
+        b.style.transition = 'transform .45s cubic-bezier(.4,.1,.6,1)';
+        b.style.transform = 'translate(' + (d.left + d.width / 2 - a.left - a.width / 2) + 'px,' + (d.top + d.height / 2 - a.top - a.height / 2) + 'px)';
+        setTimeout(dentro, espera(470));
+      }
+      /* error: la ficha vuelve a su sitio (si se toco, amaga ir al hueco y regresa) */
+      function devolver(b, h, arrastrada) {
+        var hu = huecos[h];
+        if (hu) A.temblar(hu);
+        if (arrastrada || !hu || A.menosMovimiento()) {
+          b.style.transition = 'transform .25s ease'; b.style.transform = '';
+          setTimeout(function () { b.style.transition = ''; A.temblar(b); }, 260);
+          return;
+        }
+        var a = b.getBoundingClientRect(), d = hu.getBoundingClientRect();
+        b.style.transition = 'transform .22s ease-out';
+        b.style.transform = 'translate(' + ((d.left - a.left) * 0.45) + 'px,' + ((d.top - a.top) * 0.45) + 'px)';
+        setTimeout(function () { b.style.transition = 'transform .25s ease-in'; b.style.transform = ''; setTimeout(function () { b.style.transition = ''; A.temblar(b); }, 260); }, 230);
+      }
+      /* Pip arma la pregunta: sola (mira) o con la mano (yo) */
+      function armar(q, conMano, alFin) {
+        var h = 0;
+        (function una() {
+          if (!vivo()) return;
+          if (h >= q.fichas.length) { alFin(); return; }
+          var i = h++, b = fichaDe(i), mano = null;
+          if (conMano) { mano = A.mano(); b.appendChild(mano); }
+          var ln = conMano ? { es: i === 0 ? 'Primero la palabra que pregunta: ' + cita(q.fichas[0]) + '.' : explicar(q, i, i) } : { en: q.fichas[i] };
+          if (i === 0) b.classList.add('le-guia');
+          guion([ln], function () { fijar(b, i, function () { despues(una, conMano ? 300 : 150); }); });
+        })();
+      }
+      function completa(q) {
+        fila.classList.add('le-huecos--lista');
+        var r = fila.getBoundingClientRect(); A.confeti(r.left + r.width / 2, r.top + r.height / 2, 16);
+        A.celebrar(pipCaja.querySelector('.al-pip'));
+      }
+
+      /* 1 · MIRA: Pip explica y arma 1 o 2 preguntas; las fichas se ponen solas */
+      function mira() {
+        marcarPaso('mira');
+        var i = 0;
+        guion(L.mira, function uno() {
+          if (i >= L.modelos.length) { guion(L.cierre, function () { esperarSeguir(yo); }); return; }
+          var q = L.modelos[i++];
+          ponerPregunta(q);
+          guion([{ en: q.resp }, { es: regla(q.zona) }], function () {
+            armar(q, false, function () { completa(q); guion([{ en: q.en }, { en: q.resp }], function () { despues(uno, 600); }); });
+          });
+        });
+      }
+      /* 2 · YO LO HAGO: Pip lleva las fichas con la mano y dice por que */
+      function yo() {
+        marcarPaso('yo');
+        var i = 0;
+        guion([{ es: 'Mira cómo lo hago yo.' }], function uno() {
+          if (i >= L.yo.length) { quitarPregunta(); esperarSeguir(juntos); return; }
+          var q = L.yo[i++];
+          ponerPregunta(q);
+          guion([{ en: q.resp }, { es: regla(q.zona) }], function () {
+            armar(q, true, function () { completa(q); sonido('ok'); guion([{ en: q.en }, { en: q.resp }], function () { despues(uno, 700); }); });
+          });
+        });
+      }
+      /* 3 · JUNTOS: la ficha siguiente brilla  ·  4 · TU: sin ayuda a la vista */
+      function juntos() { ronda('juntos', L.juntos.slice(), tu); }
+      function tu() { ronda('tu', mezclar(L.tu.slice()), aprendi); }
+      function ronda(k, items, sig) {
+        marcarPaso(k);
+        cola = items; repetidos = {}; siguiente = sig;
+        guion([{ es: k === 'juntos' ? L.textos.juntos : L.textos.tu }].concat(k === 'tu' ? [{ es: L.piensa }] : []), sacar);
+      }
+      function sacar() {
+        limpiarGuia();
+        if (!cola.length) { activo = null; quitarPregunta(); esperarSeguir(siguiente); guion([{ es: '¡Muy bien! Toca Seguir.' }]); return; }
+        activo = cola.shift(); ayudado = false; ocupado = false; salieron.push(paso + ':' + activo.id);
+        ponerPregunta(activo);
+        if (paso === 'juntos') guiar(0);
+        guion([{ en: activo.resp }, { es: 'Arma la pregunta. ' + activo.es }], null);
+      }
+      function poner(b, h, arrastrada) {
+        var q = activo;
+        if (!b.isConnected || b.classList.contains('le-ficha--puesta')) return;
+        if (!q || ocupado || (paso !== 'juntos' && paso !== 'tu')) {
+          if (arrastrada) devolver(b, -1, true);
+          hablar(b.getAttribute('aria-label'), { lang: cfg.lang });
+          return;
+        }
+        if (h === undefined) h = libre();
+        if (h < 0 || puestas[h]) { devolver(b, -1, !!arrastrada); return; }
+        var i = +b.getAttribute('data-i');
+        limpiarGuia();
+        if (i === h) {
+          hablar(q.fichas[i], { lang: cfg.lang });
+          ocupado = true;
+          fijar(b, h, function () {
+            ocupado = false;
+            if (libre() >= 0) { if (paso === 'juntos' || ayudado) guiar(libre()); return; }
+            /* completa y en orden: Pip la lee en ingles y dice la respuesta */
+            activo = null; sonido('ok'); racha++;
+            completa(q);
+            guion([{ en: q.en }, { en: q.resp }, { es: (paso === 'juntos' || ayudado ? '' : '¡Bien! ') + regla(q.zona) }], function () { despues(sacar, 400); });
+          }, !!arrastrada);
+          if (arrastrada) b.style.transform = '';
+        } else {
+          sonido('mal'); racha = 0;
+          devolver(b, h, !!arrastrada);
+          /* re-explicar con esta posicion; en tu solo la pregunta vuelve al final una vez */
+          ayudado = true;
+          if (paso === 'tu' && !repetidos[q.id]) { repetidos[q.id] = 1; var copia = { otra: true }; Object.keys(q).forEach(function (x) { if (x !== 'otra') copia[x] = q[x]; }); cola.push(copia); }
+          guion([{ es: 'Mira otra vez. ' + explicar(q, h, i) }], function () { if (activo === q) guiar(libre()); });
+        }
+      }
+      bAyuda.addEventListener('click', function () {
+        if (!activo) return;
+        ayudado = true;
+        var h = libre(); guiar(h);
+        guion([{ es: explicar(activo, h, h) }]);
+      });
+
+      /* 5 · LO QUE APRENDI: preguntas con su respuesta, que suenan */
+      function aprendi() {
+        marcarPaso('aprendi');
+        activo = null; quitarPregunta(); limpiarGuia();
+        var nueva = !st.hechas[L.id];
+        st.hechas[L.id] = 1; guardar();
+        sonido('fin');
+        var capa = el('div', { class: 'g-capa le-resumen', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Lo que aprendí' });
+        var box = el('div', { class: 'g-logro' });
+        box.appendChild(el('h3', { text: 'Lo que aprendí' }));
+        var lista = el('div', { class: 'le-resumen__pares' });
+        L.resumen.forEach(function (q) {
+          var c = C(q.zona);
+          var b = el('button', { class: 'le-par le-par--cuento le-par--fichas', style: '--c:' + c.color, 'aria-label': q.en + ' ' + q.resp, html:
+            '<span class="le-par__ico le-par__wh">' + A.icono(IC(c.ico), 'al-ico') + '</span><span class="le-par__txt" lang="en"><b>' + whHtml(q) + '</b><span>' + esc(q.resp) + '</span></span>' +
+            '<span class="le-par__ico">' + A.icono(IC(q.ico), 'al-ico') + '</span>' });
+          b.addEventListener('click', function () { hablar(q.en, { lang: cfg.lang }); hablar(q.resp, { lang: cfg.lang, cola: true }); });
+          lista.appendChild(b);
+        });
+        box.appendChild(lista);
+        box.appendChild(el('p', { class: 'le-calco', html: A.icono(IC(L.calco), 'al-ico') + '<span>' + (nueva ? '¡Calcomanía nueva!' : '¡Lección repasada!') + '</span>' }));
+        var sigL = li + 1 < cfg.lecciones.length ? li + 1 : null;
+        if (sigL !== null) box.appendChild(el('button', { class: 'g-btn', html: 'Siguiente lección ▶', onclick: function () { capa.remove(); ir({ l: sigL }); } }));
+        box.appendChild(el('button', { class: 'g-btn g-btn--suave', html: ICO.otra + ' Repetir la lección', onclick: function () { capa.remove(); ir({ l: li }, true); } }));
+        box.appendChild(el('button', { class: 'g-btn' + (sigL === null ? '' : ' g-btn--suave'), text: 'Lecciones', onclick: function () { capa.remove(); ir({}); } }));
+        capa.appendChild(box); document.body.appendChild(capa);
+        guion([{ es: 'Esto es lo que aprendiste hoy.' }, { es: 'Para preguntar, primero la palabra que pregunta, después «is», y al final el signo de pregunta.' }]);
+      }
+
+      G._leccion_pantalla = { salieron: salieron, paso: function () { return paso; }, activo: function () { return activo; }, seguir: function () { bSeguir.click(); },
+        /* toca la ficha con ese texto (va al siguiente hueco libre) o la suelta en el hueco h */
+        soltar: function (txt, h) { var b = Array.prototype.filter.call(pool.querySelectorAll('.le-ficha'), function (n) { return n.getAttribute('aria-label') === txt; })[0]; if (b) poner(b, h); },
+        fichas: function () { return Array.prototype.map.call(pool.querySelectorAll('.le-ficha'), function (n) { return n.getAttribute('aria-label'); }); },
+        puestas: function () { return puestas.map(function (n) { return n ? n.getAttribute('aria-label') : null; }); },
+        ocupado: function () { return ocupado; }, otra: function () { bOtra.click(); }, hablando: function () { return !!pendiente; } };   /* solo pruebas */
       mira();
     }
     return { cargar: cargar, pintar: pintar, hash: hash, desdeHash: desdeHash, estado: function () { return st; } };

@@ -476,3 +476,73 @@ body.al-jugando .site-foot { display: none; }
   .le-dialogo--pip .le-dialogo__acciones { flex: 1 1 100%; justify-content: flex-end; }
   .le-dialogo--pip .le-seguir { min-height: 44px; padding-top: 6px; padding-bottom: 6px; }
 }
+
+/* ---------- mecanica «fichas» (leccion 5, hacer la pregunta) ----------
+   La respuesta arriba (dibujo, texto y el color de su pregunta), la fila de
+   huecos y las fichas desordenadas debajo, Pip abajo. Los huecos vacios
+   miden lo mismo (no dicen que ficha va); al llenarse toman el ancho de su
+   ficha, asi la pregunta armada se lee como una frase. */
+.le-pantalla--fichas { gap: 8px; }
+.le-resp {
+  appearance: none; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 8px 12px; text-align: left; flex-shrink: 0;
+  border: 3px solid #1F2937; border-left: 12px solid var(--c); border-radius: 18px; background: #FFFFFF; box-shadow: 0 3px 0 #1F2937;
+  font-family: 'Nunito', system-ui, sans-serif; color: #1F2937; cursor: pointer; position: relative;
+}
+.le-resp[hidden] { display: none; }
+.le-resp__ico { width: clamp(80px, 28vw, 132px); aspect-ratio: 1; flex-shrink: 0; }
+.le-resp__ico svg { width: 100%; height: 100%; display: block; }
+.le-resp__txt { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.15; }
+.le-resp__txt b { font-weight: 900; font-size: clamp(1.4rem, 6.4vw, 2rem); overflow-wrap: anywhere; }
+.le-resp__txt small { font-weight: 800; font-size: 1rem; opacity: .78; }
+.le-resp__wh { position: absolute; right: 8px; top: 8px; width: 34px; height: 34px; box-sizing: border-box; padding: 3px; border-radius: 50%; border: 3px solid var(--c); background: #FFFFFF; }
+.le-resp__wh svg { width: 100%; height: 100%; display: block; }
+.le-tablero {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: clamp(22px, 5svh, 48px); padding: 14px 8px;
+  border: 3px solid #1F2937; border-radius: 20px; background: #FFFBEB; box-sizing: border-box; overflow: hidden;
+}
+.le-huecos { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; align-items: stretch; }
+.le-hueco {
+  flex: 0 1 auto; min-width: 72px; min-height: 64px; box-sizing: border-box; display: flex; align-items: stretch;
+  border: 3px dashed #64748B; border-radius: 14px; background: #FFFFFF; transition: background .2s, border-color .2s;
+}
+.le-hueco.al-sobre { background: #FEF3C7; border-color: #F59E0B; border-style: solid; }
+.le-hueco--lleno { border: 0; background: transparent; min-width: 0; }
+.le-hueco.le-guia { animation: le-hueco-guia 1.1s ease-in-out infinite; }
+@keyframes le-hueco-guia { 0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); } 50% { box-shadow: 0 0 0 6px rgba(245,158,11,.6); background: #FEF3C7; } }
+.le-hueco.al-tiembla { animation: le-tiembla-hueco .55s ease; background: #FEE2E2; }
+@keyframes le-tiembla-hueco { 0%, 100% { transform: none; } 25% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-3px); } }
+.le-fichas { display: flex; flex-wrap: wrap; gap: 14px 12px; justify-content: center; align-content: center; min-height: 64px; }
+.le-ficha {
+  appearance: none; position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 60px; min-width: 60px; padding: 6px 14px; box-sizing: border-box; white-space: nowrap;
+  border: 3px solid #1F2937; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 0 #1F2937; color: #1F2937;
+  font-family: 'Nunito', system-ui, sans-serif; font-weight: 900; font-size: clamp(1.3rem, 5.8vw, 1.7rem); line-height: 1;
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  transform: rotate(var(--gira, 0deg));
+}
+.le-ficha--wh { background: color-mix(in srgb, var(--c) 20%, #FFFFFF); border: 4px solid var(--c); border-bottom-width: 7px; }
+.le-ficha__ico { width: 1.15em; height: 1.15em; flex-shrink: 0; }
+.le-ficha__ico svg { width: 100%; height: 100%; display: block; }
+.le-ficha.al-arrastrando { z-index: 30; cursor: grabbing; box-shadow: 0 10px 18px rgba(31,41,55,.3); }
+.le-ficha.le-guia { animation: le-ficha-guia 1.1s ease-in-out infinite; }
+@keyframes le-ficha-guia { 0%, 100% { box-shadow: 0 4px 0 #1F2937, 0 0 0 0 rgba(245,158,11,0); } 50% { box-shadow: 0 4px 0 #1F2937, 0 0 0 7px rgba(245,158,11,.65); } }
+.le-ficha.al-tiembla { animation: le-tiembla-hueco .55s ease; }
+.le-ficha:focus-visible { outline: 4px solid #F59E0B; outline-offset: 3px; }
+.le-ficha .al-mano { right: -14px; bottom: -26px; width: 40px; }
+.le-ficha--puesta { width: 100%; min-width: 44px; min-height: 64px; transform: none; box-shadow: 0 3px 0 #1F2937; cursor: pointer; padding: 6px 8px; font-size: clamp(1.05rem, 4.5vw, 1.55rem); animation: al-pop .32s cubic-bezier(.3,1.6,.5,1); }
+.le-huecos--lista .le-ficha--puesta { background: #DCFCE7; border-color: #16A34A; }
+.le-huecos--lista .le-ficha--wh.le-ficha--puesta { background: color-mix(in srgb, var(--c) 20%, #FFFFFF); border-color: var(--c); }
+.le-cita { color: #1D4ED8; font-weight: 900; }
+.le-par--fichas .le-par__txt span { color: #1F2937; }
+@media (orientation: landscape) and (min-width: 700px) {
+  .le-pantalla--fichas .le-resp, .le-pantalla--fichas .le-tablero { max-width: 860px; width: 100%; align-self: center; }
+  .le-ficha { font-size: 1.7rem; min-height: 64px; padding: 8px 18px; }
+  .le-hueco { min-width: 96px; min-height: 66px; }
+}
+@media (max-width: 520px) { .le-pantalla--fichas .le-dialogo__texto { font-size: clamp(1rem, 4.2vw, 1.3rem); } }
+@media (prefers-reduced-motion: reduce) {
+  .le-ficha, .le-ficha--puesta { transform: none; animation: none; }
+  .le-ficha.le-guia, .le-hueco.le-guia, .le-hueco.al-tiembla, .le-ficha.al-tiembla { animation: none; }
+  .le-ficha.le-guia { box-shadow: 0 4px 0 #1F2937, 0 0 0 7px rgba(245,158,11,.65); }
+  .le-hueco.le-guia { background: #FEF3C7; box-shadow: 0 0 0 6px rgba(245,158,11,.6); }
+}
