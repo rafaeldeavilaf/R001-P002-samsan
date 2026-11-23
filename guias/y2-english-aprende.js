@@ -385,7 +385,7 @@ GUIA.iniciar({
      "zona": "rain"
     },
     {
-     "es": "Tiene un paraguas porque está lloviendo."
+     "es": "Tiene una sombrilla porque está lloviendo."
     },
     {
      "en": "Why is the boy happy?",
@@ -409,7 +409,7 @@ GUIA.iniciar({
      "ico": "umbrella",
      "razon": "Because it is raining.",
      "icoRazon": "rain",
-     "es": "¿Por qué la niña tiene un paraguas?",
+     "es": "¿Por qué la niña tiene una sombrilla?",
      "esRazon": "Porque está lloviendo.",
      "zona": "rain"
     },
@@ -454,7 +454,7 @@ GUIA.iniciar({
       "ico": "coat",
       "razon": "Because it is cold.",
       "icoRazon": "cold",
-      "es": "¿Por qué la niña lleva abrigo?",
+      "es": "¿Por qué la niña lleva chaqueta?",
       "esRazon": "Porque hace frío.",
       "zona": "cold"
      },
@@ -509,7 +509,7 @@ GUIA.iniciar({
       "razon": "Because it is snowing.",
       "icoRazon": "snowing",
       "es": "¿Por qué la niña hace un muñeco de nieve?",
-      "esRazon": "Porque está nevando.",
+      "esRazon": "Porque está nevando. La nieve es hielo blandito que cae del cielo cuando hace mucho frío.",
       "zona": "snowing"
      }
     ],
@@ -553,7 +553,7 @@ GUIA.iniciar({
      "ico": "umbrella",
      "razon": "Because it is raining.",
      "icoRazon": "rain",
-     "es": "¿Por qué la niña tiene un paraguas?",
+     "es": "¿Por qué la niña tiene una sombrilla?",
      "esRazon": "Porque está lloviendo.",
      "zona": "rain"
     },
@@ -576,6 +576,1113 @@ GUIA.iniciar({
      "es": "¿Por qué vuela la cometa?",
      "esRazon": "Porque hace viento.",
      "zona": "windy"
+    }
+   ]
+  },
+  {
+   "id": "cuento",
+   "unidad": "wh",
+   "titulo": "Responde con el cuento",
+   "en": "Answer from a story",
+   "calco": "turtle",
+   "mecanica": "cuento",
+   "zonas": [
+    "who",
+    "what",
+    "where",
+    "when",
+    "why"
+   ],
+   "piensa": "Piensa. ¿Qué busca la pregunta? Una persona, una cosa, un lugar, un momento o una razón.",
+   "textos": {
+    "juntos": "Ahora lo hacemos juntos. Cada respuesta tiene el color de su pregunta. La que brilla es la correcta. Tócala.",
+    "tu": "Ahora tú solo. Los colores se van."
+   },
+   "mira": [
+    {
+     "es": "Hoy vas a escuchar un cuento y a buscar respuestas en él."
+    },
+    {
+     "en": "Mia goes to the beach.",
+     "frase": 0
+    },
+    {
+     "en": "She goes in the morning.",
+     "frase": 1
+    },
+    {
+     "en": "She finds a big shell.",
+     "frase": 2
+    },
+    {
+     "en": "She is happy because she sees a turtle.",
+     "frase": 3
+    },
+    {
+     "es": "Ahora vamos a buscar respuestas en el cuento."
+    },
+    {
+     "es": "Who busca una persona.",
+     "parte": "who"
+    },
+    {
+     "es": "What busca una cosa.",
+     "parte": "what"
+    },
+    {
+     "es": "Where busca un lugar.",
+     "parte": "where"
+    },
+    {
+     "es": "When busca un momento.",
+     "parte": "when"
+    },
+    {
+     "es": "Why busca una razón, con because.",
+     "parte": "why"
+    },
+    {
+     "es": "Pip pregunta y tú tocas la respuesta, en el dibujo o en las palabras."
+    }
+   ],
+   "inicio": "playa",
+   "cuentos": {
+    "playa": {
+     "id": "playa",
+     "titulo": "Mia at the beach",
+     "fondo": "playa",
+     "frases": [
+      [
+       [
+        "Mia",
+        "who"
+       ],
+       [
+        " goes ",
+        null
+       ],
+       [
+        "to the beach",
+        "where"
+       ],
+       [
+        ".",
+        null
+       ]
+      ],
+      [
+       [
+        "She goes ",
+        null
+       ],
+       [
+        "in the morning",
+        "when"
+       ],
+       [
+        ".",
+        null
+       ]
+      ],
+      [
+       [
+        "She finds ",
+        null
+       ],
+       [
+        "a big shell",
+        "what"
+       ],
+       [
+        ".",
+        null
+       ]
+      ],
+      [
+       [
+        "She is happy ",
+        null
+       ],
+       [
+        "because she sees a turtle",
+        "why"
+       ],
+       [
+        ".",
+        null
+       ]
+      ]
+     ],
+     "partes": [
+      {
+       "zona": "who",
+       "txt": "Mia",
+       "ico": "girl",
+       "x": 20,
+       "y": 68
+      },
+      {
+       "zona": "where",
+       "txt": "to the beach",
+       "ico": "beach",
+       "x": 50,
+       "y": 27
+      },
+      {
+       "zona": "when",
+       "txt": "in the morning",
+       "ico": "morning",
+       "x": 15,
+       "y": 24
+      },
+      {
+       "zona": "what",
+       "txt": "a big shell",
+       "ico": "shell",
+       "x": 49,
+       "y": 76
+      },
+      {
+       "zona": "why",
+       "txt": "because she sees a turtle",
+       "ico": "turtle",
+       "x": 80,
+       "y": 70
+      }
+     ],
+     "deco": [
+      {
+       "ico": "palm",
+       "x": 86,
+       "y": 24,
+       "s": 13
+      }
+     ]
+    }
+   },
+   "yo": [
+    {
+     "id": "playa:who:0",
+     "cuento": "playa",
+     "zona": "who",
+     "en": "Who goes to the beach?",
+     "es": "¿Quién va a la playa?",
+     "resp": "Mia",
+     "ico": "girl",
+     "frase": 0,
+     "dice": "Mia goes to the beach."
+    },
+    {
+     "id": "playa:where:0",
+     "cuento": "playa",
+     "zona": "where",
+     "en": "Where does Mia go?",
+     "es": "¿A dónde va Mia?",
+     "resp": "to the beach",
+     "ico": "beach",
+     "frase": 0,
+     "dice": "Mia goes to the beach."
+    }
+   ],
+   "juntos": [
+    {
+     "id": "playa:what:0",
+     "cuento": "playa",
+     "zona": "what",
+     "en": "What does Mia find?",
+     "es": "¿Qué encuentra Mia?",
+     "resp": "a big shell",
+     "ico": "shell",
+     "frase": 2,
+     "dice": "She finds a big shell."
+    },
+    {
+     "id": "playa:when:0",
+     "cuento": "playa",
+     "zona": "when",
+     "en": "When does Mia go to the beach?",
+     "es": "¿Cuándo va Mia a la playa?",
+     "resp": "in the morning",
+     "ico": "morning",
+     "frase": 1,
+     "dice": "She goes in the morning."
+    },
+    {
+     "id": "playa:why:0",
+     "cuento": "playa",
+     "zona": "why",
+     "en": "Why is Mia happy?",
+     "es": "¿Por qué está feliz Mia?",
+     "resp": "because she sees a turtle",
+     "ico": "turtle",
+     "frase": 3,
+     "dice": "She is happy because she sees a turtle."
+    }
+   ],
+   "tu": [
+    {
+     "cuento": "playa",
+     "preguntas": [
+      {
+       "id": "playa:who:1",
+       "cuento": "playa",
+       "zona": "who",
+       "en": "Who finds a big shell?",
+       "es": "¿Quién encuentra una concha grande?",
+       "resp": "Mia",
+       "ico": "girl",
+       "frase": 0,
+       "dice": "Mia goes to the beach."
+      },
+      {
+       "id": "playa:where:1",
+       "cuento": "playa",
+       "zona": "where",
+       "en": "Where does Mia go in the morning?",
+       "es": "¿A dónde va Mia por la mañana?",
+       "resp": "to the beach",
+       "ico": "beach",
+       "frase": 0,
+       "dice": "Mia goes to the beach."
+      },
+      {
+       "id": "playa:when:0",
+       "cuento": "playa",
+       "zona": "when",
+       "en": "When does Mia go to the beach?",
+       "es": "¿Cuándo va Mia a la playa?",
+       "resp": "in the morning",
+       "ico": "morning",
+       "frase": 1,
+       "dice": "She goes in the morning."
+      },
+      {
+       "id": "playa:what:0",
+       "cuento": "playa",
+       "zona": "what",
+       "en": "What does Mia find?",
+       "es": "¿Qué encuentra Mia?",
+       "resp": "a big shell",
+       "ico": "shell",
+       "frase": 2,
+       "dice": "She finds a big shell."
+      },
+      {
+       "id": "playa:why:0",
+       "cuento": "playa",
+       "zona": "why",
+       "en": "Why is Mia happy?",
+       "es": "¿Por qué está feliz Mia?",
+       "resp": "because she sees a turtle",
+       "ico": "turtle",
+       "frase": 3,
+       "dice": "She is happy because she sees a turtle."
+      }
+     ],
+     "extra": {
+      "who": {
+       "id": "playa:who:1",
+       "cuento": "playa",
+       "zona": "who",
+       "en": "Who finds a big shell?",
+       "es": "¿Quién encuentra una concha grande?",
+       "resp": "Mia",
+       "ico": "girl",
+       "frase": 0,
+       "dice": "Mia goes to the beach."
+      },
+      "what": {
+       "id": "playa:what:0",
+       "cuento": "playa",
+       "zona": "what",
+       "en": "What does Mia find?",
+       "es": "¿Qué encuentra Mia?",
+       "resp": "a big shell",
+       "ico": "shell",
+       "frase": 2,
+       "dice": "She finds a big shell."
+      },
+      "where": {
+       "id": "playa:where:1",
+       "cuento": "playa",
+       "zona": "where",
+       "en": "Where does Mia go in the morning?",
+       "es": "¿A dónde va Mia por la mañana?",
+       "resp": "to the beach",
+       "ico": "beach",
+       "frase": 0,
+       "dice": "Mia goes to the beach."
+      },
+      "when": {
+       "id": "playa:when:0",
+       "cuento": "playa",
+       "zona": "when",
+       "en": "When does Mia go to the beach?",
+       "es": "¿Cuándo va Mia a la playa?",
+       "resp": "in the morning",
+       "ico": "morning",
+       "frase": 1,
+       "dice": "She goes in the morning."
+      },
+      "why": {
+       "id": "playa:why:0",
+       "cuento": "playa",
+       "zona": "why",
+       "en": "Why is Mia happy?",
+       "es": "¿Por qué está feliz Mia?",
+       "resp": "because she sees a turtle",
+       "ico": "turtle",
+       "frase": 3,
+       "dice": "She is happy because she sees a turtle."
+      }
+     }
+    }
+   ],
+   "resumen": [
+    {
+     "id": "playa:who:0",
+     "cuento": "playa",
+     "zona": "who",
+     "en": "Who goes to the beach?",
+     "es": "¿Quién va a la playa?",
+     "resp": "Mia",
+     "ico": "girl",
+     "frase": 0,
+     "dice": "Mia goes to the beach."
+    },
+    {
+     "id": "playa:where:0",
+     "cuento": "playa",
+     "zona": "where",
+     "en": "Where does Mia go?",
+     "es": "¿A dónde va Mia?",
+     "resp": "to the beach",
+     "ico": "beach",
+     "frase": 0,
+     "dice": "Mia goes to the beach."
+    },
+    {
+     "id": "playa:why:0",
+     "cuento": "playa",
+     "zona": "why",
+     "en": "Why is Mia happy?",
+     "es": "¿Por qué está feliz Mia?",
+     "resp": "because she sees a turtle",
+     "ico": "turtle",
+     "frase": 3,
+     "dice": "She is happy because she sees a turtle."
+    }
+   ]
+  },
+  {
+   "id": "repaso",
+   "unidad": "wh",
+   "titulo": "Repaso mezclado",
+   "en": "Mixed review",
+   "calco": "iguana",
+   "mecanica": "cuento",
+   "zonas": [
+    "who",
+    "what",
+    "where",
+    "when",
+    "why"
+   ],
+   "piensa": "Piensa. ¿Qué busca la pregunta? Una persona, una cosa, un lugar, un momento o una razón.",
+   "textos": {
+    "juntos": "Ahora lo hacemos juntos. Cada respuesta tiene el color de su pregunta. La que brilla es la correcta. Tócala.",
+    "tu": "Ahora tú solo, con cuentos nuevos. Los colores se van."
+   },
+   "mira": [
+    {
+     "es": "Hoy repasamos las cinco preguntas: Who, What, Where, When y Why."
+    },
+    {
+     "es": "Escucha el cuento."
+    },
+    {
+     "en": "Grandpa goes to the island.",
+     "frase": 0
+    },
+    {
+     "en": "He goes at six o'clock.",
+     "frase": 1
+    },
+    {
+     "en": "He takes a bucket because he wants to catch crabs.",
+     "frase": 2
+    },
+    {
+     "es": "Recuerda. Who, una persona. What, una cosa. Where, un lugar. When, un momento. Why, una razón."
+    },
+    {
+     "es": "Pip pregunta y tú tocas la respuesta, en el dibujo o en las palabras."
+    }
+   ],
+   "inicio": "isla",
+   "cuentos": {
+    "isla": {
+     "id": "isla",
+     "titulo": "Grandpa and the crabs",
+     "fondo": "isla",
+     "frases": [
+      [
+       [
+        "Grandpa",
+        "who"
+       ],
+       [
+        " goes ",
+        null
+       ],
+       [
+        "to the island",
+        "where"
+       ],
+       [
+        ".",
+        null
+       ]
+      ],
+      [
+       [
+        "He goes ",
+        null
+       ],
+       [
+        "at six o'clock",
+        "when"
+       ],
+       [
+        ".",
+        null
+       ]
+      ],
+      [
+       [
+        "He takes ",
+        null
+       ],
+       [
+        "a bucket",
+        "what"
+       ],
+       [
+        " ",
+        null
+       ],
+       [
+        "because he wants to catch crabs",
+        "why"
+       ],
+       [
+        ".",
+        null
+       ]
+      ]
+     ],
+     "partes": [
+      {
+       "zona": "who",
+       "txt": "Grandpa",
+       "ico": "grandpa",
+       "x": 22,
+       "y": 70
+      },
+      {
+       "zona": "where",
+       "txt": "to the island",
+       "ico": "island",
+       "x": 74,
+       "y": 28
+      },
+      {
+       "zona": "when",
+       "txt": "at six o'clock",
+       "ico": "six",
+       "x": 17,
+       "y": 24
+      },
+      {
+       "zona": "what",
+       "txt": "a bucket",
+       "ico": "bucket",
+       "x": 50,
+       "y": 76
+      },
+      {
+       "zona": "why",
+       "txt": "because he wants to catch crabs",
+       "ico": "crab",
+       "x": 81,
+       "y": 76
+      }
+     ],
+     "deco": [
+      {
+       "ico": "dolphin",
+       "x": 44,
+       "y": 38,
+       "s": 11
+      }
+     ]
+    },
+    "mercado": {
+     "id": "mercado",
+     "titulo": "Grandma at the market",
+     "fondo": "mercado",
+     "frases": [
+      [
+       [
+        "Grandma",
+        "who"
+       ],
+       [
+        " goes ",
+        null
+       ],
+       [
+        "to the market",
+        "where"
+       ],
+       [
+        ".",
+        null
+       ]
+      ],
+      [
+       [
+        "She goes ",
+        null
+       ],
+       [
+        "on her birthday",
+        "when"
+       ],
+       [
+        ".",
+        null
+       ]
+      ],
+      [
+       [
+        "She buys ",
+        null
+       ],
+       [
+        "some mangoes",
+        "what"
+       ],
+       [
+        " ",
+        null
+       ],
+       [
+        "because she wants to make juice",
+        "why"
+       ],
+       [
+        ".",
+        null
+       ]
+      ]
+     ],
+     "partes": [
+      {
+       "zona": "who",
+       "txt": "Grandma",
+       "ico": "grandma",
+       "x": 55,
+       "y": 70
+      },
+      {
+       "zona": "where",
+       "txt": "to the market",
+       "ico": "market",
+       "x": 26,
+       "y": 30
+      },
+      {
+       "zona": "when",
+       "txt": "on her birthday",
+       "ico": "birthday",
+       "x": 78,
+       "y": 26
+      },
+      {
+       "zona": "what",
+       "txt": "some mangoes",
+       "ico": "mango",
+       "x": 17,
+       "y": 76
+      },
+      {
+       "zona": "why",
+       "txt": "because she wants to make juice",
+       "ico": "juice",
+       "x": 85,
+       "y": 72
+      }
+     ],
+     "deco": []
+    },
+    "parque": {
+     "id": "parque",
+     "titulo": "Sam in the park",
+     "fondo": "parque",
+     "frases": [
+      [
+       [
+        "Sam",
+        "who"
+       ],
+       [
+        " goes ",
+        null
+       ],
+       [
+        "to the park",
+        "where"
+       ],
+       [
+        ".",
+        null
+       ]
+      ],
+      [
+       [
+        "He goes ",
+        null
+       ],
+       [
+        "on Sunday",
+        "when"
+       ],
+       [
+        ".",
+        null
+       ]
+      ],
+      [
+       [
+        "He takes ",
+        null
+       ],
+       [
+        "a camera",
+        "what"
+       ],
+       [
+        " ",
+        null
+       ],
+       [
+        "because he wants to take a photo of an iguana",
+        "why"
+       ],
+       [
+        ".",
+        null
+       ]
+      ]
+     ],
+     "partes": [
+      {
+       "zona": "who",
+       "txt": "Sam",
+       "ico": "boy",
+       "x": 50,
+       "y": 70
+      },
+      {
+       "zona": "where",
+       "txt": "to the park",
+       "ico": "slide",
+       "x": 80,
+       "y": 30
+      },
+      {
+       "zona": "when",
+       "txt": "on Sunday",
+       "ico": "sunday",
+       "x": 18,
+       "y": 25
+      },
+      {
+       "zona": "what",
+       "txt": "a camera",
+       "ico": "camera",
+       "x": 19,
+       "y": 76
+      },
+      {
+       "zona": "why",
+       "txt": "because he wants to take a photo of an iguana",
+       "ico": "iguana",
+       "x": 82,
+       "y": 77
+      }
+     ],
+     "deco": [
+      {
+       "ico": "tree",
+       "x": 50,
+       "y": 27,
+       "s": 13
+      }
+     ]
+    }
+   },
+   "yo": [
+    {
+     "id": "isla:who:0",
+     "cuento": "isla",
+     "zona": "who",
+     "en": "Who goes to the island?",
+     "es": "¿Quién va a la isla?",
+     "resp": "Grandpa",
+     "ico": "grandpa",
+     "frase": 0,
+     "dice": "Grandpa goes to the island."
+    },
+    {
+     "id": "isla:where:0",
+     "cuento": "isla",
+     "zona": "where",
+     "en": "Where does Grandpa go?",
+     "es": "¿A dónde va el abuelo?",
+     "resp": "to the island",
+     "ico": "island",
+     "frase": 0,
+     "dice": "Grandpa goes to the island."
+    }
+   ],
+   "juntos": [
+    {
+     "id": "isla:what:0",
+     "cuento": "isla",
+     "zona": "what",
+     "en": "What does Grandpa take?",
+     "es": "¿Qué lleva el abuelo?",
+     "resp": "a bucket",
+     "ico": "bucket",
+     "frase": 2,
+     "dice": "He takes a bucket because he wants to catch crabs."
+    },
+    {
+     "id": "isla:when:0",
+     "cuento": "isla",
+     "zona": "when",
+     "en": "When does Grandpa go to the island?",
+     "es": "¿Cuándo va el abuelo a la isla?",
+     "resp": "at six o'clock",
+     "ico": "six",
+     "frase": 1,
+     "dice": "He goes at six o'clock."
+    },
+    {
+     "id": "isla:why:0",
+     "cuento": "isla",
+     "zona": "why",
+     "en": "Why does Grandpa take a bucket?",
+     "es": "¿Por qué lleva el abuelo un balde?",
+     "resp": "because he wants to catch crabs",
+     "ico": "crab",
+     "frase": 2,
+     "dice": "He takes a bucket because he wants to catch crabs."
+    }
+   ],
+   "tu": [
+    {
+     "cuento": "mercado",
+     "preguntas": [
+      {
+       "id": "mercado:who:0",
+       "cuento": "mercado",
+       "zona": "who",
+       "en": "Who goes to the market?",
+       "es": "¿Quién va al mercado?",
+       "resp": "Grandma",
+       "ico": "grandma",
+       "frase": 0,
+       "dice": "Grandma goes to the market."
+      },
+      {
+       "id": "mercado:what:0",
+       "cuento": "mercado",
+       "zona": "what",
+       "en": "What does Grandma buy?",
+       "es": "¿Qué compra la abuela?",
+       "resp": "some mangoes",
+       "ico": "mango",
+       "frase": 2,
+       "dice": "She buys some mangoes because she wants to make juice."
+      },
+      {
+       "id": "mercado:where:0",
+       "cuento": "mercado",
+       "zona": "where",
+       "en": "Where does Grandma go?",
+       "es": "¿A dónde va la abuela?",
+       "resp": "to the market",
+       "ico": "market",
+       "frase": 0,
+       "dice": "Grandma goes to the market."
+      },
+      {
+       "id": "mercado:when:0",
+       "cuento": "mercado",
+       "zona": "when",
+       "en": "When does Grandma go to the market?",
+       "es": "¿Cuándo va la abuela al mercado?",
+       "resp": "on her birthday",
+       "ico": "birthday",
+       "frase": 1,
+       "dice": "She goes on her birthday."
+      },
+      {
+       "id": "mercado:why:0",
+       "cuento": "mercado",
+       "zona": "why",
+       "en": "Why does Grandma buy some mangoes?",
+       "es": "¿Por qué compra mangos la abuela?",
+       "resp": "because she wants to make juice",
+       "ico": "juice",
+       "frase": 2,
+       "dice": "She buys some mangoes because she wants to make juice."
+      }
+     ],
+     "extra": {
+      "who": {
+       "id": "mercado:who:1",
+       "cuento": "mercado",
+       "zona": "who",
+       "en": "Who buys some mangoes?",
+       "es": "¿Quién compra mangos?",
+       "resp": "Grandma",
+       "ico": "grandma",
+       "frase": 0,
+       "dice": "Grandma goes to the market."
+      },
+      "what": {
+       "id": "mercado:what:0",
+       "cuento": "mercado",
+       "zona": "what",
+       "en": "What does Grandma buy?",
+       "es": "¿Qué compra la abuela?",
+       "resp": "some mangoes",
+       "ico": "mango",
+       "frase": 2,
+       "dice": "She buys some mangoes because she wants to make juice."
+      },
+      "where": {
+       "id": "mercado:where:1",
+       "cuento": "mercado",
+       "zona": "where",
+       "en": "Where does Grandma go on her birthday?",
+       "es": "¿A dónde va la abuela en su cumpleaños?",
+       "resp": "to the market",
+       "ico": "market",
+       "frase": 0,
+       "dice": "Grandma goes to the market."
+      },
+      "when": {
+       "id": "mercado:when:0",
+       "cuento": "mercado",
+       "zona": "when",
+       "en": "When does Grandma go to the market?",
+       "es": "¿Cuándo va la abuela al mercado?",
+       "resp": "on her birthday",
+       "ico": "birthday",
+       "frase": 1,
+       "dice": "She goes on her birthday."
+      },
+      "why": {
+       "id": "mercado:why:0",
+       "cuento": "mercado",
+       "zona": "why",
+       "en": "Why does Grandma buy some mangoes?",
+       "es": "¿Por qué compra mangos la abuela?",
+       "resp": "because she wants to make juice",
+       "ico": "juice",
+       "frase": 2,
+       "dice": "She buys some mangoes because she wants to make juice."
+      }
+     }
+    },
+    {
+     "cuento": "parque",
+     "preguntas": [
+      {
+       "id": "parque:who:0",
+       "cuento": "parque",
+       "zona": "who",
+       "en": "Who goes to the park?",
+       "es": "¿Quién va al parque?",
+       "resp": "Sam",
+       "ico": "boy",
+       "frase": 0,
+       "dice": "Sam goes to the park."
+      },
+      {
+       "id": "parque:what:0",
+       "cuento": "parque",
+       "zona": "what",
+       "en": "What does Sam take?",
+       "es": "¿Qué lleva Sam?",
+       "resp": "a camera",
+       "ico": "camera",
+       "frase": 2,
+       "dice": "He takes a camera because he wants to take a photo of an iguana."
+      },
+      {
+       "id": "parque:where:0",
+       "cuento": "parque",
+       "zona": "where",
+       "en": "Where does Sam go?",
+       "es": "¿A dónde va Sam?",
+       "resp": "to the park",
+       "ico": "slide",
+       "frase": 0,
+       "dice": "Sam goes to the park."
+      },
+      {
+       "id": "parque:when:0",
+       "cuento": "parque",
+       "zona": "when",
+       "en": "When does Sam go to the park?",
+       "es": "¿Cuándo va Sam al parque?",
+       "resp": "on Sunday",
+       "ico": "sunday",
+       "frase": 1,
+       "dice": "He goes on Sunday."
+      },
+      {
+       "id": "parque:why:0",
+       "cuento": "parque",
+       "zona": "why",
+       "en": "Why does Sam take a camera?",
+       "es": "¿Por qué lleva Sam una cámara?",
+       "resp": "because he wants to take a photo of an iguana",
+       "ico": "iguana",
+       "frase": 2,
+       "dice": "He takes a camera because he wants to take a photo of an iguana."
+      }
+     ],
+     "extra": {
+      "who": {
+       "id": "parque:who:1",
+       "cuento": "parque",
+       "zona": "who",
+       "en": "Who takes a camera?",
+       "es": "¿Quién lleva una cámara?",
+       "resp": "Sam",
+       "ico": "boy",
+       "frase": 0,
+       "dice": "Sam goes to the park."
+      },
+      "what": {
+       "id": "parque:what:0",
+       "cuento": "parque",
+       "zona": "what",
+       "en": "What does Sam take?",
+       "es": "¿Qué lleva Sam?",
+       "resp": "a camera",
+       "ico": "camera",
+       "frase": 2,
+       "dice": "He takes a camera because he wants to take a photo of an iguana."
+      },
+      "where": {
+       "id": "parque:where:1",
+       "cuento": "parque",
+       "zona": "where",
+       "en": "Where does Sam go on Sunday?",
+       "es": "¿A dónde va Sam el domingo?",
+       "resp": "to the park",
+       "ico": "slide",
+       "frase": 0,
+       "dice": "Sam goes to the park."
+      },
+      "when": {
+       "id": "parque:when:0",
+       "cuento": "parque",
+       "zona": "when",
+       "en": "When does Sam go to the park?",
+       "es": "¿Cuándo va Sam al parque?",
+       "resp": "on Sunday",
+       "ico": "sunday",
+       "frase": 1,
+       "dice": "He goes on Sunday."
+      },
+      "why": {
+       "id": "parque:why:0",
+       "cuento": "parque",
+       "zona": "why",
+       "en": "Why does Sam take a camera?",
+       "es": "¿Por qué lleva Sam una cámara?",
+       "resp": "because he wants to take a photo of an iguana",
+       "ico": "iguana",
+       "frase": 2,
+       "dice": "He takes a camera because he wants to take a photo of an iguana."
+      }
+     }
+    }
+   ],
+   "resumen": [
+    {
+     "id": "isla:who:0",
+     "cuento": "isla",
+     "zona": "who",
+     "en": "Who goes to the island?",
+     "es": "¿Quién va a la isla?",
+     "resp": "Grandpa",
+     "ico": "grandpa",
+     "frase": 0,
+     "dice": "Grandpa goes to the island."
+    },
+    {
+     "id": "mercado:what:0",
+     "cuento": "mercado",
+     "zona": "what",
+     "en": "What does Grandma buy?",
+     "es": "¿Qué compra la abuela?",
+     "resp": "some mangoes",
+     "ico": "mango",
+     "frase": 2,
+     "dice": "She buys some mangoes because she wants to make juice."
+    },
+    {
+     "id": "parque:where:0",
+     "cuento": "parque",
+     "zona": "where",
+     "en": "Where does Sam go?",
+     "es": "¿A dónde va Sam?",
+     "resp": "to the park",
+     "ico": "slide",
+     "frase": 0,
+     "dice": "Sam goes to the park."
+    },
+    {
+     "id": "isla:when:0",
+     "cuento": "isla",
+     "zona": "when",
+     "en": "When does Grandpa go to the island?",
+     "es": "¿Cuándo va el abuelo a la isla?",
+     "resp": "at six o'clock",
+     "ico": "six",
+     "frase": 1,
+     "dice": "He goes at six o'clock."
+    },
+    {
+     "id": "mercado:why:0",
+     "cuento": "mercado",
+     "zona": "why",
+     "en": "Why does Grandma buy some mangoes?",
+     "es": "¿Por qué compra mangos la abuela?",
+     "resp": "because she wants to make juice",
+     "ico": "juice",
+     "frase": 2,
+     "dice": "She buys some mangoes because she wants to make juice."
     }
    ]
   }

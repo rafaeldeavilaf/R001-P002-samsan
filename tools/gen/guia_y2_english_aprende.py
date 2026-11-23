@@ -96,22 +96,22 @@ LECCIONES = [
 # (lo que se ve) y la tarjeta la RAZON (por que pasa). Nada que asuste: el bebe
 # llora porque tiene hambre, nadie se lastima.
 PAREJAS = {
-    "umbrella":   ("Why is the girl holding an umbrella?", "umbrella", "Because it is raining.", "rain", "¿Por qué la niña tiene un paraguas?", "Porque está lloviendo."),
+    "umbrella":   ("Why is the girl holding an umbrella?", "umbrella", "Because it is raining.", "rain", "¿Por qué la niña tiene una sombrilla?", "Porque está lloviendo."),
     "happy":      ("Why is the boy happy?", "happy", "Because it is his birthday.", "birthday", "¿Por qué está feliz el niño?", "Porque es su cumpleaños."),
     "icecream":   ("Why is the ice cream melting?", "melting", "Because it is hot.", "hot", "¿Por qué se derrite el helado?", "Porque hace calor."),
     "kite":       ("Why is the kite flying?", "kite", "Because it is windy.", "windy", "¿Por qué vuela la cometa?", "Porque hace viento."),
-    "coat":       ("Why is the girl wearing a coat?", "coat", "Because it is cold.", "cold", "¿Por qué la niña lleva abrigo?", "Porque hace frío."),
+    "coat":       ("Why is the girl wearing a coat?", "coat", "Because it is cold.", "cold", "¿Por qué la niña lleva chaqueta?", "Porque hace frío."),
     "sleeping":   ("Why is the boy sleeping?", "sleeping", "Because it is night-time.", "night", "¿Por qué duerme el niño?", "Porque es de noche."),
     "cheering":   ("Why are the children cheering?", "cheering", "Because they won the cup.", "trophy", "¿Por qué celebran los niños?", "Porque ganaron la copa."),
     "sunglasses": ("Why is the boy wearing sunglasses?", "sunglasses", "Because it is sunny.", "sunny", "¿Por qué el niño lleva gafas de sol?", "Porque hace sol."),
     "baby":       ("Why is the baby crying?", "babycry", "Because he is hungry.", "bottle", "¿Por qué llora el bebé?", "Porque tiene hambre."),
-    "snowman":    ("Why is the girl making a snowman?", "snowman", "Because it is snowing.", "snowing", "¿Por qué la niña hace un muñeco de nieve?", "Porque está nevando."),
+    "snowman":    ("Why is the girl making a snowman?", "snowman", "Because it is snowing.", "snowing", "¿Por qué la niña hace un muñeco de nieve?", "Porque está nevando. La nieve es hielo blandito que cae del cielo cuando hace mucho frío."),
     "plant":      ("Why is the plant growing?", "seedling", "Because it gets sun and rain.", "sunrain", "¿Por qué crece la planta?", "Porque recibe sol y lluvia."),
     "bed":        ("Why is the boy going to bed?", "bed", "Because he is tired.", "yawn", "¿Por qué el niño se va a la cama?", "Porque está cansado."),
     "dog":        ("Why is the dog happy?", "puppy", "Because it has got a bone.", "bone", "¿Por qué está feliz el perro?", "Porque tiene un hueso."),
 }
 # Para cada pregunta, las OTRAS parejas cuya razon tambien serviria (un niño
-# podria defenderla: el abrigo tambien sirve si nieva). Nunca van en la misma ronda.
+# podria defenderla: la chaqueta tambien sirve si nieva). Nunca van en la misma ronda.
 TAMBIEN = {
     "umbrella": {"sunglasses", "snowman"}, "coat": {"snowman", "kite", "umbrella"}, "icecream": {"sunglasses"},
     "sunglasses": {"icecream"}, "kite": {"sunglasses"}, "sleeping": {"bed"}, "bed": {"sleeping"}, "baby": {"bed"},
@@ -134,7 +134,7 @@ LECCION_PAREJAS = {
         {"es": "La respuesta empieza con because, que quiere decir porque."},
         {"en": "Why is the girl holding an umbrella?", "ico": "umbrella"},
         {"en": "Because it is raining.", "zona": "rain"},
-        {"es": "Tiene un paraguas porque está lloviendo."},
+        {"es": "Tiene una sombrilla porque está lloviendo."},
         {"en": "Why is the boy happy?", "ico": "happy"},
         {"en": "Because it is his birthday.", "zona": "birthday"},
         {"es": "Está feliz porque es su cumpleaños."},
@@ -144,6 +144,129 @@ LECCION_PAREJAS = {
     "juntos": [["coat", "sleeping", "cheering"]],
     "tu": [["sunglasses", "baby", "snowman"], ["plant", "bed", "dog"]],
     "resumen": ["umbrella", "happy", "kite"],
+}
+
+# ---------- Lecciones 4 y 6: responder desde un cuento (mecanica «cuento») ----------
+# Un cuento es una escena ilustrada y 3 o 4 frases cortas de Year 2. Tiene UNA
+# parte por pregunta (who, what, where, when, why): un dibujo tocable y el
+# trozo de texto que responde. Tocar el dibujo o el trozo cuenta igual. Con una
+# sola parte por pregunta, ninguna pregunta tiene dos respuestas en el cuento.
+# Las personas son genericas (Mia, Sam, Grandpa, Grandma); animales y lugares
+# del Caribe colombiano. Twemoji no tiene iguana: el lagarto 1f98e se llama
+# «iguana» (verde y de cola larga, como las de los parques de la costa).
+# partes: zona -> (trozo exacto del texto, dibujo, x %, y %)
+# preguntas: zona -> [(pregunta en ingles, traduccion), variante opcional]
+# deco: dibujos de adorno que no se tocan (nunca un lugar, un momento ni una persona)
+CUENTOS = {
+    "playa": {
+        "titulo": "Mia at the beach", "fondo": "playa",
+        "frases": ["Mia goes to the beach.", "She goes in the morning.", "She finds a big shell.", "She is happy because she sees a turtle."],
+        "partes": {"who": ("Mia", "girl", 20, 68), "where": ("to the beach", "beach", 50, 27), "when": ("in the morning", "morning", 15, 24),
+                   "what": ("a big shell", "shell", 49, 76), "why": ("because she sees a turtle", "turtle", 80, 70)},
+        "deco": [("palm", 86, 24, 13)],
+        "preguntas": {
+            "who": [("Who goes to the beach?", "¿Quién va a la playa?"), ("Who finds a big shell?", "¿Quién encuentra una concha grande?")],
+            "where": [("Where does Mia go?", "¿A dónde va Mia?"), ("Where does Mia go in the morning?", "¿A dónde va Mia por la mañana?")],
+            "when": [("When does Mia go to the beach?", "¿Cuándo va Mia a la playa?")],
+            "what": [("What does Mia find?", "¿Qué encuentra Mia?")],
+            "why": [("Why is Mia happy?", "¿Por qué está feliz Mia?")],
+        },
+    },
+    "isla": {
+        "titulo": "Grandpa and the crabs", "fondo": "isla",
+        "frases": ["Grandpa goes to the island.", "He goes at six o'clock.", "He takes a bucket because he wants to catch crabs."],
+        "partes": {"who": ("Grandpa", "grandpa", 22, 70), "where": ("to the island", "island", 74, 28), "when": ("at six o'clock", "six", 17, 24),
+                   "what": ("a bucket", "bucket", 50, 76), "why": ("because he wants to catch crabs", "crab", 81, 76)},
+        "deco": [("dolphin", 44, 38, 11)],
+        "preguntas": {
+            "who": [("Who goes to the island?", "¿Quién va a la isla?"), ("Who takes a bucket?", "¿Quién lleva un balde?")],
+            "where": [("Where does Grandpa go?", "¿A dónde va el abuelo?"), ("Where does Grandpa go at six o'clock?", "¿A dónde va el abuelo a las seis?")],
+            "when": [("When does Grandpa go to the island?", "¿Cuándo va el abuelo a la isla?")],
+            "what": [("What does Grandpa take?", "¿Qué lleva el abuelo?")],
+            "why": [("Why does Grandpa take a bucket?", "¿Por qué lleva el abuelo un balde?")],
+        },
+    },
+    "mercado": {
+        "titulo": "Grandma at the market", "fondo": "mercado",
+        "frases": ["Grandma goes to the market.", "She goes on her birthday.", "She buys some mangoes because she wants to make juice."],
+        "partes": {"who": ("Grandma", "grandma", 55, 70), "where": ("to the market", "market", 26, 30), "when": ("on her birthday", "birthday", 78, 26),
+                   "what": ("some mangoes", "mango", 17, 76), "why": ("because she wants to make juice", "juice", 85, 72)},
+        "deco": [],
+        "preguntas": {
+            "who": [("Who goes to the market?", "¿Quién va al mercado?"), ("Who buys some mangoes?", "¿Quién compra mangos?")],
+            "where": [("Where does Grandma go?", "¿A dónde va la abuela?"), ("Where does Grandma go on her birthday?", "¿A dónde va la abuela en su cumpleaños?")],
+            "when": [("When does Grandma go to the market?", "¿Cuándo va la abuela al mercado?")],
+            "what": [("What does Grandma buy?", "¿Qué compra la abuela?")],
+            "why": [("Why does Grandma buy some mangoes?", "¿Por qué compra mangos la abuela?")],
+        },
+    },
+    "parque": {
+        "titulo": "Sam in the park", "fondo": "parque",
+        "frases": ["Sam goes to the park.", "He goes on Sunday.", "He takes a camera because he wants to take a photo of an iguana."],
+        "partes": {"who": ("Sam", "boy", 50, 70), "where": ("to the park", "slide", 80, 30), "when": ("on Sunday", "sunday", 18, 25),
+                   "what": ("a camera", "camera", 19, 76), "why": ("because he wants to take a photo of an iguana", "iguana", 82, 77)},
+        "deco": [("tree", 50, 27, 13)],
+        "preguntas": {
+            "who": [("Who goes to the park?", "¿Quién va al parque?"), ("Who takes a camera?", "¿Quién lleva una cámara?")],
+            "where": [("Where does Sam go?", "¿A dónde va Sam?"), ("Where does Sam go on Sunday?", "¿A dónde va Sam el domingo?")],
+            "when": [("When does Sam go to the park?", "¿Cuándo va Sam al parque?")],
+            "what": [("What does Sam take?", "¿Qué lleva Sam?")],
+            "why": [("Why does Sam take a camera?", "¿Por qué lleva Sam una cámara?")],
+        },
+    },
+}
+WH_ES = {"who": "¿Quién", "what": "¿Qué", "where": "¿A dónde", "when": "¿Cuándo", "why": "¿Por qué"}
+# lo que un niño podria tomar por otra respuesta: cada cuento tiene UNA persona,
+# UN lugar y UN momento (se cuentan en todo el texto, no solo en las partes)
+PERSONAS = ("Mia", "Sam", "Tom", "Grandpa", "Grandma", "Mum", "Dad", "teacher", "boy", "girl")
+MOMENTOS = ("morning", "afternoon", "evening", "night", "o'clock", "birthday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+            "Saturday", "Sunday", "summer", "winter", "today", "tomorrow")
+LUGARES = ("beach", "island", "market", "park", "school", "home", "farm", "sea", "river", "shop", "garden", "tree", "sand", "house")
+
+# preguntas por paso: (cuento, zona, variante)
+LECCION_CUENTO = {
+    "id": "cuento", "unidad": "wh", "titulo": "Responde con el cuento", "en": "Answer from a story", "calco": "turtle",
+    "mecanica": "cuento", "zonas": ["who", "what", "where", "when", "why"], "inicio": "playa",
+    "piensa": "Piensa. ¿Qué busca la pregunta? Una persona, una cosa, un lugar, un momento o una razón.",
+    "textos": {
+        "juntos": "Ahora lo hacemos juntos. Cada respuesta tiene el color de su pregunta. La que brilla es la correcta. Tócala.",
+        "tu": "Ahora tú solo. Los colores se van.",
+    },
+    "mira": [
+        {"es": "Hoy vas a escuchar un cuento y a buscar respuestas en él."},
+        {"en": "Mia goes to the beach.", "frase": 0}, {"en": "She goes in the morning.", "frase": 1},
+        {"en": "She finds a big shell.", "frase": 2}, {"en": "She is happy because she sees a turtle.", "frase": 3},
+        {"es": "Ahora vamos a buscar respuestas en el cuento."},
+        {"es": "Who busca una persona.", "parte": "who"}, {"es": "What busca una cosa.", "parte": "what"},
+        {"es": "Where busca un lugar.", "parte": "where"}, {"es": "When busca un momento.", "parte": "when"},
+        {"es": "Why busca una razón, con because.", "parte": "why"},
+        {"es": "Pip pregunta y tú tocas la respuesta, en el dibujo o en las palabras."},
+    ],
+    "yo": [("playa", "who", 0), ("playa", "where", 0)],
+    "juntos": [("playa", "what", 0), ("playa", "when", 0), ("playa", "why", 0)],
+    "tu": [{"cuento": "playa", "preguntas": [("playa", "who", 1), ("playa", "where", 1), ("playa", "when", 0), ("playa", "what", 0), ("playa", "why", 0)]}],
+    "resumen": [("playa", "who", 0), ("playa", "where", 0), ("playa", "why", 0)],
+}
+LECCION_REPASO = {
+    "id": "repaso", "unidad": "wh", "titulo": "Repaso mezclado", "en": "Mixed review", "calco": "iguana",
+    "mecanica": "cuento", "zonas": ["who", "what", "where", "when", "why"], "inicio": "isla",
+    "piensa": "Piensa. ¿Qué busca la pregunta? Una persona, una cosa, un lugar, un momento o una razón.",
+    "textos": {
+        "juntos": "Ahora lo hacemos juntos. Cada respuesta tiene el color de su pregunta. La que brilla es la correcta. Tócala.",
+        "tu": "Ahora tú solo, con cuentos nuevos. Los colores se van.",
+    },
+    "mira": [
+        {"es": "Hoy repasamos las cinco preguntas: Who, What, Where, When y Why."},
+        {"es": "Escucha el cuento."},
+        {"en": "Grandpa goes to the island.", "frase": 0}, {"en": "He goes at six o'clock.", "frase": 1},
+        {"en": "He takes a bucket because he wants to catch crabs.", "frase": 2},
+        {"es": "Recuerda. Who, una persona. What, una cosa. Where, un lugar. When, un momento. Why, una razón."},
+        {"es": "Pip pregunta y tú tocas la respuesta, en el dibujo o en las palabras."},
+    ],
+    "yo": [("isla", "who", 0), ("isla", "where", 0)],
+    "juntos": [("isla", "what", 0), ("isla", "when", 0), ("isla", "why", 0)],
+    "tu": [{"cuento": c, "preguntas": [(c, z, 0) for z in ("who", "what", "where", "when", "why")]} for c in ("mercado", "parque")],
+    "resumen": [("isla", "who", 0), ("mercado", "what", 0), ("parque", "where", 0), ("isla", "when", 0), ("mercado", "why", 0)],
 }
 
 # En Where y When la respuesta es una frase con preposicion (at school, on Monday)
@@ -243,6 +366,114 @@ def construir_parejas(L):
     }
 
 
+def cuento(cid):
+    """Valida un cuento y lo arma: frases partidas en trozos [texto, zona|null]."""
+    import iconos_twemoji as IT
+    C = CUENTOS[cid]
+    banco = set(IT.ICONOS) | set(IT.PROPIOS) | set(IT.MODIFICADOS) | set(IT.COMPUESTOS)
+    texto = " ".join(C["frases"])
+    assert 3 <= len(C["frases"]) <= 4, "%s: 3 o 4 frases" % cid
+    for f in C["frases"]:
+        assert f[0].isupper() and f.endswith(".") and len(f.split()) <= 14, "%s: frase corta de Year 2: «%s»" % (cid, f)
+    assert set(C["partes"]) == set(CODIGO), "%s: una parte por cada pregunta (who, what, where, when, why)" % cid
+    spans = []
+    for z, (trozo, ico, x, y) in C["partes"].items():
+        assert texto.count(trozo) == 1, "%s: «%s» debe salir una sola vez en el cuento" % (cid, trozo)
+        assert ico in banco, "%s: el dibujo %s no esta en el banco" % (cid, ico)
+        assert 8 <= x <= 92 and 15 <= y <= 85, "%s: %s fuera de la escena" % (cid, z)
+        i = texto.index(trozo); spans.append((i, i + len(trozo), z))
+    spans.sort()
+    for a, b in zip(spans, spans[1:]):
+        assert a[1] <= b[0], "%s: los trozos %s y %s se pisan" % (cid, a[2], b[2])
+    p = C["partes"]
+    assert p["who"][0] in PERSONAS, "%s: who es una persona" % cid
+    assert p["what"][0].startswith(("a ", "an ", "some ")), "%s: what es una cosa (a, an, some)" % cid
+    assert p["where"][0].startswith(("to ", "at ", "in ", "on ")), "%s: where empieza con to, at, in u on" % cid
+    assert p["when"][0].startswith(PREPOSICION), "%s: when empieza con at, in u on" % cid
+    assert p["why"][0].startswith("because "), "%s: why empieza con because" % cid
+    # sin ambiguedad: una sola persona, un solo lugar y un solo momento en todo el texto
+    import re
+    palabras = re.findall(r"[A-Za-z']+", texto)
+    assert len({w for w in palabras if w in PERSONAS}) == 1, "%s: el cuento nombra mas de una persona" % cid
+    assert sum(1 for w in palabras if w in MOMENTOS) == 1, "%s: el cuento tiene mas de un momento" % cid
+    assert sum(1 for w in palabras if w in LUGARES) == 1, "%s: el cuento tiene mas de un lugar" % cid
+    # los dibujos no se repiten y el adorno nunca es una parte
+    dib = [v[1] for v in p.values()]
+    assert len(set(dib)) == 5, cid
+    for ico, x, y, s in C["deco"]:
+        assert ico in banco and ico not in dib, "%s: adorno %s" % (cid, ico)
+    for z, lista in C["preguntas"].items():
+        assert z in CODIGO and 1 <= len(lista) <= 2, (cid, z)
+        for en, es in lista:
+            assert en.split()[0] == CODIGO[z]["t"] and en.endswith("?"), "%s: «%s» debe empezar con %s" % (cid, en, CODIGO[z]["t"])
+            assert es.startswith(WH_ES[z]) and es.endswith("?"), "%s: «%s» debe empezar con %s" % (cid, es, WH_ES[z])
+            assert p[z][0].lower() not in en.lower(), "%s: la pregunta «%s» trae su respuesta" % (cid, en)
+    frases, base = [], 0
+    for f in C["frases"]:
+        trozos, i = [], 0
+        for a, b, z in spans:
+            if a >= base and b <= base + len(f):
+                if a - base > i:
+                    trozos.append([f[i:a - base], None])
+                trozos.append([f[a - base:b - base], z]); i = b - base
+            else:
+                assert b <= base or a >= base + len(f), "%s: un trozo cruza dos frases" % cid
+        if i < len(f):
+            trozos.append([f[i:], None])
+        assert "".join(t for t, _ in trozos) == f
+        frases.append(trozos); base += len(f) + 1
+    return {"id": cid, "titulo": C["titulo"], "fondo": C["fondo"], "frases": frases,
+            "partes": [{"zona": z, "txt": t, "ico": i, "x": x, "y": y} for z, (t, i, x, y) in C["partes"].items()],
+            "deco": [{"ico": i, "x": x, "y": y, "s": s} for i, x, y, s in C["deco"]]}
+
+
+def pregunta(cid, z, v):
+    C = CUENTOS[cid]
+    en, es = C["preguntas"][z][v]
+    trozo, ico = C["partes"][z][:2]
+    frase = next(i for i, f in enumerate(C["frases"]) if trozo in f)
+    return {"id": "%s:%s:%d" % (cid, z, v), "cuento": cid, "zona": z, "en": en, "es": es, "resp": trozo, "ico": ico,
+            "frase": frase, "dice": C["frases"][frase]}
+
+
+def construir_cuento(L):
+    """Valida y arma una leccion de mecanica «cuento» (lecciones 4 y 6)."""
+    k = L["id"]
+    assert L["zonas"] == list(CODIGO), k
+    ids = {L["inicio"]} | {q[0] for q in L["yo"] + L["juntos"]} | {r["cuento"] for r in L["tu"]}
+    cuentos = {c: cuento(c) for c in sorted(ids)}
+    for q in L["yo"] + L["juntos"] + L["resumen"] + [q for r in L["tu"] for q in r["preguntas"]]:
+        assert q[0] in CUENTOS and q[2] < len(CUENTOS[q[0]]["preguntas"][q[1]]), (k, q)
+    assert len(L["yo"]) >= 2 and len(L["juntos"]) >= 3, "%s: 2 en yo y 3 en juntos" % k
+    assert all(q[0] == L["inicio"] for q in L["yo"] + L["juntos"]), "%s: yo y juntos usan el cuento de mira" % k
+    for r in L["tu"]:
+        assert all(q[0] == r["cuento"] for q in r["preguntas"]), (k, r["cuento"])
+        assert {q[1] for q in r["preguntas"]} == set(CODIGO) and len(r["preguntas"]) == 5, "%s: tu solo pregunta las cinco en %s" % (k, r["cuento"])
+    assert len({r["cuento"] for r in L["tu"]}) == len(L["tu"]), "%s: un cuento por ronda" % k
+    # mira: las frases que se leen son las del cuento, en orden, y las partes existen
+    fr = [m for m in L["mira"] if "frase" in m]
+    assert [m["en"] for m in fr] == CUENTOS[L["inicio"]]["frases"] and [m["frase"] for m in fr] == list(range(len(fr))), "%s: mira lee el cuento entero" % k
+    assert all(m.get("parte", "who") in CODIGO for m in L["mira"]), k
+    # dibujos: dentro de la leccion ninguno se repite entre cuentos (ni la clave ni el dibujo)
+    import iconos_twemoji as IT
+    codigo = dict(IT.ICONOS); codigo.update({c: v[0] + "+" + c for c, v in IT.COMPUESTOS.items()}); codigo.update({c: v[0] + "-" + c for c, v in IT.MODIFICADOS.items()})
+    dib = [p["ico"] for c in cuentos.values() for p in c["partes"]]
+    assert len({codigo.get(d, d) for d in dib}) == len(dib), "%s: un dibujo se repite entre cuentos" % k
+    assert L["calco"] in codigo or L["calco"] in IT.PROPIOS, k
+    # lo que le costo vuelve mas: cada ronda de tu solo trae una pregunta de repuesto por zona
+    tu = []
+    for r in L["tu"]:
+        pre = CUENTOS[r["cuento"]]["preguntas"]
+        extra = {z: pregunta(r["cuento"], z, len(pre[z]) - 1) for z in CODIGO}
+        tu.append({"cuento": r["cuento"], "preguntas": [pregunta(*q) for q in r["preguntas"]], "extra": extra})
+    return {
+        "id": k, "unidad": L["unidad"], "titulo": L["titulo"], "en": L["en"], "calco": L["calco"], "mecanica": "cuento",
+        "zonas": L["zonas"], "piensa": L["piensa"], "textos": L["textos"], "mira": L["mira"], "inicio": L["inicio"], "cuentos": cuentos,
+        "yo": [pregunta(*q) for q in L["yo"]], "juntos": [pregunta(*q) for q in L["juntos"]], "tu": tu,
+        "resumen": [pregunta(*q) for q in L["resumen"]],
+    }
+
+
 def iconos_usados():
     usados = {c["ico"] for c in CODIGO.values()}
     for L in LECCIONES:
@@ -257,6 +488,11 @@ def iconos_usados():
     for r in [L["modelos"], L["yo"]] + L["juntos"] + L["tu"]:
         for pid in r:
             usados |= {PAREJAS[pid][1], PAREJAS[pid][3]}
+    for L in (LECCION_CUENTO, LECCION_REPASO):
+        usados.add(L["calco"])
+        cids = {L["inicio"]} | {q[0] for q in L["yo"] + L["juntos"] + L["resumen"]} | {r["cuento"] for r in L["tu"]}
+        for c in cids:
+            usados |= {v[1] for v in CUENTOS[c]["partes"].values()} | {d[0] for d in CUENTOS[c]["deco"]}
     return usados
 
 
@@ -266,7 +502,9 @@ def main():
         "mascota": "pip", "mascotaNombre": "Pip", "titulo": "Learn with Pip", "subtitulo": "Aprende inglés con Pip",
         "musica": "alegre", "velocidad": 0.85,
         "unidades": [{"id": "wh", "titulo": "Wh questions", "es": "Preguntas con Wh"}],
-        "codigo": CODIGO, "lecciones": construir() + [construir_parejas(LECCION_PAREJAS)],
+        "codigo": CODIGO,
+        # la leccion 5 del plan va entre «cuento» y «repaso» cuando exista; hasta entonces el repaso sale quinto
+        "lecciones": construir() + [construir_parejas(LECCION_PAREJAS), construir_cuento(LECCION_CUENTO), construir_cuento(LECCION_REPASO)],
     }
     js = ("// titulo: Learn with Pip · Year 2 English\n// lang: en\n// usa: aldea\n"
           "/* ============================================================\n"

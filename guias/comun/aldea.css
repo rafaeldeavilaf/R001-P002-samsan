@@ -380,3 +380,99 @@ body.al-jugando .site-foot { display: none; }
 .le-par__txt b { font-weight: 900; }
 .le-par__txt span { color: #BE185D; }
 @media (prefers-reduced-motion: reduce) { .le-razon--hecha .le-razon__par { animation: none; } }
+
+/* ---------- mecanica «cuento» (lecciones 4 y 6, responder desde un cuento) ----------
+   Pregunta arriba, escena con dibujos tocables, frases con trozos tocables y
+   Pip abajo. En celular va en columna; en horizontal, escena y texto lado a lado.
+   Con .le-cuento--color (mira, yo, juntos) cada parte lleva el color y el icono
+   de su pregunta; en tu solo las partes quedan neutras. */
+.le-pantalla--cuento { gap: 6px; }
+.le-preg {
+  appearance: none; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; padding: 6px 12px; text-align: left; flex-shrink: 0;
+  border: 3px solid #1F2937; border-left: 12px solid var(--c); border-radius: 16px; background: #FFFFFF; box-shadow: 0 3px 0 #1F2937;
+  font-family: 'Nunito', system-ui, sans-serif; color: #1F2937; cursor: pointer;
+}
+.le-preg[hidden] { display: none; }
+.le-preg__ico { width: 34px; height: 34px; flex-shrink: 0; }
+.le-preg__ico svg { width: 100%; height: 100%; display: block; }
+.le-preg__txt { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.le-preg__txt b { font-weight: 900; font-size: clamp(1.2rem, 4.8vw, 1.5rem); }
+.le-preg__txt small { font-weight: 800; font-size: 1rem; opacity: .8; }
+.le-wh { color: var(--c); font-weight: 900; }
+.le-cuento { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 8px; }
+.le-ilus {
+  position: relative; flex-shrink: 0; width: 100%; aspect-ratio: 3 / 2; container-type: inline-size; overflow: hidden;
+  border: 3px solid #1F2937; border-radius: 20px; box-sizing: border-box; user-select: none; -webkit-user-select: none;
+  background: linear-gradient(#BAE6FD, #E0F2FE 45%, #86EFAC 45%, #4ADE80);
+}
+.le-ilus[data-fondo="playa"] { background: linear-gradient(#BAE6FD, #E0F2FE 44%, #38BDF8 44%, #0EA5E9 58%, #FDE68A 58%, #FCD34D); }
+.le-ilus[data-fondo="isla"] { background: linear-gradient(#FDE68A, #FEF3C7 40%, #38BDF8 40%, #0284C7 86%, #FDE68A 86%); }
+.le-ilus[data-fondo="mercado"] { background: linear-gradient(#BAE6FD, #F0F9FF 46%, #FED7AA 46%, #FDBA74); }
+.le-ilus[data-fondo="parque"] { background: linear-gradient(#BAE6FD, #E0F2FE 46%, #86EFAC 46%, #4ADE80); }
+.le-deco { position: absolute; transform: translate(-50%, -50%); pointer-events: none; opacity: .9; }
+.le-deco svg { width: 100%; height: auto; display: block; }
+.le-parte--dib {
+  appearance: none; position: absolute; transform: translate(-50%, -50%); width: clamp(50px, 18cqw, 116px); aspect-ratio: 1; padding: 3%;
+  box-sizing: border-box; border-radius: 50%; border: 3px solid #1F2937; background: rgba(255,255,255,.72); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.le-parte__ico { width: 100%; height: 100%; display: block; }
+.le-parte__marca { position: absolute; right: -8%; top: -8%; width: 38%; aspect-ratio: 1; box-sizing: border-box; padding: 4%; border-radius: 50%; background: #FFFFFF; border: 3px solid var(--c); display: none; }
+.le-parte__marca svg { width: 100%; height: 100%; display: block; }
+.le-cuento--color .le-parte--dib { border: 5px solid var(--c); background: color-mix(in srgb, var(--c) 14%, #FFFFFF); }
+.le-cuento--color .le-parte__marca { display: block; }
+.le-parte--dib .al-mano { right: -24%; bottom: -30%; width: 52%; }
+.le-parte--dib.al-brilla, .le-parte--dib.le-guia { animation: le-brilla-parte 1.1s ease-in-out infinite; }
+.le-parte--dib.al-brilla { animation-iteration-count: 2; }
+@keyframes le-brilla-parte { 0%, 100% { transform: translate(-50%, -50%); box-shadow: 0 0 0 0 rgba(245,158,11,0); } 50% { transform: translate(-50%, -58%) scale(1.06); box-shadow: 0 0 0 7px rgba(245,158,11,.65); } }
+.le-parte--dib.al-tiembla { animation: le-tiembla-parte .55s ease; }
+@keyframes le-tiembla-parte { 0%, 100% { transform: translate(-50%, -50%); } 25% { transform: translate(-56%, -50%) rotate(-4deg); } 50% { transform: translate(-44%, -50%) rotate(4deg); } 75% { transform: translate(-53%, -50%); } }
+.le-parte--dib.le-parte--bien { background: #DCFCE7; border-color: #16A34A; animation: al-pop-parte .42s cubic-bezier(.3,1.6,.5,1); }
+@keyframes al-pop-parte { from { transform: translate(-50%, -50%) scale(.6); } to { transform: translate(-50%, -50%) scale(1); } }
+.le-parte--dib:focus-visible, .le-parte--txt:focus-visible { outline: 4px solid #F59E0B; outline-offset: 3px; }
+/* el texto: cada frase en su linea; los trozos que responden se tocan (alto de 44 px o mas) */
+.le-texto {
+  flex-shrink: 0; margin: 0; padding: 4px 12px; border: 3px solid #1F2937; border-radius: 18px; background: #FFFFFF; box-shadow: 0 3px 0 #1F2937;
+  font-family: 'Nunito', system-ui, sans-serif; font-weight: 800; color: #1F2937; font-size: clamp(1.15rem, 4.9vw, 1.45rem); line-height: 2.5;
+}
+.le-frase { margin: 0; padding: 0 4px; border-radius: 10px; cursor: pointer; transition: background .2s; }
+.le-frase--lee { background: #FEF3C7; box-shadow: inset 4px 0 0 #F59E0B; }
+.le-parte--txt {
+  display: inline; margin: 0; padding: .62em .12em .5em; border-bottom: 3px dashed #64748B; border-radius: 6px;
+  background: transparent; cursor: pointer; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  -webkit-tap-highlight-color: transparent;
+}
+.le-cuento--color .le-parte--txt { background: color-mix(in srgb, var(--c) 16%, #FFFFFF); border-bottom: 4px solid var(--c); }
+.le-parte--txt.al-brilla, .le-parte--txt.le-guia { animation: le-brilla-txt 1.1s ease-in-out infinite; }
+.le-parte--txt.al-brilla { animation-iteration-count: 2; }
+@keyframes le-brilla-txt { 0%, 100% { background-color: #FFFFFF; } 50% { background-color: #FDE68A; } }
+.le-parte--txt.al-tiembla { animation: none; background: #FEE2E2; }
+.le-parte--txt.le-parte--bien { background: #DCFCE7; border-bottom: 4px solid #16A34A; }
+/* Pip pequeño al lado de lo que dice */
+.le-dialogo--pip { flex-shrink: 0; padding: 6px 10px; min-height: 64px; }
+.le-dialogo__pip { appearance: none; border: 0; background: none; padding: 0; width: 58px; min-height: 44px; flex-shrink: 0; align-self: center; }
+.le-dialogo__pip .al-pip { width: 100%; }
+.le-pantalla--cuento .le-dialogo__texto { font-size: clamp(1rem, 4.2vw, 1.3rem); }
+/* horizontal (PC, tableta): escena y texto lado a lado */
+@media (orientation: landscape) and (min-width: 700px) {
+  .le-cuento { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; gap: 12px; }
+  .le-ilus { aspect-ratio: 16 / 10; }
+  .le-texto { font-size: clamp(1.2rem, 2.1vw, 1.55rem); padding: 8px 14px; }
+}
+/* resumen del cuento: pregunta con su Wh en color y la respuesta, que suenan */
+.le-par--cuento { border-left: 10px solid var(--c); }
+.le-par--cuento .le-par__txt b { font-size: 1.05rem; }
+.le-par--cuento .le-par__txt span { color: #1F2937; }
+.le-par__wh { width: 30px; height: 30px; }
+@media (prefers-reduced-motion: reduce) {
+  .le-parte--dib.al-brilla, .le-parte--dib.le-guia, .le-parte--txt.al-brilla, .le-parte--txt.le-guia, .le-parte--dib.le-parte--bien, .le-parte--dib.al-tiembla { animation: none; }
+  .le-parte--dib.le-guia { box-shadow: 0 0 0 7px rgba(245,158,11,.65); }
+  .le-parte--txt.le-guia { background: #FDE68A; }
+}
+/* celular: lo que dice Pip usa todo el ancho y los botones van debajo, a la derecha */
+@media (max-width: 520px) {
+  .le-dialogo--pip { flex-wrap: wrap; row-gap: 2px; }
+  .le-dialogo--pip .le-dialogo__texto { flex: 1 1 calc(100% - 72px); }
+  .le-dialogo--pip .le-dialogo__acciones { flex: 1 1 100%; justify-content: flex-end; }
+  .le-dialogo--pip .le-seguir { min-height: 44px; padding-top: 6px; padding-bottom: 6px; }
+}

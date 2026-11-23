@@ -53,6 +53,11 @@ ICONOS = {
     "umbrella": "2602", "rain": "1f327", "windy": "1f32c", "coat": "1f9e5", "sleeping": "1f634", "cheering": "1f64c", "trophy": "1f3c6",
     "sunglasses": "1f60e", "sunny": "2600", "bottle": "1f37c", "snowing": "1f328", "seedling": "1f331", "sunrain": "1f326",
     "yawn": "1f971", "puppy": "1f436", "bone": "1f9b4",
+    # lecciones 4 y 6 de Learn with Pip (cuentos): personas genericas, animales y lugares del Caribe.
+    # iguana: Twemoji no tiene iguana; el lagarto verde 1f98e hace de iguana. sunday: calendario sin texto.
+    "girl": "1f467", "boy": "1f466", "grandpa": "1f474", "shell": "1f41a", "turtle": "1f422", "palm": "1f334",
+    "island": "1f3dd", "six": "1f555", "bucket": "1faa3", "mango": "1f96d", "juice": "1f964", "sunday": "1f5d3",
+    "camera": "1f4f7", "iguana": "1f98e",
 }
 
 # Dibujos propios por codigo (36 x 36, colores planos al estilo Twemoji) para
@@ -94,6 +99,14 @@ PROPIOS = {
                 '<rect x="14.5" y="25" width="7" height="9" fill="#3B88C3"/>',
 }
 
+# puesto de mercado (leccion 6): toldo de rayas, mostrador y frutas; ningun emoji muestra un mercado
+PROPIOS["market"] = ('<path d="M7 13h2.4v21H7zM26.6 13h2.4v21h-2.4z" fill="#8B5E3C"/>'
+                     '<path d="M4 4h28l1.5 9h-31z" fill="#DD2E44"/><path d="M9.6 4h4.2l-.7 9H8.1zM18 4h4.2l.3 9h-4.4zM26.3 4h3.9l1.4 9h-4.5z" fill="#FFFFFF"/>'
+                     + "".join('<circle cx="%s" cy="13" r="2.6" fill="%s"/>' % (4.6 + i * 5.36, "#DD2E44" if i % 2 == 0 else "#FFFFFF") for i in range(6))
+                     + '<path d="M3 24h30v10H3z" fill="#C1694F"/><path d="M3 24h30v2.6H3z" fill="#A0522D"/>'
+                     '<circle cx="9" cy="21" r="3.2" fill="#F4900C"/><circle cx="15.6" cy="21" r="3.2" fill="#77B255"/><circle cx="22.2" cy="21" r="3.2" fill="#FFCC4D"/><circle cx="28.4" cy="21.4" r="2.8" fill="#F4900C"/>'
+                     '<path d="M15.6 17.8v-1.6" stroke="#3E721D" stroke-width="1.2" stroke-linecap="round"/>')
+
 SVG_RE = re.compile(r"^\s*<svg[^>]*viewBox=\"0 0 36 36\"[^>]*>(.*)</svg>\s*$", re.S)
 
 
@@ -108,14 +121,19 @@ MODIFICADOS = {
 
 
 # Dibujos de Twemoji con algo agregado encima (tambien permitido por CC BY 4.0
-# indicandolo): clave -> (codigo, dibujo propio que se suma). Lo agregado es de
+# indicandolo): clave -> (codigo, dibujo propio que se suma[, fragmentos que se
+# quitan antes, como en MODIFICADOS]). Lo agregado es de
 # SAMSAN. Sirven para una SITUACION que ningun emoji muestra (leccion 3, Why).
 _GOTAS = ((10.3, 18.6, 3.4, 7.2), (17.6, 20.4, 3.0, 4.2), (23.2, 18.8, 3.4, 9.4))
 COMPUESTOS = {
     # el bebe llora: cejas tristes suaves y dos lagrimas (nada de llanto fuerte)
+    # (revision de exactitud, 23 nov 2026: la boca sonriente con diente se leia como «llorar de risa»;
+    #  se quita y va una boca triste abierta)
     "babycry": ("1f476", '<path fill="none" stroke="#662214" stroke-width="1.6" stroke-linecap="round" d="M9.6 14.6l4.6-1.8M26.4 14.6l-4.6-1.8"/>'
                          '<path fill="#5DADEC" d="M11.6 21.2c-.9 1.8-2.1 3.3-2.1 4.7a2.1 2.1 0 0 0 4.2 0c0-1.4-1.2-2.9-2.1-4.7z"/>'
-                         '<path fill="#5DADEC" d="M24.4 21.2c-.9 1.8-2.1 3.3-2.1 4.7a2.1 2.1 0 0 0 4.2 0c0-1.4-1.2-2.9-2.1-4.7z"/>'),
+                         '<path fill="#5DADEC" d="M24.4 21.2c-.9 1.8-2.1 3.3-2.1 4.7a2.1 2.1 0 0 0 4.2 0c0-1.4-1.2-2.9-2.1-4.7z"/>'
+                         '<path fill="#662214" d="M14 29.4c0-2.9 1.8-4.9 4-4.9s4 2 4 4.9c0 .8-.7 1.1-1.3.6-.8-.6-1.7-.9-2.7-.9s-1.9.3-2.7.9c-.6.5-1.3.2-1.3-.6z"/>',
+                ['<path fill="#662214" d="M18 25c-3 0-4-1-4 1s2 4 4 4 4-2 4-4-1-1-4-1z"/>', '<path fill="#FFF" d="M18 26h2v1s0 1-1 1-1-1-1-1v-1z"/>']),
     # el helado se derrite: chorreones de crema sobre el cono y una gota que cae
     "melting": ("1f366", "".join('<path fill="#FFE8B6" d="M%s %sh%sv%sa%s %s 0 0 1-%s 0z"/>'
                                  '<path fill="none" stroke="#E8B04B" stroke-width=".6" stroke-linecap="round" d="M%s %sv%sa%s %s 0 0 0 %s 0v-%s"/>'
@@ -156,7 +174,7 @@ def main():
         if clave not in usados:
             continue
         svg = leer(a.fuente, codigo)
-        for quitar in MODIFICADOS.get(clave, (None, []))[1]:
+        for quitar in MODIFICADOS.get(clave, (None, []))[1] + (list(COMPUESTOS[clave][2]) if clave in COMPUESTOS and len(COMPUESTOS[clave]) > 2 else []):
             assert quitar in svg, "%s: no encuentro %s" % (clave, quitar)
             svg = svg.replace(quitar, "")
         m = SVG_RE.match(svg)
@@ -169,7 +187,7 @@ def main():
              "   ICONOS DE LA ALDEA (generado por tools/gen/iconos_twemoji.py; no se edita a mano)\n"
              "   Graficos: Twemoji, CC BY 4.0, (c) Twitter, Inc. y otros colaboradores, sin cambios en el dibujo\n"
              "   salvo: " + ", ".join("%s (%s sin el reloj)" % (k, v[0]) for k, v in sorted(MODIFICADOS.items()) if k in usados) + ".\n"
-             "   con algo agregado por SAMSAN: " + ", ".join("%s (%s)" % (k, v[0]) for k, v in sorted(COMPUESTOS.items()) if k in usados) + ".\n"
+             "   con algo agregado por SAMSAN: " + ", ".join("%s (%s%s)" % (k, v[0], " con la boca cambiada" if len(v) > 2 else "") for k, v in sorted(COMPUESTOS.items()) if k in usados) + ".\n"
              "   Propios de SAMSAN (dibujados por codigo): " + ", ".join(sorted(usados & set(PROPIOS))) + ".\n"
              "   https://github.com/jdecked/twemoji · https://creativecommons.org/licenses/by/4.0/\n"
              "   Cada valor es el interior de un SVG de 36 x 36 (ALDEA.icono lo envuelve).\n"

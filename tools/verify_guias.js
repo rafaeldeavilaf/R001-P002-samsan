@@ -301,6 +301,7 @@ function validarLeccion(nombre, cfg) {
   check(nombre + ': codigo fijo con color, icono y traduccion', Object.values(cfg.codigo).every(c => /^#[0-9A-F]{6}$/i.test(c.color) && ICONOS[c.ico] && /^¿.+\?$/.test(c.es)));
   cfg.lecciones.forEach(L => {
     if (L.mecanica === 'parejas') { validarParejas(nombre, L, ICONOS); return; }
+    if (L.mecanica === 'cuento') { validarCuento(nombre, L, ICONOS, cfg.codigo); return; }
     const k = nombre + '/' + L.id, items = [].concat(L.yo, L.juntos, L.tu);
     check(k + ': 2 en yo, 4+ en juntos, 6+ en tu', L.yo.length === 2 && L.juntos.length >= 4 && L.tu.length >= 6);
     check(k + ': cada ejemplo va a una casa de la leccion', items.every(i => L.zonas.includes(i.zona)));
@@ -324,6 +325,20 @@ function validarParejas(nombre, L, ICONOS) {
   check(k + ': resumen de 3 parejas con dibujo y calcomania', L.resumen.length === 3 && L.resumen.every(p => ICONOS[p.ico] && ICONOS[p.icoRazon]) && !!ICONOS[L.calco]);
   check(k + ': mira usa los modelos y la leccion su pregunta para pensar', L.mira.every(m => (!m.ico || ICONOS[m.ico]) && (!m.zona || L.modelos.some(p => p.zona === m.zona))) && !!L.piensa);
 }
+/* mecanica «cuento» (lecciones 4 y 6): preguntas Wh que se responden tocando el cuento */
+function validarCuento(nombre, L, ICONOS, COD) {
+  const k = nombre + '/' + L.id, cuentos = Object.values(L.cuentos);
+  const qs = [].concat(L.yo, L.juntos, ...L.tu.map(r => r.preguntas.concat(Object.values(r.extra))), L.resumen);
+  check(k + ': cada cuento tiene una parte por pregunta, con dibujo que existe', cuentos.every(c => c.partes.length === 5 && new Set(c.partes.map(p => p.zona)).size === 5 && c.partes.every(p => ICONOS[p.ico]) && c.deco.every(d => ICONOS[d.ico])));
+  check(k + ': cada trozo que responde sale una vez en el texto', cuentos.every(c => c.partes.every(p => [].concat(...c.frases).filter(t => t[1] === p.zona).length === 1 && [].concat(...c.frases).some(t => t[0] === p.txt && t[1] === p.zona))));
+  check(k + ': cada pregunta empieza con su Wh y tiene traduccion', qs.every(q => q.en.split(' ')[0] === COD[q.zona].t && /\?$/.test(q.en) && /^¿.+\?$/.test(q.es)));
+  check(k + ': la respuesta de cada pregunta esta en su cuento (dibujo y trozo)', qs.every(q => { const c = L.cuentos[q.cuento]; const p = c && c.partes.find(x => x.zona === q.zona); return p && p.txt === q.resp && p.ico === q.ico && c.frases[q.frase].map(t => t[0]).join('') === q.dice; }));
+  check(k + ': ninguna pregunta trae su respuesta', qs.every(q => q.en.toLowerCase().indexOf(q.resp.toLowerCase()) < 0));
+  check(k + ': 2+ en yo, 3+ en juntos y tu solo pregunta las cinco en cada cuento', L.yo.length >= 2 && L.juntos.length >= 3 && L.tu.every(r => new Set(r.preguntas.map(q => q.zona)).size === 5 && r.preguntas.every(q => q.cuento === r.cuento)));
+  const dib = [].concat(...cuentos.map(c => c.partes.map(p => p.ico)));
+  check(k + ': los dibujos de las partes no se repiten en la leccion', new Set(dib.map(d => ICONOS[d])).size === dib.length);
+  check(k + ': resumen con dibujo, calcomania y pregunta para pensar', L.resumen.length >= 3 && !!ICONOS[L.calco] && !!L.piensa);
+}
 async function jugarLeccion(nombre, cfg) {
   const file = path.join(ROOT, 'guia-' + nombre + '.html');
   for (const L of cfg.lecciones) {
@@ -337,22 +352,35 @@ async function jugarLeccion(nombre, cfg) {
     });
     await espera(60);
     const w = dom.window, d = w.document, P = () => w.GUIA._leccion_pantalla;
-    const pasos = [], tu = [], PAR = L.mecanica === 'parejas', juegos = { tu: new Set(), juntos: new Set() }; let fallo = false, fuera = 0, ultimo = null;
+    const pasos = [], tu = [], PAR = L.mecanica === 'parejas', CUE = L.mecanica === 'cuento', juegos = { tu: new Set(), juntos: new Set() }; let fallo = false, fuera = 0, ultimo = null;
+    const colores = { juntos: new Set(), tu: new Set() };
     for (let k = 0; k < 900 && P() && P().paso() !== 'aprendi'; k++) {
       await espera(40);
       const paso = P().paso(); if (pasos[pasos.length - 1] !== paso) pasos.push(paso);
       const seg = !d.querySelector('.le-seguir').disabled, a = P().activo();
       if (seg) { P().seguir(); continue; }
       if (!a || d.querySelector('.al-volando') || a === ultimo) continue;
-      const razones = PAR ? P().razones() : L.zonas;
+      const razones = PAR || CUE ? P().razones() : L.zonas;
       if (PAR) { juegos[paso] && juegos[paso].add(razones.slice().sort().join('+')); if (!razones.includes(a.zona)) fuera++; }
-      if (paso === 'tu' && !fallo) { fallo = true; tu.push(a.ico); P().soltar(razones.find(z => z !== a.zona)); await espera(30); continue; }
+      if (CUE) { if (P().cuento() !== a.cuento || !razones.includes(a.zona)) fuera++; if (colores[paso]) colores[paso].add(P().color()); if (juegos[paso]) juegos[paso].add(P().cuento()); }
+      if (paso === 'tu' && !fallo) { fallo = true; tu.push(CUE ? a.id : a.ico); P().soltar(razones.find(z => z !== a.zona)); await espera(30); continue; }
       ultimo = a; P().soltar(a.zona);
     }
     if (P()) pasos.push(P().paso());
     const salieron = P().salieron.filter(x => /^tu:/.test(x)).map(x => x.slice(3));
     check(nombre + '/' + L.id + ': recorre los 5 pasos en orden', pasos.join(',') === 'mira,yo,juntos,tu,aprendi', pasos.join(','));
-    if (PAR) {
+    if (CUE) {
+      /* el fallado vuelve al final de su cuento y lo que le costo vuelve en el cuento siguiente */
+      const n1 = L.tu[0].preguntas.length, zona = id => id.split(':')[1];
+      check(nombre + '/' + L.id + ': la pregunta fallada vuelve al final de su cuento', salieron[n1] === tu[0] && salieron.slice(0, n1).includes(tu[0]), salieron.join(',') + ' fallo ' + tu[0]);
+      if (L.tu.length > 1) {
+        const r2 = salieron.slice(n1 + 1, n1 + 1 + 6);
+        check(nombre + '/' + L.id + ': lo que le costo vuelve en el cuento siguiente', salieron.length === L.tu.reduce((t, r) => t + r.preguntas.length, 0) + 2 && r2.filter(x => zona(x) === zona(tu[0])).length === 2 && r2[5] && zona(r2[5]) === zona(tu[0]), salieron.join(','));
+      } else check(nombre + '/' + L.id + ': tu solo pregunta las cinco y la fallada una vez mas', salieron.length === n1 + 1);
+      check(nombre + '/' + L.id + ': cada pregunta se responde en el cuento a la vista', fuera === 0 && juegos.tu.size === L.tu.length, 'fuera ' + fuera);
+      check(nombre + '/' + L.id + ': con colores en juntos y sin colores en tu solo', [...colores.juntos].join() === 'true' && [...colores.tu].join() === 'false', [...colores.juntos] + ' / ' + [...colores.tu]);
+      check(nombre + '/' + L.id + ': el resumen trae las preguntas con su respuesta que suenan', d.querySelectorAll('.le-resumen .le-par--cuento').length === L.resumen.length);
+    } else if (PAR) {
       /* el fallado vuelve al final de SU ronda (la primera de tu solo), no al final de todo */
       const n1 = L.tu[0].length, total = L.tu.reduce((t, r) => t + r.length, 0);
       check(nombre + '/' + L.id + ': el fallado vuelve al final de su ronda', salieron.length === total + 1 && salieron[n1] === tu[0] && salieron.slice(0, n1).includes(tu[0]), salieron.join(',') + ' fallo ' + tu[0]);

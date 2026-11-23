@@ -1762,6 +1762,7 @@
     /* ---------- una leccion: los 5 pasos en la misma pantalla ---------- */
     function leccion(li) {
       var A = K(), L = cfg.lecciones[li], mio = token;
+      if (L.mecanica === 'cuento') { leccionCuento(li); return; }
       var p = el('section', { class: 'al-pantalla le-pantalla' });
       var bar = el('div', { class: 'al-barra' });
       bar.appendChild(el('button', { class: 'g-icono', 'aria-label': t('atras'), html: ICO.atras, onclick: function () { ir({}); } }));
@@ -2010,6 +2011,269 @@
 
       G._leccion_pantalla = { salieron: salieron, paso: function () { return paso; }, activo: function () { return activo; }, seguir: function () { bSeguir.click(); }, soltar: soltar,
         razones: function () { return Object.keys(porZona); } };   /* solo pruebas */
+      mira();
+    }
+
+    /* ---------- mecanica «cuento» (lecciones 4 y 6, aditiva) ----------
+       Una escena ilustrada y 3 o 4 frases en ingles. Cada parte del cuento
+       (persona, cosa, lugar, momento, razon) es un dibujo y un trozo de texto
+       que se tocan; los dos cuentan igual. Pip pregunta en ingles (Who,
+       What...) con la traduccion y el niño toca la respuesta. En mira, yo y
+       juntos las partes llevan el color y el icono de su pregunta; en tu solo
+       no. Si se equivoca, Pip re-explica y la pregunta vuelve al final de su
+       cuento; lo que le costo vuelve en el cuento siguiente con una pregunta
+       de repuesto (por dentro, sin mostrar nada al niño). L.tu es una lista
+       de rondas, una por cuento. */
+    function leccionCuento(li) {
+      var A = K(), L = cfg.lecciones[li], mio = token;
+      var p = el('section', { class: 'al-pantalla le-pantalla le-pantalla--cuento' });
+      var bar = el('div', { class: 'al-barra' });
+      bar.appendChild(el('button', { class: 'g-icono', 'aria-label': t('atras'), html: ICO.atras, onclick: function () { ir({}); } }));
+      var pasosBar = el('ol', { class: 'le-pasos', 'aria-label': 'Pasos' });
+      PASOS.forEach(function (k, i) { pasosBar.appendChild(el('li', { class: 'le-paso', 'data-paso': k, html: '<span>' + (i + 1) + '</span><small>' + NOMBRE_PASO[k] + '</small>' })); });
+      bar.appendChild(pasosBar);
+      var bAyuda = el('button', { class: 'g-icono al-bombilla', 'aria-label': t('ayuda'), html: ICO.bombilla });
+      bar.appendChild(bAyuda);
+      p.appendChild(bar);
+      var bPreg = el('button', { type: 'button', class: 'le-preg', hidden: 'hidden' });
+      p.appendChild(bPreg);
+      var caja = el('div', { class: 'le-cuento le-cuento--color' });
+      var ilus = el('div', { class: 'le-ilus', role: 'group' });
+      var hoja = el('div', { class: 'le-texto', lang: 'en' });
+      caja.appendChild(ilus); caja.appendChild(hoja);
+      p.appendChild(caja);
+      var dialogo = el('div', { class: 'le-dialogo le-dialogo--pip', role: 'status', 'aria-live': 'polite' });
+      var pipCaja = el('button', { type: 'button', class: 'al-pip-caja le-dialogo__pip', 'aria-label': 'Pip', html: vestir(A.pip('Pip'), null) });
+      var texto = el('p', { class: 'le-dialogo__texto' });
+      var acciones = el('div', { class: 'le-dialogo__acciones' });
+      var bOtra = el('button', { class: 'g-icono', 'aria-label': 'Otra vez', html: ICO.otra });
+      var bSeguir = el('button', { class: 'g-btn le-seguir', html: 'Seguir ▶', disabled: 'disabled' });
+      acciones.appendChild(bOtra); acciones.appendChild(bSeguir);
+      dialogo.appendChild(pipCaja); dialogo.appendChild(texto); dialogo.appendChild(acciones);
+      p.appendChild(dialogo);
+      raiz.appendChild(p);
+
+      var salieron = [];   /* solo pruebas */
+      var paso = null, activo = null, pregunta = null, cola = [], ultima = null, pendiente = null, alSeguir = null, ayudado = false;
+      var cuentoAct = null, nodos = {}, costo = {};
+      function vivo() { return mio === token && p.isConnected; }
+      function despues(f, ms) { setTimeout(function () { if (vivo()) f(); }, espera(ms)); }
+      function marcarPaso(k) {
+        paso = k;
+        Array.prototype.forEach.call(pasosBar.children, function (n) {
+          var i = PASOS.indexOf(n.getAttribute('data-paso')), j = PASOS.indexOf(k);
+          n.classList.toggle('le-paso--ahora', i === j); n.classList.toggle('le-paso--hecho', i < j);
+        });
+        p.setAttribute('data-paso', k);
+        bAyuda.hidden = !(k === 'juntos' || k === 'tu');
+      }
+      function mostrar(lineas) { texto.innerHTML = lineas.map(lineaHtml).join(' '); }
+      function marcarFrase(i) { Array.prototype.forEach.call(hoja.children, function (n, j) { n.classList.toggle('le-frase--lee', j === i); }); }
+      /* como en las otras lecciones, y ademas: «frase» resalta la frase que se
+         lee y «parte» hace brillar esa parte del cuento */
+      var cadena = 0;
+      function guion(lineas, alFin) {
+        ultima = lineas; pendiente = alFin || null;
+        var i = 0, esta = ++cadena;
+        (function uno() {
+          if (!vivo() || esta !== cadena) return;
+          if (i >= lineas.length) { pendiente = null; if (alFin) alFin(); return; }
+          var ln = lineas[i++];
+          mostrar([ln]);
+          marcarFrase(ln.frase === undefined ? -1 : ln.frase);
+          if (ln.parte) (nodos[ln.parte] || []).forEach(function (n) { A.brillar(n); });
+          decir(ln, uno);
+        })();
+      }
+      function esperarSeguir(f) { bSeguir.disabled = false; bSeguir.classList.add('le-seguir--late'); alSeguir = f; despues(function () { try { bSeguir.focus({ preventScroll: true }); } catch (e) { /* nada */ } }, 50); }
+      bSeguir.addEventListener('click', function () { if (bSeguir.disabled) return; bSeguir.disabled = true; bSeguir.classList.remove('le-seguir--late'); var f = alSeguir; alSeguir = null; if (f) f(); });
+      /* «otra vez» repite lo ultimo y luego sigue donde iba (no deja la leccion parada) */
+      bOtra.addEventListener('click', function () {
+        if (!ultima) return;
+        try { speechSynthesis.cancel(); } catch (e) { /* nada */ }
+        guion(ultima, pendiente);
+      });
+      function decirPregunta(q) { hablar(q.en, { lang: cfg.lang }); hablar(q.es, { lang: cfg.langExplica, cola: true }); }
+      pipCaja.addEventListener('click', function () { if (pregunta) decirPregunta(pregunta); A.celebrar(pipCaja.querySelector('.al-pip')); });
+      bPreg.addEventListener('click', function () { if (pregunta) decirPregunta(pregunta); });
+
+      function regla(z) { var c = C(z); return c.t + ' pregunta por ' + c.pide + '.'; }
+      function mayus(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+      function wh(q) { var c = C(q.zona); return esc(q.en).replace(new RegExp('^' + c.t + '\\b'), '<span class="le-wh" style="--c:' + c.color + '">' + c.t + '</span>'); }
+      function color(si) { caja.classList.toggle('le-cuento--color', !!si); }
+      function cada(f) { Object.keys(nodos).forEach(function (z) { nodos[z].forEach(function (n) { f(n, z); }); }); }
+      function limpiar() { cada(function (n) { n.classList.remove('le-guia', 'le-parte--bien', 'al-brilla'); var m = n.querySelector('.al-mano'); if (m) m.remove(); }); }
+      function guiar(z) { (nodos[z] || []).forEach(function (n) { n.classList.add('le-guia'); }); }
+      function tocar(z, nodo, txt) { if (activo && (paso === 'juntos' || paso === 'tu')) soltar(z, nodo); else hablar(txt, { lang: cfg.lang }); }
+
+      /* el cuento: escena con dibujos tocables y frases con trozos tocables */
+      function ponerCuento(id) {
+        var c = L.cuentos[id];
+        cuentoAct = id; nodos = {};
+        ilus.innerHTML = ''; hoja.innerHTML = '';
+        ilus.setAttribute('data-fondo', c.fondo); ilus.setAttribute('aria-label', c.titulo);
+        c.deco.forEach(function (d) {
+          ilus.appendChild(el('span', { class: 'le-deco', 'aria-hidden': 'true', style: 'left:' + d.x + '%;top:' + d.y + '%;width:' + d.s + '%', html: A.icono(IC(d.ico), 'al-ico') }));
+        });
+        c.partes.forEach(function (pt) {
+          var cc = C(pt.zona);
+          var b = el('button', { type: 'button', class: 'le-parte le-parte--dib', 'data-zona': pt.zona, 'aria-label': pt.txt, style: 'left:' + pt.x + '%;top:' + pt.y + '%;--c:' + cc.color,
+            html: A.icono(IC(pt.ico), 'al-ico le-parte__ico') + '<span class="le-parte__marca" aria-hidden="true">' + A.icono(IC(cc.ico), 'al-ico') + '</span>' });
+          b.addEventListener('click', function () { tocar(pt.zona, b, pt.txt); });
+          (nodos[pt.zona] = nodos[pt.zona] || []).push(b);
+          ilus.appendChild(b);
+        });
+        c.frases.forEach(function (f) {
+          var pf = el('p', { class: 'le-frase' }), plano = f.map(function (tr) { return tr[0]; }).join('');
+          f.forEach(function (tr) {
+            if (!tr[1]) { pf.appendChild(document.createTextNode(tr[0])); return; }
+            /* span con role=button: un <button> no se parte entre dos lineas y el trozo largo romperia la frase */
+            var b = el('span', { role: 'button', tabindex: '0', class: 'le-parte le-parte--txt', 'data-zona': tr[1], style: '--c:' + C(tr[1]).color, text: tr[0] });
+            b.addEventListener('click', function (ev) { ev.stopPropagation(); tocar(tr[1], b, tr[0]); });
+            b.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); ev.stopPropagation(); tocar(tr[1], b, tr[0]); } });
+            (nodos[tr[1]] = nodos[tr[1]] || []).push(b);
+            pf.appendChild(b);
+          });
+          /* tocar la frase (fuera de los trozos) la lee otra vez */
+          pf.addEventListener('click', function () { hablar(plano, { lang: cfg.lang }); });
+          hoja.appendChild(pf);
+        });
+      }
+      function leerCuento() { return L.cuentos[cuentoAct].frases.map(function (f, i) { return { en: f.map(function (tr) { return tr[0]; }).join(''), frase: i }; }); }
+      function ponerPregunta(q) {
+        var c = C(q.zona);
+        pregunta = q;
+        bPreg.hidden = false; bPreg.style.setProperty('--c', c.color);
+        bPreg.setAttribute('aria-label', q.en + ' ' + q.es);
+        bPreg.innerHTML = '<span class="le-preg__ico">' + A.icono(IC(c.ico), 'al-ico') + '</span><span class="le-preg__txt"><b lang="en">' + wh(q) + '</b><small lang="es">' + esc(q.es) + '</small></span>';
+      }
+      function quitarPregunta() { pregunta = null; bPreg.hidden = true; }
+      function bien(z) {
+        (nodos[z] || []).forEach(function (n) { n.classList.add('le-parte--bien'); });
+        var d = nodos[z] && nodos[z][0];
+        if (d) { var r = d.getBoundingClientRect(); A.confeti(r.left + r.width / 2, r.top + r.height / 2, 14); }
+        A.celebrar(pipCaja.querySelector('.al-pip'));
+      }
+      function copia(it, mas) { var c = {}; Object.keys(it).forEach(function (q) { c[q] = it[q]; }); Object.keys(mas).forEach(function (q) { c[q] = mas[q]; }); return c; }
+
+      /* 1 · MIRA: Pip lee el cuento resaltando cada frase y presenta las partes */
+      function mira() {
+        marcarPaso('mira'); color(true);
+        ponerCuento(L.inicio);
+        guion(L.mira, function () { marcarFrase(-1); esperarSeguir(yo); });
+      }
+      /* 2 · YO LO HAGO: Pip pregunta y toca la respuesta con la mano */
+      function yo() {
+        marcarPaso('yo'); color(true);
+        var i = 0;
+        guion([{ es: 'Mira cómo lo hago yo.' }], function uno() {
+          limpiar();
+          if (i >= L.yo.length) { quitarPregunta(); esperarSeguir(juntos); return; }
+          var q = L.yo[i++];
+          if (q.cuento !== cuentoAct) ponerCuento(q.cuento);
+          ponerPregunta(q);
+          guion([{ en: q.en }, { es: q.es }], function () {
+            var mano = A.mano(); nodos[q.zona][0].appendChild(mano);
+            guiar(q.zona);
+            guion([{ es: regla(q.zona) }, { en: mayus(q.resp) + '.' }, { en: q.dice, frase: q.frase }], function () {
+              mano.remove(); limpiar(); bien(q.zona); despues(uno, 900);
+            });
+          });
+        });
+      }
+      /* 3 · JUNTOS: las partes con su color y la correcta brillando */
+      function juntos() { color(true); ronda('juntos', L.juntos.slice(), tu, { primera: true }); }
+      /* 4 · TU SOLO: sin colores; un cuento por ronda */
+      function tu() {
+        var r = 0;
+        function una(primera) {
+          var R = L.tu[r++], mas = r < L.tu.length, items = mezclar(R.preguntas.slice());
+          /* lo que le costo vuelve mas: una pregunta de repuesto por cada zona fallada antes */
+          L.zonas.forEach(function (z) { if (costo[z] && R.extra[z]) items.push(copia(R.extra[z], { repuesto: true })); });
+          var nuevo = R.cuento !== cuentoAct;
+          if (nuevo) ponerCuento(R.cuento);
+          color(false);
+          ronda('tu', items, aprendi, { primera: primera, nuevo: nuevo, alVaciar: mas ? function () { una(false); } : null });
+        }
+        una(true);
+      }
+      function ronda(k, items, siguiente, op) {
+        marcarPaso(k);
+        cola = items; var repetidos = {};
+        var lineas = [];
+        if (k === 'juntos') lineas.push({ es: L.textos.juntos });
+        else lineas.push({ es: op.primera ? L.textos.tu : '¡Muy bien! Ahora un cuento nuevo.' });
+        if (op.nuevo) { lineas.push({ es: 'Escucha.' }); lineas = lineas.concat(leerCuento()); }
+        if (k === 'tu' && op.primera) lineas.push({ es: L.piensa });
+        guion(lineas, sacar);
+        function sacar() {
+          limpiar();
+          if (!cola.length && op.alVaciar) { activo = null; quitarPregunta(); op.alVaciar(); return; }
+          if (!cola.length) { activo = null; quitarPregunta(); esperarSeguir(siguiente); guion([{ es: '¡Muy bien! Toca Seguir.' }]); return; }
+          activo = cola.shift(); ayudado = false; salieron.push(k + ':' + activo.id);
+          ponerPregunta(activo);
+          if (k === 'juntos') guiar(activo.zona);
+          guion([{ en: activo.en }, { es: activo.es }], null);
+        }
+        ronda.soltar = function (z, nodo) {
+          if (!activo || paso !== k || !nodos[z]) return;
+          var it = activo;
+          cada(function (n) { n.classList.remove('le-guia'); });
+          if (z === it.zona) {
+            sonido('ok'); racha++;
+            activo = null;
+            bien(z);
+            guion([{ en: it.dice, frase: it.frase }, { es: (k === 'juntos' || ayudado ? '' : '¡Bien! ') + regla(z) }], function () { despues(sacar, 300); });
+          } else {
+            sonido('mal'); racha = 0; A.temblar(nodo || nodos[z][0]);
+            /* re-explicar con esta pregunta, no «try again» */
+            ayudado = true; costo[it.zona] = 1;
+            if (k === 'tu' && !repetidos[it.id]) { repetidos[it.id] = 1; cola.push(copia(it, { otra: true })); }
+            guion([{ es: 'Mira otra vez. ' + regla(it.zona) + ' ' + it.es }, { en: it.en }], function () { guiar(it.zona); });
+          }
+        };
+      }
+      function soltar(z, nodo) { if (ronda.soltar) ronda.soltar(z, nodo); }
+      bAyuda.addEventListener('click', function () {
+        if (!activo) return;
+        ayudado = true;
+        guiar(activo.zona);
+        guion([{ es: regla(activo.zona) + ' ' + activo.es }, { en: activo.en }]);
+      });
+
+      /* 5 · LO QUE APRENDI: preguntas del cuento con su respuesta, que suenan */
+      function aprendi() {
+        marcarPaso('aprendi');
+        ronda.soltar = null; activo = null; limpiar(); quitarPregunta(); color(true); marcarFrase(-1);
+        var nueva = !st.hechas[L.id];
+        st.hechas[L.id] = 1; guardar();
+        sonido('fin');
+        var capa = el('div', { class: 'g-capa le-resumen', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Lo que aprendí' });
+        var box = el('div', { class: 'g-logro' });
+        box.appendChild(el('h3', { text: 'Lo que aprendí' }));
+        var lista = el('div', { class: 'le-resumen__pares' }), zonas = [];
+        L.resumen.forEach(function (q) {
+          var c = C(q.zona);
+          if (zonas.indexOf(q.zona) < 0) zonas.push(q.zona);
+          var b = el('button', { class: 'le-par le-par--cuento', style: '--c:' + c.color, 'aria-label': q.en + ' ' + q.dice, html:
+            '<span class="le-par__ico le-par__wh">' + A.icono(IC(c.ico), 'al-ico') + '</span><span class="le-par__txt" lang="en"><b>' + wh(q) + '</b><span>' + esc(mayus(q.resp)) + '.</span></span>' +
+            '<span class="le-par__ico">' + A.icono(IC(q.ico), 'al-ico') + '</span>' });
+          b.addEventListener('click', function () { hablar(q.en, { lang: cfg.lang }); hablar(q.dice, { lang: cfg.lang, cola: true }); });
+          lista.appendChild(b);
+        });
+        box.appendChild(lista);
+        box.appendChild(el('p', { class: 'le-calco', html: A.icono(IC(L.calco), 'al-ico') + '<span>' + (nueva ? '¡Calcomanía nueva!' : '¡Lección repasada!') + '</span>' }));
+        var sigL = li + 1 < cfg.lecciones.length ? li + 1 : null;
+        if (sigL !== null) box.appendChild(el('button', { class: 'g-btn', html: 'Siguiente lección ▶', onclick: function () { capa.remove(); ir({ l: sigL }); } }));
+        box.appendChild(el('button', { class: 'g-btn g-btn--suave', html: ICO.otra + ' Repetir la lección', onclick: function () { capa.remove(); ir({ l: li }, true); } }));
+        box.appendChild(el('button', { class: 'g-btn' + (sigL === null ? '' : ' g-btn--suave'), text: 'Lecciones', onclick: function () { capa.remove(); ir({}); } }));
+        capa.appendChild(box); document.body.appendChild(capa);
+        guion([{ es: 'Esto es lo que aprendiste hoy.' }, { es: 'Para responder, busca la respuesta en el cuento.' }].concat(zonas.map(function (z) { return { es: regla(z) }; })));
+      }
+
+      G._leccion_pantalla = { salieron: salieron, paso: function () { return paso; }, activo: function () { return activo; }, seguir: function () { bSeguir.click(); },
+        soltar: function (z) { soltar(z); }, razones: function () { return Object.keys(nodos); }, cuento: function () { return cuentoAct; },
+        color: function () { return caja.classList.contains('le-cuento--color'); } };   /* solo pruebas */
       mira();
     }
     return { cargar: cargar, pintar: pintar, hash: hash, desdeHash: desdeHash, estado: function () { return st; } };
