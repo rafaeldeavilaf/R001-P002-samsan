@@ -306,6 +306,7 @@ function validarLeccion(nombre, cfg) {
     check(k + ': cada ejemplo, la calcomania y el resumen tienen dibujo', items.every(i => ICONOS[i.ico]) && ICONOS[L.calco] && L.resumen.every(r => r.ej.every(e => ICONOS[e.ico])));
     check(k + ': ningun dibujo se repite', new Set(items.map(i => i.ico)).size === items.length);
     check(k + ': cada casa tiene su por que', L.zonas.every(z => L.por[z]));
+    check(k + ': mira tiene dibujos que existen y la leccion su pregunta para pensar', L.mira.every(m => !m.ico || ICONOS[m.ico]) && !!L.piensa);
   });
 }
 async function jugarLeccion(nombre, cfg) {

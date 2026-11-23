@@ -209,6 +209,143 @@ GUIA.iniciar({
      ]
     }
    ]
+  },
+  {
+   "id": "where-when",
+   "unidad": "wh",
+   "titulo": "Where y When",
+   "en": "Where and When",
+   "calco": "cow",
+   "escena": "plaza",
+   "zonas": [
+    "where",
+    "when"
+   ],
+   "por": {
+    "where": "Es un lugar.",
+    "when": "Es un momento."
+   },
+   "piensa": "Piensa. ¿Es un lugar o un momento?",
+   "mira": [
+    {
+     "es": "Hoy vas a aprender dos palabras más para preguntar en inglés."
+    },
+    {
+     "es": "Where sirve para preguntar por un lugar.",
+     "zona": "where"
+    },
+    {
+     "en": "Where is the cow? At the farm.",
+     "ico": "cow",
+     "zona": "where"
+    },
+    {
+     "es": "When sirve para preguntar por un momento, cuándo pasa algo.",
+     "zona": "when"
+    },
+    {
+     "en": "When do you sleep? At night.",
+     "ico": "night",
+     "zona": "when"
+    },
+    {
+     "es": "Recuerda. Si es un lugar, Where. Si es un momento, When."
+    }
+   ],
+   "yo": [
+    {
+     "en": "at school",
+     "ico": "school",
+     "zona": "where"
+    },
+    {
+     "en": "in the morning",
+     "ico": "morning",
+     "zona": "when"
+    }
+   ],
+   "juntos": [
+    {
+     "en": "at the beach",
+     "ico": "beach",
+     "zona": "where"
+    },
+    {
+     "en": "on Monday",
+     "ico": "monday",
+     "zona": "when"
+    },
+    {
+     "en": "at the hospital",
+     "ico": "hospital",
+     "zona": "where"
+    },
+    {
+     "en": "at 7 o'clock",
+     "ico": "seven",
+     "zona": "when"
+    }
+   ],
+   "tu": [
+    {
+     "en": "at home",
+     "ico": "home",
+     "zona": "where"
+    },
+    {
+     "en": "in summer",
+     "ico": "summer",
+     "zona": "when"
+    },
+    {
+     "en": "in the park",
+     "ico": "park",
+     "zona": "where"
+    },
+    {
+     "en": "on my birthday",
+     "ico": "birthday",
+     "zona": "when"
+    },
+    {
+     "en": "in the castle",
+     "ico": "castle",
+     "zona": "where"
+    },
+    {
+     "en": "in winter",
+     "ico": "winter",
+     "zona": "when"
+    }
+   ],
+   "resumen": [
+    {
+     "zona": "where",
+     "ej": [
+      {
+       "ico": "cow",
+       "en": "at the farm"
+      },
+      {
+       "ico": "school",
+       "en": "at school"
+      }
+     ]
+    },
+    {
+     "zona": "when",
+     "ej": [
+      {
+       "ico": "night",
+       "en": "at night"
+      },
+      {
+       "ico": "morning",
+       "en": "in the morning"
+      }
+     ]
+    }
+   ]
   }
  ]
 });

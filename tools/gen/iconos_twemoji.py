@@ -48,6 +48,7 @@ ICONOS = {
     "ambulance": "1f691", "bandage": "1fa79", "ill": "1f912", "picnic": "1f9fa", "duck": "1f986",
     "persona": "1f464", "caja": "1f4e6", "lugar": "1f4cd", "pensar": "1f914",
     "hen": "1f414", "tractor": "1f69c", "evening": "1f306", "doughnut": "1f369", "dog": "1f415", "hatching": "1f423", "caterpillar": "1f41b", "egg": "1f95a", "chick": "1f425", "rooster": "1f413",
+    "cow": "1f404", "monday": "1f5d3", "hospital": "1f3e5", "seven": "1f556", "summer": "2600", "castle": "1f3f0", "winter": "2744",
 }
 
 # Dibujos propios por codigo (36 x 36, colores planos al estilo Twemoji) para

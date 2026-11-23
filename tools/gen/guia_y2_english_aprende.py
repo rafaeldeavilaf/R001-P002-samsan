@@ -16,7 +16,9 @@ traduccion en toda la app.
 
 Reglas (se validan con assert):
 - Cada ejemplo va a una sola casa, sin ambiguedad para un niño de 6 a 7 años:
-  en Who solo personas; en What solo cosas (sin animales, que se discuten).
+  en Who solo personas; en What solo cosas (sin animales, que se discuten);
+  en Where solo lugares claros; en When solo momentos claros (los dos con
+  at, in u on).
 - Todo ejemplo tiene dibujo y no se repite dentro de la leccion.
 - Solo objetivos de la guia total; nada copiado del material del colegio.
 
@@ -55,11 +57,35 @@ LECCIONES = [
         "juntos": [("a grandma", "grandma", "who"), ("an apple", "apple", "what"), ("a doctor", "doctor", "who"), ("a book", "book", "what")],
         "tu": [("a baby", "baby", "who"), ("a kite", "kite", "what"), ("a firefighter", "firefighter", "who"),
                ("a bike", "bike", "what"), ("a cook", "baker", "who"), ("a sandwich", "sandwich", "what")],
-        "resumen": {"who": ["farmer", "teacher"], "what": ["tractor", "ball"]},
+        "resumen": {"who": [("a farmer", "farmer"), ("a teacher", "teacher")], "what": [("a tractor", "tractor"), ("a ball", "ball")]},
+    },
+    {
+        # Leccion 2: Where (lugares) y When (momentos). Solo lugares que un niño
+        # de 6 a 7 años reconoce como sitio, y solo momentos claros del dia, la
+        # semana o el año. Nada que pueda ser las dos cosas (p. ej. «at lunch»,
+        # «in bed»), ni dibujos de personas, que en la leccion 1 fueron Who.
+        "id": "where-when", "unidad": "wh", "titulo": "Where y When", "en": "Where and When", "calco": "cow",
+        "escena": "plaza", "zonas": ["where", "when"],
+        "por": {"where": "Es un lugar.", "when": "Es un momento."},
+        "piensa": "Piensa. ¿Es un lugar o un momento?",
+        "mira": [
+            {"es": "Hoy vas a aprender dos palabras más para preguntar en inglés."},
+            {"es": "Where sirve para preguntar por un lugar.", "zona": "where"},
+            {"en": "Where is the cow? At the farm.", "ico": "cow", "zona": "where"},
+            {"es": "When sirve para preguntar por un momento, cuándo pasa algo.", "zona": "when"},
+            {"en": "When do you sleep? At night.", "ico": "night", "zona": "when"},
+            {"es": "Recuerda. Si es un lugar, Where. Si es un momento, When."},
+        ],
+        "yo": [("at school", "school", "where"), ("in the morning", "morning", "when")],
+        "juntos": [("at the beach", "beach", "where"), ("on Monday", "monday", "when"), ("at the hospital", "hospital", "where"), ("at 7 o'clock", "seven", "when")],
+        "tu": [("at home", "home", "where"), ("in summer", "summer", "when"), ("in the park", "park", "where"),
+               ("on my birthday", "birthday", "when"), ("in the castle", "castle", "where"), ("in winter", "winter", "when")],
+        "resumen": {"where": [("at the farm", "cow"), ("at school", "school")], "when": [("at night", "night"), ("in the morning", "morning")]},
     },
 ]
 
-NOMBRE = {"farmer": "a farmer", "teacher": "a teacher", "tractor": "a tractor", "ball": "a ball"}
+# En Where y When la respuesta es una frase con preposicion (at school, on Monday)
+PREPOSICION = ("at ", "in ", "on ")
 
 
 def item(t):
@@ -80,11 +106,21 @@ def construir():
         assert len(L["yo"]) == 2 and len(L["juntos"]) >= 4 and len(L["tu"]) >= 6, L["id"]
         for z in L["zonas"]:
             assert sum(1 for x in L["tu"] if x[2] == z) >= 2, "%s: en tu solo faltan ejemplos de %s" % (L["id"], z)
+            assert z in L["por"] and z in L["resumen"] and L["resumen"][z], (L["id"], z)
+        assert L.get("piensa"), "%s: falta la pregunta para pensar" % L["id"]
+        # los dibujos de mira son solo de mira: no vuelven como ejemplo a resolver
+        for m in L["mira"]:
+            assert m.get("ico") not in vistos, "%s: el dibujo %s de mira se repite en un ejemplo" % (L["id"], m.get("ico"))
+            assert "zona" not in m or m["zona"] in L["zonas"], (L["id"], m)
+        for paso in ("yo", "juntos", "tu"):
+            for texto, ico, zona in L[paso]:
+                if zona in ("where", "when"):
+                    assert texto.startswith(PREPOSICION), "%s: «%s» debe empezar con at, in u on" % (L["id"], texto)
         lecciones.append({
             "id": L["id"], "unidad": L["unidad"], "titulo": L["titulo"], "en": L["en"], "calco": L["calco"], "escena": L["escena"],
             "zonas": L["zonas"], "por": L["por"], "piensa": L["piensa"], "mira": L["mira"],
             "yo": [item(x) for x in L["yo"]], "juntos": [item(x) for x in L["juntos"]], "tu": [item(x) for x in L["tu"]],
-            "resumen": [{"zona": z, "ej": [{"ico": i, "en": NOMBRE.get(i, i)} for i in L["resumen"][z]]} for z in L["zonas"]],
+            "resumen": [{"zona": z, "ej": [{"ico": i, "en": texto} for texto, i in L["resumen"][z]]} for z in L["zonas"]],
         })
     return lecciones
 
@@ -97,7 +133,7 @@ def iconos_usados():
             usados |= {x[1] for x in L[paso]}
         usados |= {m["ico"] for m in L["mira"] if "ico" in m}
         for z in L["resumen"].values():
-            usados |= set(z)
+            usados |= {i for _, i in z}
     return usados
 
 
