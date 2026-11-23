@@ -2851,7 +2851,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
             /* completa y en orden: Pip la lee en ingles y dice la respuesta */
             activo = null; sonido('ok'); racha++;
             completa(q);
-            guion([{ en: q.en }, { en: q.resp }, { es: (paso === 'juntos' || ayudado ? '' : '¡Bien! ') + regla(q.zona) }], function () { despues(sacar, 400); });
+            guion([{ en: q.en }, { en: q.resp }, { es: (paso === 'juntos' || ayudado ? '' : '¡Bien! ') + (q.nota ? q.nota + ' ' : '') + regla(q.zona) }], function () { despues(sacar, 400); });
           }, !!arrastrada);
           if (arrastrada) b.style.transform = '';
         } else {
@@ -2896,7 +2896,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
         box.appendChild(el('button', { class: 'g-btn g-btn--suave', html: ICO.otra + ' Repetir la lección', onclick: function () { capa.remove(); ir({ l: li }, true); } }));
         box.appendChild(el('button', { class: 'g-btn' + (sigL === null ? '' : ' g-btn--suave'), text: 'Lecciones', onclick: function () { capa.remove(); ir({}); } }));
         capa.appendChild(box); document.body.appendChild(capa);
-        guion([{ es: 'Esto es lo que aprendiste hoy.' }, { es: 'Para preguntar, primero la palabra que pregunta, después «is», y al final el signo de pregunta.' }]);
+        guion([{ es: 'Esto es lo que aprendiste hoy.' }, { es: 'En estas preguntas va primero la palabra que pregunta, después «is», y al final el signo de pregunta.' }]);
       }
 
       G._leccion_pantalla = { salieron: salieron, paso: function () { return paso; }, activo: function () { return activo; }, seguir: function () { bSeguir.click(); },

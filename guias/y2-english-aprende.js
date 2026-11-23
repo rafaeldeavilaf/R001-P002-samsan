@@ -990,7 +990,7 @@ GUIA.iniciar({
     "when",
     "why"
    ],
-   "piensa": "Piensa. Primero la palabra que pregunta, después «is».",
+   "piensa": "Piensa. En estas preguntas va primero la palabra que pregunta y después «is».",
    "textos": {
     "juntos": "Ahora lo hacemos juntos. La ficha que brilla es la siguiente. Arrástrala al hueco o tócala.",
     "tu": "Ahora tú solo. Mira la respuesta y arma la pregunta."
@@ -1000,7 +1000,7 @@ GUIA.iniciar({
      "es": "Hoy vas a armar preguntas en inglés."
     },
     {
-     "es": "Las preguntas en inglés empiezan con la palabra que pregunta: Who, What, Where, When o Why."
+     "es": "Estas preguntas en inglés empiezan con la palabra que pregunta: Who, What, Where, When o Why."
     },
     {
      "es": "Mira. Esta es la respuesta. Las fichas se ponen solas."
@@ -1008,7 +1008,7 @@ GUIA.iniciar({
    ],
    "cierre": [
     {
-     "es": "Recuerda. Primero la palabra que pregunta, después «is», y al final la ficha con el signo de pregunta."
+     "es": "Recuerda. En estas preguntas va primero la palabra que pregunta, después «is», y al final la ficha con el signo de pregunta. En inglés el signo solo va al final."
     }
    ],
    "modelos": [
@@ -1176,7 +1176,8 @@ GUIA.iniciar({
      "resp": "In the morning.",
      "ico": "morning",
      "es": "¿Cuándo es el desayuno?",
-     "esResp": "Por la mañana."
+     "esResp": "Por la mañana.",
+     "nota": "El sol sale. Es la mañana."
     },
     {
      "id": "frio",
@@ -1191,7 +1192,8 @@ GUIA.iniciar({
      "resp": "Because it is snowing.",
      "ico": "snowing",
      "es": "¿Por qué tiene frío la niña?",
-     "esResp": "Porque está nevando."
+     "esResp": "Porque está nevando.",
+     "nota": "La nieve es hielo blandito que cae del cielo cuando hace mucho frío."
     }
    ],
    "resumen": [

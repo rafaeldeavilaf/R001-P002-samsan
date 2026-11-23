@@ -135,7 +135,7 @@ PROPIOS["seven"] = reloj(7)
 # clave -> (codigo, {color de Twemoji: color nuevo}). Cada color debe existir en el SVG.
 # juice: el liquido azul del vaso 1f964 pasa a naranja (jugo de mango, leccion 6).
 RECOLOR = {
-    "juice": ("1f964", {"#55ACEE": "#FFAC33", "#3B88C3": "#F4900C"}),
+    "juice": ("1f964", {"#55ACEE": "#FFAC33", "#3B88C3": "#F4900C", "#88C9F9": "#FFD983"}),
 }
 
 SVG_RE = re.compile(r"^\s*<svg[^>]*viewBox=\"0 0 36 36\"[^>]*>(.*)</svg>\s*$", re.S)
@@ -163,7 +163,7 @@ def _cresta():
     r = ""
     for (x0, y0), (x1, y1) in zip(P, P[1:]):
         mx, my = (x0 + x1) / 2, (y0 + y1) / 2; dx, dy = x1 - x0, y1 - y0; L = math.hypot(dx, dy); nx, ny = dy / L, -dx / L
-        r += '<path d="M%.2f %.2fL%.2f %.2fL%.2f %.2fz" fill="#A6D388"/>' % (x0, y0, mx + nx * 3.6, my + ny * 3.6, x1, y1)
+        r += '<path d="M%.2f %.2fL%.2f %.2fL%.2f %.2fz" fill="#A6D388"/>' % (x0, y0, mx + nx * 5, my + ny * 5, x1, y1)
     return r
 
 

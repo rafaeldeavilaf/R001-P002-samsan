@@ -290,26 +290,26 @@ PREGUNTAS = {
     "bici":     ("who", ["Who", "is", "on", "the bike?"], "Sam.", "biker", "¿Quién va en la bicicleta?", "Sam."),
     "comiendo": ("what", ["What", "is", "Mia", "eating?"], "An apple.", "apple", "¿Qué está comiendo Mia?", "Una manzana."),
     "abuelo":   ("where", ["Where", "is", "Grandpa?"], "At the beach.", "beach", "¿Dónde está el abuelo?", "En la playa."),
-    "desayuno": ("when", ["When", "is", "breakfast?"], "In the morning.", "morning", "¿Cuándo es el desayuno?", "Por la mañana."),
-    "frio":     ("why", ["Why", "is", "the girl", "cold?"], "Because it is snowing.", "snowing", "¿Por qué tiene frío la niña?", "Porque está nevando."),
+    "desayuno": ("when", ["When", "is", "breakfast?"], "In the morning.", "morning", "¿Cuándo es el desayuno?", "Por la mañana.", "El sol sale. Es la mañana."),
+    "frio":     ("why", ["Why", "is", "the girl", "cold?"], "Because it is snowing.", "snowing", "¿Por qué tiene frío la niña?", "Porque está nevando.", "La nieve es hielo blandito que cae del cielo cuando hace mucho frío."),
 }
 WH_PREGUNTA_ES = {"who": "¿Quién ", "what": "¿Qué ", "where": "¿Dónde ", "when": "¿Cuándo ", "why": "¿Por qué "}
 
 LECCION_FICHAS = {
     "id": "pregunta", "unidad": "wh", "titulo": "Arma la pregunta", "en": "Make the question", "calco": "parrot",
     "mecanica": "fichas", "zonas": ["who", "what", "where", "when", "why"],
-    "piensa": "Piensa. Primero la palabra que pregunta, después «is».",
+    "piensa": "Piensa. En estas preguntas va primero la palabra que pregunta y después «is».",
     "textos": {
         "juntos": "Ahora lo hacemos juntos. La ficha que brilla es la siguiente. Arrástrala al hueco o tócala.",
         "tu": "Ahora tú solo. Mira la respuesta y arma la pregunta.",
     },
     "mira": [
         {"es": "Hoy vas a armar preguntas en inglés."},
-        {"es": "Las preguntas en inglés empiezan con la palabra que pregunta: Who, What, Where, When o Why."},
+        {"es": "Estas preguntas en inglés empiezan con la palabra que pregunta: Who, What, Where, When o Why."},
         {"es": "Mira. Esta es la respuesta. Las fichas se ponen solas."},
     ],
     "modelos": ["perro", "puerta"],
-    "cierre": [{"es": "Recuerda. Primero la palabra que pregunta, después «is», y al final la ficha con el signo de pregunta."}],
+    "cierre": [{"es": "Recuerda. En estas preguntas va primero la palabra que pregunta, después «is», y al final la ficha con el signo de pregunta. En inglés el signo solo va al final."}],
     "yo": ["caja", "fiesta"],
     "juntos": ["mojado", "gato", "cocina"],
     "tu": ["bici", "comiendo", "abuelo", "desayuno", "frio"],
@@ -533,8 +533,13 @@ def construir_cuento(L):
 
 
 def ficha(pid):
-    zona, fichas, resp, ico, es, es_resp = PREGUNTAS[pid]
-    return {"id": pid, "zona": zona, "fichas": fichas, "en": " ".join(fichas), "resp": resp, "ico": ico, "es": es, "esResp": es_resp}
+    # (zona, fichas, respuesta, dibujo, pregunta es, respuesta es[, nota]): la nota
+    # es lo que Pip aclara del dibujo (p. ej. que el sol sobre el mar es la mañana)
+    zona, fichas, resp, ico, es, es_resp = PREGUNTAS[pid][:6]
+    d = {"id": pid, "zona": zona, "fichas": fichas, "en": " ".join(fichas), "resp": resp, "ico": ico, "es": es, "esResp": es_resp}
+    if len(PREGUNTAS[pid]) > 6:
+        d["nota"] = PREGUNTAS[pid][6]
+    return d
 
 
 def construir_fichas(L):
@@ -542,7 +547,7 @@ def construir_fichas(L):
     import iconos_twemoji as IT, re
     k = L["id"]
     whs = {c["t"] for c in CODIGO.values()}
-    for pid, (zona, fichas, resp, ico, es, es_resp) in PREGUNTAS.items():
+    for pid, (zona, fichas, resp, ico, es, es_resp, *_) in PREGUNTAS.items():
         q = " ".join(fichas)
         assert zona in CODIGO, (k, pid)
         assert 3 <= len(fichas) <= 4, "%s: %s debe tener 3 o 4 fichas" % (k, pid)
