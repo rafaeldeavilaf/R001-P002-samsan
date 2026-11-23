@@ -293,12 +293,64 @@ async function jugarAldea(nombre, cfg) {
   s.w.close();
 }
 
+/* ---------- modo leccion («Learn with Pip», Y2 English para aprender) ---------- */
+function validarLeccion(nombre, cfg) {
+  const iconos = fs.readFileSync(path.join(DIR, 'comun', 'iconos.js'), 'utf8');
+  const ICONOS = JSON.parse(iconos.slice(iconos.indexOf('window.ICONOS = ') + 16, iconos.lastIndexOf(';')));
+  check(nombre + ': id, idioma y idioma de explicacion', cfg.id === nombre && /^en-/.test(cfg.lang) && /^es-/.test(cfg.langExplica));
+  check(nombre + ': codigo fijo con color, icono y traduccion', Object.values(cfg.codigo).every(c => /^#[0-9A-F]{6}$/i.test(c.color) && ICONOS[c.ico] && /^¿.+\?$/.test(c.es)));
+  cfg.lecciones.forEach(L => {
+    const k = nombre + '/' + L.id, items = [].concat(L.yo, L.juntos, L.tu);
+    check(k + ': 2 en yo, 4+ en juntos, 6+ en tu', L.yo.length === 2 && L.juntos.length >= 4 && L.tu.length >= 6);
+    check(k + ': cada ejemplo va a una casa de la leccion', items.every(i => L.zonas.includes(i.zona)));
+    check(k + ': cada ejemplo, la calcomania y el resumen tienen dibujo', items.every(i => ICONOS[i.ico]) && ICONOS[L.calco] && L.resumen.every(r => r.ej.every(e => ICONOS[e.ico])));
+    check(k + ': ningun dibujo se repite', new Set(items.map(i => i.ico)).size === items.length);
+    check(k + ': cada casa tiene su por que', L.zonas.every(z => L.por[z]));
+  });
+}
+async function jugarLeccion(nombre, cfg) {
+  const file = path.join(ROOT, 'guia-' + nombre + '.html');
+  for (const L of cfg.lecciones) {
+    const errores = [];
+    const vc = new VirtualConsole();
+    vc.on('jsdomError', e => { const m = String(e && e.message); if (!/Not implemented/i.test(m)) errores.push(m); });
+    const dom = new JSDOM(fs.readFileSync(file, 'utf8'), {
+      url: 'https://example.test/' + path.basename(file) + '#' + L.id,
+      runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: vc,
+      beforeParse(w) { w.__SAMSAN_RAPIDO = true; }
+    });
+    await espera(60);
+    const w = dom.window, d = w.document, P = () => w.GUIA._leccion_pantalla;
+    const pasos = [], tu = []; let fallo = false;
+    for (let k = 0; k < 600 && P() && P().paso() !== 'aprendi'; k++) {
+      await espera(40);
+      const paso = P().paso(); if (pasos[pasos.length - 1] !== paso) pasos.push(paso);
+      const seg = !d.querySelector('.le-seguir').disabled, a = P().activo();
+      if (seg) { P().seguir(); continue; }
+      if (!a || d.querySelector('.al-volando')) continue;
+      if (paso === 'tu' && !fallo) { fallo = true; tu.push(a.ico); P().soltar(L.zonas.find(z => z !== a.zona)); continue; }
+      P().soltar(a.zona);
+    }
+    if (P()) pasos.push(P().paso());
+    const salieron = P().salieron.filter(x => /^tu:/.test(x)).map(x => x.slice(3));
+    check(nombre + '/' + L.id + ': recorre los 5 pasos en orden', pasos.join(',') === 'mira,yo,juntos,tu,aprendi', pasos.join(','));
+    check(nombre + '/' + L.id + ': el ejemplo fallado vuelve al final', salieron.length === L.tu.length + 1 && salieron[salieron.length - 1] === tu[0], salieron.join(',') + ' fallo ' + tu[0]);
+    check(nombre + '/' + L.id + ': termina con resumen y calcomania', !!d.querySelector('.le-resumen .le-calco'));
+    const visible = d.body.cloneNode(true); visible.querySelectorAll('script, style').forEach(n => n.remove());
+    check(nombre + '/' + L.id + ': no muestra puntajes ni porcentajes', !/\d+\s*%|score|puntos|aciertos/i.test(visible.textContent), (visible.textContent.match(/\d+\s*%|score|puntos|aciertos/i) || [''])[0]);
+    check(nombre + '/' + L.id + ': queda guardada', !!(JSON.parse(w.localStorage.getItem('samsan:leccion-' + cfg.id) || '{}').hechas || {})[L.id]);
+    check(nombre + '/' + L.id + ': sin errores de JavaScript', errores.length === 0, errores.join(' | '));
+    w.close();
+  }
+}
+
 (async () => {
   if (!fs.existsSync(DIR)) { console.log('OMITIDO: no hay guias/'); return; }
-  const nombres = fs.readdirSync(DIR).filter(f => f.endsWith('.js')).map(f => f.slice(0, -3));
+  const nombres = fs.readdirSync(DIR).filter(f => f.endsWith('.js')).map(f => f.slice(0, -3)).filter(n => !process.env.SOLO || n === process.env.SOLO);   /* SOLO=<guia> para probar una */
   for (const n of nombres) {
     console.log('\n== guia ' + n);
     const cfg = leerConfig(n);
+    if (cfg.modo === 'leccion') { validarLeccion(n, cfg); await jugarLeccion(n, cfg); continue; }
     if (cfg.modo === 'aldea') { validarAldea(n, cfg); await jugarAldea(n, cfg); continue; }
     if (cfg.modo === 'juego') { validarJuego(n, cfg); await errorJuego(n, cfg); await jugarJuego(n, cfg); continue; }
     validarDatos(n, cfg);

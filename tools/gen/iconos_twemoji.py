@@ -46,6 +46,7 @@ ICONOS = {
     "squirrel": "1f43f", "dolphin": "1f42c", "octopus": "1f419", "whale": "1f40b", "shark": "1f988", "ladybird": "1f41e",
     "baker": "1f9d1-200d-1f373", "croissant": "1f950", "cookie": "1f36a", "backpack": "1f392", "pencil": "270f", "books": "1f4da",
     "ambulance": "1f691", "bandage": "1fa79", "ill": "1f912", "picnic": "1f9fa", "duck": "1f986",
+    "persona": "1f464", "caja": "1f4e6", "lugar": "1f4cd", "pensar": "1f914",
     "hen": "1f414", "tractor": "1f69c", "evening": "1f306", "doughnut": "1f369", "dog": "1f415", "hatching": "1f423", "caterpillar": "1f41b", "egg": "1f95a", "chick": "1f425", "rooster": "1f413",
 }
 
@@ -105,7 +106,8 @@ def main():
     a = ap.parse_args()
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from guia_y2_english_v3 import iconos_usados
-    usados = iconos_usados()
+    from guia_y2_english_aprende import iconos_usados as usados_aprende
+    usados = iconos_usados() | usados_aprende()
     if not a.fuente:
         # Actions corre cada generador sin argumentos: ahi se comprueba que el
         # archivo versionado tenga justo los dibujos que usa el banco.

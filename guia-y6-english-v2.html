@@ -631,8 +631,8 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
 
   /* ---------- voz del telefono (sin enviar nada fuera) ---------- */
   function cargarVoces() { try { voces = window.speechSynthesis ? speechSynthesis.getVoices() : []; } catch (e) { voces = []; } }
-  function mejorVoz() {
-    var lang = cfg.lang.toLowerCase(), base = lang.slice(0, 2), mejor = null, top = -1;
+  function mejorVoz(idioma) {
+    var lang = (idioma || cfg.lang).toLowerCase(), base = lang.slice(0, 2), mejor = null, top = -1;
     voces.forEach(function (v) {
       var l = (v.lang || '').replace('_', '-').toLowerCase();
       /* Regla 2 del repo: solo voces del propio telefono (localService), nada por red. */
@@ -651,13 +651,13 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
       var limpio = plano(texto).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '').replace(/_+/g, ' ').trim();
       if (!limpio) return;
       if (!voces.length) cargarVoces();
-      var v = mejorVoz();
-      if (!v) return;   /* sin voz local no habla: queda el texto (regla 2) */
+      var v = mejorVoz(op.lang);
+      if (!v) { if (op.alTerminar) op.alTerminar(); return; }   /* sin voz local no habla: queda el texto (regla 2) */
       var u = new SpeechSynthesisUtterance(limpio);
       u.voice = v; u.lang = v.lang;
-      u.rate = op.lento ? 0.55 : (cfg.velocidad || 0.9);
+      u.rate = op.lento ? 0.55 : (op.lang && op.lang !== cfg.lang ? 0.95 : (cfg.velocidad || 0.9));
       u.onstart = function () { Musica.bajar(true); };
-      u.onend = u.onerror = function () { Musica.bajar(false); };
+      u.onend = u.onerror = function () { Musica.bajar(false); if (op.alTerminar) op.alTerminar(); };
       speechSynthesis.speak(u);
     } catch (e) { /* sin voz */ }
   }
@@ -722,11 +722,11 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
 
   /* ---------- navegacion con el boton Atras del telefono ---------- */
   function ir(estado, reemplazar) {
-    var h = cfg.modo === 'aldea' ? AL.hash(estado) : cfg.modo === 'juego' ? J.hash(estado) : (estado.m === undefined ? '' : (cfg.misiones[estado.m].id + (estado.p ? '-' + estado.p : '')));
+    var h = cfg.modo === 'leccion' ? LE.hash(estado) : cfg.modo === 'aldea' ? AL.hash(estado) : cfg.modo === 'juego' ? J.hash(estado) : (estado.m === undefined ? '' : (cfg.misiones[estado.m].id + (estado.p ? '-' + estado.p : '')));
     try { history[reemplazar ? 'replaceState' : 'pushState'](estado, '', '#' + h); } catch (e) { /* file:// sin historial */ }
     pintar(estado);
   }
-  window.addEventListener('popstate', function (ev) { if (cfg) pintar(ev.state || (cfg.modo === 'aldea' ? AL.desdeHash(location.hash.slice(1)) : {})); });
+  window.addEventListener('popstate', function (ev) { if (cfg) pintar(ev.state || (cfg.modo === 'aldea' ? AL.desdeHash(location.hash.slice(1)) : cfg.modo === 'leccion' ? LE.desdeHash(location.hash.slice(1)) : {})); });
 
   function barra(titulo, sub, alVolver) {
     var b = el('header', { class: 'g-barra' });
@@ -767,7 +767,8 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { /* nada */ }
     raiz.innerHTML = '';
     var cap = document.querySelector('.g-capa'); if (cap) cap.remove();
-    if (cfg.modo === 'aldea') AL.pintar(estado);
+    if (cfg.modo === 'leccion') LE.pintar(estado);
+    else if (cfg.modo === 'aldea') AL.pintar(estado);
     else if (cfg.modo === 'juego') J.pintar(estado);
     else if (estado.m === undefined) portada();
     else mision(estado.m, estado.p || 0);
@@ -1958,6 +1959,322 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
   TEXTOS.es.etapa_ok = '¡Etapa superada!'; TEXTOS.es.jefe_ok = '¡Jefe vencido!'; TEXTOS.es.trajes = 'Trajes'; TEXTOS.es.nuevo_traje = 'Traje nuevo';
   TEXTOS.es.oleada = 'Oleada'; TEXTOS.es.consejo = 'Consejo'; TEXTOS.es.listo = '¡Listo!'; TEXTOS.es.siguiente_etapa = 'Siguiente etapa'; TEXTOS.es.vencido = 'HECHO';
 
+
+  /* ============================================================
+     MODO LECCION («Learn with Pip», Y2 English para APRENDER, 23 nov 2026)
+     Plan aprobado por Rafael: enseñar antes de evaluar. Pip explica en
+     español (cfg.langExplica) y lo que se aprende va en ingles (cfg.lang).
+     Cada leccion tiene 5 pasos:
+       mira    Pip explica con dibujos; el niño avanza con «Seguir».
+       yo      Pip resuelve 2 ejemplos y dice por que.
+       juntos  el niño resuelve con la casa correcta brillando desde el inicio.
+       tu      sin ayuda a la vista; si se equivoca, Pip vuelve a explicar
+               la regla con ese ejemplo y el ejemplo regresa al final (por
+               dentro: nada mide aciertos frente al niño, regla 4).
+       aprendi resumen con ejemplos que se oyen y una calcomania.
+     Codigo fijo (cfg.codigo): cada pregunta con su color, icono y traduccion.
+     Usa el kit de la aldea (window.ALDEA) y sus dibujos (window.ICONOS).
+     ============================================================ */
+  var LE = (function () {
+    var st = { hechas: {}, vistas: {} }, token = 0;
+    var PASOS = ['mira', 'yo', 'juntos', 'tu', 'aprendi'];
+    var NOMBRE_PASO = { mira: 'Mira', yo: 'Yo lo hago', juntos: 'Juntos', tu: 'Tú solo', aprendi: 'Lo que aprendí' };
+    function K() { return window.ALDEA; }
+    function IC(k) { return (window.ICONOS || {})[k] || ''; }
+    function clave() { return 'samsan:leccion-' + cfg.id; }
+    function cargar() { try { var x = JSON.parse(localStorage.getItem(clave()) || '{}'); st.hechas = x.hechas || {}; st.vistas = x.vistas || {}; } catch (e) { /* nada */ } }
+    function guardar() { try { localStorage.setItem(clave(), JSON.stringify(st)); } catch (e) { /* nada */ } }
+    function hash(x) { return x.l === undefined ? '' : cfg.lecciones[x.l].id; }
+    function desdeHash(h) { var r = {}; cfg.lecciones.forEach(function (L, i) { if (L.id === h) r = { l: i }; }); return r; }
+    function rapido() { return !!window.__SAMSAN_RAPIDO; }   /* solo pruebas: acorta las esperas */
+    function espera(ms) { return rapido() ? Math.min(ms, 30) : ms; }
+    function C(z) { return cfg.codigo[z]; }
+
+    /* Pip dice una linea (es o en) y la muestra; alFin cuando termina de hablar
+       (o despues de un tiempo de lectura si el telefono no tiene esa voz). */
+    function decir(linea, alFin, cola) {
+      var mio = token, listo = false;
+      function fin() { if (listo || mio !== token) return; listo = true; if (alFin) alFin(); }
+      var txt = linea.es || linea.en;
+      /* en las lineas en español, las palabras en ingles (Who, What...) las dice
+         la voz inglesa: la voz española las pronunciaria mal */
+      var trozos = linea.es ? partir(linea.es) : [{ t: linea.en, lang: cfg.lang }];
+      trozos.forEach(function (tr, i) {
+        hablar(tr.t, { lang: tr.lang, cola: i > 0 || !!cola, alTerminar: i === trozos.length - 1 ? function () { setTimeout(fin, espera(250)); } : null });
+      });
+      /* respaldo: sin voz o si el navegador no avisa el final */
+      setTimeout(fin, espera(900 + txt.length * 75));
+    }
+    var INGLES = /\b(Who|What|Where|When|Why|because)\b/;
+    function partir(es) {
+      var r = [];
+      es.split(/\b(Who|What|Where|When|Why|because)\b/).forEach(function (x) {
+        if (!x || !/[A-Za-zÁÉÍÓÚáéíóúñ]/.test(x)) return;
+        r.push({ t: x.trim(), lang: INGLES.test(x) && x.length < 9 ? cfg.lang : (cfg.langExplica || 'es-ES') });
+      });
+      return r;
+    }
+    function lineaHtml(linea) {
+      if (linea.es) return '<span class="le-es" lang="es">' + marcas(linea.es).replace(/\b(Who|What|Where|When|Why|because)\b/g, function (w) {
+        var z = { Who: 'who', What: 'what', Where: 'where', When: 'when', Why: 'why', because: 'why' }[w];
+        return '<b class="le-palabra" style="--c:' + C(z).color + '" lang="en">' + w + '</b>';
+      }) + '</span>';
+      return '<span class="le-en" lang="en">' + esc(linea.en) + '</span>';
+    }
+
+    function pintar(x) {
+      token++;
+      raiz.classList.toggle('g-raiz--aldea', x.l !== undefined);
+      document.body.classList.toggle('al-jugando', x.l !== undefined);
+      if (x.l !== undefined) leccion(x.l); else portada();
+    }
+
+    /* ---------- portada: Pip, codigo de las preguntas, lecciones y calcomanias ---------- */
+    function portada() {
+      var A = K();
+      var s = el('section', { class: 'g-portada al-portada le-portada' });
+      s.appendChild(barra(cfg.titulo, cfg.subtitulo));
+      var hola = el('div', { class: 'al-hola' });
+      var pc = el('button', { class: 'al-pip-caja al-hola__pip', 'aria-label': 'Pip', html: vestir(A.pip('Pip'), null) });
+      var saludo = '¡Hola! Soy Pip. Te voy a enseñar inglés paso a paso. Primero miras, luego lo hacemos juntos y después tú solo.';
+      pc.addEventListener('click', function () { hablar(saludo, { lang: cfg.langExplica }); A.celebrar(pc.querySelector('.al-pip')); });
+      hola.appendChild(pc);
+      hola.appendChild(el('p', { class: 'al-globo-texto g-globo', text: saludo }));
+      s.appendChild(hola);
+      var sig = 0; while (sig < cfg.lecciones.length - 1 && st.hechas[cfg.lecciones[sig].id]) sig++;
+      var play = el('button', { id: 'play', class: 'g-btn g-btn--grande', html: '▶ ' + esc(Object.keys(st.hechas).length ? 'Seguir' : 'Empezar') + ' · ' + esc(cfg.lecciones[sig].titulo) });
+      play.addEventListener('click', function () { ir({ l: sig }); });
+      s.appendChild(play);
+      cfg.unidades.forEach(function (u) {
+        s.appendChild(el('h2', { class: 'g-seccion', html: esc(u.titulo) + ' <small>' + esc(u.es) + '</small>' }));
+        /* el codigo fijo, siempre a la vista */
+        var cod = el('div', { class: 'le-codigo' });
+        Object.keys(cfg.codigo).forEach(function (z) { cod.appendChild(tarjetaCodigo(z, true)); });
+        s.appendChild(cod);
+        var ol = el('ol', { class: 'le-lecciones' });
+        cfg.lecciones.forEach(function (L, li) {
+          if (L.unidad !== u.id) return;
+          var hecha = !!st.hechas[L.id];
+          var b = el('button', { class: 'le-leccion' + (hecha ? ' le-leccion--hecha' : '') + (li === sig && !hecha ? ' le-leccion--aqui' : ''),
+            html: '<span class="le-leccion__n">' + (li + 1) + '</span><span class="le-leccion__t">' + esc(L.titulo) + '<small lang="en">' + esc(L.en) + '</small></span>' +
+              '<span class="le-leccion__calco">' + (hecha ? A.icono(IC(L.calco), 'al-ico') : '▶') + '</span>' });
+          b.addEventListener('click', function () { ir({ l: li }); });
+          ol.appendChild(el('li', null, [b]));
+        });
+        s.appendChild(ol);
+      });
+      raiz.appendChild(s);
+    }
+    function tarjetaCodigo(z, chica) {
+      var c = C(z), A = K();
+      var b = el('button', { class: 'le-cod' + (chica ? ' le-cod--chica' : ''), 'aria-label': c.t + ', ' + c.es, html:
+        '<span class="le-cod__ico">' + A.icono(IC(c.ico), 'al-ico') + '</span><b lang="en">' + esc(c.t) + '?</b><span lang="es">' + esc(c.es) + '</span>' + (chica ? '' : '<small>' + esc(c.pide) + '</small>') });
+      b.style.setProperty('--c', c.color);
+      b.addEventListener('click', function () { hablar(c.t, { lang: cfg.lang }); hablar(c.es, { lang: cfg.langExplica, cola: true }); partir(c.regla).forEach(function (tr) { hablar(tr.t, { lang: tr.lang, cola: true }); }); });
+      return b;
+    }
+
+    /* ---------- una leccion: los 5 pasos en la misma pantalla ---------- */
+    function leccion(li) {
+      var A = K(), L = cfg.lecciones[li], mio = token;
+      var p = el('section', { class: 'al-pantalla le-pantalla' });
+      var bar = el('div', { class: 'al-barra' });
+      bar.appendChild(el('button', { class: 'g-icono', 'aria-label': t('atras'), html: ICO.atras, onclick: function () { ir({}); } }));
+      var pasosBar = el('ol', { class: 'le-pasos', 'aria-label': 'Pasos' });
+      PASOS.forEach(function (k, i) { pasosBar.appendChild(el('li', { class: 'le-paso', 'data-paso': k, html: '<span>' + (i + 1) + '</span><small>' + NOMBRE_PASO[k] + '</small>' })); });
+      bar.appendChild(pasosBar);
+      var bAyuda = el('button', { class: 'g-icono al-bombilla', 'aria-label': t('ayuda'), html: ICO.bombilla });
+      bar.appendChild(bAyuda);
+      p.appendChild(bar);
+      var esc2 = A.escena(L.escena || 'calle'); esc2.nodo.setAttribute('data-n', String(L.zonas.length));
+      var porZona = {};
+      L.zonas.forEach(function (z) {
+        var c = C(z);
+        var l = A.lugar({ id: z, tipo: 'casa', color: c.color, letrero: c.t + '?', ejemplo: IC(c.ico), etiqueta: c.t + ', ' + c.es });
+        l.insertBefore(el('span', { class: 'le-traduccion', lang: 'es', 'aria-hidden': 'true', text: c.es, style: '--c:' + c.color }), l.querySelector('.al-dibujo-lugar'));
+        l.addEventListener('click', function (ev) {
+          if (ev.target && ev.target.closest && ev.target.closest('.al-letrero, .le-traduccion')) { hablar(c.t, { lang: cfg.lang }); hablar(c.es, { lang: cfg.langExplica, cola: true }); partir(c.regla).forEach(function (tr) { hablar(tr.t, { lang: tr.lang, cola: true }); }); return; }
+          soltar(z);
+        });
+        porZona[z] = l;
+        esc2.lugares.appendChild(l);
+      });
+      var vuelo = el('div', { class: 'al-vuelo' });
+      var pipCaja = el('div', { class: 'al-pip-caja', html: vestir(A.pip('Pip'), null) });
+      vuelo.appendChild(pipCaja);
+      esc2.cielo.appendChild(vuelo);
+      p.appendChild(esc2.nodo);
+      var dialogo = el('div', { class: 'le-dialogo', role: 'status', 'aria-live': 'polite' });
+      var texto = el('p', { class: 'le-dialogo__texto' });
+      var acciones = el('div', { class: 'le-dialogo__acciones' });
+      var bOtra = el('button', { class: 'g-icono', 'aria-label': 'Otra vez', html: ICO.otra });
+      var bSeguir = el('button', { class: 'g-btn le-seguir', html: 'Seguir ▶', disabled: 'disabled' });
+      acciones.appendChild(bOtra); acciones.appendChild(bSeguir);
+      dialogo.appendChild(texto); dialogo.appendChild(acciones);
+      p.appendChild(dialogo);
+      raiz.appendChild(p);
+
+      var salieron = [];   /* solo pruebas: que ejemplos salieron y en que orden */
+      var paso = null, globo = null, activo = null, cola = [], ultima = null, alSeguir = null, ayudado = false, ocupado = false;
+      function vivo() { return mio === token && p.isConnected; }
+      function despues(f, ms) { setTimeout(function () { if (vivo()) f(); }, espera(ms)); }
+      function marcarPaso(k) {
+        paso = k;
+        Array.prototype.forEach.call(pasosBar.children, function (n) {
+          var i = PASOS.indexOf(n.getAttribute('data-paso')), j = PASOS.indexOf(k);
+          n.classList.toggle('le-paso--ahora', i === j); n.classList.toggle('le-paso--hecho', i < j);
+        });
+        p.setAttribute('data-paso', k);
+        bAyuda.hidden = !(k === 'juntos' || k === 'tu');
+      }
+      function mostrar(lineas) { texto.innerHTML = lineas.map(lineaHtml).join(' '); }
+      /* dice varias lineas seguidas mostrando cada una; alFin al terminar */
+      var cadena = 0;
+      function guion(lineas, alFin) {
+        ultima = lineas; var i = 0, esta = ++cadena;   /* un guion nuevo deja callado al anterior */
+        (function uno() {
+          if (!vivo() || esta !== cadena) return;
+          if (i >= lineas.length) { if (alFin) alFin(); return; }
+          var ln = lineas[i++];
+          mostrar([ln]);
+          if (ln.zona) { A.brillar(porZona[ln.zona]); }
+          if (ln.ico) mostrarCarta(ln.ico, ln.en || '');
+          decir(ln, uno);
+        })();
+      }
+      function esperarSeguir(f) { bSeguir.disabled = false; bSeguir.classList.add('le-seguir--late'); alSeguir = f; despues(function () { try { bSeguir.focus({ preventScroll: true }); } catch (e) { /* nada */ } }, 50); }
+      bSeguir.addEventListener('click', function () { if (bSeguir.disabled) return; bSeguir.disabled = true; bSeguir.classList.remove('le-seguir--late'); var f = alSeguir; alSeguir = null; if (f) f(); });
+      bOtra.addEventListener('click', function () {
+        if (!ultima) return;
+        token++; mio = token;   /* corta lo que se estaba diciendo, sin perder la pantalla */
+        try { speechSynthesis.cancel(); } catch (e) { /* nada */ }
+        var l2 = ultima;
+        l2.forEach(function (ln, k) { decir(ln, null, k > 0); });
+        mostrar(l2);
+      });
+      pipCaja.addEventListener('click', function () { if (activo) hablar(activo.en, { lang: cfg.lang }); });
+
+      function volverGlobo() { var g = globo; if (!g) return; g.style.transition = 'transform .3s ease'; g.style.transform = ''; setTimeout(function () { g.style.transition = ''; }, 320); }
+      function quitarCarta() { if (globo) { globo.remove(); globo = null; } }
+      function mostrarCarta(ico, palabra) {
+        quitarCarta();
+        globo = A.globo({ palabra: palabra || ' ', icono: IC(ico), indice: Math.floor(Math.random() * 6) });
+        globo.classList.add('le-globo');
+        vuelo.appendChild(globo); A.entrar(vuelo);
+        return globo;
+      }
+      function frase(it) { return C(it.zona).q + ' ' + it.en.charAt(0).toUpperCase() + it.en.slice(1) + '.'; }
+      function porque(it) { return L.por[it.zona] + ' Va en la casa de ' + C(it.zona).t + '.'; }
+      function llevar(it, alFin) {
+        var g = globo, l = porZona[it.zona];
+        ocupado = true;
+        A.volar(g, l, function () {
+          g.remove(); if (globo === g) globo = null;
+          A.confeti(l.getBoundingClientRect().left + l.offsetWidth / 2, l.getBoundingClientRect().top + 20, 16);
+          A.celebrar(pipCaja.querySelector('.al-pip'));
+          ocupado = false;
+          if (alFin) alFin();
+        });
+      }
+
+      /* 1 · MIRA */
+      function mira() {
+        marcarPaso('mira');
+        guion(L.mira, function () { quitarCarta(); esperarSeguir(yo); });
+      }
+      /* 2 · YO LO HAGO: Pip lleva dos ejemplos con la mano y dice por que */
+      function yo() {
+        marcarPaso('yo');
+        var i = 0;
+        guion([{ es: 'Mira cómo lo hago yo.' }], function uno() {
+          if (i >= L.yo.length) { esperarSeguir(juntos); return; }
+          var it = L.yo[i++];
+          var g = mostrarCarta(it.ico, it.en);
+          var mano = A.mano(); g.appendChild(mano);
+          guion([{ en: frase(it) }, { es: porque(it), zona: it.zona }], function () { llevar(it, function () { despues(uno, 400); }); });
+        });
+      }
+      /* 3 · JUNTOS y 4 · TU: el niño lleva el globo; en juntos la casa correcta brilla */
+      function juntos() { ronda('juntos', L.juntos.slice(), tu); }
+      function tu() { ronda('tu', mezclar(L.tu), aprendi); }
+      function ronda(k, items, siguiente) {
+        marcarPaso(k);
+        cola = items; var repetidos = {};
+        guion([{ es: k === 'juntos' ? 'Ahora lo hacemos juntos. La casa que brilla es la correcta. Lleva el globo.' : 'Ahora tú solo. ' + (L.piensa || 'Piensa bien antes de soltar.') }], sacar);
+        function sacar() {
+          if (!cola.length) { activo = null; quitarCarta(); esperarSeguir(siguiente); guion([{ es: '¡Muy bien! Toca Seguir.' }]); return; }
+          activo = cola.shift(); ayudado = false; salieron.push(k + ':' + activo.ico);
+          var g = mostrarCarta(activo.ico, activo.en);
+          A.arrastre(g, { alSoltar: function (l) { soltar(l.getAttribute('data-lugar')); }, alTocar: function () { if (activo) hablar(activo.en, { lang: cfg.lang }); } });
+          if (k === 'juntos') guiar();
+          /* la ficha se dice en ingles; tocarla la repite */
+          guion([{ en: activo.en }], null);
+        }
+        function guiar() { var l = porZona[activo.zona]; l.classList.add('le-guia'); }
+        ronda.soltar = function (z) {
+          if (!activo || ocupado || paso !== k) { volverGlobo(); return; }
+          var it = activo, l = porZona[z];
+          Object.keys(porZona).forEach(function (q) { porZona[q].classList.remove('le-guia'); });
+          if (z === it.zona) {
+            sonido('ok'); racha++;
+            activo = null;
+            /* primero vuela a la casa y despues Pip dice la frase completa */
+            llevar(it, function () { guion([{ en: frase(it) }, { es: (k === 'juntos' || ayudado ? '' : '¡Bien! ') + L.por[it.zona] }], function () { despues(sacar, 300); }); });
+          } else {
+            sonido('mal'); racha = 0; A.temblar(l);
+            volverGlobo();
+            /* re-explicar con este ejemplo, no «try again» */
+            ayudado = true;
+            if (k === 'tu' && !repetidos[it.ico]) { repetidos[it.ico] = 1; cola.push({ en: it.en, ico: it.ico, zona: it.zona, otra: true }); }
+            guion([{ es: 'Mira otra vez. ' + L.por[it.zona] + ' ' + C(it.zona).regla }, { en: frase(it) }], function () { porZona[it.zona].classList.add('le-guia'); });
+          }
+        };
+      }
+      function soltar(z) { if (ronda.soltar) ronda.soltar(z); }
+      bAyuda.addEventListener('click', function () {
+        if (!activo) return;
+        ayudado = true;
+        porZona[activo.zona].classList.add('le-guia');
+        guion([{ es: L.por[activo.zona] + ' ' + C(activo.zona).regla }]);
+      });
+
+      /* 5 · LO QUE APRENDI */
+      function aprendi() {
+        marcarPaso('aprendi');
+        ronda.soltar = null;
+        var nueva = !st.hechas[L.id];
+        st.hechas[L.id] = 1; guardar();
+        sonido('fin');
+        var capa = el('div', { class: 'g-capa le-resumen', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Lo que aprendí' });
+        var box = el('div', { class: 'g-logro' });
+        box.appendChild(el('h3', { text: 'Lo que aprendí' }));
+        L.resumen.forEach(function (r) {
+          var c = C(r.zona), fila = el('div', { class: 'le-resumen__fila', style: '--c:' + c.color });
+          fila.appendChild(tarjetaCodigo(r.zona));
+          var ejs = el('div', { class: 'le-resumen__ej' });
+          r.ej.forEach(function (e) {
+            var b = el('button', { class: 'le-resumen__btn', 'aria-label': e.en, html: A.icono(IC(e.ico), 'al-ico') + '<span lang="en">' + esc(e.en) + '</span>' });
+            b.addEventListener('click', function () { hablar(c.q + ' ' + e.en.charAt(0).toUpperCase() + e.en.slice(1) + '.', { lang: cfg.lang }); });
+            ejs.appendChild(b);
+          });
+          fila.appendChild(ejs);
+          box.appendChild(fila);
+        });
+        box.appendChild(el('p', { class: 'le-calco', html: A.icono(IC(L.calco), 'al-ico') + '<span>' + (nueva ? '¡Calcomanía nueva!' : '¡Lección repasada!') + '</span>' }));
+        var sigL = li + 1 < cfg.lecciones.length ? li + 1 : null;
+        if (sigL !== null) box.appendChild(el('button', { class: 'g-btn', html: 'Siguiente lección ▶', onclick: function () { capa.remove(); ir({ l: sigL }); } }));
+        box.appendChild(el('button', { class: 'g-btn g-btn--suave', html: ICO.otra + ' Repetir la lección', onclick: function () { capa.remove(); ir({ l: li }, true); } }));
+        box.appendChild(el('button', { class: 'g-btn' + (sigL === null ? '' : ' g-btn--suave'), text: 'Lecciones', onclick: function () { capa.remove(); ir({}); } }));
+        capa.appendChild(box); document.body.appendChild(capa);
+        guion([{ es: 'Esto es lo que aprendiste hoy.' }].concat(L.resumen.map(function (r) { return { es: C(r.zona).t + ' significa ' + C(r.zona).es.replace(/[¿?]/g, '') + '. ' + C(r.zona).regla }; })));
+      }
+
+      G._leccion_pantalla = { salieron: salieron, paso: function () { return paso; }, activo: function () { return activo; }, seguir: function () { bSeguir.click(); }, soltar: soltar };   /* solo pruebas */
+      mira();
+    }
+    return { cargar: cargar, pintar: pintar, hash: hash, desdeHash: desdeHash, estado: function () { return st; } };
+  })();
+
   /* ---------- arranque ---------- */
   G.iniciar = function (c) {
     cfg = c;
@@ -1966,7 +2283,8 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     document.documentElement.setAttribute('data-tema', cfg.tema || 'y2');
     raiz = document.getElementById('guia');
     try { vozOn = localStorage.getItem('samsan:guia-voz') !== '0'; musicaOn = localStorage.getItem('samsan:guia-musica-' + cfg.id) !== '0'; } catch (e) { vozOn = true; musicaOn = true; }
-    if (cfg.modo === 'aldea') { cfg.misiones = []; AL.cargar(); }
+    if (cfg.modo === 'leccion') { cfg.misiones = []; LE.cargar(); }
+    else if (cfg.modo === 'aldea') { cfg.misiones = []; AL.cargar(); }
     else if (cfg.modo === 'juego') { cfg.misiones = []; J.cargar(); } else armarJefe();
     cargar(); cargarVoces();
     if (window.speechSynthesis && 'onvoiceschanged' in speechSynthesis) speechSynthesis.onvoiceschanged = cargarVoces;
@@ -1976,9 +2294,9 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
     });
     /* entrada directa por #id-mision o #id-mision-N (modo juego: #mundo-etapa o #jefe) */
     var h = (location.hash || '').slice(1), estado = {};
-    if (cfg.modo === 'juego' || cfg.modo === 'aldea') {
-      estado = (cfg.modo === 'aldea' ? AL : J).desdeHash(h);
-      if (estado.w !== undefined || estado.jefe) { try { history.replaceState({}, '', location.pathname); } catch (e) { /* nada */ } ir(estado); }
+    if (cfg.modo === 'juego' || cfg.modo === 'aldea' || cfg.modo === 'leccion') {
+      estado = (cfg.modo === 'aldea' ? AL : cfg.modo === 'leccion' ? LE : J).desdeHash(h);
+      if (estado.w !== undefined || estado.jefe || estado.l !== undefined) { try { history.replaceState({}, '', location.pathname); } catch (e) { /* nada */ } ir(estado); }
       else ir({}, true);
       return;
     }
@@ -1994,6 +2312,7 @@ html[data-tema="y6"] .g-etapa--aqui { color: #0B1120; }
   G._musica = Musica;
   G._juego = J;   /* solo para pruebas: estado() y medir(estilo, segundos) */
   G._aldea = AL;  /* solo para pruebas */
+  G._leccion = LE;
 })();
 
 </script>
