@@ -336,6 +336,23 @@
       }
     });
   };
+  /* Columna de piedra gris: más corta y ancha, con estrías marcadas (variante de la columna). */
+  C.columnaPiedra = function (o) {
+    o = o || {};
+    return suelta('columnaPiedra', o, {
+      forma: [[-34, -36], [34, -36], [34, -26], [24, -26], [24, 26], [34, 26], [34, 36], [-34, 36], [-34, 26], [-24, 26], [-24, -26], [-34, -26]],
+      color: o.color || '#9A9CA8', altura: 2, grosor: 3, recto: true, semilla: 90,
+      encima: function (g) {
+        g.save(); g.lineWidth = 3;
+        [-14, -5, 4, 13].forEach(function (x) {
+          g.strokeStyle = 'rgba(0,0,0,.22)'; g.beginPath(); g.moveTo(x, -24); g.lineTo(x, 24); g.stroke();
+          g.strokeStyle = 'rgba(255,255,255,.3)'; g.beginPath(); g.moveTo(x + 2, -24); g.lineTo(x + 2, 24); g.stroke();
+        });
+        g.fillStyle = 'rgba(255,255,255,.25)'; g.fillRect(-34, -36, 68, 4);
+        g.restore();
+      }
+    });
+  };
   /* Arco de puente: medio anillo con patas. */
   C.arco = function (o) {
     o = o || {};
@@ -658,7 +675,7 @@
   /* Índice por categoría: la hoja del catálogo y quien busque piezas lo usan. */
   C.categorias = {
     matematicas: ['tarjeta', 'recta', 'marcador', 'cuenta', 'varilla', 'marco10', 'gema'],
-    construccion: ['ladrillo', 'muro', 'bloque', 'viga', 'columna', 'arco', 'rampa', 'escalera', 'techo', 'puerta', 'ventanaCasa', 'engranaje', 'tuerca', 'cono', 'andamio', 'grua', 'portal'],
+    construccion: ['ladrillo', 'muro', 'bloque', 'viga', 'columna', 'columnaPiedra', 'arco', 'rampa', 'escalera', 'techo', 'puerta', 'ventanaCasa', 'engranaje', 'tuerca', 'cono', 'andamio', 'grua', 'portal'],
     vehiculos: ['furgoneta', 'cupe', 'sedanLargo', 'mini', 'sedan', 'camioneta', 'compacto', 'deportivo'],
     aldea: ['casa', 'arbol', 'arbusto', 'nube', 'tabla', 'carrito', 'cerca', 'hojaPasto', 'hojaRio'],
     estacion: ['panel', 'brazo', 'modulo', 'ventana', 'antena', 'nave', 'estrella', 'planeta']

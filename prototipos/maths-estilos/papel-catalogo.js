@@ -28,6 +28,7 @@
     bloque: [function (ctx) { C.bloque({ color: '#E07A3F' }).dibujar(ctx, -28, 10); C.bloque({ color: '#3E8E7E' }).dibujar(ctx, 28, 10); C.bloque({ color: '#F2C14E' }).dibujar(ctx, 0, -40); }, 0.85],
     viga: [una(function () { return C.viga(); }), 0.85],
     columna: [una(function () { return C.columna(); }), 1.1],
+    columnaPiedra: [una(function () { return C.columnaPiedra(); }), 1.3],
     arco: [una(function () { return C.arco(); }), 1],
     rampa: [una(function () { return C.rampa(); }), 1.1],
     escalera: [una(function () { return C.escalera(); }), 1.1],
