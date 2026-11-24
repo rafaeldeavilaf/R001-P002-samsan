@@ -64,6 +64,12 @@
       C.recta({ inicio: 0, fin: 1, paso: 0.1, largo: 400 }).dibujar(ctx, 720, y + 40);
       etiqueta(ctx, n + 0.5, 'recta 0-1 (decimales)', 720, y + 86);
     }],
+    portal: [250, function (ctx, y, n) {
+      ctx.save(); ctx.translate(W / 2, y + 128); ctx.scale(0.72, 0.72);
+      C.portal().dibujar(ctx, 0, 0);
+      ctx.restore();
+      etiqueta(ctx, n, 'portal (castillo)', W / 2, y + 234);
+    }],
     hojaRio: [90, function (ctx, y, n) {
       C.hojaRio({ ancho: W, y: y + 40 }).dibujar(ctx, 0, 0);
       etiqueta(ctx, n, 'hojaRio', W / 2, y + 40);

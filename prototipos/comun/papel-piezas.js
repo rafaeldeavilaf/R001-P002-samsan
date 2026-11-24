@@ -446,6 +446,68 @@
     return g;
   };
 
+  /* Portal de castillo de ladrillo: dos torres con chapiteles, muro almenado con arco y reja.
+     Genérico: sin escudos, sin letrero y sin nombres. Mide unos 300 × 300 (base en y = 130). */
+  function ladrillos(x0, y0, x1, y1) {
+    return function (g) {
+      g.save(); g.strokeStyle = 'rgba(233,220,192,.55)'; g.lineWidth = 1.2;
+      for (var y = y0, j = 0; y < y1; y += 11, j++) {
+        g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+        for (var x = x0 + (j % 2 ? 11 : 0); x < x1; x += 22) { g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 11); g.stroke(); }
+      }
+      g.restore();
+    };
+  }
+  function almenas(x0, x1, y, alto, paso) {
+    var pts = [], arriba = false;
+    for (var x = x0; x < x1; x += paso) {
+      var x2 = Math.min(x + paso, x1);
+      pts.push([x, arriba ? y - alto : y]); pts.push([x2, arriba ? y - alto : y]);
+      arriba = !arriba;
+    }
+    return pts;
+  }
+  C.portal = function (o) {
+    o = o || {};
+    var LAD = o.color || '#B5553C', TEJA = o.techo || '#9E3B2E', CORNISA = '#E9DCC0';
+    function arcoPts(cx, cy, r, desde, hasta, n) { var p = []; for (var k = 0; k <= n; k++) { var a = desde + (hasta - desde) * k / n; p.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return p; }
+    /* Reja dentro del arco, con el jardín detrás. */
+    var hueco = [[-58, 130], [-58, 40]].concat(arcoPts(0, 40, 58, Math.PI, 2 * Math.PI, 20)).concat([[58, 40], [58, 130]]);
+    var reja = PP.pieza({
+      forma: hueco, recto: true, color: '#9DBF8A', altura: 1, grosor: 1, clave: clave('portal-reja', o),
+      encima: function (g) {
+        g.fillStyle = '#2E2A36';
+        for (var x = -54; x <= 54; x += 9) g.fillRect(x - 1.5, -20, 3, 150);
+        g.fillRect(-58, 62, 116, 4); g.fillRect(-58, 110, 116, 4);
+      }
+    });
+    /* Muro con arco y almenas arriba. */
+    var muro = [[-87, 130], [-87, -45]].concat(almenas(-87, 87, -45, 12, 14)).concat([[87, -45], [87, 130], [58, 130], [58, 40]])
+      .concat(arcoPts(0, 40, 58, 2 * Math.PI, Math.PI, 20)).concat([[-58, 40], [-58, 130]]);
+    var pared = PP.pieza({ forma: muro, recto: true, color: LAD, altura: 2, grosor: 3, semilla: 131, clave: clave('portal-muro', o), encima: ladrillos(-87, -45, 87, 130) });
+    /* Torre: cuerpo de ladrillo con dos ventanas angostas y una cornisa. */
+    var torre = PP.pieza({
+      forma: [[-28, 130], [-28, -70], [28, -70], [28, 130]], recto: true, color: LAD, altura: 3, grosor: 3, semilla: 133, clave: clave('portal-torre', o),
+      encima: function (g) {
+        ladrillos(-28, -70, 28, 130)(g);
+        g.fillStyle = '#2E2A36'; g.fillRect(-6, -40, 12, 22); g.fillRect(-6, 60, 12, 26);
+        g.fillStyle = CORNISA; g.fillRect(-28, -70, 56, 6);
+      }
+    });
+    var capitel = PP.pieza({
+      forma: [[-36, -68], [-36, -86]].concat(almenas(-36, 36, -86, 8, 12)).concat([[36, -86], [36, -68]]),
+      recto: true, color: LAD, altura: 4, grosor: 2, semilla: 135, clave: clave('portal-capitel', o),
+      encima: function (g) { g.fillStyle = CORNISA; g.fillRect(-36, -72, 72, 4); }
+    });
+    var chapitel = PP.pieza({ forma: [[-26, -88], [0, -160], [26, -88]], recto: true, color: TEJA, altura: 4, semilla: 137, clave: clave('portal-chapitel', o) });
+    var torrecilla = PP.pieza({ forma: [[-9, -86], [-9, -98], [0, -116], [9, -98], [9, -86]], recto: true, color: TEJA, altura: 5, grosor: 1, semilla: 139, clave: clave('portal-torrecilla', o) });
+    var partes = [[reja, 0, 0], [pared, 0, 0]];
+    [-115, 115].forEach(function (x) {
+      partes.push([torre, x, 0], [capitel, x, 0], [chapitel, x, 0], [torrecilla, x - 30, 0], [torrecilla, x + 30, 0]);
+    });
+    return grupo(partes);
+  };
+
   /* ================= C. Estación (Y6) ================= */
   C.panel = function (o) {
     o = o || {};
@@ -486,7 +548,7 @@
   /* Índice por categoría: la hoja del catálogo y quien busque piezas lo usan. */
   C.categorias = {
     matematicas: ['tarjeta', 'recta', 'marcador', 'cuenta', 'varilla', 'marco10', 'gema'],
-    construccion: ['ladrillo', 'muro', 'bloque', 'viga', 'columna', 'arco', 'rampa', 'escalera', 'techo', 'puerta', 'ventanaCasa', 'engranaje', 'tuerca', 'cono', 'andamio', 'grua'],
+    construccion: ['ladrillo', 'muro', 'bloque', 'viga', 'columna', 'arco', 'rampa', 'escalera', 'techo', 'puerta', 'ventanaCasa', 'engranaje', 'tuerca', 'cono', 'andamio', 'grua', 'portal'],
     aldea: ['casa', 'arbol', 'arbusto', 'nube', 'tabla', 'carrito', 'cerca', 'hojaPasto', 'hojaRio'],
     estacion: ['panel', 'brazo', 'modulo', 'ventana', 'antena', 'nave', 'estrella', 'planeta']
   };
