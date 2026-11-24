@@ -180,6 +180,304 @@
     });
   };
 
+  /* ================= A2. Set matemático ================= */
+  var cacheTexto = {};
+  var nada = { dibujar: function () {} };
+  /* Números y signos recortados en papel a partir de la letra (Nunito). Misma receta que
+     PP.pieza: tres sombras, canto abajo a la derecha y brillo arriba a la izquierda.
+     Conviene dibujarlos después de document.fonts.ready para que salga la letra correcta. */
+  function piezaTexto(nombre, o, t, color, tam) {
+    var k = clave(nombre, o);
+    if (cacheTexto[k]) return cacheTexto[k];
+    var dpr = PP.dpr(), h = o.altura || 2, font = '900 ' + tam + 'px ' + FUENTE;
+    var med = document.createElement('canvas'), mg = med.getContext ? med.getContext('2d') : null;
+    if (!mg) return nada;
+    mg.font = font;
+    var ancho = mg.measureText ? mg.measureText(t).width : tam * 0.6 * t.length;
+    var margen = 8 + h * 9 + 3, w = ancho + margen * 2, alto = tam * 1.2 + margen * 2;
+    var c = document.createElement('canvas'); c.width = Math.ceil(w * dpr); c.height = Math.ceil(alto * dpr);
+    var g = c.getContext('2d');
+    if (!g) return nada;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.font = font; g.textAlign = 'center'; g.textBaseline = 'middle';
+    var cx = w / 2, cy = alto / 2, LEJOS = 100000;
+    function letra(col, dx, dy) { g.fillStyle = col; g.fillText(t, cx + dx, cy + dy); }
+    [[3 * h, 5 * h, 6.4 * h, 0.2], [1.8 * h, 2.6 * h, 2.6 * h, 0.44], [0.5 * h, 0.7 * h, 1.2, 0.55]].forEach(function (s) {
+      g.save(); g.shadowColor = 'rgba(42,30,20,' + s[3] + ')'; g.shadowBlur = s[2] * dpr;
+      g.shadowOffsetX = (s[0] + LEJOS) * dpr; g.shadowOffsetY = s[1] * dpr; letra('#000', -LEJOS, 0); g.restore();
+    });
+    for (var j = 3; j >= 1; j--) letra(PP.oscurecer(color, 0.66), j * 0.8, j * 0.95);
+    letra(PP.oscurecer(color, 1.35), -1.1, -1.1);
+    letra(color, 0, 0);
+    g.save(); g.globalCompositeOperation = 'source-atop';
+    var gr = g.createLinearGradient ? g.createLinearGradient(cx - ancho / 2, cy - tam / 2, cx + ancho / 2, cy + tam / 2) : null;
+    if (gr && gr.addColorStop) { gr.addColorStop(0, 'rgba(255,255,255,.14)'); gr.addColorStop(1, 'rgba(0,0,0,.10)'); g.fillStyle = gr; g.fillRect(0, 0, w, alto); }
+    g.restore();
+    var p = { lienzo: c, ox: cx, oy: cy, ancho: w, alto: alto };
+    p.dibujar = function (ctx, x, y, a) { PP.dibujar(ctx, p, x, y, a); };
+    return (cacheTexto[k] = p);
+  }
+  var COLORES_NUM = ['#E05A3A', '#F08A3C', '#E9B44C', '#8DB84A', '#3E8E7E', '#3F7CC2', '#7A5CA8', '#D9638A', '#B5553C', '#2F9BB8'];
+
+  /* Número recortado: cada dígito de su color, o todo de o.color. */
+  C.numero = function (o) {
+    o = o || {};
+    var t = String(o.valor === undefined ? o.texto || '0' : o.valor);
+    var color = o.color || (/^\d$/.test(t) ? COLORES_NUM[+t] : '#3F7CC2');
+    return piezaTexto('numero', o, t, color, o.tam || 64);
+  };
+  /* Signos: los de siempre como formas recortadas; el resto con la letra. */
+  function cruz(l, a) { return [[-a, -l], [a, -l], [a, -a], [l, -a], [l, a], [a, a], [a, l], [-a, l], [-a, a], [-l, a], [-l, -a], [-a, -a]]; }
+  function girar(pts, ang) { var c = Math.cos(ang), s = Math.sin(ang); return pts.map(function (q) { return [q[0] * c - q[1] * s, q[0] * s + q[1] * c]; }); }
+  var SIGNO = { mas: '#3E8E7E', menos: '#C2453A', por: '#3F7CC2', entre: '#7A5CA8', igual: '#E9B44C', menor: '#F08A3C', mayor: '#F08A3C' };
+  C.simbolo = function (o) {
+    o = o || {};
+    var v = o.valor || 'mas', col = o.color || SIGNO[v] || '#3B3542', base = { color: col, altura: 2, recto: true };
+    function una(f, s) { return suelta('simbolo-' + v, o, Object.assign({ forma: f, semilla: s }, base)); }
+    if (v === 'mas') return una(cruz(24, 7), 211);
+    if (v === 'menos') return una(F.rect(48, 14), 213);
+    if (v === 'por') return una(girar(cruz(24, 7), Math.PI / 4), 215);
+    if (v === 'menor') return una([[16, -26], [26, -18], [0, 0], [26, 18], [16, 26], [-14, 0]], 217);
+    if (v === 'mayor') return una([[-16, -26], [-26, -18], [0, 0], [-26, 18], [-16, 26], [14, 0]], 219);
+    if (v === 'igual') {
+      var barra = PP.pieza(Object.assign({ forma: F.rect(48, 12), semilla: 221, clave: clave('igual', o) }, base));
+      return grupo([[barra, 0, -10], [barra, 0, 10]]);
+    }
+    if (v === 'entre') {
+      var linea = PP.pieza(Object.assign({ forma: F.rect(48, 11), semilla: 223, clave: clave('entre-l', o) }, base));
+      var punto = PP.pieza(Object.assign({ forma: F.circulo(7), semilla: 225, clave: clave('entre-p', o) }, base));
+      return grupo([[linea, 0, 0], [punto, 0, -18], [punto, 0, 18]]);
+    }
+    return piezaTexto('simbolo', o, v, col, o.tam || 60);
+  };
+
+  /* Calculadora con pantalla y teclas en relieve. */
+  C.calculadora = function (o) {
+    o = o || {};
+    var pantalla = String(o.pantalla === undefined ? '123' : o.pantalla);
+    var teclas = [['C', '(', ')', '÷'], ['7', '8', '9', '×'], ['4', '5', '6', '−'], ['1', '2', '3', '+'], ['0', '.', '%', '=']];
+    return suelta('calculadora', o, {
+      forma: F.rect(124, 184), color: o.color || '#3B3542', altura: 2, grosor: 3, semilla: 227,
+      encima: function (g) {
+        g.save(); g.fillStyle = '#B7D4A8'; g.fillRect(-52, -80, 104, 36);
+        g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(-52, -80, 104, 3);
+        texto(g, pantalla.slice(-8), 0, -61, 24, '#1E2A1E');
+        teclas.forEach(function (fila, j) {
+          fila.forEach(function (t, i) {
+            var x = -52 + i * 26.5, y = -36 + j * 23.5, op = /[÷×−+=%()C]/.test(t);
+            g.save(); sombraChica(g);
+            g.fillStyle = t === '=' ? '#8DB84A' : t === 'C' ? '#E05A3A' : op ? '#F08A3C' : '#EFE8D8';
+            g.beginPath(); redondeado(g, x, y, 22, 19, 4); g.fill(); g.restore();
+            texto(g, t, x + 11, y + 10, 13, op ? '#FFFFFF' : TINTA);
+          });
+        });
+        g.restore();
+      }
+    });
+  };
+  /* Regla de 15 cm con marcas de medio centímetro. */
+  C.regla = function (o) {
+    o = o || {};
+    var cm = o.cm || 15, paso = 12, L = cm * paso;
+    return suelta('regla', o, {
+      forma: F.rect(L + 20, 34), color: o.color || '#F2C14E', altura: 2, semilla: 229,
+      encima: function (g) {
+        g.save(); g.strokeStyle = TINTA; g.lineWidth = 1.2;
+        for (var k = 0; k <= cm * 2; k++) {
+          var x = -L / 2 + k * paso / 2, largo = k % 2 ? 6 : 10;
+          g.beginPath(); g.moveTo(x, -17); g.lineTo(x, -17 + largo); g.stroke();
+          if (k % 2 === 0 && (k / 2) % (cm > 10 ? 1 : 1) === 0) texto(g, String(k / 2), x, 4, 9);
+        }
+        g.restore();
+      }
+    });
+  };
+  /* Transportador: medio anillo con marcas cada 10°. */
+  C.transportador = function (o) {
+    o = o || {};
+    var R = 70, r = 24, pts = [];
+    for (var k = 0; k <= 30; k++) { var a = Math.PI + k * Math.PI / 30; pts.push([R * Math.cos(a), R * Math.sin(a)]); }
+    for (var k2 = 30; k2 >= 0; k2--) { var a2 = Math.PI + k2 * Math.PI / 30; pts.push([r * Math.cos(a2), r * Math.sin(a2)]); }
+    return suelta('transportador', o, {
+      forma: pts.map(function (q) { return [q[0], q[1] + 30]; }), recto: true, color: o.color || '#BFE0EA', altura: 2, semilla: 231,
+      encima: function (g) {
+        g.save(); g.strokeStyle = TINTA; g.lineWidth = 1;
+        for (var d = 0; d <= 180; d += 10) {
+          var a = Math.PI + d * Math.PI / 180, l = d % 90 === 0 ? 14 : d % 30 === 0 ? 10 : 6;
+          g.beginPath(); g.moveTo(R * Math.cos(a), 30 + R * Math.sin(a)); g.lineTo((R - l) * Math.cos(a), 30 + (R - l) * Math.sin(a)); g.stroke();
+        }
+        [[0, -62, 26], [180, 62, 26], [90, 0, -16]].forEach(function (q) { texto(g, String(q[0]), q[1], q[2] + 0, 10); });
+        g.restore();
+      }
+    });
+  };
+  /* Escuadra de 90°. */
+  C.escuadra = function (o) {
+    o = o || {};
+    return suelta('escuadra', o, {
+      forma: [[-46, 42], [50, 42], [-46, -52]], recto: true, color: o.color || '#8DCBD9', altura: 2, semilla: 233,
+      encima: function (g) {
+        g.save(); g.fillStyle = 'rgba(255,255,255,.35)'; poli(g, [[-32, 30], [14, 30], [-32, -14]]); g.fill();
+        g.strokeStyle = TINTA; g.lineWidth = 1;
+        for (var x = -42; x < 46; x += 6) { g.beginPath(); g.moveTo(x, 42); g.lineTo(x, (x + 42) % 30 === 0 ? 34 : 38); g.stroke(); }
+        g.strokeRect(-46, 32, 10, 10);
+        g.restore();
+      }
+    });
+  };
+  /* Reloj de agujas: o.hora y o.minuto. */
+  C.reloj = function (o) {
+    o = o || {};
+    var hora = o.hora === undefined ? 3 : o.hora, min = o.minuto || 0;
+    return suelta('reloj', o, {
+      forma: F.circulo(46), color: o.color || '#E07A3F', altura: 2, grosor: 3, semilla: 235,
+      encima: function (g) {
+        g.save();
+        g.fillStyle = '#FFF6DC'; g.beginPath(); g.arc(0, 0, 38, 0, Math.PI * 2); g.fill();
+        for (var k = 1; k <= 12; k++) { var a = k * Math.PI / 6 - Math.PI / 2; texto(g, String(k), Math.cos(a) * 29, Math.sin(a) * 29 + 1, k % 3 ? 9 : 11); }
+        sombraChica(g); g.strokeStyle = TINTA; g.lineCap = 'round';
+        var am = min * Math.PI / 30 - Math.PI / 2, ah = ((hora % 12) + min / 60) * Math.PI / 6 - Math.PI / 2;
+        g.lineWidth = 5; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(ah) * 16, Math.sin(ah) * 16); g.stroke();
+        g.lineWidth = 3; g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(am) * 26, Math.sin(am) * 26); g.stroke();
+        g.fillStyle = '#C2453A'; g.beginPath(); g.arc(0, 0, 4, 0, Math.PI * 2); g.fill();
+        g.restore();
+      }
+    });
+  };
+  /* Balanza de dos platillos (para igualdades y el valor que falta). */
+  C.balanza = function (o) {
+    o = o || {};
+    var col = o.color || '#B8935A';
+    var base = PP.pieza({ forma: [[-34, 52], [34, 52], [22, 38], [-22, 38]], recto: true, color: col, altura: 2, semilla: 237, clave: clave('balanza-base', o) });
+    var poste = PP.pieza({ forma: F.rect(18, 66), color: col, altura: 2, semilla: 239, clave: clave('balanza-poste', o) });
+    var brazo = PP.pieza({ forma: F.rect(170, 10), color: PP.oscurecer(col, 0.85), altura: 3, semilla: 241, clave: clave('balanza-brazo', o) });
+    var plato = PP.pieza({ forma: [[-30, 0], [30, 0], [22, 12], [-22, 12]], recto: true, color: '#C9CDD8', altura: 3, semilla: 243, clave: clave('balanza-plato', o) });
+    var g = grupo([[base, 0, 0], [poste, 0, 6], [brazo, 0, -28], [plato, -72, 12], [plato, 72, 12]]);
+    var dib = g.dibujar;
+    g.dibujar = function (ctx, x, y, a) {
+      if (ctx) {
+        ctx.save(); ctx.translate(x, y); ctx.strokeStyle = '#5E5A66'; ctx.lineWidth = 1.5;
+        [-72, 72].forEach(function (cx) { ctx.beginPath(); ctx.moveTo(cx, -26); ctx.lineTo(cx - 26, 12); ctx.moveTo(cx, -26); ctx.lineTo(cx + 26, 12); ctx.stroke(); });
+        ctx.restore();
+      }
+      dib(ctx, x, y, a);
+    };
+    return g;
+  };
+  /* Pizarra con texto en tiza. */
+  C.pizarra = function (o) {
+    o = o || {};
+    return suelta('pizarra', o, {
+      forma: F.rect(160, 104), color: '#A8743F', altura: 2, grosor: 3, semilla: 245,
+      encima: function (g) {
+        g.fillStyle = '#2F5D4E'; g.fillRect(-72, -44, 144, 88);
+        g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(-60, -30, 70, 12);
+        texto(g, String(o.texto === undefined ? '2 + 3 = 5' : o.texto), 0, 2, 22, 'rgba(255,255,255,.92)');
+      }
+    });
+  };
+
+  /* Conteo y valor posicional */
+  C.ficha = function (o) {
+    o = o || {};
+    return suelta('ficha', o, { forma: F.circulo(15), color: o.color || (o.valor === 'amarilla' ? '#F2C14E' : '#E05A3A'), altura: 2, semilla: 247 });
+  };
+  C.dado = function (o) {
+    o = o || {};
+    var n = Math.max(1, Math.min(6, +(o.valor || 5)));
+    var PUNTOS = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]], 4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]], 6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] };
+    return suelta('dado', o, {
+      forma: F.rect(48, 48), color: o.color || '#FBF7EE', altura: 2, grosor: 3, semilla: 249,
+      encima: function (g) {
+        g.save(); g.fillStyle = TINTA;
+        PUNTOS[n].forEach(function (q) { g.beginPath(); g.arc(q[0] * 13, q[1] * 13, 4.6, 0, Math.PI * 2); g.fill(); });
+        g.restore();
+      }
+    });
+  };
+  C.moneda = function (o) {
+    o = o || {};
+    var v = String(o.valor === undefined ? 100 : o.valor);
+    return suelta('moneda', o, {
+      forma: F.circulo(24), color: o.color || '#E9B44C', altura: 2, semilla: 251,
+      encima: function (g) {
+        g.strokeStyle = 'rgba(120,80,20,.5)'; g.lineWidth = 1.5; g.beginPath(); g.arc(0, 0, 19, 0, Math.PI * 2); g.stroke();
+        texto(g, v, 0, 1, v.length > 3 ? 11 : 14, '#6E4A14');
+      }
+    });
+  };
+  /* Bloques de base 10: unidad, decena (barra de 10) y centena (placa de 10 × 10). */
+  C.base10 = function (o) {
+    o = o || {};
+    var v = o.valor || 'unidad', col = o.color || '#7EC8A8', l = 13;
+    var tam = v === 'centena' ? [l * 10, l * 10] : v === 'decena' ? [l * 10, l] : [l, l];
+    return suelta('base10-' + v, o, {
+      forma: F.rect(tam[0], tam[1]), color: col, altura: 2, grosor: 3, recto: true, semilla: 253,
+      encima: function (g) {
+        g.save(); g.strokeStyle = 'rgba(20,60,40,.35)'; g.lineWidth = 1;
+        for (var x = -tam[0] / 2 + l; x < tam[0] / 2 - 1; x += l) { g.beginPath(); g.moveTo(x, -tam[1] / 2); g.lineTo(x, tam[1] / 2); g.stroke(); }
+        for (var y = -tam[1] / 2 + l; y < tam[1] / 2 - 1; y += l) { g.beginPath(); g.moveTo(-tam[0] / 2, y); g.lineTo(tam[0] / 2, y); g.stroke(); }
+        g.restore();
+      }
+    });
+  };
+
+  /* Figuras 2D */
+  var FIGURA = {
+    circulo: ['#E05A3A', function () { return F.circulo(30); }],
+    cuadrado: ['#3F7CC2', function () { return F.rect(56, 56); }],
+    rectangulo: ['#8DB84A', function () { return F.rect(78, 44); }],
+    triangulo: ['#F2C14E', function () { return [[-34, 28], [34, 28], [0, -32]]; }],
+    pentagono: ['#7A5CA8', function () { return F.poligono(5, 34, -Math.PI / 2); }],
+    hexagono: ['#3E8E7E', function () { return F.poligono(6, 32, 0); }],
+    rombo: ['#F08A3C', function () { return [[0, -36], [26, 0], [0, 36], [-26, 0]]; }],
+    ovalo: ['#D9638A', function () { var p = []; for (var k = 0; k < 40; k++) { var a = k * Math.PI / 20; p.push([40 * Math.cos(a), 26 * Math.sin(a)]); } return p; }],
+    estrella: ['#E9B44C', function () { return F.estrella(36); }]
+  };
+  C.formas2D = Object.keys(FIGURA);
+  C.figura = function (o) {
+    o = o || {};
+    var f = FIGURA[o.valor] || FIGURA.circulo;
+    return suelta('figura', o, { forma: f[1](), color: o.color || f[0], altura: 2, grosor: 3, recto: o.valor !== 'circulo', semilla: 255 });
+  };
+
+  /* Fracciones y datos */
+  C.fraccion = function (o) {
+    o = o || {};
+    var m = /^(\d+)\/(\d+)$/.exec(String(o.valor || '3/4')), k = m ? +m[1] : 3, n = m ? Math.max(1, +m[2]) : 4;
+    return suelta('fraccion', o, {
+      forma: F.circulo(40), color: o.fondo || '#FFF6DC', altura: 2, grosor: 3, semilla: 257,
+      encima: function (g) {
+        g.save();
+        for (var i = 0; i < n; i++) {
+          var a0 = -Math.PI / 2 + i * 2 * Math.PI / n, a1 = a0 + 2 * Math.PI / n;
+          if (i < k) { g.fillStyle = o.color || '#F08A3C'; g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, 41, a0, a1); g.closePath(); g.fill(); }
+          g.strokeStyle = TINTA; g.lineWidth = 2; g.beginPath(); g.moveTo(0, 0); g.lineTo(41 * Math.cos(a0), 41 * Math.sin(a0)); g.stroke();
+        }
+        g.restore();
+      }
+    });
+  };
+  C.grafica = function (o) {
+    o = o || {};
+    var datos = o.valores || [3, 5, 2, 4], cols = ['#E05A3A', '#3F7CC2', '#8DB84A', '#F2C14E', '#7A5CA8'], max = o.max || 6;
+    return suelta('grafica', o, {
+      forma: F.rect(160, 116), color: '#FFF6DC', altura: 2, semilla: 259,
+      encima: function (g) {
+        g.save();
+        g.strokeStyle = 'rgba(30,20,38,.15)'; g.lineWidth = 1;
+        for (var v = 1; v <= max; v++) { var y = 44 - v * 13; g.beginPath(); g.moveTo(-60, y); g.lineTo(70, y); g.stroke(); texto(g, String(v), -68, y, 9); }
+        var bw = 120 / datos.length;
+        datos.forEach(function (d, i) {
+          g.save(); sombraChica(g); g.fillStyle = cols[i % cols.length];
+          g.fillRect(-56 + i * bw + 4, 44 - d * 13, bw - 10, d * 13); g.restore();
+        });
+        g.strokeStyle = TINTA; g.lineWidth = 2.5; g.beginPath(); g.moveTo(-60, -40); g.lineTo(-60, 44); g.lineTo(72, 44); g.stroke();
+        g.restore();
+      }
+    });
+  };
+
   /* ================= B. Aldea (Y2) ================= */
 
   /* 8. Casa: muro con techo, puerta y ventana pegadas. */
@@ -1133,7 +1431,11 @@
 
   /* Índice por categoría: la hoja del catálogo y quien busque piezas lo usan. */
   C.categorias = {
-    matematicas: ['tarjeta', 'recta', 'marcador', 'cuenta', 'varilla', 'marco10', 'gema'],
+    mateNumeros: ['tarjeta', 'numero:42', 'numero:3.5', 'simbolo:mas', 'simbolo:menos', 'simbolo:por', 'simbolo:entre', 'simbolo:igual', 'simbolo:menor', 'simbolo:mayor', 'simbolo:%', 'digitos'],
+    mateInstrumentos: ['calculadora', 'regla', 'transportador', 'escuadra', 'reloj', 'balanza', 'pizarra', 'marcador', 'recta'],
+    mateConteo: ['cuenta', 'varilla', 'marco10', 'ficha', 'dado:5', 'moneda:100', 'base10:unidad', 'base10:decena', 'base10:centena', 'gema'],
+    mateFiguras: ['figura:circulo', 'figura:cuadrado', 'figura:rectangulo', 'figura:triangulo', 'figura:pentagono', 'figura:hexagono', 'figura:rombo', 'figura:ovalo', 'figura:estrella'],
+    mateDatos: ['fraccion:1/2', 'fraccion:3/4', 'fraccion:2/3', 'fraccion:5/8', 'grafica'],
     construccion: ['ladrillo', 'muro', 'bloque', 'viga', 'columna', 'columnaPiedra', 'arco', 'rampa', 'escalera', 'techo', 'puerta', 'ventanaCasa', 'engranaje', 'tuerca', 'cono', 'andamio', 'grua', 'portal'],
     /* Variantes «pieza:opción» (muro de cada material, techo forma:material). */
     materiales: ['muro:ladrillo', 'muro:ladrilloClaro', 'muro:adobe', 'muro:piedra', 'muro:sillar', 'muro:madera', 'muro:troncos', 'muro:guadua', 'muro:bahareque', 'muro:concreto', 'muro:corrugado', 'muro:vidrio'],

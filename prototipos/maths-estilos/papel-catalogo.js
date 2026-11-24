@@ -13,7 +13,7 @@
   var P = window.PROTO_COMUN, PP = window.SAMSAN_PAPEL, C = PP && PP.catalogo;
   var W = 960, CEL = 160, COLS = 6, CAB = 46;
 
-  var TITULOS = { matematicas: 'Matemáticas', construccion: 'Construcción', materiales: 'Construcción · materiales de muro', techos: 'Construcción · techos (forma y material)', aberturas: 'Construcción · puertas y ventanas', detalles: 'Construcción · detalles de fachada', suelos: 'Construcción · suelos y caminos', obra: 'Construcción · obra', vehiculos: 'Vehículos', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
+  var TITULOS = { mateNumeros: 'Matemáticas · números y signos', mateInstrumentos: 'Matemáticas · instrumentos', mateConteo: 'Matemáticas · conteo y valor posicional', mateFiguras: 'Matemáticas · figuras 2D', mateDatos: 'Matemáticas · fracciones y gráficas', construccion: 'Construcción', materiales: 'Construcción · materiales de muro', techos: 'Construcción · techos (forma y material)', aberturas: 'Construcción · puertas y ventanas', detalles: 'Construcción · detalles de fachada', suelos: 'Construcción · suelos y caminos', obra: 'Construcción · obra', vehiculos: 'Vehículos', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
   var CORTO = { dosAguas: '2 aguas', dosAguasLado: 'lado', unaAgua: '1 agua', plano: 'plano', conico: 'cónico', cupula: 'cúpula' };
   /* «muro:adobe» o «techo:conico:pizarra»: variantes que se arman solas. */
   function variante(nombre) {
@@ -21,6 +21,9 @@
     if (p[0] === 'muro') return [function (ctx) { C.muro({ material: p[1], ancho: 124, alto: 96 }).dibujar(ctx, 0, 0); }, 0.95, p[1]];
     if (p[0] === 'suelo') return [function (ctx) { C.suelo({ material: p[1], ancho: 128, alto: 80 }).dibujar(ctx, 0, 0); }, 0.95, p[1]];
     if (p[0] === 'techo') return [function (ctx) { C.techo({ forma: p[1], material: p[2] }).dibujar(ctx, 0, 6); }, 1.25, (CORTO[p[1]] || p[1]) + ' · ' + p[2]];
+    /* Resto: C.<pieza>({ valor }) con su escala. */
+    var ESC = { numero: 1, simbolo: 1.2, dado: 1.5, moneda: 1.7, figura: 1.3, fraccion: 1.4, base10: p[1] === 'centena' ? 0.85 : p[1] === 'decena' ? 0.95 : 2.2 };
+    if (p.length > 1 && C[p[0]]) return [function (ctx) { C[p[0]]({ valor: p[1] }).dibujar(ctx, 0, 0); }, ESC[p[0]] || 1, p[0] + ' ' + p[1]];
     return null;
   }
   /* Cómo mostrar cada pieza en su celda: [función que dibuja en (0,0), escala]. Las anchas van aparte. */
@@ -32,6 +35,15 @@
     varilla: [function (ctx) { C.varilla({ largo: 120 }).dibujar(ctx, 0, 0); [-40, -12, 16].forEach(function (y) { C.cuenta({ valor: 'd' }).dibujar(ctx, 0, y); }); }, 1, 'varilla con cuentas'],
     marco10: [una(function () { return C.marco10({ llenos: 7 }); }), 0.85, 'marco10 (7)'],
     gema: [una(function () { return C.gema(); }), 1.4],
+    calculadora: [una(function () { return C.calculadora(); }), 0.72],
+    regla: [una(function () { return C.regla(); }), 0.72],
+    transportador: [una(function () { return C.transportador(); }), 0.95],
+    escuadra: [una(function () { return C.escuadra(); }), 1.05],
+    reloj: [una(function () { return C.reloj({ hora: 3, minuto: 0 }); }), 1.35, 'reloj (3:00)'],
+    balanza: [una(function () { return C.balanza(); }), 0.75],
+    pizarra: [una(function () { return C.pizarra(); }), 0.85],
+    ficha: [function (ctx) { C.ficha({ valor: 'roja' }).dibujar(ctx, -20, 0); C.ficha({ valor: 'amarilla' }).dibujar(ctx, 20, 0); }, 1.5, 'fichas'],
+    grafica: [una(function () { return C.grafica(); }), 0.85, 'gráfica de barras'],
     ladrillo: [una(function () { return C.ladrillo(); }), 1.5],
     muro: [una(function () { return C.muro(); }), 0.85],
     bloque: [function (ctx) { C.bloque({ color: '#E07A3F' }).dibujar(ctx, -28, 10); C.bloque({ color: '#3E8E7E' }).dibujar(ctx, 28, 10); C.bloque({ color: '#F2C14E' }).dibujar(ctx, 0, -40); }, 0.85],
@@ -94,6 +106,10 @@
   };
   /* Piezas anchas: [nombre, alto, función(ctx, y)]. */
   var ANCHAS = {
+    digitos: [110, function (ctx, y, n) {
+      for (var d = 0; d <= 9; d++) C.numero({ valor: d }).dibujar(ctx, 66 + d * 92, y + 48);
+      etiqueta(ctx, n, 'numero 0-9 (recortados)', W / 2, y + 96);
+    }],
     recta: [110, function (ctx, y, n) {
       var r1 = C.recta({ inicio: 0, fin: 100, paso: 10, largo: 400 });
       r1.dibujar(ctx, 240, y + 40);
@@ -155,7 +171,12 @@
     return { bloques: bloques, alto: y };
   }
 
+  /* Los números y signos usan la letra Nunito: se dibujan cuando la fuente ya cargó. */
   function mostrar() {
+    var listo = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+    listo.then(dibujarHoja, dibujarHoja);
+  }
+  function dibujarHoja() {
     P.$('#proto').innerHTML =
       '<section class="pc-marco"><canvas id="pc-lienzo" role="img" aria-label="Catalogue of paper pieces by category"></canvas>' +
       '<div class="k-panel pc-panel"><p class="k-rotulo">Paper pieces</p><p id="pc-info" aria-live="polite"></p></div></section>';

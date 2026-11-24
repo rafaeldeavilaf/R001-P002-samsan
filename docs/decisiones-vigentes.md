@@ -251,6 +251,13 @@ Verificación: `node tools/verify_repaso_y2.js` (corre también `tools/verify_ab
     - Muros: ladrillo, ladrillo claro, adobe, piedra, sillar, madera, troncos, guadua, bahareque, concreto, corrugado y vidrio.
     - Techos: tejas, pizarra, paja, zinc, tablillas y teja verde.
     - Suelos: baldosa, adoquín, tablones, grava, camino de piedras y asfalto.
+  - Set matemático en cinco subcategorías:
+    - números y signos: números recortados en papel a partir de la letra, y los signos + − × ÷ = < > como formas recortadas;
+    - instrumentos: calculadora, regla, transportador, escuadra, reloj de agujas, balanza, pizarra, marcador y recta;
+    - conteo: cuentas, varilla, marco de 10, fichas, dado, moneda genérica, bloques de base 10 y gema;
+    - figuras 2D: nueve figuras;
+    - fracciones y gráfica de barras.
+  - Aviso: el dado y el marco de 10 tocan Maths 2 (reconocer cantidades sin contar), el tema de control de RB02. Tampoco se usan con los niños hasta después de la hoja de 21 días.
   - Por la revisión infantil quedan fuera las herramientas largas con punta (pala, martillo, llave, destornillador) y el farol de poste; el farol es de pared.
 - `prototipos/maths-estilos/fotogramas.js` (solo `_local/`): tres fotogramas de la misma estación, dibujados por código y sin contenido del colegio:
   - papercraft técnico, en papel negro con neón;
