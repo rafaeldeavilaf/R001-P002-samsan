@@ -508,6 +508,116 @@
     return grupo(partes);
   };
 
+  /* ================= E. Vehículos (vista de lado, el frente a la izquierda) =================
+     Autos genéricos, sin marcas. Cada uno: carrocería con ventanas, puertas y luces,
+     y dos ruedas con su rin. El suelo queda en y ≈ 31. */
+  function auto(nombre, o, d) {
+    var r = d.r || 13;
+    var cuerpo = PP.pieza({
+      forma: d.cuerpo, color: o.color || d.color, altura: 2, grosor: 3, semilla: d.semilla, clave: clave(nombre, o),
+      encima: function (g) {
+        g.save(); sombraChica(g); g.fillStyle = '#CFE8F2';
+        d.ventanas.forEach(function (v) { g.beginPath(); v.forEach(function (q, i) { g[i ? 'lineTo' : 'moveTo'](q[0], q[1]); }); g.closePath(); g.fill(); });
+        g.restore();
+        g.strokeStyle = 'rgba(30,20,38,.35)'; g.lineWidth = 1.5;
+        (d.puertas || []).forEach(function (x) { g.beginPath(); g.moveTo(x, d.altoPuerta || -14); g.lineTo(x, 12); g.stroke(); });
+        g.fillStyle = '#FFF3C4'; g.fillRect(d.faro[0], d.faro[1], 6, 5);
+        g.fillStyle = '#C2453A'; g.fillRect(d.cola[0], d.cola[1], 4, 6);
+        if (d.extra) d.extra(g);
+      }
+    });
+    var rueda = PP.pieza({
+      forma: F.circulo(r), color: '#2B2530', altura: 3, semilla: 59, clave: clave('auto-rueda', { r: r }),
+      encima: function (g) {
+        g.fillStyle = '#B8BCCF'; g.beginPath(); g.arc(0, 0, r * 0.52, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#6E6A78'; g.beginPath(); g.arc(0, 0, r * 0.18, 0, Math.PI * 2); g.fill();
+      }
+    });
+    return grupo([[cuerpo, 0, 0]].concat(d.ruedas.map(function (x) { return [rueda, x, 18]; })));
+  }
+  /* Furgoneta alta de pasajeros. */
+  C.furgoneta = function (o) {
+    o = o || {};
+    return auto('furgoneta', o, {
+      color: '#F2C14E', semilla: 141, ruedas: [-40, 40],
+      cuerpo: [[-64, 16], [-64, 0], [-60, -10], [-50, -46], [-44, -50], [58, -50], [63, -45], [64, 16]],
+      ventanas: [[[-48, -42], [-36, -44], [-36, -24], [-54, -24]], [[-30, -44], [-6, -44], [-6, -24], [-30, -24]], [[0, -44], [24, -44], [24, -24], [0, -24]], [[30, -44], [56, -44], [56, -24], [30, -24]]],
+      puertas: [-33, 27], altoPuerta: -22, faro: [-63, -6], cola: [60, -18]
+    });
+  };
+  /* Cupé descapotable, pequeño y bajo. */
+  C.cupe = function (o) {
+    o = o || {};
+    return auto('cupe', o, {
+      color: '#D9453A', semilla: 143, ruedas: [-34, 34],
+      cuerpo: [[-55, 16], [-55, -2], [-48, -10], [-26, -14], [-12, -28], [14, -30], [30, -14], [53, -11], [55, 16]],
+      ventanas: [[[-9, -25], [12, -27], [24, -15], [-20, -14]]],
+      puertas: [-12, 24], faro: [-54, -4], cola: [50, -8]
+    });
+  };
+  /* Sedán largo y elegante. */
+  C.sedanLargo = function (o) {
+    o = o || {};
+    return auto('sedanLargo', o, {
+      color: '#2E2A36', semilla: 145, ruedas: [-46, 46],
+      cuerpo: [[-70, 16], [-70, -4], [-62, -10], [-36, -14], [-20, -32], [30, -33], [42, -15], [68, -12], [70, 16]],
+      ventanas: [[[-17, -29], [4, -30], [4, -17], [-30, -16]], [[9, -30], [27, -30], [37, -17], [9, -17]]],
+      puertas: [-20, 6, 38], faro: [-69, -6], cola: [66, -9],
+      extra: function (g) { g.fillStyle = 'rgba(233,236,242,.7)'; g.fillRect(-66, 2, 132, 2.5); }
+    });
+  };
+  /* Auto pequeño de ciudad, alto y corto. */
+  C.mini = function (o) {
+    o = o || {};
+    return auto('mini', o, {
+      color: '#8DB84A', semilla: 147, ruedas: [-30, 30], r: 12,
+      cuerpo: [[-50, 16], [-50, -4], [-44, -14], [-30, -20], [-14, -44], [34, -46], [44, -40], [50, -10], [50, 16]],
+      ventanas: [[[-12, -40], [14, -41], [14, -20], [-27, -19]], [[19, -41], [33, -42], [40, -22], [19, -21]]],
+      puertas: [16], altoPuerta: -18, faro: [-49, -9], cola: [46, -16]
+    });
+  };
+  /* Sedán familiar de cuatro puertas. */
+  C.sedan = function (o) {
+    o = o || {};
+    return auto('sedan', o, {
+      color: '#E05A3A', semilla: 149, ruedas: [-40, 40],
+      cuerpo: [[-65, 16], [-65, -2], [-56, -10], [-32, -14], [-14, -33], [26, -34], [42, -16], [63, -12], [65, 16]],
+      ventanas: [[[-11, -30], [4, -31], [4, -17], [-26, -16]], [[9, -31], [24, -31], [35, -17], [9, -17]]],
+      puertas: [-14, 6, 34], faro: [-64, -5], cola: [61, -8]
+    });
+  };
+  /* Camioneta compacta, techo alto y recto. */
+  C.camioneta = function (o) {
+    o = o || {};
+    return auto('camioneta', o, {
+      color: '#3F7CC2', semilla: 151, ruedas: [-36, 36],
+      cuerpo: [[-60, 16], [-60, -4], [-54, -14], [-38, -18], [-26, -42], [50, -44], [58, -40], [60, 16]],
+      ventanas: [[[-23, -38], [-2, -39], [-2, -20], [-34, -19]], [[3, -39], [26, -39], [26, -20], [3, -20]], [[31, -39], [52, -40], [54, -22], [31, -21]]],
+      puertas: [0, 29], altoPuerta: -18, faro: [-59, -10], cola: [56, -14],
+      extra: function (g) { g.fillStyle = 'rgba(30,20,38,.28)'; g.fillRect(-56, 0, 114, 3); }
+    });
+  };
+  /* Compacto de cinco puertas (hatchback). */
+  C.compacto = function (o) {
+    o = o || {};
+    return auto('compacto', o, {
+      color: '#C9CDD8', semilla: 153, ruedas: [-36, 36],
+      cuerpo: [[-59, 16], [-59, -2], [-52, -10], [-34, -16], [-12, -38], [34, -40], [50, -26], [57, -14], [59, 16]],
+      ventanas: [[[-9, -34], [9, -36], [9, -19], [-28, -18]], [[14, -36], [32, -36], [45, -22], [14, -20]]],
+      puertas: [-12, 11], altoPuerta: -18, faro: [-58, -6], cola: [54, -12]
+    });
+  };
+  /* Deportivo bajo con alerón. */
+  C.deportivo = function (o) {
+    o = o || {};
+    return auto('deportivo', o, {
+      color: '#F08A3C', semilla: 155, ruedas: [-40, 40],
+      cuerpo: [[-65, 16], [-66, 4], [-54, -4], [-22, -10], [-8, -24], [18, -25], [32, -12], [54, -10], [56, -22], [68, -24], [67, -17], [62, -8], [66, 16]],
+      ventanas: [[[-5, -21], [16, -22], [26, -12], [-16, -10]]],
+      puertas: [-14, 26], altoPuerta: -9, faro: [-64, -1], cola: [62, -4]
+    });
+  };
+
   /* ================= C. Estación (Y6) ================= */
   C.panel = function (o) {
     o = o || {};
@@ -549,6 +659,7 @@
   C.categorias = {
     matematicas: ['tarjeta', 'recta', 'marcador', 'cuenta', 'varilla', 'marco10', 'gema'],
     construccion: ['ladrillo', 'muro', 'bloque', 'viga', 'columna', 'arco', 'rampa', 'escalera', 'techo', 'puerta', 'ventanaCasa', 'engranaje', 'tuerca', 'cono', 'andamio', 'grua', 'portal'],
+    vehiculos: ['furgoneta', 'cupe', 'sedanLargo', 'mini', 'sedan', 'camioneta', 'compacto', 'deportivo'],
     aldea: ['casa', 'arbol', 'arbusto', 'nube', 'tabla', 'carrito', 'cerca', 'hojaPasto', 'hojaRio'],
     estacion: ['panel', 'brazo', 'modulo', 'ventana', 'antena', 'nave', 'estrella', 'planeta']
   };

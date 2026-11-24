@@ -13,7 +13,7 @@
   var P = window.PROTO_COMUN, PP = window.SAMSAN_PAPEL, C = PP && PP.catalogo;
   var W = 960, CEL = 160, COLS = 6, CAB = 46;
 
-  var TITULOS = { matematicas: 'Matemáticas', construccion: 'Construcción', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
+  var TITULOS = { matematicas: 'Matemáticas', construccion: 'Construcción', vehiculos: 'Vehículos', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
   /* Cómo mostrar cada pieza en su celda: [función que dibuja en (0,0), escala]. Las anchas van aparte. */
   function una(fn) { return function (ctx) { fn().dibujar(ctx, 0, 0); }; }
   var MUESTRA = {
@@ -39,6 +39,14 @@
     cono: [una(function () { return C.cono(); }), 1.3],
     andamio: [una(function () { return C.andamio(); }), 0.85],
     grua: [una(function () { return C.grua(); }), 0.85],
+    furgoneta: [una(function () { return C.furgoneta(); }), 1.05],
+    cupe: [una(function () { return C.cupe(); }), 1.1],
+    sedanLargo: [una(function () { return C.sedanLargo(); }), 1],
+    mini: [una(function () { return C.mini(); }), 1.2],
+    sedan: [una(function () { return C.sedan(); }), 1.05],
+    camioneta: [una(function () { return C.camioneta(); }), 1.1],
+    compacto: [una(function () { return C.compacto(); }), 1.1],
+    deportivo: [una(function () { return C.deportivo(); }), 1.05],
     casa: [function (ctx) { C.casa().dibujar(ctx, -36, 0); C.casa({ techo: '#3E8E7E', color: '#F1E4C6' }).dibujar(ctx, 40, 0); }, 0.85],
     arbol: [una(function () { return C.arbol(); }), 1.3],
     arbusto: [una(function () { return C.arbusto(); }), 1.4],
