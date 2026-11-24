@@ -1,6 +1,6 @@
 ---
 estado: vigente
-actualizado: 2026-11-23
+actualizado: 2026-11-24
 descripcion: Estado real, decisiones y plan por etapas de SAMSAN. Gana sobre cualquier otro documento. Lo leen el proyecto de Claude (integración de GitHub) y Claude Code.
 ---
 
@@ -232,6 +232,16 @@ Verificación: `node tools/verify_repaso_y2.js` (corre también `tools/verify_ab
   - papel de colores;
   - pixel de hoy, imitado.
   - A pedido de Rafael, los dos de papel llevan relieve por capas: sombra según la altura, canto del papel y hueco hundido. La revisión de contenido infantil cambió la antena (ahora un cuenco sobre un pie ancho), quitó un robot y redondeó el árbol de la plantilla.
+- **Rafael eligió el papel y cartón recortado (24 nov 2026)** y pidió desarrollar solo ese estilo por ahora. Los fotogramas A y C quedan como están, para que el jugador mayor siga comparando en H04. El de papel ya es un diorama de caja:
+  - un tablero de cartón kraft con textura;
+  - una hoja de cielo de borde rasgado, pegada con cinta;
+  - en cada pieza, fibra y bisel iluminados desde arriba a la izquierda;
+  - el canto visible, corrugado en los brazos de cartón;
+  - tres sombras por altura: contacto, ambiental y lejana;
+  - las celdas de los paneles pegadas como cuadritos;
+  - las esquinas más oscuras, como bajo una lámpara.
+
+  Todo es SVG con filtros. Un riesgo a medir antes del juego: los filtros de luz pesan en el teléfono, así que en el juego probablemente se dibujen una vez a un mapa de bits.
 - Los resultados con los niños van en `privado/`, que git ignora. Aquí solo queda la decisión que salga de ellos.
 - Verificación:
   - `node tools/verify_rb01.js` (corre en Actions);

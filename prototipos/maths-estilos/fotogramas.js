@@ -124,50 +124,113 @@
     return s;
   }
 
-  /* ---------- 2. Papel recortado de colores ---------- */
-  var COLOR = { planeta: '#7FB069', brazo: '#D9A441', panel: '#3E8E7E', hueco: '#F3E3C3', antena: '#C2453A', casco: '#E07A3F', ventana: '#FFF3C4', nave: '#F2C14E', repuesto: '#3E8E7E' };
-  /* Canto del papel: el mismo color, más oscuro. */
-  var CANTO = { planeta: '#567A45', brazo: '#9C7326', panel: '#245A4F', antena: '#842A23', casco: '#A24F22', ventana: '#C9B27A', nave: '#B5872A', repuesto: '#245A4F' };
+  /* ---------- 2. Papel y cartón recortado (el estilo elegido por Rafael) ----------
+     Diorama de caja: un tablero de cartón kraft, una hoja de cielo pegada con
+     cinta, y piezas de cartulina y cartón a distintas alturas. Cada pieza tiene:
+     - material: fibra del papel y bisel del borde, con luz de arriba a la izquierda;
+     - grosor: el canto visible abajo a la derecha (cartón corrugado en los brazos);
+     - tres sombras: contacto, ambiental y lejana, más largas cuanto más alta. */
+  var COLOR = { planeta: '#7FB069', brazo: '#C89B62', panel: '#3E8E7E', antena: '#C2453A', casco: '#E07A3F', ventana: '#FFF3C4', nave: '#F2C14E', repuesto: '#3E8E7E' };
+  /* Canto: el mismo papel, más oscuro; en el cartón, las ondas del corrugado. */
+  var CANTO = { planeta: '#4F7340', brazo: 'url(#pp-corrugado)', panel: '#22564B', antena: '#7E2620', casco: '#9A4A1F', ventana: '#C2A96E', nave: '#AE8026', repuesto: '#22564B' };
+  /* Grosor en px: cartulina 2, cartón 4. */
+  var GROSOR = { brazo: 4, casco: 3, planeta: 3 };
+  var SOMBRA = '#2A1E14';
+  function sombraF(clase, dx, dy, blur, op, res) {
+    return '<feGaussianBlur in="SourceAlpha" stdDeviation="' + blur + '"/>' +
+      '<feOffset class="' + clase + '" dx="' + dx + '" dy="' + dy + '" result="' + res + 'a"/>' +
+      '<feFlood flood-color="' + SOMBRA + '" flood-opacity="' + op + '"/>' +
+      '<feComposite in2="' + res + 'a" operator="in" result="' + res + '"/>';
+  }
+  function filtroPapel(id, h) {
+    return '<filter id="' + id + '" data-alto="' + h + '" x="-40%" y="-40%" width="200%" height="200%" color-interpolation-filters="sRGB">' +
+      '<feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="bisel"/>' +
+      '<feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="3" seed="' + (5 + h) + '" result="ruido"/>' +
+      '<feComposite in="bisel" in2="ruido" operator="arithmetic" k2="1" k3=".22" result="altura"/>' +
+      '<feDiffuseLighting in="altura" surfaceScale="2.6" diffuseConstant="1" lighting-color="#FFFFFF" result="luz"><feDistantLight azimuth="225" elevation="58"/></feDiffuseLighting>' +
+      '<feComposite in="SourceGraphic" in2="luz" operator="arithmetic" k1="1.2" result="iluminada"/>' +
+      '<feComposite in="iluminada" in2="SourceAlpha" operator="in" result="cara"/>' +
+      sombraF('lejos', 3 * h, 5 * h, (3.2 * h).toFixed(1), 0.2, 'sl') +
+      sombraF('ambiente', (1.8 * h).toFixed(1), (2.6 * h).toFixed(1), (1.3 * h).toFixed(1), 0.44, 'sa') +
+      sombraF('contacto', (0.5 * h).toFixed(1), (0.7 * h).toFixed(1), 0.6, 0.55, 'sc') +
+      '<feMerge><feMergeNode in="sl"/><feMergeNode in="sa"/><feMergeNode in="sc"/><feMergeNode in="cara"/></feMerge></filter>';
+  }
+  /* Celdas de un panel solar: cuadritos de papel pegados sobre la pieza. */
+  function celdas(q, n, m) {
+    function lerp(p, r, t) { return [p[0] + (r[0] - p[0]) * t, p[1] + (r[1] - p[1]) * t]; }
+    function en(u, v) { return lerp(lerp(q[0], q[1], u), lerp(q[3], q[2], u), v); }
+    var out = [];
+    for (var i = 0; i < n; i++) for (var j = 0; j < n; j++) {
+      var u0 = i / n + m, u1 = (i + 1) / n - m, v0 = j / n + m, v1 = (j + 1) / n - m;
+      out.push([en(u0, v0), en(u1, v0), en(u1, v1), en(u0, v1)]);
+    }
+    return out;
+  }
+  /* Borde rasgado para la hoja de cielo. */
+  function rasgado(y0, semilla) {
+    var pts = [[-20, -20], [W + 20, -20]], s = semilla;
+    function azar() { s = (s * 16807) % 2147483647; return s / 2147483647 - 0.5; }
+    for (var x = W + 20; x >= -20; x -= 14) pts.push([x, y0 + Math.sin(x / 47) * 6 + azar() * 5]);
+    return pts;
+  }
   function temblar(pts, semilla) {
     /* Bordes de tijera: un punto intermedio por lado, movido un poco. */
     var out = [], s = semilla;
     function azar() { s = (s * 16807) % 2147483647; return s / 2147483647 - 0.5; }
     for (var k = 0; k < pts.length; k++) {
       var a = pts[k], b = pts[(k + 1) % pts.length];
-      out.push([a[0] + azar() * 2.4, a[1] + azar() * 2.4]);
-      out.push([(a[0] + b[0]) / 2 + azar() * 3.2, (a[1] + b[1]) / 2 + azar() * 3.2]);
+      /* En curvas (lados cortos) la tijera tiembla menos: si no, el borde queda dentado. */
+      var f = Math.min(1, Math.hypot(b[0] - a[0], b[1] - a[1]) / 30);
+      out.push([a[0] + azar() * 2.4 * f, a[1] + azar() * 2.4 * f]);
+      out.push([(a[0] + b[0]) / 2 + azar() * 3.2 * f, (a[1] + b[1]) / 2 + azar() * 3.2 * f]);
     }
     return out;
   }
   function papelColores() {
-    var s = '<defs>' + filtrosRelieve('pp', '#3B2F25', 0.5, 0.38) +
-      '<filter id="pp-difuso" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4"/></filter>' +
-      '<filter id="pp-grano" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>' +
+    var s = '<defs>';
+    for (var h = 1; h <= 5; h++) s += filtroPapel('pp-r' + h, h);
+    s += '<filter id="pp-difuso" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4"/></filter>' +
+      /* Cartón kraft: fibra gruesa, iluminada. */
+      '<filter id="pp-carton" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">' +
+        '<feTurbulence type="fractalNoise" baseFrequency=".7 .35" numOctaves="4" seed="2" result="r"/>' +
+        '<feDiffuseLighting in="r" surfaceScale=".8" lighting-color="#FFFFFF" result="l"><feDistantLight azimuth="225" elevation="64"/></feDiffuseLighting>' +
+        '<feComposite in="SourceGraphic" in2="l" operator="arithmetic" k1="1.12" result="c"/>' +
+        '<feComposite in="c" in2="SourceAlpha" operator="in"/></filter>' +
+      '<filter id="pp-cinta" x="-20%" y="-40%" width="140%" height="180%"><feDropShadow dx="1" dy="1.5" stdDeviation="1" flood-color="' + SOMBRA + '" flood-opacity=".25"/></filter>' +
+      '<pattern id="pp-corrugado" width="3.2" height="6" patternUnits="userSpaceOnUse"><rect width="3.2" height="6" fill="#B48853"/><rect width="1.3" height="6" fill="#7A5630"/></pattern>' +
+      '<radialGradient id="pp-vineta" cx="50%" cy="45%" r="70%"><stop offset="60%" stop-color="#2A1E14" stop-opacity="0"/><stop offset="100%" stop-color="#2A1E14" stop-opacity=".28"/></radialGradient>' +
       '</defs>';
-    /* Fondo kraft un poco más oscuro, para que el papel de encima resalte. */
-    s += '<rect class="fondo" width="' + W + '" height="' + H + '" fill="#E6CFA2"/>';
-    s += '<rect width="' + W + '" height="' + H * 0.55 + '" fill="#EEDDB8"/>';
+    /* Tablero de cartón kraft. */
+    s += '<rect class="fondo" width="' + W + '" height="' + H + '" fill="#C9A570" filter="url(#pp-carton)"/>';
+    /* Hoja de cielo con borde rasgado, pegada con cinta. */
+    var cielo = rasgado(300, 21);
+    s += '<polygon class="canto" points="' + ptsStr(mover(cielo, 0.8, 1)) + '" fill="#D4C29A"/>';
+    s += '<polygon class="cara" data-alto="1" points="' + ptsStr(cielo) + '" fill="#F1E4C6" filter="url(#pp-r1)"/>';
+    [[70, 18, -14], [730, 18, 12]].forEach(function (c) {
+      s += '<rect x="' + (c[0] - 32) + '" y="' + (c[1] - 9) + '" width="64" height="18" fill="#EDE0B4" opacity=".82" transform="rotate(' + c[2] + ' ' + c[0] + ' ' + c[1] + ')" filter="url(#pp-cinta)"/>';
+    });
     ESTRELLAS.forEach(function (e, i) {
-      var pts = ngon(e[0], e[1], 5, 5, i);
-      s += '<polygon class="canto" points="' + ptsStr(mover(pts, 1, 1)) + '" fill="#B8862E"/>';
+      var pts = ngon(e[0], e[1], 6, 5, i);
+      s += '<polygon class="canto" points="' + ptsStr(mover(pts, 0.8, 1)) + '" fill="#A87A26"/>';
       s += '<polygon class="cara" data-alto="1" points="' + ptsStr(pts) + '" fill="#E9B44C" filter="url(#pp-r1)"/>';
     });
     ESCENA.forEach(function (p, i) {
       var color = COLOR[p.rol];
       if (p.rol === 'hueco') {
-        s += hundido('pp', p.pts, '#D9C08E', '#5E4630', 0.55);
-        s += '<polygon points="' + ptsStr(p.pts) + '" fill="none" stroke="#8A6D4B" stroke-width="1.5" stroke-dasharray="7 6"/>';
+        /* Ranura cortada en la hoja de cielo: se ve el cartón de abajo, en sombra. */
+        s += hundido('pp', p.pts, '#A88355', SOMBRA, 0.6);
+        s += '<polygon points="' + ptsStr(p.pts) + '" fill="none" stroke="#6E5233" stroke-width="1.5" stroke-dasharray="7 6"/>';
         return;
       }
-      var pts = temblar(contorno(p), (p.circ ? 11 : 3) + i);
-      s += '<polygon class="canto" points="' + ptsStr(mover(pts, 1.5, 1.5)) + '" fill="' + CANTO[p.rol] + '"/>';
+      var pts = temblar(contorno(p), (p.circ ? 11 : 3) + i), g = GROSOR[p.rol] || 2;
+      for (var k = g; k >= 1; k--) s += '<polygon class="canto" points="' + ptsStr(mover(pts, k * 0.8, k * 0.95)) + '" fill="' + CANTO[p.rol] + '"/>';
       s += '<polygon class="cara" data-alto="' + p.alto + '" points="' + ptsStr(pts) + '" fill="' + color + '" filter="url(#pp-r' + p.alto + ')"/>';
-      /* Brillo fino del borde que recibe la luz. */
-      s += '<polygon points="' + ptsStr(pts) + '" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="1"/>';
-      if (p.rejilla) s += rejilla(p.pts, '#F8EDD6', 2);
+      if (p.rejilla) celdas(p.pts, 4, 0.045).forEach(function (q) {
+        s += '<polygon points="' + ptsStr(q) + '" fill="#5DB09C" filter="url(#pp-r1)"/>';
+      });
     });
-    /* Grano del papel sobre todo, muy suave. */
-    s += '<rect width="' + W + '" height="' + H + '" filter="url(#pp-grano)" opacity=".09" style="mix-blend-mode:multiply"/>';
+    /* Luz de lámpara: las esquinas de la caja más oscuras. */
+    s += '<rect width="' + W + '" height="' + H + '" fill="url(#pp-vineta)"/>';
     return s;
   }
 
@@ -222,7 +285,7 @@
   var FOTOGRAMAS = [
     { id: 'papercraft-tecnico', nombre: 'Technical papercraft', nota: 'Black paper, neon edges, folded like mechanical origami.', borde: '#2FE6FF', dibujar: papercraft,
       alt: 'Space station made of black folded paper with glowing neon edges' },
-    { id: 'papel-colores', nombre: 'Cut paper', nota: 'Warm coloured paper, cut with scissors, in layers with shadows.', borde: '#E07A3F', dibujar: papelColores,
+    { id: 'papel-colores', nombre: 'Cut paper', nota: 'Cut paper and card in layers, like a diorama in a box.', borde: '#E07A3F', dibujar: papelColores,
       alt: 'Space station made of warm coloured cut paper with soft shadows' },
     { id: 'pixel-imitacion', nombre: 'Pixel (like today)', nota: 'A code-made imitation of the pixel style the games use today.', borde: '#1E1426', dibujar: pixel,
       alt: 'Space station in chunky pixel squares with dark outlines' }

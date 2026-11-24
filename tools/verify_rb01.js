@@ -225,6 +225,19 @@ async function h04() {
     check('H04 relieve ' + id + ': cada cara tiene debajo su canto de papel', caras.every(c => { const a = c.previousElementSibling; return a && a.getAttribute('class') === 'canto'; }));
     check('H04 relieve ' + id + ': el hueco está hundido (sombra interior)', !!svg.querySelector('clipPath#' + pref + '-hueco') && !!svg.querySelector('polygon.hueco'));
   });
+  /* Papel y cartón (estilo elegido por Rafael): material y grosor visibles. */
+  {
+    const svg = new w.DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg">' + lista.find(x => x.id === 'papel-colores').dibujar() + '</svg>', 'image/svg+xml');
+    const f3 = svg.getElementById('pp-r3');
+    check('H04 papel: cada pieza lleva fibra y bisel iluminados desde arriba a la izquierda', [1, 2, 3, 4, 5].every(h => {
+      const f = svg.getElementById('pp-r' + h);
+      const luz = f && f.querySelector('feDiffuseLighting feDistantLight');
+      return f && f.querySelector('feTurbulence') && luz && luz.getAttribute('azimuth') === '225';
+    }));
+    check('H04 papel: tres sombras por altura (contacto, ambiental y lejana)', !!f3 && ['contacto', 'ambiente', 'lejos'].every(c => !!f3.querySelector('.' + c)));
+    check('H04 papel: los brazos son de cartón con canto corrugado de 4 capas', [...svg.querySelectorAll('polygon.canto[fill="url(#pp-corrugado)"]')].length === 8 && !!svg.getElementById('pp-corrugado'));
+    check('H04 papel: tablero de cartón con textura', /url\(#pp-carton\)/.test(svg.querySelector('rect.fondo').getAttribute('filter') || ''));
+  }
   /* Revisión infantil: sin robot y sin antena de palo con cúpula. */
   const fuente = leer('prototipos/maths-estilos/fotogramas.js');
   check('Revisión infantil: no hay robot en la escena', !/rol:\s*'robot'/.test(fuente));
