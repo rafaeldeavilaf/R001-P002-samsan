@@ -10,7 +10,8 @@
      Vale solo mientras dure RB01: en RB02 esas páginas pueden cambiar
      con razón, por eso este archivo no se llama verify_*.js.
    - H03.4 y H04.3: privado/rb01-resultados.md (ignorado por git) tiene
-     los resultados de los dos teléfonos y la elección del mayor.
+     los resultados del teléfono del padre y de la gama baja simulada,
+     y la elección del mayor.
 
    USO:  python3 tools/build.py && node tools/revisar_rb01.js
    ============================================================ */
@@ -53,8 +54,10 @@ if (!fs.existsSync(res)) {
   const t = fs.readFileSync(res, 'utf8');
   const valor = etiqueta => { const m = t.match(new RegExp('^-\\s*' + etiqueta + ':[ \\t]*(.*)$', 'mi')); return m ? m[1].trim() : ''; };
   const lleno = v => v && !/_{3,}|pendiente/i.test(v);
-  ['Jugador menor · teléfono', 'Jugador menor · Canvas', 'Jugador menor · CSS 3D',
-    'Jugador mayor · teléfono', 'Jugador mayor · Canvas', 'Jugador mayor · CSS 3D'].forEach(e => check('H03.4 ' + e, lleno(valor(e)), valor(e) || 'vacío'));
+  /* H03.4 cambió el 24 nov 2026: se compartirá con otras familias, así que se mide contra
+     el teléfono del padre (techo) y una gama baja simulada (piso). Un equipo viejo real es opcional. */
+  ['Padre · teléfono', 'Padre · Canvas', 'Padre · CSS 3D',
+    'Gama baja simulada · Canvas', 'Gama baja simulada · CSS 3D'].forEach(e => check('H03.4 ' + e, lleno(valor(e)), valor(e) || 'vacío'));
   check('H04.3 elección del jugador mayor', lleno(valor('Elección del jugador mayor')), valor('Elección del jugador mayor') || 'vacío');
   check('H04.3 comentario del jugador mayor', lleno(valor('Comentario del jugador mayor')), valor('Comentario del jugador mayor') || 'vacío');
   check('privado/ está ignorado por git', /^privado\/\s*$/m.test(fs.readFileSync(path.join(ROOT, '.gitignore'), 'utf8')));

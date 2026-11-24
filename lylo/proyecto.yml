@@ -44,7 +44,7 @@ historias:
     hoy.'
   - Mide FPS y memoria por separado para Canvas y para CSS 3D.
   - Muestra los resultados en pantalla para anotarlos; nada sale del navegador ni se pide nada a terceros.
-  - Se corre en el teléfono de cada niño y los resultados quedan anotados.
+  - Se corre en el teléfono del padre, en gama baja simulada (CPU ×6) y en un equipo viejo real si hay uno, y los resultados quedan anotados.
   aprobada_por_cliente: true
 - id: H04
   historia: Como jugador mayor, quiero ver tres fotogramas de estilo, uno de ellos de papercraft técnico,
