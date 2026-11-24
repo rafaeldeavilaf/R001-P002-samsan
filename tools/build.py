@@ -462,6 +462,7 @@ def build_proto(kit, ui, brand, credits, carpeta, nombre, materia):
         page += '<script>\n' + read(PROTO, "comun", "repaso.js") + '\n</script>\n'
     if USA_PAPEL_RE.search(js):
         page += '<script>\n' + read(PROTO, "comun", "papel.js") + '\n</script>\n'
+        page += '<script>\n' + read(PROTO, "comun", "papel-piezas.js") + '\n</script>\n'
     inc = INCLUYE_RE.search(js)
     if inc:
         page += '<script>window.SAMSAN_MENU = true;</script>\n'

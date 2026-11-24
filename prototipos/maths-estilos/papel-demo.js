@@ -12,28 +12,14 @@
   var P = window.PROTO_COMUN, PP = window.SAMSAN_PAPEL;
   var W = 800, H = 450;
 
+  /* Todas las piezas salen del catálogo (prototipos/comun/papel-piezas.js). */
   function armar() {
-    var F = PP.formas;
+    var C = PP.catalogo;
     return {
       cielo: PP.hoja(W, 300, { clave: 'demo-cielo' }),
-      planeta: PP.pieza({ forma: F.circulo(230), color: '#7FB069', altura: 1, grosor: 3, semilla: 11, clave: 'demo-planeta' }),
-      brazo: PP.pieza({ forma: F.rect(120, 30), color: '#C89B62', altura: 2, carton: true, semilla: 4, clave: 'demo-brazo' }),
-      panel: PP.pieza({ forma: F.rect(120, 140), color: '#3E8E7E', altura: 3, semilla: 6, clave: 'demo-panel', encima: celdas }),
-      repuesto: PP.pieza({ forma: F.rect(120, 140), color: '#3E8E7E', altura: 3, semilla: 9, clave: 'demo-repuesto', encima: celdas }),
-      pie: PP.pieza({ forma: [[-24, 11], [24, 11], [10, -11], [-10, -11]], color: '#C2453A', altura: 3, semilla: 8, clave: 'demo-pie' }),
-      cuenco: PP.pieza({ forma: F.cuenco(36), color: '#C2453A', altura: 3, semilla: 10, clave: 'demo-cuenco' }),
-      casco: PP.pieza({ forma: F.poligono(8, 78), color: '#E07A3F', altura: 4, grosor: 3, semilla: 12, clave: 'demo-casco' }),
-      ventana: PP.pieza({ forma: F.circulo(26), color: '#FFF3C4', altura: 5, semilla: 13, clave: 'demo-ventana' }),
-      nave: PP.pieza({ forma: [[-42, -18], [43, 0], [-42, 18], [-24, 0]], color: '#F2C14E', altura: 3, semilla: 14, clave: 'demo-nave' }),
-      estrella: PP.pieza({ forma: F.estrella(7), color: '#E9B44C', altura: 1, grosor: 1, recto: true, clave: 'demo-estrella' })
+      planeta: C.planeta(), brazo: C.brazo(), panel: C.panel(), repuesto: C.panel({ semilla: 9 }),
+      antena: C.antena(), casco: C.modulo(), ventana: C.ventana(), nave: C.nave(), estrella: C.estrella()
     };
-  }
-  /* Cuadritos de las celdas solares, pegados sobre el panel. */
-  function celdas(g) {
-    g.fillStyle = '#5DB09C';
-    g.shadowColor = 'rgba(42,30,20,.4)'; g.shadowBlur = 2; g.shadowOffsetX = 1; g.shadowOffsetY = 1.4;
-    for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++) g.fillRect(-54 + i * 28, -64 + j * 33, 20, 22);
-    g.shadowColor = 'transparent';
   }
 
   var ESTRELLAS = [[60, 40], [250, 30], [330, 70], [520, 50], [610, 90], [700, 40], [760, 130], [480, 120], [280, 300], [760, 260], [520, 400], [40, 200]];
@@ -85,7 +71,7 @@
       if (!rep.puesto) PP.hueco(ctx, HUECO.x, HUECO.y, HUECO.w, HUECO.h);
       PP.dibujar(ctx, A.brazo, 275, 211); PP.dibujar(ctx, A.brazo, 525, 211);
       PP.dibujar(ctx, A.panel, 155, 210);
-      PP.dibujar(ctx, A.pie, 400, 135); PP.dibujar(ctx, A.cuenco, 400, 110);
+      A.antena.dibujar(ctx, 400, 110);
       PP.dibujar(ctx, A.casco, 400, 212); PP.dibujar(ctx, A.ventana, 400, 212);
       PP.dibujar(ctx, A.nave, 160 + Math.sin(t / 1400) * 18, 88 + Math.sin(t / 700) * 6, Math.sin(t / 1400) * 0.08);
       PP.dibujar(ctx, A.repuesto, rep.x, rep.y, rep.a);

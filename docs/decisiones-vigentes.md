@@ -237,6 +237,12 @@ Verificación: `node tools/verify_repaso_y2.js` (corre también `tools/verify_ab
   - Un boceto la incluye con `// usa: papel`.
   - Demo en `prototipos/maths-estilos/papel-demo.js`, solo en `_local/`: la estación completa, la nave que flota y el panel de repuesto que se arrastra al hueco. Las piezas se dibujan una vez en unos 8 ms y la escena corre a 60 FPS en el portátil.
   - Es un boceto fuera de rebanada. RB02 decide si lo adopta en su plan.
+  - Catálogo de piezas en `prototipos/comun/papel-piezas.js`, que se incluye solo con `// usa: papel`:
+    - instrumentos de Maths: tarjeta de número, decimal o fracción; recta numérica con `xDe(v)`; marcador; cuentas y varilla de ábaco; marco de 10; gema;
+    - aldea: casa, árbol, arbusto, nube, tabla, carrito, cerca, hoja de pasto y río;
+    - estación: panel, brazo, módulo, ventana, antena, nave, estrella y planeta.
+  - La hoja `prototipos/maths-estilos/papel-catalogo.js`, solo en `_local/`, las muestra numeradas. Sirve también para la revisión infantil.
+  - Aviso: el marco de 10 es de Maths 2, el tema de control de RB02. Existe, pero no se usa con los niños hasta después de la hoja de 21 días.
 - `prototipos/maths-estilos/fotogramas.js` (solo `_local/`): tres fotogramas de la misma estación, dibujados por código y sin contenido del colegio:
   - papercraft técnico, en papel negro con neón;
   - papel de colores;
