@@ -1,6 +1,6 @@
 ---
 estado: vigente
-actualizado: 2026-11-18
+actualizado: 2026-11-23
 descripcion: Estado real, decisiones y plan por etapas de SAMSAN. Gana sobre cualquier otro documento. Lo leen el proyecto de Claude (integración de GitHub) y Claude Code.
 ---
 
@@ -214,6 +214,28 @@ Una sola aplicación (decisión de Rafael, 4 nov 2026): el menú incluye los dos
 **Submenú de niveles (4 nov 2026, a pedido de Rafael).** Cada juego abre un submenú con sus cinco rondas en orden, todas abiertas: el niño o el padre eligen cuál estudiar. La siguiente sin terminar dice «Start here» y las terminadas muestran su gema; no se muestran aciertos ni intentos (regla 4). MENU dentro de una ronda vuelve al submenú, «GAMES» vuelve al menú principal y al terminar una ronda salen NEXT ROUND y LEVELS. El progreso guarda solo qué rondas se terminaron, en `localStorage` con la clave `samsan:proto-repaso-<juego>-hechas`; el progreso viejo (la ronda en la que iba) se convierte al abrir.
 
 Verificación: `node tools/verify_repaso_y2.js` (corre también `tools/verify_abaco_y2.js` y prueba el menú). Nada se sube hasta que Rafael lo pida. Horas de la serie: unas 1,3 h de reloj el 4 nov (12:10 a 13:30) entre la primera versión, el pixel art, el conteo tocando, el menú, el inglés simple y la prueba del agente; los estimados aprobados sumaban 27 h de desarrollo (11,5 + 8 + 3,5 + 4) y no incluyen pasar los juegos a la base, que no se hizo.
+
+**Plan revisado: validar con los niños antes de construir (20 nov 2026).** Rafael adoptó el plan que salió de una revisión independiente:
+- Primero se prueba con los niños sobre lo que ya existe. Se construye solo con evidencia.
+- El proyecto se lleva con el marco lylo-dev: perfil Base, con Rafael como cliente. La ficha está en `lylo/proyecto.yml` y los planes en `lylo/planes/`.
+- Los temas salen de las guías totales del año, en su orden, empezando por Maths. Del material del colegio solo se toman temas y objetivos.
+- Hay dos rebanadas antes de una compuerta (hito HT01): cada niño vuelve solo dos veces en siete días, y una hoja de retención en papel a los 21 días sale mejor en el tema jugado que en uno de control.
+  - RB01: mirar y probar el estilo de papel.
+  - RB02: boceto gris de un bucle diario «Hoy» sobre `prototipos/comun/repaso.js` y `guias/comun/guia.js`.
+- El motor de papel y un proyecto nuevo quedan detrás de esa compuerta.
+
+**RB01 «Mirar y probar» (construida el 23 nov 2026, plan en `lylo/planes/RB01.md`).** Ninguna página publicada cambia.
+- `imprimibles/` (no se publica): una hoja de observación para dos sesiones por niño y la guía de una prueba de papel de una hora, con plantillas de recorte. Las hojas llenas se quedan en papel.
+- `maths-estilos-rendimiento.html` (es la única página que se publica): mide FPS con Canvas 2D y con CSS 3D en escalones de 50, 150 y 300 piezas, recargando la página entre una prueba y otra. El umbral se fijó antes de medir: el teléfono aguanta si el percentil 5 es de 30 FPS o más con 150 piezas. La memoria es solo la de JavaScript y aproximada. Nada sale del teléfono.
+- `prototipos/maths-estilos/fotogramas.js` (solo `_local/`): tres fotogramas de la misma estación, dibujados por código y sin contenido del colegio:
+  - papercraft técnico, en papel negro con neón;
+  - papel de colores;
+  - pixel de hoy, imitado.
+  - A pedido de Rafael, los dos de papel llevan relieve por capas: sombra según la altura, canto del papel y hueco hundido. La revisión de contenido infantil cambió la antena (ahora un cuenco sobre un pie ancho), quitó un robot y redondeó el árbol de la plantilla.
+- Los resultados con los niños van en `privado/`, que git ignora. Aquí solo queda la decisión que salga de ellos.
+- Verificación:
+  - `node tools/verify_rb01.js` (corre en Actions);
+  - `node tools/revisar_rb01.js` (solo local): comprueba que las páginas publicadas antes sigan idénticas y que los resultados estén anotados.
 
 ## 8. Preguntas abiertas
 

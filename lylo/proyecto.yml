@@ -1,0 +1,192 @@
+version_esquema: 2
+codigo: R001-P002
+nombre: SAMSAN
+tipo: app-web
+cliente: Proyecto personal, línea R001 de juegos educativos
+problema: Los cinco juegos anteriores se construyeron antes de que los niños los jugaran, y los cinco
+  se rechazaron. No hay evidencia de qué hace que vuelvan solos a repasar ni de que jugar los haga recordar
+  más los temas de las guías totales.
+objetivo_medible: Al cerrar RB02, cada niño vuelve solo al bucle «Hoy» al menos dos veces en siete días,
+  y su hoja de retención a los 21 días sale mejor en el tema jugado (Maths 1) que en el de control no
+  jugado (Maths 2).
+usuarios:
+- rol: Jugador menor (Year 2, 6 a 7 años)
+  necesidad: Repasar los temas de su guía en sesiones de 6 a 10 minutos, con íconos y un botón grande,
+    solo y desde el teléfono.
+- rol: Jugador mayor (Year 6, 10 a 12 años)
+  necesidad: Repasar sus temas escribiendo más y con menos envoltorio, desde el teléfono.
+- rol: Padre (diseña y observa)
+  necesidad: Saber con evidencia si el bucle funciona antes de construir más, y preparar cada tema en
+    unas 2 horas.
+historias:
+- id: H01
+  historia: Como padre, quiero una hoja de observación para dos sesiones por niño con lo ya publicado,
+    para saber qué abren solos sin que se lo pidan.
+  criterios:
+  - La hoja es imprimible y alcanza para dos sesiones por niño, cuatro en total.
+  - Cada sesión anota qué abrió el niño por su cuenta y qué abrió porque se lo pidieron.
+  - Los niños aparecen solo como jugador menor y jugador mayor.
+  - Las hojas llenas se quedan en papel y no entran al repo.
+  aprobada_por_cliente: true
+- id: H02
+  historia: Como padre, quiero una guía imprimible para una prueba de papel con recortes reales, para
+    ver con los dos niños, en una hora, si el estilo de papel recortado les funciona antes de construirlo.
+  criterios:
+  - La guía es imprimible y dice qué materiales usar, qué pasos seguir y qué observar.
+  - La prueba se hace con los dos niños y dura una hora.
+  - La guía deja espacio para anotar lo observado, sin nombres.
+  aprobada_por_cliente: true
+- id: H03
+  historia: Como padre, quiero una página publicada que mida FPS y memoria con Canvas y con CSS 3D en
+    los teléfonos de los niños, para saber si aguantan el estilo nuevo antes de construirlo.
+  criterios:
+  - 'Es una página nueva publicada con la cabecera «// publicar: true» y no cambia ninguna página publicada
+    hoy.'
+  - Mide FPS y memoria por separado para Canvas y para CSS 3D.
+  - Muestra los resultados en pantalla para anotarlos; nada sale del navegador ni se pide nada a terceros.
+  - Se corre en el teléfono de cada niño y los resultados quedan anotados.
+  aprobada_por_cliente: true
+- id: H04
+  historia: Como jugador mayor, quiero ver tres fotogramas de estilo, uno de ellos de papercraft técnico,
+    para elegir cómo se ve mi parte del juego.
+  criterios:
+  - Hay tres fotogramas y uno es papercraft técnico (papel negro, neón, origami mecánico).
+  - Ninguno usa personajes ni marcas de terceros.
+  - La elección o el comentario del jugador mayor queda anotado.
+  aprobada_por_cliente: true
+- id: H05
+  historia: Como jugador menor, quiero una sesión diaria «Hoy» con Numbers to 100, para repasar jugando
+    en pocos minutos y ver crecer mi aldea.
+  criterios:
+  - Del perfil al primer reto hay dos toques, y la sesión dura de 6 a 10 minutos.
+  - Empieza con 3 a 5 retos de repaso espaciado, con cajas de repaso locales a 1, 3, 7 y 21 días guardadas
+    solo en el navegador.
+  - Sigue un reto nuevo con consecuencia visible (predecir, observar y explicar) y un ejemplo resuelto
+    cuyo último paso hace el niño.
+  - Termina con un reto de producción, escribir con el teclado numérico el número que muestra el ábaco
+    o la recta.
+  - Cada reto produce una pieza con función para la aldea.
+  - Se arma sobre prototipos/comun/repaso.js sin reescribirlo, con íconos y un botón grande.
+  - Ningún reto usa la opción múltiple como verbo principal, y no hay puntaje frente al niño.
+  aprobada_por_cliente: true
+- id: H06
+  historia: Como jugador mayor, quiero una sesión diaria «Hoy» con Sequences (números enteros, decimales
+    y fracciones), para repasar escribiendo y ver crecer mi estación espacial.
+  criterios:
+  - Tiene el mismo orden que H05, con repaso espaciado, reto nuevo con consecuencia, ejemplo resuelto
+    y producción final.
+  - Los retos piden completar secuencias de enteros, decimales y fracciones, y salen de un generador con
+    assert y un resolvedor.
+  - El reto de producción pide escribir el término que sigue y la regla.
+  - Cada reto produce una pieza con función para la estación espacial.
+  - Se arma sobre repaso.js o sobre la actividad de ordenar y completar de guias/comun/guia.js, sin portar
+    el generador viejo de opción múltiple.
+  aprobada_por_cliente: true
+- id: H07
+  historia: Como jugador, quiero un jefe que solo cae cuando resolví cada tipo de reto una vez sin pista,
+    para que ganar dependa de saber y no de adivinar.
+  criterios:
+  - El jefe cae solo cuando cada tipo de reto del tema se resolvió una vez sin pista.
+  - Lo que se falla vuelve como una variante, no como el mismo ítem.
+  - En Year 6 el jefe actúa en tiempo real, y el error desordena pero nunca hace perder.
+  - No hay derrota ni puntaje frente al niño.
+  aprobada_por_cliente: true
+- id: H08
+  historia: Como padre, quiero una hoja de retención en papel para cada niño, antes de jugar y a los 7
+    y 21 días, para saber si el bucle hace recordar más que estudiar como siempre.
+  criterios:
+  - Cada hoja cubre el tema jugado (Maths 1) y un tema de control no jugado (Maths 2) de la guía total
+    de cada niño.
+  - En Year 2 el control es Recognise amounts up to 10 without counting; en Year 6, Adding positive and
+    negative numbers.
+  - Se aplica antes de jugar, a los 7 días y a los 21 días, con dificultad pareja entre el tema jugado
+    y el de control.
+  - Los ejercicios son propios; nunca se copian ni se parafrasean de cerca los de la guía del colegio.
+  - El padre corrige aparte y el niño no ve la calificación; las hojas no entran al repo.
+  aprobada_por_cliente: true
+rigor:
+  datos_personales: false
+  salud_o_biometricos: false
+  menores_de_edad: false
+  pagos_cobros_credito: false
+  exigido_por_contrato: false
+  perfil: Base
+etapa_actual: rebanadas
+minimos:
+- id: M01
+  estado: cumplido
+  evidencia: lylo/proyecto.yml
+  fecha: 2026-11-20
+- id: M02
+  estado: excepcion
+  decision: aprobadas
+  fecha: 2026-11-21
+- id: M03
+  estado: excepcion
+  decision: aprobadas
+  fecha: 2026-11-21
+- id: M04
+  estado: no_aplica
+  motivo: El proyecto no maneja datos personales
+- id: M05
+  estado: cumplido
+  evidencia: docs/decisiones-vigentes.md
+  fecha: 2026-11-20
+- id: M06
+  estado: no_aplica
+  motivo: No aplica al perfil Base
+- id: M07
+  estado: excepcion
+  decision: 'Excepción, al proyecto nuevo: no se agrega nada aquí; el escaneo entra cuando se abra el
+    proyecto nuevo con repo privado.'
+  fecha: 2026-11-21
+- id: M16
+  estado: pendiente
+rebanadas:
+- id: RB01
+  nombre: Mirar y probar
+  historias:
+  - H01
+  - H02
+  - H03
+  - H04
+  etapa: construccion
+  commit_inicio: 9fe2df288a2d9fcc06416fa7c14f8b471737e792
+  horas_estimadas: 9.25
+  minimos:
+  - id: M08
+    estado: cumplido
+    evidencia: lylo/planes/RB01.md
+    fecha: 2026-11-22
+  - id: M09
+    estado: pendiente
+  - id: M10
+    estado: pendiente
+  - id: M11
+    estado: no_aplica
+    motivo: No aplica al perfil Base
+  - id: M12
+    estado: pendiente
+  - id: M13
+    estado: no_aplica
+    motivo: La rebanada no cierra un hito
+  - id: M14
+    estado: pendiente
+  - id: M15
+    estado: no_aplica
+    motivo: No aplica al perfil Base
+hitos:
+- id: HT01
+  nombre: 'Compuerta: cada niño vuelve solo dos veces en siete días y la hoja de retención a los 21 días
+    sale mejor en el tema jugado'
+  estado: pendiente
+historial:
+- fecha: 2026-11-20
+  de: alta
+  a: rebanadas
+- fecha: 2026-11-22
+  rebanada: RB01
+  de: alta
+  a: construccion
+creado: 2026-11-20
+actualizado: 2026-11-22

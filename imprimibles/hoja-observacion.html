@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoja de observación · RB01</title>
+<!--
+  RB01 · H01. Hoja imprimible para mirar qué abren solos los niños con lo ya
+  publicado. Autocontenida: sin scripts ni recursos externos. No se publica
+  (Actions y Cloudflare solo copian los .html de la raíz).
+  Las hojas llenas se quedan en papel: no se escanean ni se suben al repo.
+-->
+<style>
+  @page { size: A4; margin: 14mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; color: #1a1a1a; font: 11pt/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .hoja { max-width: 182mm; margin: 0 auto; padding: 10mm 0; }
+  .sesion { break-before: page; page-break-before: always; }
+  .portada + .sesion { break-before: page; }
+  h1 { font-size: 17pt; margin: 0 0 4mm; }
+  h2 { font-size: 14pt; margin: 0 0 2mm; }
+  p { margin: 0 0 2.5mm; }
+  .datos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3mm; margin: 3mm 0 4mm; }
+  .campo { border-bottom: 1px solid #333; padding-top: 6mm; font-size: 9pt; color: #444; }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; }
+  th, td { border: 1px solid #333; padding: 2mm; vertical-align: top; text-align: left; }
+  th { background: #eee; font-size: 9.5pt; }
+  td.marca { width: 17mm; text-align: center; }
+  td.minutos { width: 20mm; }
+  .caja { display: inline-block; width: 5mm; height: 5mm; border: 1.5px solid #333; vertical-align: middle; }
+  .notas { border: 1px solid #333; min-height: 38mm; padding: 2mm; font-size: 9pt; color: #555; }
+  .pie { margin-top: 4mm; font-size: 9pt; color: #333; border-top: 1px solid #999; padding-top: 2mm; }
+  .aviso { border: 2px solid #333; padding: 3mm; margin: 3mm 0; }
+  ul { margin: 0 0 3mm 5mm; padding: 0; }
+  @media screen { body { background: #f3f3f3; } .hoja { background: #fff; padding: 12mm; margin: 6mm auto; box-shadow: 0 1px 4px rgba(0,0,0,.2); } }
+  @media screen and (max-width: 600px) { .hoja { padding: 4mm; margin: 0; box-shadow: none; } th, td { padding: 1mm; word-break: break-word; } }
+</style>
+</head>
+<body>
+
+<section class="hoja portada">
+  <h1>Hoja de observación · semana 1</h1>
+  <p>Cuatro hojas: dos sesiones por niño. Sirven para saber qué abre cada uno <b>por su cuenta</b> y qué abre porque se lo pidieron, con lo que ya está publicado.</p>
+  <div class="aviso">
+    <p><b>Reglas.</b></p>
+    <ul>
+      <li>No escribir nombres. Solo «jugador menor» o «jugador mayor».</li>
+      <li>La hoja llena se queda en papel: no se escanea, no se fotografía y no se sube al repo.</li>
+      <li>No decirle al niño qué abrir al empezar. Solo dejar el teléfono a mano y mirar.</li>
+      <li>Si el niño pide ayuda, se ayuda y se anota en «Notas».</li>
+    </ul>
+  </div>
+  <p><b>Cómo marcar.</b> En cada fila: una X en «Lo abrió solo» o en «Se lo pedí», los minutos que estuvo y si volvió solo otro día. Si no lo abrió, la fila queda vacía.</p>
+  <p><b>Ojo con el jugador menor.</b> «Year 2 Maths games» trae la recta y el ábaco, que tocan Maths 1 (Numbers to 100), el tema que se medirá en RB02. Si lo abre, se marca la casilla de la hoja; no se le impide.</p>
+</section>
+
+<section class="hoja sesion" data-sesion="menor-1">
+  <h2>Jugador menor · sesión 1</h2>
+  <div class="datos"><div class="campo">Fecha</div><div class="campo">Hora de inicio</div><div class="campo">Duración total (min)</div></div>
+  <table>
+    <thead><tr><th>Lo publicado</th><th>Lo abrió solo</th><th>Se lo pedí</th><th>Minutos</th><th>Volvió solo otro día</th></tr></thead>
+    <tbody>
+      <tr data-item><td>Year 2 Maths games · «Hop along the number line»</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 2 Maths games · «Abacus workshop»</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 2 English · Pip's village</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 2 English · Word Quest</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 2 English · Study guide</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Otra cosa: ____________________</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+    </tbody>
+  </table>
+  <p><span class="caja"></span> Abrió «Year 2 Maths games» (Maths 1 en juego antes de RB02).</p>
+  <div class="notas">Notas: qué buscó primero, dónde se trabó, qué dijo, si pidió seguir.</div>
+  <p class="pie">Sin nombres. Esta hoja llena se queda en papel.</p>
+</section>
+
+<section class="hoja sesion" data-sesion="menor-2">
+  <h2>Jugador menor · sesión 2</h2>
+  <div class="datos"><div class="campo">Fecha</div><div class="campo">Hora de inicio</div><div class="campo">Duración total (min)</div></div>
+  <table>
+    <thead><tr><th>Lo publicado</th><th>Lo abrió solo</th><th>Se lo pedí</th><th>Minutos</th><th>Volvió solo otro día</th></tr></thead>
+    <tbody>
+      <tr data-item><td>Year 2 Maths games · «Hop along the number line»</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 2 Maths games · «Abacus workshop»</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 2 English · Pip's village</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 2 English · Word Quest</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 2 English · Study guide</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Otra cosa: ____________________</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+    </tbody>
+  </table>
+  <p><span class="caja"></span> Abrió «Year 2 Maths games» (Maths 1 en juego antes de RB02).</p>
+  <div class="notas">Notas: qué buscó primero, dónde se trabó, qué dijo, si pidió seguir.</div>
+  <p class="pie">Sin nombres. Esta hoja llena se queda en papel.</p>
+</section>
+
+<section class="hoja sesion" data-sesion="mayor-1">
+  <h2>Jugador mayor · sesión 1</h2>
+  <div class="datos"><div class="campo">Fecha</div><div class="campo">Hora de inicio</div><div class="campo">Duración total (min)</div></div>
+  <table>
+    <thead><tr><th>Lo publicado</th><th>Lo abrió solo</th><th>Se lo pedí</th><th>Minutos</th><th>Volvió solo otro día</th></tr></thead>
+    <tbody>
+      <tr data-item><td>Year 6 English · Word Drop</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 6 English · Exam prep</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Algo de Year 2: ____________________</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Otra cosa: ____________________</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+    </tbody>
+  </table>
+  <div class="notas">Notas: qué buscó primero, dónde se trabó, qué dijo, si pidió seguir.</div>
+  <p class="pie">Sin nombres. Esta hoja llena se queda en papel.</p>
+</section>
+
+<section class="hoja sesion" data-sesion="mayor-2">
+  <h2>Jugador mayor · sesión 2</h2>
+  <div class="datos"><div class="campo">Fecha</div><div class="campo">Hora de inicio</div><div class="campo">Duración total (min)</div></div>
+  <table>
+    <thead><tr><th>Lo publicado</th><th>Lo abrió solo</th><th>Se lo pedí</th><th>Minutos</th><th>Volvió solo otro día</th></tr></thead>
+    <tbody>
+      <tr data-item><td>Year 6 English · Word Drop</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Year 6 English · Exam prep</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Algo de Year 2: ____________________</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+      <tr data-item><td>Otra cosa: ____________________</td><td class="marca"><span class="caja"></span></td><td class="marca"><span class="caja"></span></td><td class="minutos"></td><td class="marca"><span class="caja"></span></td></tr>
+    </tbody>
+  </table>
+  <div class="notas">Notas: qué buscó primero, dónde se trabó, qué dijo, si pidió seguir.</div>
+  <p class="pie">Sin nombres. Esta hoja llena se queda en papel.</p>
+</section>
+
+</body>
+</html>

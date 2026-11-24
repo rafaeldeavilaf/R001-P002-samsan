@@ -29,3 +29,6 @@ _local/
 # Arte crudo de PixelLab: el original vive en la biblioteca privada R001-P003.
 # arte/crudo/ se archivó el 2026-10-28; queda ignorado por si alguien lo recrea.
 arte/crudo/
+
+# Resultados de las pruebas con los niños (RB01 y siguientes): nunca se versionan.
+privado/
