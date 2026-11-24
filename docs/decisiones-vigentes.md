@@ -229,7 +229,9 @@ Verificación: `node tools/verify_repaso_y2.js` (corre también `tools/verify_ab
 - `maths-estilos-rendimiento.html` (es la única página que se publica): mide FPS con Canvas 2D y con CSS 3D en escalones de 50, 150 y 300 piezas, recargando la página entre una prueba y otra. El umbral se fijó antes de medir: el teléfono aguanta si el percentil 5 es de 30 FPS o más con 150 piezas. La memoria es solo la de JavaScript y aproximada. Nada sale del teléfono.
   - Primera medición, en un teléfono Android de gama alta (24 nov 2026): Canvas aguanta 150 piezas y CSS 3D no. La simulación con la CPU frenada decía lo contrario, porque no frena el procesador gráfico; no sirve para juzgar CSS 3D.
   - Como SAMSAN probablemente se compartirá con otras familias, H03.4 ahora se mide en el teléfono del padre, en una gama baja simulada y en un equipo viejo real si hay uno.
-  - Se sumó una tercera prueba, «papel pre-dibujado»: cada pieza se dibuja una vez con todo su relieve y en cada cuadro solo se copia. Es el camino propuesto para el juego.
+  - Se sumó una tercera prueba, «papel pre-dibujado»: cada pieza se dibuja una vez con todo su relieve y en cada cuadro solo se copia.
+  - Resultado en el mismo teléfono: el papel pre-dibujado aguanta las 300 piezas a casi 60 FPS (percentil 5 de 57), mientras Canvas con sombras por cuadro solo llega a 150 y CSS 3D a 50.
+  - **Decisión técnica (24 nov 2026):** el estilo de papel se dibuja una vez por pieza y en el juego solo se copia en Canvas, sin sombras ni filtros por cuadro. Falta confirmarlo en un equipo viejo real.
 - `prototipos/maths-estilos/fotogramas.js` (solo `_local/`): tres fotogramas de la misma estación, dibujados por código y sin contenido del colegio:
   - papercraft técnico, en papel negro con neón;
   - papel de colores;
