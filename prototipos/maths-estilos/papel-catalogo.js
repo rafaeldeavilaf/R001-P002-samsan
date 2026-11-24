@@ -13,12 +13,13 @@
   var P = window.PROTO_COMUN, PP = window.SAMSAN_PAPEL, C = PP && PP.catalogo;
   var W = 960, CEL = 160, COLS = 6, CAB = 46;
 
-  var TITULOS = { matematicas: 'Matemáticas', construccion: 'Construcción', materiales: 'Construcción · materiales de muro', techos: 'Construcción · techos (forma y material)', vehiculos: 'Vehículos', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
+  var TITULOS = { matematicas: 'Matemáticas', construccion: 'Construcción', materiales: 'Construcción · materiales de muro', techos: 'Construcción · techos (forma y material)', aberturas: 'Construcción · puertas y ventanas', detalles: 'Construcción · detalles de fachada', suelos: 'Construcción · suelos y caminos', obra: 'Construcción · obra', vehiculos: 'Vehículos', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
   var CORTO = { dosAguas: '2 aguas', dosAguasLado: 'lado', unaAgua: '1 agua', plano: 'plano', conico: 'cónico', cupula: 'cúpula' };
   /* «muro:adobe» o «techo:conico:pizarra»: variantes que se arman solas. */
   function variante(nombre) {
     var p = nombre.split(':');
     if (p[0] === 'muro') return [function (ctx) { C.muro({ material: p[1], ancho: 124, alto: 96 }).dibujar(ctx, 0, 0); }, 0.95, p[1]];
+    if (p[0] === 'suelo') return [function (ctx) { C.suelo({ material: p[1], ancho: 128, alto: 80 }).dibujar(ctx, 0, 0); }, 0.95, p[1]];
     if (p[0] === 'techo') return [function (ctx) { C.techo({ forma: p[1], material: p[2] }).dibujar(ctx, 0, 6); }, 1.25, (CORTO[p[1]] || p[1]) + ' · ' + p[2]];
     return null;
   }
@@ -48,6 +49,26 @@
     cono: [una(function () { return C.cono(); }), 1.3],
     andamio: [una(function () { return C.andamio(); }), 0.85],
     grua: [una(function () { return C.grua(); }), 0.85],
+    ventanaArco: [una(function () { return C.ventanaArco(); }), 1.5],
+    ventanaRedonda: [una(function () { return C.ventanaRedonda(); }), 1.7],
+    ventanaPostigos: [una(function () { return C.ventanaPostigos(); }), 1.4],
+    puertaDoble: [una(function () { return C.puertaDoble(); }), 1.3],
+    porton: [una(function () { return C.porton(); }), 1.2],
+    reja: [una(function () { return C.reja(); }), 1.3],
+    vitral: [una(function () { return C.vitral(); }), 1.35],
+    chimenea: [una(function () { return C.chimenea(); }), 1.5],
+    balcon: [una(function () { return C.balcon(); }), 1.1],
+    toldo: [una(function () { return C.toldo(); }), 1.1],
+    escaleraExterior: [una(function () { return C.escaleraExterior(); }), 1.05, 'escalera exterior'],
+    torre: [una(function () { return C.torre(); }), 0.62],
+    almenas: [una(function () { return C.almenas(); }), 1],
+    puente: [una(function () { return C.puente(); }), 0.75],
+    farol: [una(function () { return C.farol(); }), 1.8],
+    pilaLadrillos: [una(function () { return C.pilaLadrillos(); }), 1.1, 'pila de ladrillos'],
+    tablonesApilados: [una(function () { return C.tablonesApilados(); }), 1, 'tablones apilados'],
+    saco: [una(function () { return C.saco(); }), 1.5, 'saco de cemento'],
+    balde: [una(function () { return C.balde(); }), 1.6],
+    carretilla: [una(function () { return C.carretilla(); }), 1.35],
     furgoneta: [una(function () { return C.furgoneta(); }), 1.05],
     cupe: [una(function () { return C.cupe(); }), 1.1],
     sedanLargo: [una(function () { return C.sedanLargo(); }), 1],

@@ -243,6 +243,15 @@ Verificación: `node tools/verify_repaso_y2.js` (corre también `tools/verify_ab
     - estación: panel, brazo, módulo, ventana, antena, nave, estrella y planeta.
   - La hoja `prototipos/maths-estilos/papel-catalogo.js`, solo en `_local/`, las muestra numeradas. Sirve también para la revisión infantil.
   - Aviso: el marco de 10 es de Maths 2, el tema de control de RB02. Existe, pero no se usa con los niños hasta después de la hoja de 21 días.
+  - El 24 nov 2026 el catálogo creció a 99 piezas en 11 categorías (`C.categorias`):
+    - **construcción:** materiales de muro, techos, puertas y ventanas, detalles de fachada, suelos y caminos, y obra;
+    - **vehículos:** 8 autos genéricos, sin marcas;
+    - un portal de castillo genérico, sin escudo, letrero ni nombre.
+  - Los materiales tienen textura y sirven para cualquier forma: `C.muro({ material })`, `C.techo({ forma, material })` y `C.suelo({ material })`.
+    - Muros: ladrillo, ladrillo claro, adobe, piedra, sillar, madera, troncos, guadua, bahareque, concreto, corrugado y vidrio.
+    - Techos: tejas, pizarra, paja, zinc, tablillas y teja verde.
+    - Suelos: baldosa, adoquín, tablones, grava, camino de piedras y asfalto.
+  - Por la revisión infantil quedan fuera las herramientas largas con punta (pala, martillo, llave, destornillador) y el farol de poste; el farol es de pared.
 - `prototipos/maths-estilos/fotogramas.js` (solo `_local/`): tres fotogramas de la misma estación, dibujados por código y sin contenido del colegio:
   - papercraft técnico, en papel negro con neón;
   - papel de colores;

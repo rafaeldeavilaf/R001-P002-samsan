@@ -732,6 +732,258 @@
     return grupo(partes);
   };
 
+  /* ================= D2. Aberturas: puertas y ventanas ================= */
+  var MARCO = '#F1E4C6', VIDRIO = '#CFE8F2';
+  function arcoArriba(w, h, n) {
+    /* Rectángulo con arco de medio punto arriba; base en y = h/2. */
+    var r = w / 2, p = [[-r, h / 2], [-r, -h / 2 + r]];
+    for (var k = 0; k <= (n || 16); k++) { var a = Math.PI + k * Math.PI / (n || 16); p.push([r * Math.cos(a), -h / 2 + r + r * Math.sin(a)]); }
+    p.push([r, -h / 2 + r]); p.push([r, h / 2]);
+    return p;
+  }
+  C.ventanaArco = function (o) {
+    o = o || {};
+    return suelta('ventanaArco', o, {
+      forma: arcoArriba(40, 60), recto: true, color: o.color || MARCO, altura: 2, semilla: 161,
+      encima: function (g) {
+        g.fillStyle = VIDRIO; poli(g, arcoArriba(28, 48)); g.fill();
+        g.fillStyle = o.color || MARCO; g.fillRect(-2, -24, 4, 48); g.fillRect(-14, 2, 28, 4);
+      }
+    });
+  };
+  C.ventanaRedonda = function (o) {
+    o = o || {};
+    return suelta('ventanaRedonda', o, {
+      forma: F.circulo(22), color: o.color || MARCO, altura: 2, semilla: 163,
+      encima: function (g) {
+        g.fillStyle = VIDRIO; g.beginPath(); g.arc(0, 0, 15, 0, Math.PI * 2); g.fill();
+        g.fillStyle = o.color || MARCO; g.fillRect(-2, -15, 4, 30); g.fillRect(-15, -2, 30, 4);
+      }
+    });
+  };
+  C.ventanaPostigos = function (o) {
+    o = o || {};
+    var col = o.postigo || '#3E8E7E';
+    var postigo = PP.pieza({
+      forma: F.rect(18, 40), color: col, altura: 3, semilla: 165, clave: clave('postigo', o),
+      encima: function (g) { g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1.5; for (var y = -16; y <= 16; y += 5) { g.beginPath(); g.moveTo(-6, y); g.lineTo(6, y + 2); g.stroke(); } }
+    });
+    return grupo([[C.ventanaCasa(), 0, 0], [postigo, -29, 0], [postigo, 29, 0]]);
+  };
+  C.puertaDoble = function (o) {
+    o = o || {};
+    return suelta('puertaDoble', o, {
+      forma: arcoArriba(56, 76), recto: true, color: o.color || '#8A5A32', altura: 2, semilla: 167,
+      encima: function (g) {
+        var rnd = azar(168);
+        for (var x = -26; x < 26; x += 8.6) { g.fillStyle = variar(o.color || '#8A5A32', rnd, 0.06); g.fillRect(x, -40, 8, 80); }
+        g.fillStyle = 'rgba(40,25,15,.6)'; g.fillRect(-1, -40, 2, 80);
+        g.fillStyle = '#E9B44C'; g.beginPath(); g.arc(-6, 8, 2.6, 0, Math.PI * 2); g.arc(6, 8, 2.6, 0, Math.PI * 2); g.fill();
+      }
+    });
+  };
+  C.porton = function (o) {
+    o = o || {};
+    return suelta('porton', o, {
+      forma: F.rect(92, 64), color: o.color || '#C9CDD8', altura: 2, grosor: 3, semilla: 169,
+      encima: function (g) {
+        for (var y = -32; y < 32; y += 13) {
+          g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(-46, y, 92, 2);
+          g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(-46, y + 11, 92, 2);
+        }
+        g.fillStyle = '#6E6A78'; g.fillRect(-10, 22, 20, 3);
+      }
+    });
+  };
+  C.reja = function (o) {
+    o = o || {};
+    var col = o.color || '#2E2A36';
+    var barra = PP.pieza({ forma: [[-2.5, 30], [-2.5, -26], [0, -32], [2.5, -26], [2.5, 30]], recto: true, color: col, altura: 2, grosor: 1, semilla: 171, clave: clave('reja-barra', o) });
+    var riel = PP.pieza({ forma: F.rect(84, 5), color: col, altura: 3, grosor: 1, semilla: 173, clave: clave('reja-riel', o) });
+    var partes = [];
+    for (var x = -36; x <= 36; x += 12) partes.push([barra, x, 0]);
+    partes.push([riel, 0, -14], [riel, 0, 18]);
+    return grupo(partes);
+  };
+  C.vitral = function (o) {
+    o = o || {};
+    return suelta('vitral', o, {
+      forma: arcoArriba(46, 70), recto: true, color: '#3B3542', altura: 2, semilla: 175,
+      encima: function (g) {
+        var cols = ['#E05A3A', '#F2C14E', '#3F7CC2', '#3E8E7E', '#7A5CA8', '#EFA0B0'], rnd = azar(176), k = 0;
+        g.save(); poli(g, arcoArriba(38, 62)); g.clip();
+        for (var y = -31; y < 31; y += 12) for (var x = -19; x < 19; x += 12.7) {
+          g.fillStyle = cols[(k++ + Math.floor((rnd() + 0.5) * 3)) % cols.length];
+          poli(g, [[x + 1, y + 1], [x + 12, y + 1 + rnd() * 3], [x + 11.5, y + 11], [x + 1 + rnd() * 2, y + 11]]); g.fill();
+        }
+        g.restore();
+        g.fillStyle = 'rgba(255,255,255,.18)'; poli(g, [[-19, 10], [-19, -6], [4, -31], [16, -31]]); g.fill();
+      }
+    });
+  };
+
+  /* ================= D3. Detalles de fachada ================= */
+  C.chimenea = function (o) {
+    o = o || {};
+    return conMaterial('chimenea', o, [[-14, 30], [-14, -22], [-18, -22], [-18, -32], [18, -32], [18, -22], [14, -22], [14, 30]], o.material || 'ladrillo');
+  };
+  C.balcon = function (o) {
+    o = o || {};
+    var col = o.color || '#E9DCC0';
+    var losa = PP.pieza({ forma: F.rect(104, 10), color: col, altura: 2, grosor: 3, semilla: 177, clave: clave('balcon-losa', o) });
+    var pasamanos = PP.pieza({ forma: F.rect(104, 6), color: col, altura: 3, grosor: 2, semilla: 179, clave: clave('balcon-pasa', o) });
+    var poste = PP.pieza({ forma: F.rect(6, 26), color: PP.oscurecer(col, 0.85), altura: 2, grosor: 1, semilla: 181, clave: clave('balcon-poste', o) });
+    var partes = [];
+    for (var x = -46; x <= 46; x += 11.5) partes.push([poste, x, -4]);
+    partes.push([losa, 0, 12], [pasamanos, 0, -18]);
+    return grupo(partes);
+  };
+  C.toldo = function (o) {
+    o = o || {};
+    var pts = [[-50, -16], [50, -16], [58, 10]];
+    for (var k = 0; k <= 8; k++) { var x = 58 - k * 14.5; pts.push([x, 10]); pts.push([x - 7.25, 17]); }
+    pts.pop(); pts.push([-58, 10]);
+    var a = o.color || '#C2453A';
+    return suelta('toldo', o, {
+      forma: pts, recto: true, color: '#FFF6DC', altura: 3, semilla: 183,
+      encima: function (g) {
+        g.fillStyle = a;
+        for (var i = 0; i < 8; i += 2) { var x0 = -58 + i * 14.5, x1 = x0 + 14.5; poli(g, [[x0 + 8 - i * 1.0, -16], [x1 + 8 - (i + 1) * 1.0, -16], [x1, 20], [x0, 20]]); g.fill(); }
+        g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(-58, 6, 116, 4);
+      }
+    });
+  };
+  C.escaleraExterior = function (o) {
+    o = o || {};
+    var escalones = conMaterial('escaleraExterior', o, [[-50, 34], [50, 34], [50, -34], [26, -34], [26, -17], [0, -17], [0, 0], [-25, 0], [-25, 17], [-50, 17]], o.material || 'sillar');
+    var baranda = PP.pieza({ forma: [[-52, 4], [44, -58], [48, -52], [-48, 10]], recto: true, color: '#3B3542', altura: 4, grosor: 1, semilla: 185, clave: clave('escalera-baranda', o) });
+    var poste = PP.pieza({ forma: F.rect(5, 26), color: '#3B3542', altura: 3, grosor: 1, semilla: 187, clave: clave('escalera-poste', o) });
+    return grupo([[escalones, 0, 0], [poste, -37, 6], [poste, -12, -11], [poste, 13, -28], [poste, 38, -45], [baranda, 0, 0]]);
+  };
+  C.torre = function (o) {
+    o = o || {};
+    var cuerpo = conMaterial('torre', o, F.rect(56, 120), o.material || 'piedra', { altura: 3 });
+    var corona = conMaterial('torre-corona', o, [[-34, 8], [-34, -6]].concat(almenas(-34, 34, -6, 10, 11)).concat([[34, -6], [34, 8]]), o.material || 'piedra', { altura: 4 });
+    var punta = C.techo({ forma: 'conico', material: o.techo || 'pizarra', altura: 4 });
+    return grupo([[cuerpo, 0, 30], [corona, 0, -36], [punta, 0, -80]]);
+  };
+  C.almenas = function (o) {
+    o = o || {};
+    return conMaterial('almenas', o, [[-62, 14], [-62, -6]].concat(almenas(-62, 62, -6, 12, 13)).concat([[62, -6], [62, 14]]), o.material || 'piedra');
+  };
+  C.puente = function (o) {
+    o = o || {};
+    var tablero = conMaterial('puente-tablero', o, F.rect(170, 14), 'madera', { altura: 2 });
+    var poste = PP.pieza({ forma: F.rect(12, 44), color: '#8A5A32', altura: 3, grosor: 2, semilla: 189, clave: clave('puente-poste', o) });
+    var g = grupo([[tablero, 0, 0], [poste, -80, -14], [poste, 80, -14], [poste, 0, -14]]);
+    var dib = g.dibujar;
+    g.dibujar = function (ctx, x, y, a) {
+      dib(ctx, x, y, a);
+      if (!ctx) return;
+      ctx.save(); ctx.translate(x, y); ctx.strokeStyle = '#B8935A'; ctx.lineWidth = 2.5;
+      [-28, -18].forEach(function (yy) { ctx.beginPath(); ctx.moveTo(-80, yy); ctx.quadraticCurveTo(-40, yy + 8, 0, yy); ctx.quadraticCurveTo(40, yy + 8, 80, yy); ctx.stroke(); });
+      ctx.restore();
+    };
+    return g;
+  };
+  /* Farol de pared (no de poste): soporte corto y farol con luz cálida. */
+  C.farol = function (o) {
+    o = o || {};
+    var soporte = PP.pieza({ forma: [[-22, -16], [-4, -16], [-4, -12], [-18, -12], [-18, 4], [-22, 4]], recto: true, color: '#3B3542', altura: 2, grosor: 1, semilla: 191, clave: clave('farol-soporte', o) });
+    var farol = PP.pieza({
+      forma: [[-10, 18], [-12, -6], [-6, -16], [6, -16], [12, -6], [10, 18]], recto: true, color: '#3B3542', altura: 3, semilla: 193, clave: clave('farol', o),
+      encima: function (g) { g.fillStyle = '#FFD86B'; g.fillRect(-7, -6, 14, 20); g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(-5, -4, 3, 15); }
+    });
+    return grupo([[soporte, 0, 0], [farol, 6, 0]]);
+  };
+
+  /* ================= D4. Suelos y caminos (con material) ================= */
+  Object.assign(MAT, {
+    baldosa: { base: '#9A8F80', suelo: true, pintar: function (g, a, b, c, d) {
+      for (var y = b, j = 0; y < d; y += 16, j++) for (var x = a, i = 0; x < c; x += 16, i++) { g.fillStyle = (i + j) % 2 ? '#3B3542' : '#EFE8D8'; g.fillRect(x + 1, y + 1, 14, 14); }
+    } },
+    adoquin: { base: '#5E5246', suelo: true, pintar: function (g, a, b, c, d) { hiladas(g, a, b, c, d, { alto: 13, largo: 19, junta: 2.5, colores: ['#8E7F70', '#9C8C7A', '#7E7062'], semilla: 31, redondo: 4 }); } },
+    tablones: { base: '#6E4A2A', suelo: true, pintar: function (g, a, b, c, d) { hiladas(g, a, b, c, d, { alto: 13, largo: 70, junta: 1.5, colores: ['#C8955A', '#B98549', '#D3A066'], semilla: 32, var: 0.05 }); } },
+    grava: { base: '#B8A88E', suelo: true, pintar: function (g, a, b, c, d) {
+      var rnd = azar(33);
+      g.save(); g.shadowColor = 'rgba(42,30,20,.4)'; g.shadowBlur = 1; g.shadowOffsetX = 0.6; g.shadowOffsetY = 0.8;
+      for (var k = 0; k < (c - a) * (d - b) / 14; k++) {
+        g.fillStyle = ['#8E8F98', '#A79A86', '#C9BFAE', '#7E7268'][Math.floor((rnd() + 0.5) * 4) % 4];
+        g.beginPath(); g.ellipse ? g.ellipse(a + (rnd() + 0.5) * (c - a), b + (rnd() + 0.5) * (d - b), 2 + (rnd() + 0.5) * 2, 1.5 + (rnd() + 0.5) * 1.5, rnd() * 3, 0, Math.PI * 2) : g.rect(a, b, 2, 2); g.fill();
+      }
+      g.restore();
+    } },
+    caminoPiedras: { base: '#8DBA6A', suelo: true, pintar: function (g, a, b, c, d) {
+      var rnd = azar(34), cy = (b + d) / 2;
+      g.save(); sombraChica(g);
+      for (var x = a + 14; x < c - 6; x += 30) {
+        var y = cy + Math.sin(x / 25) * 8, r = 11 + (rnd() + 0.5) * 3, p = [];
+        for (var t = 0; t < 9; t++) { var an = t * Math.PI * 2 / 9; p.push([x + Math.cos(an) * r * (0.8 + (rnd() + 0.5) * 0.3), y + Math.sin(an) * r * 0.7 * (0.8 + (rnd() + 0.5) * 0.3)]); }
+        g.fillStyle = variar('#B4B4BC', rnd, 0.06); poli(g, p); g.fill();
+      }
+      g.restore();
+    } },
+    asfalto: { base: '#4A4A52', suelo: true, pintar: function (g, a, b, c, d) {
+      var rnd = azar(35);
+      for (var k = 0; k < (c - a) * (d - b) / 18; k++) { g.fillStyle = 'rgba(' + (rnd() > 0 ? '255,255,255,.12' : '0,0,0,.2') + ')'; g.fillRect(a + (rnd() + 0.5) * (c - a), b + (rnd() + 0.5) * (d - b), 1.5, 1.5); }
+      g.fillStyle = '#F2C14E'; for (var x = a + 6; x < c; x += 30) g.fillRect(x, (b + d) / 2 - 2, 16, 4);
+    } }
+  });
+  C.materialesSuelo = ['baldosa', 'adoquin', 'tablones', 'grava', 'caminoPiedras', 'asfalto'];
+  C.suelo = function (o) {
+    o = o || {};
+    return conMaterial('suelo', o, F.rect(o.ancho || 130, o.alto || 70), o.material || 'baldosa', { altura: 1, grosor: 2 });
+  };
+
+  /* ================= D5. Obra ================= */
+  C.pilaLadrillos = function (o) {
+    o = o || {};
+    var l = C.ladrillo({ material: o.material || 'ladrillo' }), partes = [];
+    [[-50, 18], [0, 18], [50, 18], [-25, -6], [25, -6], [0, -30]].forEach(function (p) { partes.push([l, p[0] * 0.98, p[1]]); });
+    return grupo(partes);
+  };
+  C.tablonesApilados = function (o) {
+    o = o || {};
+    var t = C.tabla({ largo: 110 });
+    return grupo([[t, -4, 18], [t, 6, 0], [t, -2, -18]]);
+  };
+  C.saco = function (o) {
+    o = o || {};
+    return suelta('saco', o, {
+      forma: [[-26, 30], [-30, 0], [-26, -26], [-18, -32], [18, -32], [26, -26], [30, 0], [26, 30]], recto: true, color: o.color || '#E6D8B8', altura: 2, semilla: 195,
+      encima: function (g) {
+        g.fillStyle = '#8C8FA8'; g.fillRect(-30, -6, 60, 16);
+        g.strokeStyle = 'rgba(90,70,40,.35)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(-18, -32); g.lineTo(-14, -22); g.lineTo(18, -22); g.lineTo(18, -32); g.stroke();
+      }
+    });
+  };
+  C.balde = function (o) {
+    o = o || {};
+    var cuerpo = PP.pieza({
+      forma: [[-18, 22], [-22, -18], [22, -18], [18, 22]], recto: true, color: o.color || '#8C96A3', altura: 2, semilla: 197, clave: clave('balde', o),
+      encima: function (g) { g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(-22, -18, 44, 4); g.fillStyle = 'rgba(0,0,0,.15)'; g.fillRect(-21, 4, 42, 3); }
+    });
+    var g = grupo([[cuerpo, 0, 0]]);
+    var dib = g.dibujar;
+    g.dibujar = function (ctx, x, y, a) {
+      if (ctx) { ctx.save(); ctx.strokeStyle = '#3B3542'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y - 16, 20, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke(); ctx.restore(); }
+      dib(ctx, x, y, a);
+    };
+    return g;
+  };
+  C.carretilla = function (o) {
+    o = o || {};
+    var col = o.color || '#3F7CC2';
+    var bandeja = PP.pieza({ forma: [[-34, -16], [30, -16], [20, 10], [-26, 10]], recto: true, color: col, altura: 3, semilla: 199, clave: clave('carretilla', o) });
+    var mango = PP.pieza({ forma: [[24, -6], [52, 2], [50, 9], [20, 2]], recto: true, color: '#8A5A32', altura: 2, grosor: 2, semilla: 201, clave: clave('carretilla-mango', o) });
+    var pata = PP.pieza({ forma: F.rect(6, 18), color: '#3B3542', altura: 2, grosor: 1, semilla: 203, clave: clave('carretilla-pata', o) });
+    var rueda = PP.pieza({
+      forma: F.circulo(13), color: '#2B2530', altura: 3, semilla: 59, clave: clave('auto-rueda', { r: 13 }),
+      encima: function (g) { g.fillStyle = '#B8BCCF'; g.beginPath(); g.arc(0, 0, 6.8, 0, Math.PI * 2); g.fill(); }
+    });
+    return grupo([[mango, 0, 0], [pata, 18, 18], [bandeja, 0, 0], [rueda, -30, 18]]);
+  };
+
   /* ================= E. Vehículos (vista de lado, el frente a la izquierda) =================
      Autos genéricos, sin marcas. Cada uno: carrocería con ventanas, puertas y luces,
      y dos ruedas con su rin. El suelo queda en y ≈ 31. */
@@ -887,6 +1139,10 @@
     materiales: ['muro:ladrillo', 'muro:ladrilloClaro', 'muro:adobe', 'muro:piedra', 'muro:sillar', 'muro:madera', 'muro:troncos', 'muro:guadua', 'muro:bahareque', 'muro:concreto', 'muro:corrugado', 'muro:vidrio'],
     techos: ['techo:dosAguas:tejas', 'techo:dosAguas:paja', 'techo:dosAguasLado:pizarra', 'techo:dosAguasLado:tejaVerde', 'techo:unaAgua:zinc', 'techo:unaAgua:tablillas',
       'techo:plano:concreto', 'techo:plano:madera', 'techo:conico:pizarra', 'techo:conico:tejas', 'techo:cupula:tejaVerde', 'techo:cupula:zinc'],
+    aberturas: ['ventanaArco', 'ventanaRedonda', 'ventanaPostigos', 'puertaDoble', 'porton', 'reja', 'vitral'],
+    detalles: ['chimenea', 'balcon', 'toldo', 'escaleraExterior', 'torre', 'almenas', 'puente', 'farol'],
+    suelos: ['suelo:baldosa', 'suelo:adoquin', 'suelo:tablones', 'suelo:grava', 'suelo:caminoPiedras', 'suelo:asfalto'],
+    obra: ['pilaLadrillos', 'tablonesApilados', 'saco', 'balde', 'carretilla'],
     vehiculos: ['furgoneta', 'cupe', 'sedanLargo', 'mini', 'sedan', 'camioneta', 'compacto', 'deportivo'],
     aldea: ['casa', 'arbol', 'arbusto', 'nube', 'tabla', 'carrito', 'cerca', 'hojaPasto', 'hojaRio'],
     estacion: ['panel', 'brazo', 'modulo', 'ventana', 'antena', 'nave', 'estrella', 'planeta']
