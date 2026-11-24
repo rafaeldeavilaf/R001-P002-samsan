@@ -166,6 +166,18 @@ async function h03() {
   check('H03 CSS 3D sin errores de JS', lento.errores.length === 0, lento.errores.join(' | '));
   lento.w.close();
 
+  /* Tercera prueba (24 nov 2026, a pedido de Rafael): papel pre-dibujado, copiado con drawImage. */
+  const papel = await correrModo('#rb-imagen', { paso: 16.7 });
+  const fp = papel.res && papel.res.filas;
+  check('H03 papel pre-dibujado: un resultado por escalón', !!fp && fp.map(f => f.piezas).join(',') === '50,150,300', JSON.stringify(papel.res));
+  check('H03 papel pre-dibujado: queda en su propia fila, aparte de Canvas y CSS 3D',
+    papel.w.document.querySelectorAll('#rb-resultados tr[data-modo="imagen"][data-piezas]').length === 3 &&
+    papel.w.document.querySelectorAll('#rb-resultados tr[data-modo="canvas"][data-piezas]').length === 0);
+  check('H03 papel pre-dibujado: el aviso pide la prueba que falta', /Ahora toca «Probar Canvas 2D»/.test(papel.w.document.querySelector('#rb-aviso').textContent));
+  check('H03.3 papel pre-dibujado: nada sale del navegador', papel.llamadas.length === 0, papel.llamadas.join(', '));
+  check('H03 papel pre-dibujado sin errores de JS', papel.errores.length === 0, papel.errores.join(' | '));
+  papel.w.close();
+
   /* Escalón más alto que se sostiene: el dato para decidir. */
   const R = abrirRendimiento({ paso: 16.7 });
   await espera(50);

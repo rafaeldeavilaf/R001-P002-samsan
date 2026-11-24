@@ -2790,7 +2790,10 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var CFG = Object.assign({ pasos: [50, 150, 300], calentar: 2000, medir: 8000, umbral: 30, referencia: 150 }, window.RB01_CFG || {});
   var CLAVE = 'samsan:rb01-rendimiento';
-  var MODOS = { canvas: 'Canvas 2D', css3d: 'CSS 3D' };
+  /* imagen: papel pre-dibujado (24 nov 2026, a pedido de Rafael). Cada pieza se dibuja UNA vez,
+     con su sombra, canto, bisel y fibra, y en cada cuadro solo se copia con drawImage. */
+  var MODOS = { canvas: 'Canvas 2D', css3d: 'CSS 3D', imagen: 'Papel pre-dibujado' };
+  var PAPEL = [['#E07A3F', '#9A4A1F'], ['#3E8E7E', '#22564B'], ['#F2C14E', '#AE8026'], ['#C2453A', '#7E2620'], ['#7FB069', '#4F7340']];
   var NEON = ['#2FE6FF', '#FF4FD8', '#B6FF3B'];
   var raf = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function (f) { return setTimeout(f, 16); };
   var yaCorrio = false;
@@ -2919,10 +2922,92 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
     };
   }
 
+  /* Una pieza de papel, dibujada una sola vez en su propio lienzo. */
+  function hojaDePapel(lado, colores, dpr, semilla) {
+    var m = 14, t = Math.ceil((lado * 2 + m * 2) * dpr);
+    var c = document.createElement('canvas');
+    c.width = c.height = t;
+    var g = c.getContext ? c.getContext('2d') : null;
+    if (!g) return null;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var cx = lado + m, cy = lado + m, s = semilla;
+    function azar() { s = (s * 16807) % 2147483647; return s / 2147483647 - 0.5; }
+    var pts = [];
+    for (var k = 0; k < 12; k++) {
+      var ang = k * Math.PI / 6, r = (k % 2 ? lado * 0.78 : lado) + azar() * 1.6;
+      pts.push([cx + Math.cos(ang) * r, cy + Math.sin(ang) * r]);
+    }
+    function forma(dx, dy) {
+      g.beginPath();
+      pts.forEach(function (q, i) { g[i ? 'lineTo' : 'moveTo'](q[0] + dx, q[1] + dy); });
+      g.closePath();
+    }
+    /* Sombra ambiental y canto del papel. */
+    g.save();
+    g.shadowColor = 'rgba(42,30,20,.42)'; g.shadowBlur = 7; g.shadowOffsetX = 4; g.shadowOffsetY = 6;
+    forma(1.6, 1.9); g.fillStyle = colores[1]; g.fill();
+    g.restore();
+    /* Cara con luz de arriba a la izquierda. */
+    forma(0, 0);
+    var grad = g.createLinearGradient ? g.createLinearGradient(cx - lado, cy - lado, cx + lado, cy + lado) : null;
+    if (grad && grad.addColorStop) {
+      grad.addColorStop(0, 'rgba(255,255,255,.18)'); grad.addColorStop(0.5, 'rgba(255,255,255,0)'); grad.addColorStop(1, 'rgba(0,0,0,.12)');
+    }
+    g.fillStyle = colores[0]; g.fill();
+    if (grad && grad.addColorStop) { g.fillStyle = grad; g.fill(); }
+    /* Bisel: borde claro arriba a la izquierda, oscuro abajo a la derecha. */
+    g.save(); forma(0, 0); g.clip();
+    g.lineWidth = 2.4;
+    forma(-1, -1); g.strokeStyle = 'rgba(0,0,0,.22)'; g.stroke();
+    forma(1, 1); g.strokeStyle = 'rgba(255,255,255,.35)'; g.stroke();
+    g.restore();
+    /* Fibra del papel: ruido fino, solo sobre la cara. */
+    var img = g.getImageData ? g.getImageData(0, 0, t, t) : null;
+    if (img && img.data) {
+      var d = img.data;
+      for (var i = 0; i < d.length; i += 4) {
+        if (d[i + 3] > 200) { var n = (Math.random() - 0.5) * 18; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+      }
+      g.putImageData(img, 0, 0);
+    }
+    return { lienzo: c, mitad: t / dpr / 2 };
+  }
+
+  function escenaImagen(host) {
+    var c = document.createElement('canvas');
+    c.className = 'rb-lienzo';
+    host.appendChild(c);
+    var ctx = c.getContext ? c.getContext('2d') : null;
+    var ancho = host.clientWidth || 360, alto = 420, dpr = window.devicePixelRatio || 1, lista = [], hojas = [];
+    if (!ctx) return null;
+    c.width = Math.round(ancho * dpr); c.height = Math.round(alto * dpr);
+    c.style.width = ancho + 'px'; c.style.height = alto + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    /* Antes de medir: 5 colores × 3 tamaños, dibujados una vez. */
+    PAPEL.forEach(function (col, i) { [18, 24, 30].forEach(function (lado, j) { var h = hojaDePapel(lado, col, dpr, 11 + i * 3 + j); if (h) hojas.push(h); }); });
+    return {
+      hojas: hojas.length,
+      poner: function (n) { lista = piezas(n, ancho, alto); },
+      animar: function () {
+        mover(lista, ancho, alto);
+        ctx.fillStyle = '#E6CFA2'; ctx.fillRect(0, 0, ancho, alto);
+        for (var i = 0; i < lista.length; i++) {
+          var p = lista[i], h = hojas[i % hojas.length];
+          if (!h) continue;
+          ctx.save();
+          ctx.translate(p.x, p.y); ctx.rotate(p.a * Math.PI / 180);
+          ctx.drawImage(h.lienzo, -h.mitad, -h.mitad, h.mitad * 2, h.mitad * 2);
+          ctx.restore();
+        }
+      },
+      quitar: function () { c.remove(); }
+    };
+  }
+
   /* ---------- Una prueba completa: todos los escalones de un modo ---------- */
   function correr(modo, alTerminar) {
     var host = $('#rb-escena');
-    var escena = modo === 'canvas' ? escenaCanvas(host) : escenaCSS(host);
+    var escena = modo === 'canvas' ? escenaCanvas(host) : modo === 'imagen' ? escenaImagen(host) : escenaCSS(host);
     if (!escena) { alTerminar(null); return; }
     var filas = [], i = 0;
     function paso() {
@@ -3011,6 +3096,7 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
         '<div class="k-botones">' +
           '<button type="button" class="k-boton k-boton--primario" id="play" data-modo="canvas">Probar Canvas</button>' +
           '<button type="button" class="k-boton" id="rb-css3d" data-modo="css3d">Probar CSS 3D</button>' +
+          '<button type="button" class="k-boton" id="rb-imagen" data-modo="imagen">Probar papel pre-dibujado</button>' +
         '</div>' +
         '<p id="rb-aviso" aria-live="polite"></p>' +
         '<div id="rb-escena" class="rb-escena"></div>' +
@@ -3062,7 +3148,8 @@ window.SAMSAN_IMG = {"comun": {"mascota-base": "data:image/png;base64,iVBORw0KGg
       estado.resultados[modo] = oculta ? { interrumpida: true } : { filas: filas, fecha: new Date().toISOString().slice(0, 10) };
       guardar(estado);
       pintar();
-      aviso(MODOS[modo] + ' terminado. ' + (modo === 'canvas' && !estado.resultados.css3d ? 'Ahora toca «Probar CSS 3D».' : ''));
+      var falta = Object.keys(MODOS).filter(function (m) { return !estado.resultados[m]; })[0];
+      aviso(MODOS[modo] + ' terminado. ' + (falta ? 'Ahora toca «Probar ' + MODOS[falta] + '».' : 'Ya están las tres pruebas: toca «Copiar resultados».'));
       if (window.RB01_ALTERMINAR) window.RB01_ALTERMINAR(modo, estado.resultados[modo]);
     });
   }
