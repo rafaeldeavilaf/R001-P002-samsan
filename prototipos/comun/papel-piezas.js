@@ -478,6 +478,185 @@
     });
   };
 
+  /* ================= A3. Sólidos 3D y sus desarrollos =================
+     Sólidos de papel en vista isométrica: cada cara visible en su tono según la luz
+     (arriba a la izquierda): arriba la más clara, izquierda media, derecha la más oscura.
+     Los curvos (cilindro, cono, esfera) van con degradado y tapa recortada.
+     o.aristasOcultas dibuja punteadas las aristas de atrás. */
+  var VISTA = [1, 1, 1], LUZ3 = (function () { var v = [-0.2, 0.5, 0.85], n = Math.hypot(v[0], v[1], v[2]); return v.map(function (c) { return c / n; }); })();
+  function iso(p) { return [(p[0] - p[1]) * 0.866, (p[0] + p[1]) * 0.5 - p[2]]; }
+  function resta(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function cruzar(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+  function punto(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function envolvente(pts) {
+    var p = pts.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }), lo = [], hi = [];
+    function giro(o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); }
+    p.forEach(function (q) { while (lo.length >= 2 && giro(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); });
+    for (var i = p.length - 1; i >= 0; i--) { var q = p[i]; while (hi.length >= 2 && giro(hi[hi.length - 2], hi[hi.length - 1], q) <= 0) hi.pop(); hi.push(q); }
+    hi.pop(); lo.pop(); return lo.concat(hi);
+  }
+  function centrar(lista) {
+    /* Centra en (0, 0) los puntos 2D de varias listas. */
+    var todos = [].concat.apply([], lista), bb = caja(todos), cx = (bb[0] + bb[2]) / 2, cy = (bb[1] + bb[3]) / 2;
+    return lista.map(function (l) { return l.map(function (q) { return [q[0] - cx, q[1] - cy]; }); });
+  }
+  var POLIEDRO = {
+    cubo: function () { var s = 40; return caja3([0, 0, 0], [s, s, s]); },
+    prismaRect: function () { return caja3([0, 0, 0], [62, 34, 30]); },
+    prismaTri: function () {
+      var L = 62, W = 36, H = 32;
+      return { v: [[0, 0, 0], [0, W, 0], [0, W / 2, H], [L, 0, 0], [L, W, 0], [L, W / 2, H]], f: [[0, 1, 2], [3, 5, 4], [0, 3, 4, 1], [1, 4, 5, 2], [0, 2, 5, 3]] };
+    },
+    piramide: function () { var s = 50, h = 48; return { v: [[0, 0, 0], [s, 0, 0], [s, s, 0], [0, s, 0], [s / 2, s / 2, h]], f: [[0, 3, 2, 1], [0, 1, 4], [1, 2, 4], [2, 3, 4], [3, 0, 4]] }; },
+    /* Girado para que un vértice de la base mire al frente y se vean dos caras. */
+    tetraedro: function () {
+      var R = 34, v = [20, 140, 260].map(function (d) { var a = d * Math.PI / 180; return [R * Math.cos(a), R * Math.sin(a), 0]; });
+      v.push([0, 0, R * 1.45]);
+      return { v: v, f: [[0, 2, 1], [0, 1, 3], [1, 2, 3], [2, 0, 3]] };
+    }
+  };
+  function caja3(a, b) {
+    var v = [[a[0], a[1], a[2]], [b[0], a[1], a[2]], [b[0], b[1], a[2]], [a[0], b[1], a[2]], [a[0], a[1], b[2]], [b[0], a[1], b[2]], [b[0], b[1], b[2]], [a[0], b[1], b[2]]];
+    return { v: v, f: [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]] };
+  }
+  function poliedro(nombre, o, def) {
+    var col = o.color || COLORES_SOL[nombre] || '#3F7CC2', cen = [0, 0, 0];
+    def.v.forEach(function (p) { cen = [cen[0] + p[0] / def.v.length, cen[1] + p[1] / def.v.length, cen[2] + p[2] / def.v.length]; });
+    var caras = def.f.map(function (f) {
+      var p = f.map(function (i) { return def.v[i]; }), n = cruzar(resta(p[1], p[0]), resta(p[2], p[0])), m = [0, 0, 0];
+      p.forEach(function (q) { m = [m[0] + q[0] / p.length, m[1] + q[1] / p.length, m[2] + q[2] / p.length]; });
+      if (punto(n, resta(m, cen)) < 0) n = [-n[0], -n[1], -n[2]];
+      var l = Math.hypot(n[0], n[1], n[2]); n = n.map(function (c) { return c / l; });
+      return { idx: f, n: n, visible: punto(n, VISTA) > 1e-6 };
+    });
+    var proy = centrar([def.v.map(iso)])[0];
+    var silueta = envolvente(proy);
+    var aristas = {};
+    caras.forEach(function (c) { c.idx.forEach(function (i, k) { var j = c.idx[(k + 1) % c.idx.length], key = Math.min(i, j) + '-' + Math.max(i, j); (aristas[key] = aristas[key] || []).push(c.visible); }); });
+    return suelta('solido-' + nombre, o, {
+      forma: silueta, recto: true, color: col, altura: o.altura || 3, grosor: 1, fibra: 0.35, semilla: 271,
+      encima: function (g) {
+        caras.forEach(function (c) {
+          if (!c.visible) return;
+          g.fillStyle = PP.oscurecer(col, 0.72 + 0.4 * punto(c.n, LUZ3));
+          poli(g, c.idx.map(function (i) { return proy[i]; })); g.fill();
+        });
+        Object.keys(aristas).forEach(function (key) {
+          var vis = aristas[key].some(function (x) { return x; }), ij = key.split('-').map(Number), a = proy[ij[0]], b = proy[ij[1]];
+          if (!vis && !o.aristasOcultas) return;
+          g.save();
+          if (vis) { g.strokeStyle = 'rgba(30,20,38,.45)'; g.lineWidth = 1.4; }
+          else { g.strokeStyle = 'rgba(30,20,38,.6)'; g.lineWidth = 1.2; if (g.setLineDash) g.setLineDash([4, 4]); }
+          g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke(); g.restore();
+        });
+      }
+    });
+  }
+  var COLORES_SOL = { cubo: '#3F7CC2', prismaRect: '#8DB84A', prismaTri: '#F2C14E', piramide: '#E07A3F', tetraedro: '#7A5CA8', cilindro: '#3E8E7E', cono: '#E05A3A', esfera: '#D9638A' };
+  function elipse(r, z, n, t0, t1) { var p = []; for (var k = 0; k <= n; k++) { var t = t0 + (t1 - t0) * k / n; p.push(iso([r * Math.cos(t), r * Math.sin(t), z])); } return p; }
+  function curvo(nombre, o) {
+    var col = o.color || COLORES_SOL[nombre], r = nombre === 'esfera' ? 34 : 26, h = nombre === 'cilindro' ? 56 : 62;
+    if (nombre === 'esfera') {
+      return suelta('solido-esfera', o, {
+        forma: F.circulo(r), color: col, altura: o.altura || 3, grosor: 1, fibra: 0.35, semilla: 273,
+        encima: function (g) {
+          var gr = g.createRadialGradient ? g.createRadialGradient(-12, -13, 3, 0, 0, r * 1.05) : null;
+          if (gr && gr.addColorStop) { gr.addColorStop(0, PP.oscurecer(col, 1.35)); gr.addColorStop(0.55, col); gr.addColorStop(1, PP.oscurecer(col, 0.6)); g.fillStyle = gr; g.fillRect(-r, -r, 2 * r, 2 * r); }
+          g.save(); g.strokeStyle = 'rgba(30,20,38,.35)'; g.lineWidth = 1.2;
+          var ec = []; for (var k = 0; k <= 40; k++) { var t = k * Math.PI / 20; ec.push([r * Math.cos(t), r * 0.35 * Math.sin(t)]); }
+          g.beginPath(); ec.slice(0, 21).forEach(function (q, i) { g[i ? 'lineTo' : 'moveTo'](q[0], q[1]); }); g.stroke();
+          if (o.aristasOcultas && g.setLineDash) { g.setLineDash([4, 4]); g.beginPath(); ec.slice(20).forEach(function (q, i) { g[i ? 'lineTo' : 'moveTo'](q[0], q[1]); }); g.stroke(); }
+          g.restore();
+        }
+      });
+    }
+    /* Base, tope y las dos mitades de la base (adelante visible, atrás oculta), centrados juntos. */
+    var c = centrar([elipse(r, 0, 40, 0, 2 * Math.PI), nombre === 'cilindro' ? elipse(r, h, 40, 0, 2 * Math.PI) : [iso([0, 0, h])],
+      elipse(r, 0, 20, -Math.PI / 4, 3 * Math.PI / 4), elipse(r, 0, 20, 3 * Math.PI / 4, 7 * Math.PI / 4)]);
+    var base = c[0], tope = c[1], delante = c[2], atras = c[3];
+    var sil = envolvente(base.concat(tope)), bb = caja(sil);
+    return suelta('solido-' + nombre, o, {
+      forma: sil, recto: true, color: col, altura: o.altura || 3, grosor: 1, fibra: 0.35, semilla: 275,
+      encima: function (g) {
+        var gr = g.createLinearGradient ? g.createLinearGradient(bb[0], 0, bb[2], 0) : null;
+        if (gr && gr.addColorStop) { gr.addColorStop(0, PP.oscurecer(col, 1.2)); gr.addColorStop(0.35, col); gr.addColorStop(1, PP.oscurecer(col, 0.6)); g.fillStyle = gr; g.fillRect(bb[0], bb[1], bb[2] - bb[0], bb[3] - bb[1]); }
+        g.save(); g.strokeStyle = 'rgba(30,20,38,.45)'; g.lineWidth = 1.4;
+        g.beginPath(); delante.forEach(function (q, i) { g[i ? 'lineTo' : 'moveTo'](q[0], q[1]); }); g.stroke();
+        if (o.aristasOcultas && g.setLineDash) { g.setLineDash([4, 4]); g.beginPath(); atras.forEach(function (q, i) { g[i ? 'lineTo' : 'moveTo'](q[0], q[1]); }); g.stroke(); }
+        g.restore();
+        if (nombre === 'cilindro') {
+          g.save(); sombraChica(g); g.fillStyle = PP.oscurecer(col, 1.25); poli(g, tope); g.fill(); g.restore();
+          g.strokeStyle = 'rgba(30,20,38,.45)'; g.lineWidth = 1.4; poli(g, tope); g.stroke();
+        }
+      }
+    });
+  }
+  C.solidos = ['cubo', 'prismaRect', 'prismaTri', 'piramide', 'tetraedro', 'cilindro', 'cono', 'esfera'];
+  C.solido = function (o) {
+    o = o || {};
+    var v = o.valor || 'cubo';
+    return POLIEDRO[v] ? poliedro(v, o, POLIEDRO[v]()) : curvo(v, o);
+  };
+
+  /* Desarrollos: el sólido abierto en plano. Las caras van unidas en una sola pieza;
+     los pliegues (aristas compartidas) van punteados y las caras alternan dos tonos. */
+  function rectP(x, y, w, h) { return [[x, y], [x + w, y], [x + w, y + h], [x, y + h]]; }
+  function triP(a, b, c) { return [a, b, c]; }
+  function circP(cx, cy, r, n) { var p = []; for (var k = 0; k < (n || 32); k++) { var t = k * 2 * Math.PI / (n || 32); p.push([cx + r * Math.cos(t), cy + r * Math.sin(t)]); } return p; }
+  var DESARROLLO = {
+    cubo: function () { var s = 30, p = []; [[1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2]].forEach(function (q) { p.push(rectP(q[0] * s, q[1] * s, s, s)); }); return p; },
+    prismaRect: function () {
+      var a = 50, b = 26, c = 18;
+      return [rectP(c, 0, a, c), rectP(c, c, a, b), rectP(c, c + b, a, c), rectP(c, 2 * c + b, a, b), rectP(0, c, c, b), rectP(c + a, c, c, b)];
+    },
+    prismaTri: function () {
+      var L = 60, w = 30, h = w * 0.866;
+      return [rectP(0, h, L, w), rectP(0, h + w, L, w), rectP(0, h + 2 * w, L, w), triP([0, h], [0, h + w], [-h, h + w / 2]), triP([L, h], [L + h, h + w / 2], [L, h + w])];
+    },
+    piramide: function () {
+      var s = 40, t = 36;
+      return [rectP(0, 0, s, s), triP([0, 0], [s, 0], [s / 2, -t]), triP([s, 0], [s + t, s / 2], [s, s]), triP([s, s], [s / 2, s + t], [0, s]), triP([0, s], [-t, s / 2], [0, 0])];
+    },
+    tetraedro: function () {
+      var s = 46, h = s * 0.866, A = [0, 2 * h], B = [2 * s, 2 * h], Cc = [s, 0], m1 = [s, 2 * h], m2 = [s / 2, h], m3 = [1.5 * s, h];
+      return [triP(A, m1, m2), triP(m1, B, m3), triP(m2, m3, Cc), triP(m2, m1, m3)];
+    },
+    cilindro: function () { var r = 16, w = 2 * Math.PI * r * 0.9, h = 50; return [rectP(0, 0, w, h), circP(w / 2, -r, r), circP(w / 2, h + r, r)]; },
+    cono: function () {
+      var R = 54, r = 16, ang = 2 * Math.PI * r / R, sector = [[0, 0]];
+      for (var k = 0; k <= 24; k++) { var t = Math.PI / 2 - ang / 2 + ang * k / 24; sector.push([R * Math.cos(t), R * Math.sin(t)]); }
+      return [sector, circP(0, R + r, r)];
+    },
+    esfera: function () {
+      /* Ocho gajos unidos por el ecuador, como una cáscara de naranja abierta. */
+      var p = [], w = 17, h = 46;
+      for (var i = 0; i < 8; i++) {
+        var cx = i * w, g = [];
+        for (var k = 0; k <= 12; k++) { var t = -Math.PI / 2 + Math.PI * k / 12; g.push([cx + (w / 2) * Math.cos(t), h * Math.sin(t)]); }
+        for (var k2 = 12; k2 >= 0; k2--) { var t2 = -Math.PI / 2 + Math.PI * k2 / 12; g.push([cx - (w / 2) * Math.cos(t2), h * Math.sin(t2)]); }
+        p.push(g);
+      }
+      return p;
+    }
+  };
+  C.desarrollo = function (o) {
+    o = o || {};
+    var v = o.valor || 'cubo', caras = centrar((DESARROLLO[v] || DESARROLLO.cubo)()), col = o.color || COLORES_SOL[v] || '#3F7CC2';
+    /* Aristas que comparten dos caras = pliegues. */
+    var cuenta = {};
+    function clv(a, b) { var A = a.map(Math.round).join(','), B = b.map(Math.round).join(','); return A < B ? A + '|' + B : B + '|' + A; }
+    caras.forEach(function (c) { c.forEach(function (q, k) { var key = clv(q, c[(k + 1) % c.length]); cuenta[key] = (cuenta[key] || 0) + 1; }); });
+    return suelta('desarrollo-' + v, o, {
+      forma: caras, recto: true, color: col, altura: 1, grosor: 1, fibra: 0.45, semilla: 281,
+      encima: function (g) {
+        caras.forEach(function (c, i) { if (i % 2) { g.fillStyle = 'rgba(255,255,255,.16)'; poli(g, c); g.fill(); } });
+        g.save(); g.strokeStyle = 'rgba(30,20,38,.6)'; g.lineWidth = 1.3; if (g.setLineDash) g.setLineDash([4, 3]);
+        caras.forEach(function (c) { c.forEach(function (q, k) { var b = c[(k + 1) % c.length]; if (cuenta[clv(q, b)] >= 2) { g.beginPath(); g.moveTo(q[0], q[1]); g.lineTo(b[0], b[1]); g.stroke(); } }); });
+        g.restore();
+      }
+    });
+  };
+
   /* ================= B. Aldea (Y2) ================= */
 
   /* 8. Casa: muro con techo, puerta y ventana pegadas. */
@@ -1435,6 +1614,8 @@
     mateInstrumentos: ['calculadora', 'regla', 'transportador', 'escuadra', 'reloj', 'balanza', 'pizarra', 'marcador', 'recta'],
     mateConteo: ['cuenta', 'varilla', 'marco10', 'ficha', 'dado:5', 'moneda:100', 'base10:unidad', 'base10:decena', 'base10:centena', 'gema'],
     mateFiguras: ['figura:circulo', 'figura:cuadrado', 'figura:rectangulo', 'figura:triangulo', 'figura:pentagono', 'figura:hexagono', 'figura:rombo', 'figura:ovalo', 'figura:estrella'],
+    mateSolidos: ['solido:cubo', 'solido:prismaRect', 'solido:prismaTri', 'solido:piramide', 'solido:tetraedro', 'solido:cilindro', 'solido:cono', 'solido:esfera', 'solidosOcultas'],
+    mateDesarrollos: ['desarrollo:cubo', 'desarrollo:prismaRect', 'desarrollo:prismaTri', 'desarrollo:piramide', 'desarrollo:tetraedro', 'desarrollo:cilindro', 'desarrollo:cono', 'desarrollo:esfera'],
     mateDatos: ['fraccion:1/2', 'fraccion:3/4', 'fraccion:2/3', 'fraccion:5/8', 'grafica'],
     construccion: ['ladrillo', 'muro', 'bloque', 'viga', 'columna', 'columnaPiedra', 'arco', 'rampa', 'escalera', 'techo', 'puerta', 'ventanaCasa', 'engranaje', 'tuerca', 'cono', 'andamio', 'grua', 'portal'],
     /* Variantes «pieza:opción» (muro de cada material, techo forma:material). */

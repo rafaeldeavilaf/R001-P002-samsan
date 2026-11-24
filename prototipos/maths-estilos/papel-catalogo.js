@@ -13,7 +13,7 @@
   var P = window.PROTO_COMUN, PP = window.SAMSAN_PAPEL, C = PP && PP.catalogo;
   var W = 960, CEL = 160, COLS = 6, CAB = 46;
 
-  var TITULOS = { mateNumeros: 'Matemáticas · números y signos', mateInstrumentos: 'Matemáticas · instrumentos', mateConteo: 'Matemáticas · conteo y valor posicional', mateFiguras: 'Matemáticas · figuras 2D', mateDatos: 'Matemáticas · fracciones y gráficas', construccion: 'Construcción', materiales: 'Construcción · materiales de muro', techos: 'Construcción · techos (forma y material)', aberturas: 'Construcción · puertas y ventanas', detalles: 'Construcción · detalles de fachada', suelos: 'Construcción · suelos y caminos', obra: 'Construcción · obra', vehiculos: 'Vehículos', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
+  var TITULOS = { mateNumeros: 'Matemáticas · números y signos', mateInstrumentos: 'Matemáticas · instrumentos', mateConteo: 'Matemáticas · conteo y valor posicional', mateFiguras: 'Matemáticas · figuras 2D', mateSolidos: 'Matemáticas · sólidos 3D', mateDesarrollos: 'Matemáticas · desarrollos de los sólidos', mateDatos: 'Matemáticas · fracciones y gráficas', construccion: 'Construcción', materiales: 'Construcción · materiales de muro', techos: 'Construcción · techos (forma y material)', aberturas: 'Construcción · puertas y ventanas', detalles: 'Construcción · detalles de fachada', suelos: 'Construcción · suelos y caminos', obra: 'Construcción · obra', vehiculos: 'Vehículos', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
   var CORTO = { dosAguas: '2 aguas', dosAguasLado: 'lado', unaAgua: '1 agua', plano: 'plano', conico: 'cónico', cupula: 'cúpula' };
   /* «muro:adobe» o «techo:conico:pizarra»: variantes que se arman solas. */
   function variante(nombre) {
@@ -22,7 +22,7 @@
     if (p[0] === 'suelo') return [function (ctx) { C.suelo({ material: p[1], ancho: 128, alto: 80 }).dibujar(ctx, 0, 0); }, 0.95, p[1]];
     if (p[0] === 'techo') return [function (ctx) { C.techo({ forma: p[1], material: p[2] }).dibujar(ctx, 0, 6); }, 1.25, (CORTO[p[1]] || p[1]) + ' · ' + p[2]];
     /* Resto: C.<pieza>({ valor }) con su escala. */
-    var ESC = { numero: 1, simbolo: 1.2, dado: 1.5, moneda: 1.7, figura: 1.3, fraccion: 1.4, base10: p[1] === 'centena' ? 0.85 : p[1] === 'decena' ? 0.95 : 2.2 };
+    var ESC = { solido: 1.35, desarrollo: 0.95, numero: 1, simbolo: 1.2, dado: 1.5, moneda: 1.7, figura: 1.3, fraccion: 1.4, base10: p[1] === 'centena' ? 0.85 : p[1] === 'decena' ? 0.95 : 2.2 };
     if (p.length > 1 && C[p[0]]) return [function (ctx) { C[p[0]]({ valor: p[1] }).dibujar(ctx, 0, 0); }, ESC[p[0]] || 1, p[0] + ' ' + p[1]];
     return null;
   }
@@ -35,6 +35,7 @@
     varilla: [function (ctx) { C.varilla({ largo: 120 }).dibujar(ctx, 0, 0); [-40, -12, 16].forEach(function (y) { C.cuenta({ valor: 'd' }).dibujar(ctx, 0, y); }); }, 1, 'varilla con cuentas'],
     marco10: [una(function () { return C.marco10({ llenos: 7 }); }), 0.85, 'marco10 (7)'],
     gema: [una(function () { return C.gema(); }), 1.4],
+    solidosOcultas: [function (ctx) { C.solido({ valor: 'cubo', aristasOcultas: true }).dibujar(ctx, -34, 0); C.solido({ valor: 'cono', aristasOcultas: true }).dibujar(ctx, 34, 0); }, 1, 'aristas ocultas (opción)'],
     calculadora: [una(function () { return C.calculadora(); }), 0.72],
     regla: [una(function () { return C.regla(); }), 0.72],
     transportador: [una(function () { return C.transportador(); }), 0.95],

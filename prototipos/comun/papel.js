@@ -96,10 +96,14 @@
     return (cache[clave] = l.c);
   }
 
+  /* pts es un polígono [[x, y], ...] o varios [[[x, y], ...], ...] (una pieza de varias caras unidas). */
+  function esVarias(pts) { return pts.length && Array.isArray(pts[0][0]); }
   function trazar(g, pts, dx, dy) {
     g.beginPath();
-    for (var i = 0; i < pts.length; i++) g[i ? 'lineTo' : 'moveTo'](pts[i][0] + dx, pts[i][1] + dy);
-    g.closePath();
+    (esVarias(pts) ? pts : [pts]).forEach(function (p) {
+      for (var i = 0; i < p.length; i++) g[i ? 'lineTo' : 'moveTo'](p[i][0] + dx, p[i][1] + dy);
+      g.closePath();
+    });
   }
   function sombra(g, pts, dx, dy, blur, alfa, dpr) {
     g.save();
@@ -124,8 +128,9 @@
   PP.pieza = function (o) {
     if (o.clave && cache['pieza:' + o.clave]) return cache['pieza:' + o.clave];
     var dpr = o.dpr || PP.dpr(), h = o.altura || 2, grosor = o.grosor || (o.carton ? 4 : 2);
-    var pts = o.recto ? o.forma : PP.temblar(o.forma, o.semilla || 3);
-    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    var pts = o.recto ? o.forma : esVarias(o.forma) ? o.forma.map(function (p, i) { return PP.temblar(p, (o.semilla || 3) + i); }) : PP.temblar(o.forma, o.semilla || 3);
+    var todos = esVarias(pts) ? [].concat.apply([], pts) : pts;
+    var xs = todos.map(function (p) { return p[0]; }), ys = todos.map(function (p) { return p[1]; });
     var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs), minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
     var margen = 8 + h * 9 + grosor;
     var ox = -minX + margen, oy = -minY + margen;
