@@ -419,6 +419,8 @@ TITULO_RE = re.compile(r"^\s*/[/*]\s*titulo:\s*(.+?)\s*(?:\*/)?\s*$", re.M)
 #   // usa: repaso      incluye prototipos/comun/repaso.js (pistas, teclado, rondas, voz en ingles).
 PUBLICAR_RE = re.compile(r"^\s*/[/*]\s*publicar:\s*true\s*(?:\*/)?\s*$", re.M)
 USA_RE = re.compile(r"^\s*/[/*]\s*usa:\s*repaso\s*(?:\*/)?\s*$", re.M)
+#   // usa: papel       incluye prototipos/comun/papel.js (papel y cartón en Canvas, 24 nov 2026).
+USA_PAPEL_RE = re.compile(r"^\s*/[/*]\s*usa:\s*papel\s*(?:\*/)?\s*$", re.M)
 # `// incluye: carpeta/archivo.js otra/archivo.js` mete esos bocetos en la misma pagina (menu de juegos).
 INCLUYE_RE = re.compile(r"^\s*//\s*incluye:\s*(.+?)\s*$", re.M)
 
@@ -458,6 +460,8 @@ def build_proto(kit, ui, brand, credits, carpeta, nombre, materia):
     page += '<script>\n' + read(PROTO, "comun", "proto-comun.js") + '\n</script>\n'
     if USA_RE.search(js):
         page += '<script>\n' + read(PROTO, "comun", "repaso.js") + '\n</script>\n'
+    if USA_PAPEL_RE.search(js):
+        page += '<script>\n' + read(PROTO, "comun", "papel.js") + '\n</script>\n'
     inc = INCLUYE_RE.search(js)
     if inc:
         page += '<script>window.SAMSAN_MENU = true;</script>\n'

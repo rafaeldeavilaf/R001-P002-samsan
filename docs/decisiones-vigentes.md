@@ -232,6 +232,11 @@ Verificación: `node tools/verify_repaso_y2.js` (corre también `tools/verify_ab
   - Se sumó una tercera prueba, «papel pre-dibujado»: cada pieza se dibuja una vez con todo su relieve y en cada cuadro solo se copia.
   - Resultado en el mismo teléfono: el papel pre-dibujado aguanta las 300 piezas a casi 60 FPS (percentil 5 de 57), mientras Canvas con sombras por cuadro solo llega a 150 y CSS 3D a 50.
   - **Decisión técnica (24 nov 2026):** el estilo de papel se dibuja una vez por pieza y en el juego solo se copia en Canvas, sin sombras ni filtros por cuadro. Falta confirmarlo en un equipo viejo real.
+- **Biblioteca de papel (24 nov 2026, decisión de Rafael).** Rafael decidió construirla antes de las pruebas con los niños, porque ese día no podía hacerlas.
+  - `prototipos/comun/papel.js` hace en Canvas lo mismo que el fotograma aprobado: piezas con fibra, bisel, canto (corrugado en el cartón) y tres sombras por altura. También trae un tablero de cartón, hojas de borde rasgado, cinta y huecos.
+  - Un boceto la incluye con `// usa: papel`.
+  - Demo en `prototipos/maths-estilos/papel-demo.js`, solo en `_local/`: la estación completa, la nave que flota y el panel de repuesto que se arrastra al hueco. Las piezas se dibujan una vez en unos 8 ms y la escena corre a 60 FPS en el portátil.
+  - Es un boceto fuera de rebanada. RB02 decide si lo adopta en su plan.
 - `prototipos/maths-estilos/fotogramas.js` (solo `_local/`): tres fotogramas de la misma estación, dibujados por código y sin contenido del colegio:
   - papercraft técnico, en papel negro con neón;
   - papel de colores;
