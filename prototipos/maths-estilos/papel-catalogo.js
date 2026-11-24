@@ -109,44 +109,51 @@
   var ANCHAS = {
     digitos: [110, function (ctx, y, n) {
       for (var d = 0; d <= 9; d++) C.numero({ valor: d }).dibujar(ctx, 66 + d * 92, y + 48);
-      etiqueta(ctx, n, 'numero 0-9 (recortados)', W / 2, y + 96);
+      etiqueta(ctx, n, 'numero 0-9 (recortados)', W / 2, y + 96, C.nombreIngles('digitos'));
     }],
     recta: [110, function (ctx, y, n) {
       var r1 = C.recta({ inicio: 0, fin: 100, paso: 10, largo: 400 });
       r1.dibujar(ctx, 240, y + 40);
       C.marcador().dibujar(ctx, 240 + r1.xDe(70), y + 32 - C.marcador().punta);
-      etiqueta(ctx, n, 'recta 0-100 + marcador', 240, y + 86);
+      etiqueta(ctx, n, 'recta 0-100 + marcador', 240, y + 86, 'number line + pointer');
       C.recta({ inicio: 0, fin: 1, paso: 0.1, largo: 400 }).dibujar(ctx, 720, y + 40);
-      etiqueta(ctx, n + 0.5, 'recta 0-1 (decimales)', 720, y + 86);
+      etiqueta(ctx, n + 0.5, 'recta 0-1 (decimales)', 720, y + 86, 'number line (decimals)');
     }],
     portal: [250, function (ctx, y, n) {
       ctx.save(); ctx.translate(W / 2, y + 128); ctx.scale(0.72, 0.72);
       C.portal().dibujar(ctx, 0, 0);
       ctx.restore();
-      etiqueta(ctx, n, 'portal (castillo)', W / 2, y + 234);
+      etiqueta(ctx, n, 'portal (castillo)', W / 2, y + 234, C.nombreIngles('portal'));
     }],
     hojaRio: [90, function (ctx, y, n) {
       C.hojaRio({ ancho: W, y: y + 40 }).dibujar(ctx, 0, 0);
-      etiqueta(ctx, n, 'hojaRio', W / 2, y + 40);
+      etiqueta(ctx, n, 'hojaRio', W / 2, y + 40, C.nombreIngles('hojaRio'));
     }],
     hojaPasto: [150, function (ctx, y, n) {
       C.hojaPasto({ ancho: W, alto: y + 150, borde: y + 30 }).dibujar(ctx, 0, 0);
       C.tabla().dibujar(ctx, 120, y + 92); C.casa().dibujar(ctx, 300, y + 74);
       C.arbol().dibujar(ctx, 420, y + 76); C.cerca().dibujar(ctx, 560, y + 86);
       C.carrito().dibujar(ctx, 700, y + 86); C.arbusto().dibujar(ctx, 840, y + 100);
-      etiqueta(ctx, n, 'hojaPasto con aldea', W / 2, y + 132);
+      etiqueta(ctx, n, 'hojaPasto con aldea', W / 2, y + 128, 'grass sheet with village');
     }]
   };
 
-  function etiqueta(ctx, n, nombre, x, y) {
+  /* Etiqueta: número y nombre en español; debajo, el nombre en inglés si lo hay. */
+  function etiqueta(ctx, n, nombre, x, y, ingles) {
     var t = (n % 1 ? '' : n + '  ') + nombre;
     ctx.save();
     ctx.font = '800 13px Nunito, system-ui, sans-serif';
     var w = ctx.measureText ? ctx.measureText(t).width + 14 : 120;
+    if (ingles) {
+      ctx.font = 'italic 700 12px Nunito, system-ui, sans-serif';
+      w = Math.max(w, (ctx.measureText ? ctx.measureText(ingles).width : 100) + 14);
+    }
+    var alto = ingles ? 34 : 20, y0 = ingles ? y - 7 : y;
     ctx.fillStyle = '#FFF6DC'; ctx.shadowColor = 'rgba(42,30,20,.3)'; ctx.shadowBlur = 2; ctx.shadowOffsetY = 1;
-    ctx.fillRect(x - w / 2, y - 10, w, 20);
+    ctx.fillRect(x - w / 2, y0 - 10, w, alto);
     ctx.shadowColor = 'transparent'; ctx.fillStyle = '#1E1426'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(t, x, y + 1);
+    ctx.font = '800 13px Nunito, system-ui, sans-serif'; ctx.fillText(t, x, y0 + 1);
+    if (ingles) { ctx.fillStyle = '#4A3B5C'; ctx.font = 'italic 700 12px Nunito, system-ui, sans-serif'; ctx.fillText(ingles, x, y0 + 15); }
     ctx.restore();
   }
   function cabecera(ctx, titulo, cuantas, y) {
@@ -196,7 +203,7 @@
         ctx.save(); ctx.translate(cx, cy); ctx.scale(m[1], m[1]);
         try { m[0](ctx); } catch (e) { faltan.push(nombre); }
         ctx.restore();
-        etiqueta(ctx, ++n, m[2] || nombre, cx, cy + CEL / 2 - 4);
+        etiqueta(ctx, ++n, m[2] || nombre, cx, cy + CEL / 2 - 8, C.nombreIngles(nombre));
       });
       var y = b.yAnchas;
       b.anchas.forEach(function (nombre) { ANCHAS[nombre][1](ctx, y, ++n); y += ANCHAS[nombre][0]; });

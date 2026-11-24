@@ -1630,4 +1630,70 @@
     aldea: ['casa', 'arbol', 'arbusto', 'nube', 'tabla', 'carrito', 'cerca', 'hojaPasto', 'hojaRio'],
     estacion: ['panel', 'brazo', 'modulo', 'ventana', 'antena', 'nave', 'estrella', 'planeta']
   };
+
+  /* ================= Nombres en inglés =================
+     C.ingles: pieza → nombre en inglés (para mostrarlo y para el juego en inglés).
+     C.inglesValores: valores de opciones (materiales, formas, figuras, sólidos, signos) en inglés.
+     C.en: las mismas piezas con nombre de función en inglés y opciones en inglés:
+       C.en.shape({ value: 'triangle' })  ≡  C.figura({ valor: 'triangulo' })
+       C.en.wall({ material: 'logs' })    ≡  C.muro({ material: 'troncos' }) */
+  C.ingles = {
+    tarjeta: 'number card', recta: 'number line', marcador: 'pointer', cuenta: 'bead', varilla: 'rod', marco10: 'ten frame', gema: 'gem',
+    numero: 'number', simbolo: 'symbol', digitos: 'digits 0-9', calculadora: 'calculator', regla: 'ruler', transportador: 'protractor',
+    escuadra: 'set square', reloj: 'clock', balanza: 'balance scale', pizarra: 'chalkboard', ficha: 'counters', dado: 'dice', moneda: 'coin',
+    base10: 'base-ten block', figura: 'shape', fraccion: 'fraction', grafica: 'bar chart', solido: 'solid', desarrollo: 'net', solidosOcultas: 'hidden edges',
+    casa: 'house', arbol: 'tree', arbusto: 'bush', nube: 'cloud', tabla: 'plank', carrito: 'car', cerca: 'fence', hojaPasto: 'grass sheet', hojaRio: 'river',
+    ladrillo: 'brick', muro: 'wall', bloque: 'block', viga: 'beam', columna: 'column', columnaPiedra: 'stone column', arco: 'arch', rampa: 'ramp',
+    escalera: 'stairs', techo: 'roof', puerta: 'door', ventanaCasa: 'window', engranaje: 'gear', tuerca: 'nut', cono: 'traffic cone', andamio: 'scaffold',
+    grua: 'crane', portal: 'castle gate', suelo: 'floor',
+    ventanaArco: 'arched window', ventanaRedonda: 'round window', ventanaPostigos: 'shuttered window', puertaDoble: 'double door', porton: 'garage door',
+    reja: 'railing', vitral: 'stained glass', chimenea: 'chimney', balcon: 'balcony', toldo: 'awning', escaleraExterior: 'outdoor stairs', torre: 'tower',
+    almenas: 'battlements', puente: 'bridge', farol: 'wall lantern', pilaLadrillos: 'brick pile', tablonesApilados: 'plank stack', saco: 'cement bag',
+    balde: 'bucket', carretilla: 'wheelbarrow', furgoneta: 'van', cupe: 'coupe', sedanLargo: 'limousine', mini: 'city car', sedan: 'sedan',
+    camioneta: 'SUV', compacto: 'hatchback', deportivo: 'sports car', panel: 'solar panel', brazo: 'truss arm', modulo: 'module', ventana: 'porthole',
+    antena: 'dish antenna', nave: 'spaceship', estrella: 'star', planeta: 'planet'
+  };
+  C.inglesValores = {
+    /* materiales */
+    ladrillo: 'brick', ladrilloClaro: 'light brick', adobe: 'adobe', piedra: 'stone', sillar: 'ashlar', madera: 'wood', troncos: 'logs', guadua: 'bamboo',
+    bahareque: 'wattle and daub', concreto: 'concrete', corrugado: 'corrugated metal', vidrio: 'glass', tejas: 'clay tiles', pizarra: 'slate', paja: 'thatch',
+    zinc: 'tin', tablillas: 'shingles', tejaVerde: 'green tiles', baldosa: 'tiles', adoquin: 'cobblestones', tablones: 'floorboards', grava: 'gravel',
+    caminoPiedras: 'stepping stones', asfalto: 'asphalt',
+    /* formas de techo */
+    dosAguas: 'gable', dosAguasLado: 'gable side', unaAgua: 'lean-to', plano: 'flat', conico: 'conical', cupula: 'dome',
+    /* figuras 2D */
+    circulo: 'circle', cuadrado: 'square', rectangulo: 'rectangle', triangulo: 'triangle', pentagono: 'pentagon', hexagono: 'hexagon', rombo: 'rhombus',
+    ovalo: 'oval', estrella: 'star',
+    /* sólidos */
+    cubo: 'cube', prismaRect: 'rectangular prism', prismaTri: 'triangular prism', piramide: 'square pyramid', tetraedro: 'tetrahedron', cilindro: 'cylinder',
+    cono: 'cone', esfera: 'sphere',
+    /* signos, base 10, cuentas y fichas */
+    mas: 'plus', menos: 'minus', por: 'times', entre: 'divided by', igual: 'equals', menor: 'less than', mayor: 'greater than',
+    unidad: 'one', decena: 'ten', centena: 'hundred', u: 'ones', d: 'tens', c: 'hundreds', roja: 'red', amarilla: 'yellow'
+  };
+  /* Nombre en inglés de una entrada del catálogo: «muro:adobe» → «wall · adobe». */
+  C.nombreIngles = function (entrada) {
+    var p = String(entrada).split(':');
+    return [C.ingles[p[0]] || p[0]].concat(p.slice(1).map(function (v) { return C.inglesValores[v] || v; })).join(' · ');
+  };
+  (function () {
+    var deValor = {};
+    Object.keys(C.inglesValores).forEach(function (k) { deValor[C.inglesValores[k]] = k; });
+    function camello(s) { return s.replace(/[^a-zA-Z0-9]+(.)?/g, function (m, c) { return c ? c.toUpperCase() : ''; }).replace(/^./, function (c) { return c.toLowerCase(); }); }
+    var CLAVES = { value: 'valor', text: 'texto', shape: 'forma', roof: 'techo', hiddenEdges: 'aristasOcultas', start: 'inicio', end: 'fin', step: 'paso',
+      length: 'largo', width: 'ancho', height: 'alto', hour: 'hora', minute: 'minuto', screen: 'pantalla', values: 'valores', filled: 'llenos', side: 'lado' };
+    function traducir(o) {
+      var r = {};
+      Object.keys(o || {}).forEach(function (k) {
+        var v = o[k], kk = CLAVES[k] || k;
+        r[kk] = typeof v === 'string' && deValor[v] ? deValor[v] : v;
+      });
+      return r;
+    }
+    C.en = {};
+    Object.keys(C.ingles).forEach(function (es) {
+      if (typeof C[es] !== 'function') return;
+      C.en[camello(C.ingles[es])] = function (o) { return C[es](traducir(o)); };
+    });
+  })();
 })();
