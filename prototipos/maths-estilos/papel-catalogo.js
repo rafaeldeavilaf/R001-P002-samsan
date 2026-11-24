@@ -13,7 +13,15 @@
   var P = window.PROTO_COMUN, PP = window.SAMSAN_PAPEL, C = PP && PP.catalogo;
   var W = 960, CEL = 160, COLS = 6, CAB = 46;
 
-  var TITULOS = { matematicas: 'Matemáticas', construccion: 'Construcción', vehiculos: 'Vehículos', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
+  var TITULOS = { matematicas: 'Matemáticas', construccion: 'Construcción', materiales: 'Construcción · materiales de muro', techos: 'Construcción · techos (forma y material)', vehiculos: 'Vehículos', aldea: 'Aldea (Year 2)', estacion: 'Estación (Year 6)' };
+  var CORTO = { dosAguas: '2 aguas', dosAguasLado: 'lado', unaAgua: '1 agua', plano: 'plano', conico: 'cónico', cupula: 'cúpula' };
+  /* «muro:adobe» o «techo:conico:pizarra»: variantes que se arman solas. */
+  function variante(nombre) {
+    var p = nombre.split(':');
+    if (p[0] === 'muro') return [function (ctx) { C.muro({ material: p[1], ancho: 124, alto: 96 }).dibujar(ctx, 0, 0); }, 0.95, p[1]];
+    if (p[0] === 'techo') return [function (ctx) { C.techo({ forma: p[1], material: p[2] }).dibujar(ctx, 0, 6); }, 1.25, (CORTO[p[1]] || p[1]) + ' · ' + p[2]];
+    return null;
+  }
   /* Cómo mostrar cada pieza en su celda: [función que dibuja en (0,0), escala]. Las anchas van aparte. */
   function una(fn) { return function (ctx) { fn().dibujar(ctx, 0, 0); }; }
   var MUESTRA = {
@@ -115,7 +123,7 @@
   function plano() {
     var bloques = [], y = 10;
     Object.keys(C.categorias).forEach(function (cat) {
-      var nombres = C.categorias[cat], celdas = nombres.filter(function (n) { return MUESTRA[n]; }), anchas = nombres.filter(function (n) { return ANCHAS[n]; });
+      var nombres = C.categorias[cat], celdas = nombres.filter(function (n) { return MUESTRA[n] || variante(n); }), anchas = nombres.filter(function (n) { return ANCHAS[n]; });
       var b = { cat: cat, y: y, celdas: celdas, anchas: anchas, total: nombres.length };
       y += CAB + Math.ceil(celdas.length / COLS) * CEL;
       b.yAnchas = y;
@@ -141,7 +149,7 @@
     pl.bloques.forEach(function (b) {
       cabecera(ctx, TITULOS[b.cat] || b.cat, b.total, b.y);
       b.celdas.forEach(function (nombre, i) {
-        var m = MUESTRA[nombre], cx = (i % COLS) * CEL + CEL / 2, cy = b.y + CAB + Math.floor(i / COLS) * CEL + CEL / 2 - 10;
+        var m = MUESTRA[nombre] || variante(nombre), cx = (i % COLS) * CEL + CEL / 2, cy = b.y + CAB + Math.floor(i / COLS) * CEL + CEL / 2 - 10;
         ctx.save(); ctx.translate(cx, cy); ctx.scale(m[1], m[1]);
         try { m[0](ctx); } catch (e) { faltan.push(nombre); }
         ctx.restore();

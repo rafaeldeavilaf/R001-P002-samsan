@@ -274,29 +274,225 @@
   /* ================= D. Construcción (piezas para que la base crezca) ================= */
   function sombraChica(g) { g.shadowColor = 'rgba(42,30,20,.45)'; g.shadowBlur = 2; g.shadowOffsetX = 1; g.shadowOffsetY = 1.4; }
 
-  /* Ladrillo suelto. */
-  C.ladrillo = function (o) {
-    o = o || {};
-    return suelta('ladrillo', o, { forma: F.rect(48, 22), color: o.color || '#B5553C', altura: o.altura || 2, semilla: 81 });
-  };
-  /* Muro de ladrillos: hiladas trabadas sobre mezcla clara. */
-  C.muro = function (o) {
-    o = o || {};
-    var w = o.ancho || 150, h = o.alto || 84;
-    return suelta('muro', o, {
-      forma: F.rect(w, h), color: '#D9C4A0', altura: 2, grosor: 3, semilla: 83,
-      encima: function (g) {
-        g.save(); sombraChica(g); g.fillStyle = o.color || '#B5553C';
-        var lh = 14, lw = 30, j = 0;
-        for (var y = -h / 2 + 2; y < h / 2 - 2; y += lh, j++) {
-          for (var x = -w / 2 + 2 - (j % 2 ? lw / 2 : 0); x < w / 2 - 2; x += lw) {
-            var x0 = Math.max(x, -w / 2 + 2), x1 = Math.min(x + lw - 3, w / 2 - 2);
-            if (x1 - x0 > 4) g.fillRect(x0, y, x1 - x0, lh - 3);
-          }
+  /* ---------- Materiales con textura ----------
+     Cada material sabe pintar un rectángulo (x0, y0, x1, y1) dentro de una pieza ya
+     recortada a su forma. Las piezas sueltas (ladrillos, piedras, tejas) llevan su
+     propia sombrita, como papelitos pegados. Todo es determinista (semilla fija). */
+  function variar(hex, rnd, cuanto) { return PP.oscurecer(hex, 1 + (rnd() * 2) * (cuanto || 0.08)); }
+  function poli(g, pts) { g.beginPath(); pts.forEach(function (q, i) { g[i ? 'lineTo' : 'moveTo'](q[0], q[1]); }); g.closePath(); }
+  function hiladas(g, x0, y0, x1, y1, o) {
+    /* Bloques trabados (ladrillo, adobe, sillar, tablillas): o.alto, o.largo, o.junta, o.colores. */
+    var rnd = azar(o.semilla || 1), j = 0;
+    g.save(); sombraChica(g);
+    for (var y = y0 + o.junta; y < y1; y += o.alto, j++) {
+      for (var x = x0 - (j % 2 ? o.largo / 2 : 0); x < x1; x += o.largo) {
+        g.fillStyle = variar(o.colores[Math.floor((rnd() + 0.5) * o.colores.length) % o.colores.length], rnd, o.var);
+        var bx = Math.max(x, x0 + o.junta), bw = Math.min(x + o.largo - o.junta, x1 - o.junta) - bx;
+        if (bw > 3) { if (o.redondo) { g.beginPath(); redondeado(g, bx, y, bw, o.alto - o.junta, o.redondo); g.fill(); } else g.fillRect(bx, y, bw, o.alto - o.junta); }
+        if (o.grieta && rnd() > 0.55) {
+          g.save(); g.shadowColor = 'transparent'; g.strokeStyle = 'rgba(60,35,20,.45)'; g.lineWidth = 1;
+          var cx = bx + bw * (0.3 + (rnd() + 0.5) * 0.4); g.beginPath(); g.moveTo(cx, y + 1); g.lineTo(cx + 3, y + (o.alto - o.junta) * 0.5); g.lineTo(cx - 1, y + o.alto - o.junta - 1); g.stroke(); g.restore();
+        }
+      }
+    }
+    g.restore();
+  }
+  function redondeado(g, x, y, w, h, r) {
+    r = Math.min(r, h / 2, w / 2);
+    g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.arc(x + w - r, y + r, r, -Math.PI / 2, 0); g.lineTo(x + w, y + h - r);
+    g.arc(x + w - r, y + h - r, r, 0, Math.PI / 2); g.lineTo(x + r, y + h); g.arc(x + r, y + h - r, r, Math.PI / 2, Math.PI);
+    g.lineTo(x, y + r); g.arc(x + r, y + r, r, Math.PI, Math.PI * 1.5); g.closePath();
+  }
+  function azar(semilla) { var s = semilla || 7; return function () { s = (s * 16807) % 2147483647; return s / 2147483647 - 0.5; }; }
+  function vetas(g, x0, x1, y, alto, rnd, color) {
+    g.save(); g.strokeStyle = color; g.lineWidth = 0.8;
+    for (var k = 0; k < 2; k++) {
+      var yy = y + alto * (0.3 + k * 0.35) + rnd() * 2;
+      g.beginPath(); g.moveTo(x0, yy);
+      for (var x = x0; x <= x1; x += 12) g.lineTo(x, yy + Math.sin(x / 9 + k * 2) * 1.2 + rnd() * 0.8);
+      g.stroke();
+    }
+    g.restore();
+  }
+  function ondas(g, x0, y0, x1, y1, color, paso) {
+    /* Lámina corrugada: bandas verticales con luz y sombra. */
+    for (var x = x0; x < x1; x += paso) {
+      var gr = g.createLinearGradient ? g.createLinearGradient(x, 0, x + paso, 0) : null;
+      if (gr && gr.addColorStop) {
+        gr.addColorStop(0, PP.oscurecer(color, 1.18)); gr.addColorStop(0.5, color); gr.addColorStop(1, PP.oscurecer(color, 0.72));
+        g.fillStyle = gr;
+      } else g.fillStyle = color;
+      g.fillRect(x, y0, paso, y1 - y0);
+    }
+  }
+  function escamas(g, x0, y0, x1, y1, o) {
+    /* Tejas, pizarra y tablillas de techo: filas que se montan, la de arriba proyecta sombra. */
+    var rnd = azar(o.semilla || 3), j = 0;
+    for (var y = y0 - 4; y < y1; y += o.alto, j++) {
+      g.save(); g.shadowColor = 'rgba(42,30,20,.5)'; g.shadowBlur = 2.5; g.shadowOffsetY = 2;
+      for (var x = x0 - o.ancho - (j % 2 ? o.ancho / 2 : 0); x < x1 + o.ancho; x += o.ancho) {
+        g.fillStyle = variar(o.color, rnd, o.var || 0.07);
+        g.beginPath();
+        if (o.tipo === 'curva') { g.moveTo(x, y); g.lineTo(x + o.ancho, y); g.lineTo(x + o.ancho, y + o.alto * 0.55); g.arc(x + o.ancho / 2, y + o.alto * 0.55, o.ancho / 2, 0, Math.PI); g.closePath(); }
+        else if (o.tipo === 'escama') { g.moveTo(x, y); g.lineTo(x + o.ancho, y); g.lineTo(x + o.ancho, y + o.alto * 0.5); g.arc(x + o.ancho / 2, y + o.alto * 0.5, o.ancho / 2, 0, Math.PI); g.closePath(); }
+        else { g.rect(x + 0.5, y, o.ancho - 1, o.alto + 3); }
+        g.fill();
+        if (o.tipo === 'curva') {
+          g.save(); g.shadowColor = 'transparent'; g.fillStyle = 'rgba(255,255,255,.22)';
+          g.fillRect(x + o.ancho * 0.18, y, o.ancho * 0.16, o.alto * 0.7); g.restore();
+        }
+      }
+      g.restore();
+    }
+  }
+  var MAT = {
+    ladrillo: { base: '#D9C4A0', pintar: function (g, a, b, c, d) { hiladas(g, a, b, c, d, { alto: 14, largo: 30, junta: 3, colores: ['#B5553C', '#A84C35', '#C0603F'], semilla: 11 }); } },
+    ladrilloClaro: { base: '#7A5C40', pintar: function (g, a, b, c, d) { hiladas(g, a, b, c, d, { alto: 14, largo: 30, junta: 3, colores: ['#E2C27A', '#D6B062', '#EACF8F'], semilla: 12 }); } },
+    adobe: { base: '#9C6A40', pintar: function (g, a, b, c, d) { hiladas(g, a, b, c, d, { alto: 22, largo: 46, junta: 3, colores: ['#C89060', '#BD8455', '#D29A6A'], semilla: 13, grieta: true, var: 0.06 }); } },
+    piedra: { base: '#5E5A66', pintar: function (g, a, b, c, d) {
+      var rnd = azar(14);
+      g.save(); sombraChica(g);
+      for (var y = b + 2; y < d; y += 20 + rnd() * 6) {
+        for (var x = a - 10 * (rnd() + 0.5); x < c;) {
+          var w = 22 + (rnd() + 0.5) * 20, h = 17 + rnd() * 5;
+          g.fillStyle = variar(['#A2A3AD', '#8E8F98', '#B4B4BC', '#9A9488'][Math.floor((rnd() + 0.5) * 4) % 4], rnd, 0.06);
+          poli(g, [[x + 3 + rnd() * 3, y + rnd() * 3], [x + w - 2 + rnd() * 3, y + 1 + rnd() * 3], [x + w + rnd() * 2, y + h * 0.5], [x + w - 3 + rnd() * 3, y + h + rnd() * 2], [x + 4 + rnd() * 3, y + h + rnd() * 2], [x + rnd() * 2, y + h * 0.5]]);
+          g.fill(); x += w + 3;
+        }
+      }
+      g.restore();
+    } },
+    sillar: { base: '#8A8272', pintar: function (g, a, b, c, d) { hiladas(g, a, b, c, d, { alto: 22, largo: 44, junta: 2, colores: ['#CFC7B4', '#C4BBA6', '#D8D0BE'], semilla: 15, var: 0.05 }); } },
+    madera: { base: '#6E4A2A', pintar: function (g, a, b, c, d) {
+      var rnd = azar(16);
+      g.save(); sombraChica(g);
+      for (var y = b + 1; y < d; y += 14) {
+        g.fillStyle = variar('#A8743F', rnd, 0.08); g.fillRect(a, y, c - a, 12);
+        g.save(); g.shadowColor = 'transparent'; vetas(g, a, c, y, 12, rnd, 'rgba(70,40,20,.35)');
+        g.fillStyle = 'rgba(60,40,25,.7)'; g.fillRect(a + 6, y + 5, 2, 2); g.fillRect(c - 8, y + 5, 2, 2); g.restore();
+      }
+      g.restore();
+    } },
+    troncos: { base: '#5A3A20', pintar: function (g, a, b, c, d) {
+      var rnd = azar(17);
+      g.save(); sombraChica(g);
+      for (var y = b + 1; y < d; y += 18) {
+        var col = variar('#9C6B3C', rnd, 0.07);
+        var gr = g.createLinearGradient ? g.createLinearGradient(0, y, 0, y + 16) : null;
+        if (gr && gr.addColorStop) { gr.addColorStop(0, PP.oscurecer(col, 1.2)); gr.addColorStop(0.45, col); gr.addColorStop(1, PP.oscurecer(col, 0.7)); g.fillStyle = gr; } else g.fillStyle = col;
+        g.beginPath(); redondeado(g, a - 4, y, c - a + 8, 16, 8); g.fill();
+        g.save(); g.shadowColor = 'transparent'; vetas(g, a, c, y, 16, rnd, 'rgba(60,35,20,.3)'); g.restore();
+      }
+      g.restore();
+    } },
+    guadua: { base: '#6E6A3A', pintar: function (g, a, b, c, d) {
+      var rnd = azar(18);
+      g.save(); sombraChica(g);
+      for (var x = a + 1; x < c; x += 15) {
+        var col = variar('#BBA75C', rnd, 0.06);
+        var gr = g.createLinearGradient ? g.createLinearGradient(x, 0, x + 13, 0) : null;
+        if (gr && gr.addColorStop) { gr.addColorStop(0, PP.oscurecer(col, 1.15)); gr.addColorStop(0.4, col); gr.addColorStop(1, PP.oscurecer(col, 0.75)); g.fillStyle = gr; } else g.fillStyle = col;
+        g.fillRect(x, b, 13, d - b);
+        g.save(); g.shadowColor = 'transparent';
+        for (var y = b + 18 + rnd() * 20; y < d; y += 38 + rnd() * 8) {
+          g.fillStyle = 'rgba(80,70,30,.6)'; g.fillRect(x, y, 13, 3);
+          g.fillStyle = 'rgba(255,250,220,.45)'; g.fillRect(x, y + 3, 13, 1.2);
         }
         g.restore();
       }
-    });
+      g.restore();
+    } },
+    bahareque: { base: '#EFE8D8', pintar: function (g, a, b, c, d) {
+      var rnd = azar(19);
+      g.save();
+      for (var k = 0; k < 140; k++) { g.fillStyle = 'rgba(120,100,70,' + (0.05 + (rnd() + 0.5) * 0.08) + ')'; g.fillRect(a + (rnd() + 0.5) * (c - a), b + (rnd() + 0.5) * (d - b), 2, 2); }
+      /* Un desconchado: se ve la caña del bahareque. */
+      var cx = a + (c - a) * 0.62, cy = b + (d - b) * 0.6, rx = Math.min(40, (c - a) * 0.3), ry = Math.min(26, (d - b) * 0.28);
+      var hueco = []; for (var t = 0; t < 18; t++) { var ang = t * Math.PI / 9; var f = 0.6 + (rnd() + 0.5) * 0.6; hueco.push([cx + Math.cos(ang) * rx * f, cy + Math.sin(ang) * ry * f]); }
+      g.fillStyle = '#B89A6A'; poli(g, hueco); g.fill();
+      g.save(); poli(g, hueco); g.clip();
+      g.strokeStyle = '#7E5A30'; g.lineWidth = 3;
+      for (var x = cx - rx - 10; x < cx + rx + 10; x += 8) { g.beginPath(); g.moveTo(x, cy - ry - 4); g.lineTo(x, cy + ry + 4); g.stroke(); }
+      g.strokeStyle = '#94703F'; g.lineWidth = 2;
+      for (var y = cy - ry; y < cy + ry; y += 9) { g.beginPath(); g.moveTo(cx - rx - 4, y); g.lineTo(cx + rx + 4, y + 2); g.stroke(); }
+      g.restore();
+      g.shadowColor = 'rgba(42,30,20,.35)'; g.shadowBlur = 2; g.shadowOffsetX = -1; g.shadowOffsetY = -1;
+      g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 1.5; poli(g, hueco); g.stroke();
+      g.restore();
+    } },
+    concreto: { base: '#A9A9A6', pintar: function (g, a, b, c, d) {
+      var rnd = azar(20);
+      g.save();
+      g.strokeStyle = 'rgba(60,60,60,.25)'; g.lineWidth = 1;
+      for (var y = b + 28; y < d; y += 28) { g.beginPath(); g.moveTo(a, y); g.lineTo(c, y); g.stroke(); }
+      for (var y2 = b + 14; y2 < d; y2 += 28) for (var x = a + 20; x < c; x += 40) { g.fillStyle = 'rgba(50,50,50,.4)'; g.beginPath(); g.arc(x, y2, 1.8, 0, Math.PI * 2); g.fill(); }
+      for (var k = 0; k < 90; k++) { g.fillStyle = 'rgba(70,70,70,' + (0.12 + (rnd() + 0.5) * 0.15) + ')'; g.beginPath(); g.arc(a + (rnd() + 0.5) * (c - a), b + (rnd() + 0.5) * (d - b), 0.6 + (rnd() + 0.5), 0, Math.PI * 2); g.fill(); }
+      g.restore();
+    } },
+    corrugado: { base: '#9EA7B3', pintar: function (g, a, b, c, d) { ondas(g, a, b, c, d, '#9EA7B3', 8); } },
+    vidrio: { base: '#5E6B78', pintar: function (g, a, b, c, d) {
+      g.save();
+      for (var y = b + 3; y < d; y += 46) for (var x = a + 3; x < c; x += 38) {
+        var w = Math.min(34, c - x - 3), h = Math.min(42, d - y - 3);
+        if (w < 6 || h < 6) continue;
+        var gr = g.createLinearGradient ? g.createLinearGradient(x, y, x + w, y + h) : null;
+        if (gr && gr.addColorStop) { gr.addColorStop(0, '#DDF0F5'); gr.addColorStop(0.5, '#AFD6E2'); gr.addColorStop(1, '#8EC0D2'); g.fillStyle = gr; } else g.fillStyle = '#BFE0EA';
+        g.fillRect(x, y, w, h);
+        g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
+        g.fillStyle = 'rgba(255,255,255,.55)';
+        g.beginPath(); g.moveTo(x + w * 0.2, y); g.lineTo(x + w * 0.42, y); g.lineTo(x, y + h * 0.5); g.lineTo(x, y + h * 0.28); g.closePath(); g.fill();
+        g.restore();
+      }
+      g.restore();
+    } },
+    /* Solo techos */
+    tejas: { base: '#7A2E22', techo: true, pintar: function (g, a, b, c, d) { escamas(g, a, b, c, d, { tipo: 'curva', ancho: 14, alto: 12, color: '#B5553C', semilla: 21 }); } },
+    pizarra: { base: '#3E4250', techo: true, pintar: function (g, a, b, c, d) { escamas(g, a, b, c, d, { tipo: 'escama', ancho: 13, alto: 10, color: '#6E7280', semilla: 22 }); } },
+    paja: { base: '#A9853E', techo: true, pintar: function (g, a, b, c, d) {
+      var rnd = azar(23);
+      g.save(); g.lineWidth = 1.3;
+      for (var y = b - 6; y < d; y += 9) {
+        g.save(); g.shadowColor = 'rgba(60,40,10,.45)'; g.shadowBlur = 2; g.shadowOffsetY = 2;
+        g.fillStyle = variar('#D9B56A', rnd, 0.05); g.fillRect(a, y, c - a, 10); g.restore();
+        for (var x = a; x < c; x += 2.2) {
+          g.strokeStyle = ['#C49A45', '#E6C77E', '#B88C3C'][Math.floor((rnd() + 0.5) * 3) % 3];
+          g.beginPath(); g.moveTo(x, y); g.lineTo(x + rnd() * 1.5, y + 9 + rnd() * 3); g.stroke();
+        }
+      }
+      g.restore();
+    } },
+    zinc: { base: '#8C96A3', techo: true, pintar: function (g, a, b, c, d) { ondas(g, a, b, c, d, '#A6AFBA', 7); } },
+    tablillas: { base: '#6E4A2A', techo: true, pintar: function (g, a, b, c, d) { escamas(g, a, b, c, d, { tipo: 'tabla', ancho: 16, alto: 11, color: '#A8743F', semilla: 24, var: 0.1 }); } },
+    tejaVerde: { base: '#1F4E45', techo: true, pintar: function (g, a, b, c, d) { escamas(g, a, b, c, d, { tipo: 'curva', ancho: 14, alto: 12, color: '#3E8E7E', semilla: 25 }); } }
+  };
+  C.materialesMuro = ['ladrillo', 'ladrilloClaro', 'adobe', 'piedra', 'sillar', 'madera', 'troncos', 'guadua', 'bahareque', 'concreto', 'corrugado', 'vidrio'];
+  C.materialesTecho = ['tejas', 'pizarra', 'paja', 'zinc', 'tablillas', 'tejaVerde'];
+  function caja(pts) {
+    var xs = pts.map(function (p) { return p[0]; }), ys = pts.map(function (p) { return p[1]; });
+    return [Math.min.apply(null, xs), Math.min.apply(null, ys), Math.max.apply(null, xs), Math.max.apply(null, ys)];
+  }
+  /* Una pieza de cualquier forma, rellena con un material. */
+  function conMaterial(nombre, o, forma, material, extra) {
+    var m = MAT[material] || MAT.ladrillo, bb = caja(forma);
+    return suelta(nombre, o, Object.assign({
+      forma: forma, recto: true, color: m.base, altura: o.altura || 2, grosor: o.grosor || 3, semilla: 83,
+      encima: function (g) { m.pintar(g, bb[0], bb[1], bb[2], bb[3]); }
+    }, extra || {}));
+  }
+  C.material = function (nombre) { return MAT[nombre] || null; };
+
+  /* Ladrillo (o bloque) suelto de un material. */
+  var BLOQUE = { ladrillo: '#B5553C', ladrilloClaro: '#E2C27A', adobe: '#C89060', sillar: '#CFC7B4', concreto: '#A9A9A6', piedra: '#9A9AA4' };
+  C.ladrillo = function (o) {
+    o = o || {};
+    var m = o.material || 'ladrillo', tam = m === 'adobe' || m === 'sillar' ? [56, 28] : [48, 22];
+    return suelta('ladrillo', o, { forma: F.rect(tam[0], tam[1]), color: o.color || BLOQUE[m] || BLOQUE.ladrillo, altura: o.altura || 2, semilla: 81 });
+  };
+  /* Muro de cualquier material (por defecto ladrillo). */
+  C.muro = function (o) {
+    o = o || {};
+    var w = o.ancho || 150, h = o.alto || 84;
+    return conMaterial('muro', o, F.rect(w, h), o.material || 'ladrillo');
   };
   /* Bloque de juguete: cuadrado con un recuadro en relieve. */
   C.bloque = function (o) {
@@ -376,10 +572,21 @@
       color: o.color || '#D9A441', altura: 2, grosor: 3, recto: true, semilla: 95
     });
   };
-  /* Techo suelto (triángulo) para armar casas. */
+  /* Techos: 6 formas × cualquier material. Sin material, el triángulo liso de siempre. */
+  var FORMA_TECHO = {
+    dosAguas: [[-50, 20], [0, -26], [50, 20]],
+    dosAguasLado: [[-62, 20], [-38, -22], [38, -22], [62, 20]],
+    unaAgua: [[-50, 20], [-50, -4], [50, -24], [50, 20]],
+    plano: [[-56, 10], [-56, -4], [-50, -10], [50, -10], [56, -4], [56, 10]],
+    conico: [[-28, 30], [0, -46], [28, 30]],
+    cupula: (function () { var p = [[-46, 22]]; for (var k = 0; k <= 20; k++) { var a = Math.PI + k * Math.PI / 20; p.push([46 * Math.cos(a), 22 + 44 * Math.sin(a)]); } p.push([46, 22]); return p; })()
+  };
+  C.formasTecho = Object.keys(FORMA_TECHO);
   C.techo = function (o) {
     o = o || {};
-    return suelta('techo', o, { forma: [[-46, 18], [0, -24], [46, 18]], color: o.color || '#C2453A', altura: 3, semilla: 97 });
+    var forma = FORMA_TECHO[o.forma] || FORMA_TECHO.dosAguas;
+    if (!o.material) return suelta('techo', o, { forma: forma.map(function (p) { return [p[0] * 0.92, p[1] * 0.92]; }), color: o.color || '#C2453A', altura: 3, semilla: 97 });
+    return conMaterial('techo', o, forma, o.material, { altura: o.altura || 3 });
   };
   /* Puerta suelta con picaporte. */
   C.puerta = function (o) {
@@ -676,6 +883,10 @@
   C.categorias = {
     matematicas: ['tarjeta', 'recta', 'marcador', 'cuenta', 'varilla', 'marco10', 'gema'],
     construccion: ['ladrillo', 'muro', 'bloque', 'viga', 'columna', 'columnaPiedra', 'arco', 'rampa', 'escalera', 'techo', 'puerta', 'ventanaCasa', 'engranaje', 'tuerca', 'cono', 'andamio', 'grua', 'portal'],
+    /* Variantes «pieza:opción» (muro de cada material, techo forma:material). */
+    materiales: ['muro:ladrillo', 'muro:ladrilloClaro', 'muro:adobe', 'muro:piedra', 'muro:sillar', 'muro:madera', 'muro:troncos', 'muro:guadua', 'muro:bahareque', 'muro:concreto', 'muro:corrugado', 'muro:vidrio'],
+    techos: ['techo:dosAguas:tejas', 'techo:dosAguas:paja', 'techo:dosAguasLado:pizarra', 'techo:dosAguasLado:tejaVerde', 'techo:unaAgua:zinc', 'techo:unaAgua:tablillas',
+      'techo:plano:concreto', 'techo:plano:madera', 'techo:conico:pizarra', 'techo:conico:tejas', 'techo:cupula:tejaVerde', 'techo:cupula:zinc'],
     vehiculos: ['furgoneta', 'cupe', 'sedanLargo', 'mini', 'sedan', 'camioneta', 'compacto', 'deportivo'],
     aldea: ['casa', 'arbol', 'arbusto', 'nube', 'tabla', 'carrito', 'cerca', 'hojaPasto', 'hojaRio'],
     estacion: ['panel', 'brazo', 'modulo', 'ventana', 'antena', 'nave', 'estrella', 'planeta']
