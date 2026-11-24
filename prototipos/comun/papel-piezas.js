@@ -5,7 +5,8 @@
    Todas devuelven un objeto con .dibujar(ctx, x, y, angulo).
      var C = window.SAMSAN_PAPEL.catalogo;
      C.tarjeta({ texto: '47' }).dibujar(ctx, 120, 80);
-   Grupos: A instrumentos de Maths, B aldea (Y2), C estación (Y6).
+   Grupos: A instrumentos de Maths, B aldea (Y2), D construcción, C estación (Y6).
+   C.categorias lista los nombres por categoría.
    Sin personajes ni caras. Los números son de ejemplo.
    ============================================================ */
 (function () {
@@ -224,12 +225,27 @@
       }
     });
   };
-  /* 13. Carrito: caja y dos ruedas. */
+  /* 13. Carro: carrocería con cabina y dos ventanas, y dos ruedas. */
   C.carrito = function (o) {
     o = o || {};
-    var caja = PP.pieza({ forma: F.rect(70, 38), color: o.color || '#5B7DB1', altura: 2, semilla: 57, clave: clave('caja', o) });
-    var rueda = PP.pieza({ forma: F.circulo(12), color: '#3B2F25', altura: 3, semilla: 59, clave: clave('rueda', o) });
-    return grupo([[caja, 0, 0], [rueda, -22, 22], [rueda, 22, 22]]);
+    var cuerpo = PP.pieza({
+      forma: [[-38, -2], [-24, -26], [20, -26], [34, -2], [38, -2], [38, 20], [-38, 20]],
+      color: o.color || '#5B7DB1', altura: 2, semilla: 57, clave: clave('carro', o),
+      encima: function (g) {
+        g.save();
+        g.shadowColor = 'rgba(42,30,20,.45)'; g.shadowBlur = 2; g.shadowOffsetX = 1; g.shadowOffsetY = 1.5;
+        g.fillStyle = '#CFE8F2';
+        g.beginPath(); g.moveTo(-20, -21); g.lineTo(-3, -21); g.lineTo(-3, -5); g.lineTo(-29, -5); g.closePath(); g.fill();
+        g.beginPath(); g.moveTo(3, -21); g.lineTo(17, -21); g.lineTo(27, -5); g.lineTo(3, -5); g.closePath(); g.fill();
+        g.fillStyle = '#FFF3C4'; g.fillRect(30, 3, 6, 6);
+        g.restore();
+      }
+    });
+    var rueda = PP.pieza({
+      forma: F.circulo(12), color: '#3B2F25', altura: 3, semilla: 59, clave: clave('rueda', o),
+      encima: function (g) { g.fillStyle = '#B8BCCF'; g.beginPath(); g.arc(0, 0, 4.5, 0, Math.PI * 2); g.fill(); }
+    });
+    return grupo([[cuerpo, 0, 0], [rueda, -22, 20], [rueda, 22, 20]]);
   };
   /* 14. Cerca: tres listones y un travesaño. */
   C.cerca = function (o) {
@@ -253,6 +269,181 @@
     for (var x = -20; x <= w + 20; x += 16) pts.push([x, y - a / 2 + Math.sin(x / 61) * 8]);
     for (var x2 = w + 20; x2 >= -20; x2 -= 16) pts.push([x2, y + a / 2 + Math.sin(x2 / 61 + 1) * 8]);
     return suelta('hojaRio', o, { forma: pts, recto: true, color: o.color || '#5DA9C9', altura: 1, grosor: 1, semilla: 67 });
+  };
+
+  /* ================= D. Construcción (piezas para que la base crezca) ================= */
+  function sombraChica(g) { g.shadowColor = 'rgba(42,30,20,.45)'; g.shadowBlur = 2; g.shadowOffsetX = 1; g.shadowOffsetY = 1.4; }
+
+  /* Ladrillo suelto. */
+  C.ladrillo = function (o) {
+    o = o || {};
+    return suelta('ladrillo', o, { forma: F.rect(48, 22), color: o.color || '#B5553C', altura: o.altura || 2, semilla: 81 });
+  };
+  /* Muro de ladrillos: hiladas trabadas sobre mezcla clara. */
+  C.muro = function (o) {
+    o = o || {};
+    var w = o.ancho || 150, h = o.alto || 84;
+    return suelta('muro', o, {
+      forma: F.rect(w, h), color: '#D9C4A0', altura: 2, grosor: 3, semilla: 83,
+      encima: function (g) {
+        g.save(); sombraChica(g); g.fillStyle = o.color || '#B5553C';
+        var lh = 14, lw = 30, j = 0;
+        for (var y = -h / 2 + 2; y < h / 2 - 2; y += lh, j++) {
+          for (var x = -w / 2 + 2 - (j % 2 ? lw / 2 : 0); x < w / 2 - 2; x += lw) {
+            var x0 = Math.max(x, -w / 2 + 2), x1 = Math.min(x + lw - 3, w / 2 - 2);
+            if (x1 - x0 > 4) g.fillRect(x0, y, x1 - x0, lh - 3);
+          }
+        }
+        g.restore();
+      }
+    });
+  };
+  /* Bloque de juguete: cuadrado con un recuadro en relieve. */
+  C.bloque = function (o) {
+    o = o || {};
+    var t = o.lado || 50;
+    return suelta('bloque', o, {
+      forma: F.rect(t, t), color: o.color || '#E07A3F', altura: o.altura || 2, grosor: 3, semilla: 85,
+      encima: function (g) {
+        g.save(); g.lineWidth = 3;
+        g.strokeStyle = 'rgba(255,255,255,.45)'; g.strokeRect(-t / 2 + 7, -t / 2 + 7, t - 14, t - 14);
+        g.strokeStyle = 'rgba(0,0,0,.18)'; g.strokeRect(-t / 2 + 9, -t / 2 + 9, t - 14, t - 14);
+        g.restore();
+      }
+    });
+  };
+  /* Viga de cartón con agujeros (horizontal). */
+  C.viga = function (o) {
+    o = o || {};
+    var L = o.largo || 160;
+    return suelta('viga', o, {
+      forma: F.rect(L, 22), color: '#C89B62', altura: o.altura || 2, carton: true, semilla: 87,
+      encima: function (g) {
+        g.fillStyle = 'rgba(42,30,20,.6)';
+        for (var x = -L / 2 + 14; x <= L / 2 - 14; x += 22) { g.beginPath(); g.arc(x, 0, 4.5, 0, Math.PI * 2); g.fill(); }
+      }
+    });
+  };
+  /* Columna corta con capitel y base anchos. */
+  C.columna = function (o) {
+    o = o || {};
+    return suelta('columna', o, {
+      forma: [[-27, -46], [27, -46], [27, -36], [17, -36], [17, 36], [27, 36], [27, 46], [-27, 46], [-27, 36], [-17, 36], [-17, -36], [-27, -36]],
+      color: o.color || '#E9DCC0', altura: 2, grosor: 3, recto: true, semilla: 89,
+      encima: function (g) {
+        g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = 2;
+        [-8, 0, 8].forEach(function (x) { g.beginPath(); g.moveTo(x, -32); g.lineTo(x, 32); g.stroke(); });
+      }
+    });
+  };
+  /* Arco de puente: medio anillo con patas. */
+  C.arco = function (o) {
+    o = o || {};
+    var R = 56, r = 30, pts = [];
+    for (var k = 0; k <= 18; k++) { var a = Math.PI + k * Math.PI / 18; pts.push([R * Math.cos(a), R * Math.sin(a) + 14]); }
+    pts.push([R, 34]); pts.push([r, 34]);
+    for (var k2 = 18; k2 >= 0; k2--) { var a2 = Math.PI + k2 * Math.PI / 18; pts.push([r * Math.cos(a2), r * Math.sin(a2) + 14]); }
+    pts.push([-r, 34]); pts.push([-R, 34]);
+    return suelta('arco', o, { forma: pts, recto: true, color: o.color || '#C9A570', altura: 2, grosor: 3, carton: !!o.carton, semilla: 91 });
+  };
+  /* Rampa (cuña). */
+  C.rampa = function (o) {
+    o = o || {};
+    return suelta('rampa', o, { forma: [[-52, 24], [52, 24], [52, -24]], color: o.color || '#3E8E7E', altura: 2, grosor: 3, semilla: 93 });
+  };
+  /* Escalera de tres escalones. */
+  C.escalera = function (o) {
+    o = o || {};
+    return suelta('escalera', o, {
+      forma: [[-45, 30], [45, 30], [45, -30], [15, -30], [15, -10], [-15, -10], [-15, 10], [-45, 10]],
+      color: o.color || '#D9A441', altura: 2, grosor: 3, recto: true, semilla: 95
+    });
+  };
+  /* Techo suelto (triángulo) para armar casas. */
+  C.techo = function (o) {
+    o = o || {};
+    return suelta('techo', o, { forma: [[-46, 18], [0, -24], [46, 18]], color: o.color || '#C2453A', altura: 3, semilla: 97 });
+  };
+  /* Puerta suelta con picaporte. */
+  C.puerta = function (o) {
+    o = o || {};
+    return suelta('puerta', o, {
+      forma: [[-16, 28], [-16, -18], [-10, -26], [10, -26], [16, -18], [16, 28]], color: o.color || '#7E4A2A', altura: 2, semilla: 99,
+      encima: function (g) { g.fillStyle = '#E9B44C'; g.beginPath(); g.arc(9, 4, 3, 0, Math.PI * 2); g.fill(); }
+    });
+  };
+  /* Ventana suelta con marco y cruz. */
+  C.ventanaCasa = function (o) {
+    o = o || {};
+    return suelta('ventanaCasa', o, {
+      forma: F.rect(36, 36), color: o.color || '#F1E4C6', altura: 2, semilla: 101,
+      encima: function (g) {
+        g.fillStyle = '#CFE8F2'; g.fillRect(-13, -13, 26, 26);
+        g.fillStyle = o.color || '#F1E4C6'; g.fillRect(-2, -13, 4, 26); g.fillRect(-13, -2, 26, 4);
+      }
+    });
+  };
+  /* Engranaje de 10 dientes con agujero. */
+  C.engranaje = function (o) {
+    o = o || {};
+    var R = o.r || 30, d = 10, pts = [];
+    for (var k = 0; k < d * 4; k++) {
+      var a = k * Math.PI * 2 / (d * 4), rr = (k % 4 === 0 || k % 4 === 1) ? R : R * 0.78;
+      pts.push([rr * Math.cos(a), rr * Math.sin(a)]);
+    }
+    return suelta('engranaje', o, {
+      forma: pts, recto: true, color: o.color || '#8C8FA8', altura: 2, grosor: 3, semilla: 103,
+      encima: function (g) { g.fillStyle = 'rgba(42,30,20,.65)'; g.beginPath(); g.arc(0, 0, R * 0.28, 0, Math.PI * 2); g.fill(); }
+    });
+  };
+  /* Tuerca: hexágono con agujero. */
+  C.tuerca = function (o) {
+    o = o || {};
+    return suelta('tuerca', o, {
+      forma: F.poligono(6, o.r || 18, 0), recto: true, color: '#B8BCCF', altura: 2, semilla: 105,
+      encima: function (g) { g.fillStyle = 'rgba(42,30,20,.65)'; g.beginPath(); g.arc(0, 0, (o.r || 18) * 0.42, 0, Math.PI * 2); g.fill(); }
+    });
+  };
+  /* Cono de obra: naranja con franja blanca, sobre base cuadrada. */
+  C.cono = function (o) {
+    o = o || {};
+    var base = PP.pieza({ forma: F.rect(48, 10), color: '#E07A3F', altura: 2, semilla: 107, clave: clave('cono-base', o) });
+    var cuerpo = PP.pieza({
+      forma: [[-20, 18], [-6, -26], [6, -26], [20, 18]], color: '#F08A3C', altura: 3, semilla: 109, clave: clave('cono', o),
+      encima: function (g) { g.fillStyle = '#FFF6DC'; g.beginPath(); g.moveTo(-13, -4); g.lineTo(13, -4); g.lineTo(16, 6); g.lineTo(-16, 6); g.closePath(); g.fill(); }
+    });
+    return grupo([[base, 0, 22], [cuerpo, 0, 0]]);
+  };
+  /* Andamio: tres parantes y tres travesaños de cartón. */
+  C.andamio = function (o) {
+    o = o || {};
+    var parante = PP.pieza({ forma: F.rect(10, 110), color: '#C89B62', altura: 2, semilla: 111, clave: clave('andamio-p', o) });
+    var trav = PP.pieza({ forma: F.rect(110, 10), color: '#B48853', altura: 3, semilla: 113, clave: clave('andamio-t', o) });
+    return grupo([[parante, -50, 0], [parante, 0, 0], [parante, 50, 0], [trav, 0, -40], [trav, 0, 0], [trav, 0, 40]]);
+  };
+  /* Grúa: torre, pluma, contrapeso y gancho. */
+  C.grua = function (o) {
+    o = o || {};
+    var col = o.color || '#F2C14E';
+    var torre = PP.pieza({
+      forma: F.rect(20, 120), color: col, altura: 2, semilla: 115, clave: clave('grua-torre', o),
+      encima: function (g) {
+        g.strokeStyle = 'rgba(42,30,20,.45)'; g.lineWidth = 2;
+        for (var y = -56; y < 56; y += 16) { g.beginPath(); g.moveTo(-8, y); g.lineTo(8, y + 16); g.stroke(); }
+      }
+    });
+    var pluma = PP.pieza({ forma: F.rect(140, 14), color: col, altura: 3, semilla: 117, clave: clave('grua-pluma', o) });
+    var peso = PP.pieza({ forma: F.rect(24, 20), color: '#8C8FA8', altura: 3, semilla: 119, clave: clave('grua-peso', o) });
+    var gancho = PP.pieza({ forma: [[-8, -6], [8, -6], [8, 6], [0, 12], [-8, 6]], color: '#3B2F25', altura: 3, recto: true, semilla: 121, clave: clave('grua-gancho', o) });
+    var g = grupo([[torre, 0, 0], [pluma, 40, -62], [peso, -18, -50], [gancho, 92, -10]]);
+    var dib = g.dibujar;
+    g.dibujar = function (ctx, x, y, a) {
+      if (!ctx) return;
+      ctx.save(); ctx.strokeStyle = '#3B2F25'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x + 92, y - 56); ctx.lineTo(x + 92, y - 16); ctx.stroke(); ctx.restore();
+      dib(ctx, x, y, a);
+    };
+    return g;
   };
 
   /* ================= C. Estación (Y6) ================= */
@@ -290,5 +481,13 @@
   C.planeta = function (o) {
     o = o || {};
     return suelta('planeta', o, { forma: F.circulo(o.r || 230), color: o.color || '#7FB069', altura: 1, grosor: 3, semilla: 11 });
+  };
+
+  /* Índice por categoría: la hoja del catálogo y quien busque piezas lo usan. */
+  C.categorias = {
+    matematicas: ['tarjeta', 'recta', 'marcador', 'cuenta', 'varilla', 'marco10', 'gema'],
+    construccion: ['ladrillo', 'muro', 'bloque', 'viga', 'columna', 'arco', 'rampa', 'escalera', 'techo', 'puerta', 'ventanaCasa', 'engranaje', 'tuerca', 'cono', 'andamio', 'grua'],
+    aldea: ['casa', 'arbol', 'arbusto', 'nube', 'tabla', 'carrito', 'cerca', 'hojaPasto', 'hojaRio'],
+    estacion: ['panel', 'brazo', 'modulo', 'ventana', 'antena', 'nave', 'estrella', 'planeta']
   };
 })();
