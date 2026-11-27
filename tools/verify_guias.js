@@ -297,7 +297,7 @@ async function jugarAldea(nombre, cfg) {
 function validarLeccion(nombre, cfg) {
   const iconos = fs.readFileSync(path.join(DIR, 'comun', 'iconos.js'), 'utf8');
   const ICONOS = JSON.parse(iconos.slice(iconos.indexOf('window.ICONOS = ') + 16, iconos.lastIndexOf(';')));
-  check(nombre + ': id, idioma y idioma de explicacion', cfg.id === nombre && /^en-/.test(cfg.lang) && /^es-/.test(cfg.langExplica));
+  check(nombre + ': id, idioma y idioma de explicacion', cfg.id === nombre && /^(en|es)-/.test(cfg.lang) && /^es-/.test(cfg.langExplica));   /* Y2 Español: lang es-CO */
   check(nombre + ': codigo fijo con color, icono y traduccion', Object.values(cfg.codigo).every(c => /^#[0-9A-F]{6}$/i.test(c.color) && ICONOS[c.ico] && /^¿.+\?$/.test(c.es)));
   cfg.lecciones.forEach(L => {
     if (L.mecanica === 'parejas') { validarParejas(nombre, L, ICONOS); return; }

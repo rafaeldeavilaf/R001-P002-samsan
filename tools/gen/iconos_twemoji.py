@@ -62,6 +62,11 @@ ICONOS = {
     # leccion 5 de Learn with Pip (hacer la pregunta): «Who is on the bike? Sam.» y «When is the party? On Saturday.»
     # saturday: el mismo calendario sin texto que monday y sunday (el dia lo dice la respuesta escrita)
     "biker": "1f6b4", "saturday": "1f5d3",
+    # Aprende con Pip, Y2 Español (corte A, lecciones 1 a 3): la c (k y s), la r y la rr, las silabas.
+    # cinema: la claqueta 1f3ac para «cine»; tower: la torre 1f5fc para «torre»; cart: el carrito del supermercado
+    "pig": "1f437", "cinema": "1f3ac", "onion": "1f9c5", "toothbrush": "1faa5", "zebra": "1f993", "phone": "1f4f1", "brain": "1f9e0",
+    "pear": "1f350", "scissors": "2702", "orange": "1f34a", "tower": "1f5fc", "cap": "1f9e2", "cart": "1f6d2", "fox": "1f98a",
+    "tomato": "1f345", "salt": "1f9c2", "cloud": "2601", "cat": "1f431",
 }
 
 # Dibujos propios por codigo (36 x 36, colores planos al estilo Twemoji) para
@@ -127,6 +132,30 @@ def reloj(hora):
             '<path d="M18 18L%.2f %.2f" stroke="#DD2E44" stroke-width="3.4" stroke-linecap="round"/>' % (18 + 8.2 * math.sin(a), 18 - 8.2 * math.cos(a)) +
             '<circle cx="18" cy="18" r="2" fill="#292F33"/>')
 
+
+def letra(txt, fondo, tam=22):
+    """Ficha de letra por codigo (Y2 Español): cuadro redondeado de color con la letra en blanco."""
+    return ('<rect x="2" y="2" width="32" height="32" rx="8" fill="%s"/>'
+            '<text x="18" y="%s" text-anchor="middle" font-family="Nunito,Arial,sans-serif" font-weight="900" font-size="%s" fill="#FFFFFF">%s</text>'
+            % (fondo, 18 + tam * 0.36, tam, txt))
+
+
+def golpes(n, fondo):
+    """Ficha de golpes de voz por codigo: n palmadas (circulos blancos) sobre cuadro de color."""
+    xs = {1: [18], 2: [11.5, 24.5], 3: [8, 18, 28]}[n]
+    r = {1: 6.5, 2: 5.2, 3: 4}[n]
+    return ('<rect x="2" y="2" width="32" height="32" rx="8" fill="%s"/>' % fondo
+            + "".join('<circle cx="%s" cy="18" r="%s" fill="#FFFFFF"/>' % (x, r) for x in xs))
+
+
+# colores iguales a los de la casa de cada codigo (tools/gen/guia_y2_espanol_aprende.py)
+PROPIOS["letra_k"] = letra("k", "#2563EB")
+PROPIOS["letra_s"] = letra("s", "#C2410C")
+PROPIOS["letra_r"] = letra("r", "#15803D")
+PROPIOS["letra_rr"] = letra("rr", "#9333EA", 19)
+PROPIOS["golpe1"] = golpes(1, "#DB2777")
+PROPIOS["golpe2"] = golpes(2, "#0F766E")
+PROPIOS["golpe3"] = golpes(3, "#B45309")
 
 PROPIOS["six"] = reloj(6)
 PROPIOS["seven"] = reloj(7)
@@ -201,7 +230,8 @@ def main():
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from guia_y2_english_v3 import iconos_usados
     from guia_y2_english_aprende import iconos_usados as usados_aprende
-    usados = iconos_usados() | usados_aprende()
+    from guia_y2_espanol_aprende import iconos_usados as usados_espanol
+    usados = iconos_usados() | usados_aprende() | usados_espanol()
     if not a.fuente:
         # Actions corre cada generador sin argumentos: ahi se comprueba que el
         # archivo versionado tenga justo los dibujos que usa el banco.
